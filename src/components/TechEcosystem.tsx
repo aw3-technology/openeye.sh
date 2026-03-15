@@ -17,7 +17,6 @@ const categories = [
   "VLMs",
   "Detection Frameworks",
   "3D Vision",
-  "Agentic Reasoning",
   "Annotation & Labeling",
   "Deep Learning Frameworks",
 ] as const;
@@ -25,32 +24,24 @@ const categories = [
 const projects: Project[] = [
   // Real-Time Detection
   { name: "YOLOv8", creator: "Ultralytics", description: "Real-time object detection — 80 COCO classes with ONNX and TensorRT support", category: "Real-Time Detection", integrated: true },
-  { name: "RF-DETR", creator: "Roboflow", description: "Real-time detection transformer — end-to-end object detection without NMS", category: "Real-Time Detection", integrated: true },
+  { name: "RF-DETR", creator: "Roboflow", description: "Real-time detection transformer — end-to-end object detection without NMS", category: "Real-Time Detection" },
   { name: "YOLOWorld", creator: "Tencent AILab", description: "Open-vocabulary real-time detection with text prompts", category: "Real-Time Detection" },
   { name: "DAMO-YOLO", creator: "Alibaba DAMO", description: "Efficient YOLO variant with NAS-optimized architecture", category: "Real-Time Detection" },
   { name: "Gold-YOLO", creator: "Huazhong UST", description: "Gather-and-distribute mechanism for multi-scale feature fusion", category: "Real-Time Detection" },
 
   // Segmentation
-  { name: "SAM2", creator: "Meta AI", description: "Segment Anything Model 2 — zero-shot segmentation for any object in any image", category: "Segmentation", integrated: true },
+  { name: "SAM2", creator: "Meta AI", description: "Segment Anything Model 2 — zero-shot segmentation for any object in any image", category: "Segmentation" },
   { name: "Grounded-SAM", creator: "IDEA Research", description: "Combines Grounding DINO with SAM for text-prompted segmentation", category: "Segmentation" },
   { name: "FastSAM", creator: "CASIA-IVA", description: "CNN-based SAM alternative running 50x faster", category: "Segmentation" },
   { name: "EfficientSAM", creator: "Meta AI", description: "Lightweight SAM with SAMI-distilled image encoders", category: "Segmentation" },
   { name: "Mask2Former", creator: "Meta AI", description: "Unified architecture for panoptic, instance, and semantic segmentation", category: "Segmentation" },
 
   // VLMs
-  { name: "Qwen3-VL", creator: "Alibaba Qwen", description: "Multimodal vision-language model with native visual grounding", category: "VLMs", integrated: true },
+  { name: "Qwen2.5-VL", creator: "Alibaba Qwen", description: "Multimodal vision-language model with native visual grounding", category: "VLMs" },
   { name: "LLaVA-NeXT", creator: "UW / Microsoft", description: "Improved visual instruction tuning with dynamic high-res support", category: "VLMs" },
-  { name: "InternVL 2.5", creator: "Shanghai AI Lab", description: "Open-source GPT-4o-level multimodal model", category: "VLMs" },
+  { name: "InternVL 2.5", creator: "Shanghai AI Lab", description: "Open-source multimodal model with strong visual reasoning", category: "VLMs" },
   { name: "CogVLM2", creator: "Tsinghua / Zhipu", description: "Visual expert architecture for deep image understanding", category: "VLMs" },
   { name: "Phi-3 Vision", creator: "Microsoft", description: "Compact multimodal model optimized for on-device inference", category: "VLMs" },
-  { name: "Qwen3.5-9B", creator: "Qwen", description: "Multimodal VLM with 256K context — cost-effective vision-language reasoning via OpenRouter", category: "VLMs", integrated: true },
-  { name: "Seed-2.0-Lite", creator: "ByteDance", description: "Low-latency multimodal model with 262K context via OpenRouter", category: "VLMs", integrated: true },
-  { name: "GPT-5.4", creator: "OpenAI", description: "Premium multimodal model with 1.05M context for top-tier vision reasoning via OpenRouter", category: "VLMs", integrated: true },
-
-  // Agentic Reasoning
-  { name: "GLM-5 Turbo", creator: "Z.ai", description: "Agent-optimized language model with 203K context for multi-step planning", category: "Agentic Reasoning", integrated: true },
-  { name: "Hunter Alpha", creator: "OpenRouter", description: "Free agentic model with 1.05M context for long-context reasoning and task planning", category: "Agentic Reasoning", integrated: true },
-  { name: "Nemotron 3 Super", creator: "NVIDIA", description: "Free MoE model with 262K context for efficient agentic reasoning", category: "Agentic Reasoning", integrated: true },
 
   // Detection Frameworks
   { name: "Grounding DINO", creator: "IDEA Research", description: "Open-set object detection with language-guided text prompts", category: "Detection Frameworks", integrated: true },
@@ -103,10 +94,10 @@ export function TechEcosystem() {
             Technology Ecosystem
           </div>
           <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
-            30+ open-source vision projects. One platform.
+            Compatible with the open vision ecosystem.
           </h2>
           <p className="text-muted-foreground mb-8 max-w-2xl">
-            OpenEye integrates with the best open-source models and tools across the computer vision ecosystem. Swap models, combine pipelines, and stay on the cutting edge.
+            OpenEye is designed to work with open-source models and tools across computer vision. Swap models, combine pipelines, and extend with custom adapters.
           </p>
         </motion.div>
 
@@ -179,15 +170,15 @@ export function TechEcosystem() {
         >
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-terminal-green" />
-            30+ Projects
+            {projects.filter(p => p.integrated).length} Integrated
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-terminal-green" />
-            8 Categories
+            {categories.length - 1} Categories
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-terminal-green" />
-            100% Open Source
+            Model-Agnostic Architecture
           </div>
         </motion.div>
       </div>
