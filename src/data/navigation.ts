@@ -22,6 +22,8 @@ import {
   Tv2,
   Crosshair,
   Shield,
+  Cpu,
+  Gauge,
 } from "lucide-react";
 
 export interface NavLink {
@@ -50,7 +52,9 @@ export const dashboardNavItems: DashboardNavItem[] = [
   { label: "Inference", icon: ImagePlus, path: "/dashboard/inference" },
   { label: "Live Stream", icon: Video, path: "/dashboard/live" },
   { label: "History", icon: History, path: "/dashboard/history" },
+  { label: "Models", icon: Cpu, path: "/dashboard/models" },
   { label: "Model Settings", icon: SlidersHorizontal, path: "/dashboard/settings" },
+  { label: "Benchmark", icon: Gauge, path: "/dashboard/benchmark" },
   { label: "Metrics", icon: BarChart3, path: "/dashboard/metrics" },
   { label: "Scene Graph", icon: GitBranch, path: "/dashboard/scene-graph" },
   { label: "Export", icon: Download, path: "/dashboard/export" },
