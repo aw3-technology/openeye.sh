@@ -34,7 +34,7 @@ export function DeployAnywhereSection() {
             <p className="text-sm text-muted-foreground leading-relaxed">
               All inference runs locally. No data leaves your premises — run in air-gapped environments or on-device at the edge.
             </p>
-            <div className="font-mono text-xs bg-terminal-bg text-terminal-green px-3 py-2 rounded-inner border border-foreground/5 mt-3 overflow-x-auto">
+            <div className="font-mono text-xs bg-secondary text-oe-green px-3 py-2 rounded-inner border mt-3 overflow-x-auto">
               openeye serve yolov8 --port 8000
             </div>
           </motion.div>
