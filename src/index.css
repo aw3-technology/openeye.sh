@@ -164,3 +164,9 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* Logo theme switching */
+.logo-light { display: none; }
+.logo-dark { display: block; }
+.light .logo-light { display: block; }
+.light .logo-dark { display: none; }
