@@ -152,7 +152,7 @@ export default function Community() {
                 <div className="space-y-2">
                   <div className="font-mono text-xs uppercase tracking-widest text-terminal-amber">Robot Adapters</div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Connect OpenEye to any robot framework. Solo CLI, OpenClaw, and ROS 2 adapters ship built-in. Write yours in under 50 lines.
+                    Connect OpenEye to any robot framework. The Unitree G1 connector ships built-in with SDK, HTTP, and dry-run modes. ROS 2 coming soon.
                   </p>
                 </div>
                 <div className="space-y-2">

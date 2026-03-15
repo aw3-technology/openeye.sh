@@ -1,6 +1,6 @@
 # Quickstart
 
-This guide walks you through pulling a model, running inference, and starting the API server.
+This guide walks you through pulling a model, running inference, starting the API server, and using live camera feeds.
 
 ## 1. Pull a Model
 
@@ -37,6 +37,12 @@ Output is structured JSON:
 }
 ```
 
+Save an annotated image with bounding boxes:
+
+```bash
+openeye run yolov8 photo.jpg --visualize
+```
+
 ## 3. Start the Server
 
 Serve the model over HTTP:
@@ -51,6 +57,23 @@ The server starts at `http://localhost:8000` with:
 - `POST /predict` — Upload an image for inference
 - `GET /` — Browser dashboard
 - `WebSocket /ws` — Real-time inference
+- `WebSocket /ws/perception` — Full perception pipeline with scene graph
+- `WebSocket /ws/vlm` — VLM reasoning (requires `--vlm-model` or `NEBIUS_API_KEY`)
+- `WebSocket /ws/agentic` — Continuous agentic loop
+- `GET /metrics` — Prometheus metrics
+- `GET /nebius/stats` — VLM usage statistics
+
+To enable VLM reasoning:
+
+```bash
+openeye serve yolov8 --vlm-model qwen/qwen3.5-9b
+```
+
+For demo mode with zero cold-start and a live status bar:
+
+```bash
+openeye serve yolov8 --demo
+```
 
 ## 4. Query the API
 
@@ -59,10 +82,30 @@ curl -X POST http://localhost:8000/predict \
   -F "file=@photo.jpg"
 ```
 
-## 5. List Available Models
+## 5. Live Camera Feed
+
+Watch live detections in the terminal:
+
+```bash
+openeye watch --models yolov8
+```
+
+With safety monitoring:
+
+```bash
+openeye watch --models yolov8 --safety
+```
+
+With a video file fallback:
+
+```bash
+openeye watch --models yolov8 --video demo.mp4
+```
+
+## 6. List Available Models
 
 ```bash
 openeye list
 ```
 
-Shows all registered models with download status.
+Shows all registered models with download status and hardware tags.

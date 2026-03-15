@@ -2,11 +2,11 @@ import { motion } from "framer-motion";
 
 const layers = [
   { label: "Camera Feed", sub: "USB · RTSP · Video Files · Simulated Feeds", color: "oe-blue" },
-  { label: "Vision Engine", sub: "YOLO26 · Grounding DINO 1.5 · SAM 3", color: "oe-blue" },
+  { label: "Vision Engine", sub: "YOLO26 · Grounding DINO · SAM 2 · RF-DETR", color: "oe-blue" },
   { label: "Scene Understanding", sub: "Objects · Spatial Map · Hazards", color: "oe-blue" },
-  { label: "LLM Reasoning", sub: "Qwen3-VL · OpenRouter · Nebius Token Factory", color: "oe-red" },
+  { label: "LLM Reasoning", sub: "Qwen2.5-VL · OpenRouter · Nebius Token Factory", color: "oe-red" },
   { label: "Action Planner", sub: "Structured Task Decomposition", color: "oe-blue" },
-  { label: "Robot Adapter", sub: "Solo CLI · OpenClaw · Simulation", color: "oe-green" },
+  { label: "Robot Adapter", sub: "Unitree G1 · SmolVLA · Simulation", color: "oe-green" },
 ];
 
 function Diamond({ colorClass }: { colorClass: string }) {

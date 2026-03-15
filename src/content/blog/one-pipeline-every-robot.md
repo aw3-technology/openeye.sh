@@ -18,9 +18,9 @@ OpenEye solves this with a clean separation between perception and hardware. The
 The connection between this universal perception pipeline and specific robot hardware is handled by adapters. An adapter is a thin translation layer that converts OpenEye's structured output into platform-specific commands.
 
 Currently supported adapters:
-- **Solo CLI**: For Unitree robots and compatible quadrupeds
+- **Unitree G1 connector**: For Unitree robots with SDK, HTTP, and dry-run modes
 - **ROS/ROS2**: For any robot running the Robot Operating System
-- **gRPC Generic**: For custom platforms with gRPC endpoints
+- **WebSocket Generic**: For custom platforms with WebSocket endpoints
 - **REST**: For web-based robot APIs
 - **MQTT**: For IoT-integrated robot systems
 
@@ -52,9 +52,9 @@ With OpenEye, you run one perception pipeline with three adapters. The safety sy
 
 ```bash
 # Same perception, different robots
-openeye watch --reason --adapter solo-cli    # Unitree quadruped
+openeye watch --reason --adapter unitree-g1   # Unitree quadruped
 openeye watch --reason --adapter ros2        # ROS2 arm
-openeye watch --reason --adapter grpc://drone:50051  # Custom drone
+openeye watch --reason --adapter ws://drone:8000/ws  # Custom drone
 ```
 
 ## Model Agnostic Too
@@ -67,7 +67,7 @@ Hardware-agnosticism extends to the ML models themselves. OpenEye's vision layer
 - **Custom models**: Any ONNX or TorchScript model with the right output format
 
 And for the reasoning layer:
-- **Cloud VLMs**: GPT-4o, Claude, Qwen3-VL via API
+- **Cloud VLMs**: GPT-4o, Claude, Qwen2.5-VL via API
 - **Local VLMs**: Any model running through Ollama or vLLM
 - **Fine-tuned models**: Your own domain-specific models
 
@@ -77,7 +77,7 @@ openeye detect --model yolo26 image.jpg
 openeye detect --model grounding-dino image.jpg
 
 # Swap the reasoning model
-openeye watch --reason --vlm qwen3-vl
+openeye watch --reason --vlm qwen2.5-vl
 openeye watch --reason --vlm local/custom-safety-model
 ```
 

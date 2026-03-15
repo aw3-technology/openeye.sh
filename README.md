@@ -1,73 +1,109 @@
-# Welcome to your Lovable project
+# OpenEye
 
-## Project info
+**Open-source eyes for the agent era.**
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+OpenEye is a CLI-first perception engine that turns raw video into structured world models for robots and autonomous agents. Pull, run, and serve computer-vision models from your terminal — like Ollama, but for vision AI.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Object Detection** — YOLOv8, YOLOv26, Grounding DINO, RF-DETR, and custom adapters
+- **Depth Estimation** — Monocular depth via Depth Anything V2
+- **Segmentation** — SAM2 segment anything
+- **Scene Understanding** — Spatial relationships, scene graphs, natural language queries
+- **VLM Reasoning** — Vision-language model integration (Nebius, OpenRouter)
+- **Agentic Loop** — Continuous perception → reasoning → planning pipeline
+- **Safety Monitoring** — Zone-based awareness with real-time human detection and robot halt
+- **CLI-Native** — Every capability accessible from the terminal
+- **REST + WebSocket API** — Serve models over HTTP with a single command
+- **Fleet Management** — Register, deploy, and monitor edge devices at scale
+- **MLOps** — Model registry, versioning, A/B testing, batch inference
+- **Governance** — Policy enforcement, audit logging, safety rule management
+- **Web Dashboard** — React-based UI for inference, live streams, fleet management, and more
 
-**Use Lovable**
+## Quick Install
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+```bash
+pip install openeye-ai
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+With YOLO support:
 
-**Use your preferred IDE**
+```bash
+pip install "openeye-ai[yolo]"
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Quick Start
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# Pull a model
+openeye pull yolov8
 
-Follow these steps:
+# Run inference on an image
+openeye run yolov8 photo.jpg
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Start the server with REST API, WebSocket, and browser dashboard
+openeye serve yolov8
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Live camera feed with real-time detections
+openeye watch --models yolov8
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Live camera feed with safety monitoring
+openeye watch --models yolov8 --safety
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## Project Structure
+
+```
+perceptify-the-world/
+├── cli/              # openeye-ai CLI & inference server (Python)
+├── backend/          # Perception engine runtime (Python)
+├── src/              # React web frontend (TypeScript)
+└── docs/             # MkDocs documentation site
+```
+
+| Package | Description | Language |
+|---------|-------------|----------|
+| `cli/` | CLI tool & FastAPI inference server (port 8000) | Python |
+| `backend/` | Perception pipeline, fleet control plane (port 8001), governance engine | Python |
+| `src/` | Web dashboard with live streams, fleet management, MLOps, and agentic UI | TypeScript/React |
+
+## Tech Stack
+
+**CLI & Backend**: Python, Typer, Rich, FastAPI, Uvicorn, Pydantic
+
+**Frontend**: React, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query
+
+**Auth**: Supabase (Google/Apple OAuth)
+
+**AI/ML**: Ultralytics (YOLO), Transformers, ONNX Runtime, TensorRT, LangChain
+
+## Development
+
+### Frontend
+
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### CLI
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+cd cli
+pip install -e ".[all]" --group dev
+```
 
-**Use GitHub Codespaces**
+### Backend
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+cd backend
+pip install -e . --group dev
+```
 
-## What technologies are used for this project?
+## Documentation
 
-This project is built with:
+Full documentation is available in the `docs/` directory, built with MkDocs Material.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## License
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+See [LICENSE](LICENSE) for details.

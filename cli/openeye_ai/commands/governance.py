@@ -315,3 +315,44 @@ def init(
 
     rprint(f"[green]Generated governance config:[/green] {path}")
     rprint(f"[dim]Edit the file to customize, then run: openeye govern validate {path}[/dim]")
+
+
+@govern_app.command("violations")
+def violations(
+    server: str = typer.Option("http://localhost:8000", "--server", "-s"),
+    limit: int = typer.Option(20, "--limit", "-n"),
+):
+    """Show governance violations (filtered from audit trail)."""
+    import httpx
+
+    try:
+        r = httpx.get(f"{server}/governance/violations", params={"limit": limit}, timeout=5)
+        r.raise_for_status()
+        entries = r.json()
+    except Exception as e:
+        rprint(f"[red]Error:[/red] {e}")
+        raise typer.Exit(1)
+
+    if not entries:
+        rprint("[dim]No violations found.[/dim]")
+        return
+
+    table = Table(title="Governance Violations")
+    table.add_column("Time", style="dim")
+    table.add_column("Policy", style="cyan")
+    table.add_column("Decision")
+    table.add_column("Severity", style="red")
+    table.add_column("Reason")
+
+    for entry in entries:
+        decision = entry.get("decision", "")
+        color = {"deny": "red", "warn": "yellow"}.get(decision, "red")
+        table.add_row(
+            str(entry.get("timestamp", "")),
+            entry.get("policy_name", ""),
+            f"[{color}]{decision}[/{color}]",
+            entry.get("severity", ""),
+            entry.get("reason", ""),
+        )
+
+    console.print(table)

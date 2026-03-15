@@ -31,12 +31,13 @@ export default function UseCases() {
               Use Cases
             </div>
             <h1 className="text-4xl md:text-5xl font-semibold font-display leading-[1.05] mb-4">
-              Perception for every robot.
+              Perception for every machine.
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              OpenEye adapts to any environment where machines and humans
-              coexist. From factory floors to family kitchens to autonomous agent
-              frameworks — the same perception engine, tuned for each context.
+              OpenEye adapts to any environment where software needs to see.
+              From robots navigating human spaces to agents automating desktops
+              to CI pipelines catching visual bugs — the same perception engine,
+              tuned for each context.
             </p>
           </motion.div>
         </div>

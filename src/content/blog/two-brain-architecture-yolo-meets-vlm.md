@@ -52,7 +52,7 @@ The smart brain is where understanding happens. It doesn't just see a knife and 
 
 **Latency budget**: 500ms-2s per analysis
 **Hardware**: Cloud inference via API, or local with sufficient GPU
-**Model**: Configurable — Qwen3-VL, GPT-4o, Claude, or any VLM with an API
+**Model**: Configurable — Qwen2.5-VL, GPT-4o, Claude, or any VLM with an API
 
 ## How They Communicate
 
@@ -94,13 +94,13 @@ Without `--reason`, you get the fast brain only — pure detection at maximum fr
 For production deployments where the VLM runs on cloud infrastructure:
 
 ```
-openeye watch --reason --vlm openrouter/qwen3-vl
+openeye watch --reason --vlm openrouter/qwen2.5-vl
 ```
 
 For fully local deployments:
 
 ```
-openeye watch --reason --vlm local/qwen3-vl
+openeye watch --reason --vlm local/qwen2.5-vl
 ```
 
 The two-brain architecture isn't a compromise between speed and intelligence. It's the realization that you need both — running in parallel, communicating through a shared world model, each doing what it does best.

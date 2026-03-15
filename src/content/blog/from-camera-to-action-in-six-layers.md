@@ -68,10 +68,10 @@ The planner considers:
 
 The execution layer translates the action plan into robot-specific commands and streams them to the downstream system. This is where OpenEye meets the physical world.
 
-The execution layer uses adapters to support different robot platforms. A Solo CLI adapter for Unitree robots. A ROS adapter for ROS-based systems. A generic gRPC adapter for custom platforms. The adapter pattern means adding support for a new robot is a single module, not a rewrite.
+The execution layer uses adapters to support different robot platforms. A Unitree G1 connector for Unitree robots with SDK, HTTP, and dry-run modes. A ROS adapter for ROS-based systems. A generic WebSocket adapter for custom platforms. The adapter pattern means adding support for a new robot is a single module, not a rewrite.
 
 **Input**: Structured action plan
-**Output**: Robot-specific commands via gRPC, REST, or platform-specific protocol
+**Output**: Robot-specific commands via WebSocket, REST, or platform-specific protocol
 
 ## Why Six Layers?
 

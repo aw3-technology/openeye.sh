@@ -24,6 +24,7 @@ import {
   Shield,
   Cpu,
   Gauge,
+  Settings,
 } from "lucide-react";
 
 export interface NavLink {
@@ -40,6 +41,18 @@ export interface DashboardNavItem {
   label: string;
   icon: LucideIcon;
   path: string;
+}
+
+export interface DashboardNavGroup {
+  label: string;
+  icon: LucideIcon;
+  items: DashboardNavItem[];
+}
+
+export type DashboardSidebarItem = DashboardNavItem | DashboardNavGroup;
+
+export function isNavGroup(item: DashboardSidebarItem): item is DashboardNavGroup {
+  return "items" in item;
 }
 
 export type NavItem = NavLink | NavDropdown;
@@ -62,28 +75,75 @@ export const publicNavItems: NavItem[] = [
   },
 ];
 
-/** Dashboard sidebar — main section */
-export const dashboardNavItems: DashboardNavItem[] = [
-  { label: "Live Demo", icon: Tv2, path: "/dashboard/demo" },
-  { label: "Agentic Loop", icon: Crosshair, path: "/dashboard/agentic" },
+/** Dashboard sidebar — grouped with collapsible dropdowns */
+export const dashboardSidebarItems: DashboardSidebarItem[] = [
   { label: "Overview", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Inference", icon: ImagePlus, path: "/dashboard/inference" },
-  { label: "Live Stream", icon: Video, path: "/dashboard/live" },
-  { label: "History", icon: History, path: "/dashboard/history" },
-  { label: "Models", icon: Cpu, path: "/dashboard/models" },
-  { label: "Model Settings", icon: SlidersHorizontal, path: "/dashboard/settings" },
-  { label: "Benchmark", icon: Gauge, path: "/dashboard/benchmark" },
-  { label: "Metrics", icon: BarChart3, path: "/dashboard/metrics" },
-  { label: "Scene Graph", icon: GitBranch, path: "/dashboard/scene-graph" },
-  { label: "Export", icon: Download, path: "/dashboard/export" },
-  { label: "API Keys", icon: Key, path: "/dashboard/api-keys" },
-  { label: "Config Editor", icon: FileCode, path: "/dashboard/config" },
-  { label: "MLOps", icon: FlaskConical, path: "/dashboard/mlops" },
-  { label: "Credits", icon: Coins, path: "/dashboard/credits" },
-  { label: "Agent Loop", icon: Bot, path: "/dashboard/agent" },
-  { label: "Memory", icon: Brain, path: "/dashboard/memory" },
-  { label: "Governance", icon: Shield, path: "/dashboard/governance" },
+  {
+    label: "Live",
+    icon: Tv2,
+    items: [
+      { label: "Live Demo", icon: Tv2, path: "/dashboard/demo" },
+      { label: "Live Stream", icon: Video, path: "/dashboard/live" },
+      { label: "Agentic Loop", icon: Crosshair, path: "/dashboard/agentic" },
+    ],
+  },
+  {
+    label: "Perception",
+    icon: ImagePlus,
+    items: [
+      { label: "Inference", icon: ImagePlus, path: "/dashboard/inference" },
+      { label: "History", icon: History, path: "/dashboard/history" },
+      { label: "Scene Graph", icon: GitBranch, path: "/dashboard/scene-graph" },
+    ],
+  },
+  {
+    label: "Models",
+    icon: Cpu,
+    items: [
+      { label: "Registry", icon: Cpu, path: "/dashboard/models" },
+      { label: "Settings", icon: SlidersHorizontal, path: "/dashboard/models/settings" },
+      { label: "Benchmark", icon: Gauge, path: "/dashboard/models/benchmark" },
+    ],
+  },
+  {
+    label: "Analytics",
+    icon: BarChart3,
+    items: [
+      { label: "Metrics", icon: BarChart3, path: "/dashboard/metrics" },
+      { label: "Export", icon: Download, path: "/dashboard/export" },
+    ],
+  },
+  {
+    label: "Agent",
+    icon: Bot,
+    items: [
+      { label: "Agent Loop", icon: Bot, path: "/dashboard/agent" },
+      { label: "Memory", icon: Brain, path: "/dashboard/memory" },
+    ],
+  },
+  {
+    label: "Operations",
+    icon: FlaskConical,
+    items: [
+      { label: "MLOps", icon: FlaskConical, path: "/dashboard/mlops" },
+      { label: "Governance", icon: Shield, path: "/dashboard/governance" },
+    ],
+  },
+  {
+    label: "Settings",
+    icon: Settings,
+    items: [
+      { label: "Config", icon: FileCode, path: "/dashboard/settings" },
+      { label: "API Keys", icon: Key, path: "/dashboard/settings/api-keys" },
+      { label: "Credits", icon: Coins, path: "/dashboard/settings/credits" },
+    ],
+  },
 ];
+
+/** Flat list for backward compat — re-derived from grouped items */
+export const dashboardNavItems: DashboardNavItem[] = dashboardSidebarItems.flatMap(
+  (item) => (isNavGroup(item) ? item.items : [item]),
+);
 
 /** Dashboard sidebar — fleet management section */
 export const fleetNavItems: DashboardNavItem[] = [

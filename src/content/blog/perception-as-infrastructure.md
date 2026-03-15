@@ -54,7 +54,7 @@ This is where most of the innovation is happening, and where standardization is 
 ### The Delivery Layer
 Streaming, APIs, and integration. How perception data reaches downstream systems — robot controllers, safety systems, planning engines, monitoring dashboards, logging infrastructure.
 
-gRPC streaming, REST APIs, and structured data formats are making this layer increasingly standard. The key insight is that perception data should be delivered as structured information, not as video — this makes it consumable by any downstream system regardless of its technology stack.
+WebSocket streaming, REST APIs, and structured data formats are making this layer increasingly standard. The key insight is that perception data should be delivered as structured information, not as video — this makes it consumable by any downstream system regardless of its technology stack.
 
 ## What Changes When Perception Is Infrastructure
 

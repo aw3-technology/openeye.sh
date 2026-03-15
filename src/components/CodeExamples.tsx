@@ -38,7 +38,7 @@ for frame in eye.watch(models=["yolov8"], safety=True):
   http: {
     description: "Self-host the API on your own infrastructure. REST and WebSocket endpoints built in.",
     code: `# Start the server locally
-openeye serve yolov8 --port 8000
+openeye serve yolov8 --port 8000 --vlm-model Qwen/Qwen2.5-VL-72B-Instruct
 
 # Detect objects in an image
 curl -X POST http://localhost:8000/predict \\
@@ -54,15 +54,16 @@ curl -X POST http://localhost:8000/predict \\
 #   "inference_ms": 14.2
 # }
 
-# Stream detections via WebSocket
-wscat -c ws://localhost:8000/ws
+# WebSocket endpoints
+wscat -c ws://localhost:8000/ws              # raw detection
+wscat -c ws://localhost:8000/ws/perception   # scene graph + governance
+wscat -c ws://localhost:8000/ws/vlm          # VLM reasoning (Nebius)
+wscat -c ws://localhost:8000/ws/agentic      # full perception loop
 
-# Health check
+# Health + metrics
 curl http://localhost:8000/health
-
-# Read / update config
-curl http://localhost:8000/config
-curl -X PUT http://localhost:8000/config -d '{"backend":"onnx"}'`,
+curl http://localhost:8000/metrics           # Prometheus
+curl http://localhost:8000/nebius/stats      # VLM usage stats`,
   },
   ros: {
     description: "ROS 2 integration is on the roadmap. Subscribe to OpenEye topics for real-time perception in your robot stack.",

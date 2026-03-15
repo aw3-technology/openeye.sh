@@ -366,10 +366,10 @@ function SolutionSlide() {
 
 function ArchitectureSlide() {
   const layers = [
-    { label: "Input", items: ["USB Camera", "RTSP Stream", "Video File", "Image"], color: "bg-oe-blue", glow: "hsl(var(--oe-blue))" },
-    { label: "Perception", items: ["Detection (YOLO)", "Depth Estimation", "Object Tracking", "3D Position"], color: "bg-primary", glow: "hsl(var(--primary))" },
-    { label: "Intelligence", items: ["Scene Graph", "Safety Eval", "Change Detection", "Action Suggest"], color: "bg-oe-red", glow: "hsl(var(--oe-red))" },
-    { label: "Output", items: ["REST API", "WebSocket", "gRPC", "Event Bus"], color: "bg-foreground", glow: "hsl(var(--foreground))" },
+    { label: "Input", items: ["USB Camera", "RTSP Stream", "Video File", "ROI Crop"], color: "bg-oe-blue", glow: "hsl(var(--oe-blue))" },
+    { label: "Perception", items: ["Detection (YOLO/RF-DETR)", "Object Tracking", "Depth + 3D Position", "Floor Plane"], color: "bg-primary", glow: "hsl(var(--primary))" },
+    { label: "Intelligence", items: ["Scene Graph", "VLM Reasoning", "Safety Guardian", "Governance"], color: "bg-oe-red", glow: "hsl(var(--oe-red))" },
+    { label: "Output", items: ["REST API", "WebSocket", "Agentic WS", "Action Plan"], color: "bg-foreground", glow: "hsl(var(--foreground))" },
   ];
 
   return (
@@ -453,12 +453,12 @@ function ArchitectureSlide() {
 
 function ModelsSlide() {
   const models = [
-    { name: "YOLOv8", type: "Detection", desc: "Real-time object detection, multiple variants (nano to xlarge)", accent: "text-oe-green" },
-    { name: "Depth Anything v2", type: "Depth", desc: "Monocular depth estimation for 3D spatial reasoning", accent: "text-oe-blue" },
-    { name: "Grounding DINO", type: "Open-Vocab", desc: "Text-prompted detection — find anything by description", accent: "text-primary" },
-    { name: "SAM2", type: "Segmentation", desc: "Segment Anything Model for precise object masks", accent: "text-oe-red" },
-    { name: "ONNX Runtime", type: "Runtime", desc: "Cross-platform inference with hardware acceleration", accent: "text-terminal-amber" },
-    { name: "TensorRT", type: "Runtime", desc: "NVIDIA-optimized inference for edge deployment", accent: "text-oe-green" },
+    { name: "YOLOv8 / YOLO26", type: "Detection", desc: "Real-time object detection with quantized variants and MPS/CUDA support.", accent: "text-oe-green" },
+    { name: "Depth Anything v2", type: "Depth", desc: "Monocular depth estimation for 3D position and floor-plane reasoning.", accent: "text-oe-blue" },
+    { name: "Grounding DINO", type: "Open-Vocab", desc: "Text-prompted detection — find anything by natural language description.", accent: "text-primary" },
+    { name: "SAM2", type: "Segmentation", desc: "Segment Anything Model for precise object masks and boundaries.", accent: "text-oe-red" },
+    { name: "RF-DETR", type: "Transformer", desc: "NMS-free detection transformer — cleaner outputs, no post-processing.", accent: "text-terminal-amber" },
+    { name: "SmolVLA", type: "VLA", desc: "Vision-Language-Action model for robotic control from visual input.", accent: "text-oe-green" },
   ];
 
   return (
@@ -601,14 +601,200 @@ function SafetySlide() {
   );
 }
 
+// ─── Agentic Loop Slide ──────────────────────────────────────────────────
+
+function AgenticSlide() {
+  const steps = [
+    { label: "Detect", desc: "YOLO runs every frame — objects, positions, tracking IDs.", color: "bg-oe-green", icon: "◉" },
+    { label: "Reason", desc: "VLM analyzes the scene every 3s — context, risks, intent.", color: "bg-primary", icon: "◈" },
+    { label: "Plan", desc: "Action plan generated from scene graph + goal + memory.", color: "bg-oe-blue", icon: "▸" },
+    { label: "Remember", desc: "Objects tracked across frames. Appearance/disappearance timeline.", color: "bg-oe-red", icon: "◆" },
+  ];
+
+  return (
+    <SlideLayout>
+      <GridBackground opacity={0.04} />
+      <GlowOrb color="hsl(var(--primary))" size={500} x="60%" y="10%" blur={250} />
+      <GlowOrb color="hsl(var(--oe-blue))" size={400} x="15%" y="60%" blur={200} />
+
+      <div className="flex-1 flex px-20 py-20 relative z-10">
+        <div className="flex-1 flex flex-col justify-center">
+          <motion.div
+            className="font-mono text-xl uppercase tracking-widest text-primary mb-6 flex items-center gap-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <motion.span
+              className="inline-block w-3 h-3 rounded-full bg-primary"
+              animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            Agentic Perception
+          </motion.div>
+          <motion.h2
+            className="text-[72px] font-semibold font-display leading-[1.05] mb-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            Detect. Reason.
+            <br />
+            <span className="bg-gradient-to-r from-primary to-oe-blue bg-clip-text text-transparent">Plan. Remember.</span>
+          </motion.h2>
+          <div className="space-y-5 max-w-[750px]">
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.label}
+                className="flex items-start gap-4 bg-card/40 border border-border/30 rounded-lg px-6 py-4"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.12 }}
+              >
+                <span className={`mt-1 w-2.5 h-2.5 rounded-full ${step.color} shrink-0`} />
+                <div className="text-[24px] text-muted-foreground leading-relaxed">
+                  <strong className="text-foreground">{step.label}:</strong> {step.desc}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+        <div className="w-[600px] flex items-center justify-center">
+          <motion.div
+            className="w-full bg-card/80 border border-border/60 rounded-xl p-8 font-mono text-lg leading-loose space-y-2 relative overflow-hidden backdrop-blur-sm"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <motion.span
+                className="w-2 h-2 rounded-full bg-primary"
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+              />
+              <span className="text-xs text-muted-foreground">AGENTIC</span>
+            </div>
+            {[
+              { text: "WS /ws/agentic", color: "text-oe-green" },
+              { text: '→ goal: "monitor workspace"', color: "text-muted-foreground" },
+              { text: "[DETECT] 4 objects — person, table, mug, laptop", color: "text-oe-green" },
+              { text: "[SCENE]  person seated at desk, mug on left", color: "text-oe-blue" },
+              { text: "[VLM]    Person working, no hazards detected", color: "text-primary" },
+              { text: "[PLAN]   Continue monitoring. No action needed.", color: "text-muted-foreground" },
+              { text: "[MEMORY] 12 objects tracked · 47 frames", color: "text-oe-red" },
+            ].map((line, i) => (
+              <motion.div
+                key={i}
+                className={line.color}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + i * 0.12 }}
+              >
+                {line.text}
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </SlideLayout>
+  );
+}
+
+// ─── Governance & MLOps Slide ────────────────────────────────────────────
+
+function GovernanceSlide() {
+  return (
+    <SlideLayout>
+      <GridBackground opacity={0.04} />
+      <GlowOrb color="hsl(var(--oe-red))" size={400} x="70%" y="20%" blur={200} />
+      <GlowOrb color="hsl(var(--oe-green))" size={350} x="20%" y="70%" blur={200} />
+
+      <div className="flex-1 flex flex-col px-20 py-20 relative z-10">
+        <motion.div
+          className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="w-8 h-px bg-muted-foreground" />
+          Governance & MLOps
+        </motion.div>
+        <motion.h2
+          className="text-[60px] font-semibold font-display leading-[1.05] mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          Production-ready from <span className="bg-gradient-to-r from-oe-red to-oe-green bg-clip-text text-transparent">day one.</span>
+        </motion.h2>
+        <div className="grid grid-cols-2 gap-8 flex-1">
+          {/* Governance */}
+          <motion.div
+            className="bg-card/60 border border-border/50 rounded-xl p-8 flex flex-col backdrop-blur-sm relative overflow-hidden"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-oe-red/40 to-transparent" />
+            <div className="font-mono text-sm uppercase tracking-widest text-oe-red mb-5">Policy Engine</div>
+            <div className="text-[28px] font-semibold mb-6">Governance</div>
+            <div className="space-y-4 font-mono text-lg text-muted-foreground flex-1">
+              {["Zone policies (3D boundaries)", "Action filters (regex + speed limits)", "Object restrictions", "PII filters", "Interaction boundaries", "Rate limiters"].map((item, i) => (
+                <motion.div
+                  key={item}
+                  className="flex items-center gap-3"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.35 + i * 0.06 }}
+                >
+                  <span className="text-oe-red/60">├─</span> {item}
+                </motion.div>
+              ))}
+            </div>
+            <div className="mt-5 font-mono text-base bg-secondary/60 text-oe-green px-4 py-3 rounded-lg border border-border/40">
+              $ openeye govern --presets robotics
+            </div>
+          </motion.div>
+
+          {/* MLOps */}
+          <motion.div
+            className="bg-card/60 border border-border/50 rounded-xl p-8 flex flex-col backdrop-blur-sm relative overflow-hidden"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-oe-green/40 to-transparent" />
+            <div className="font-mono text-sm uppercase tracking-widest text-oe-green mb-5">Model Lifecycle</div>
+            <div className="text-[28px] font-semibold mb-6">MLOps</div>
+            <div className="space-y-4 font-mono text-lg text-muted-foreground flex-1">
+              {["Promote: dev → staging → prod", "A/B testing with traffic splits", "Shadow mode (live comparison)", "Export: ONNX / TensorRT / CoreML", "INT8 quantization", "Lineage tracking & annotations"].map((item, i) => (
+                <motion.div
+                  key={item}
+                  className="flex items-center gap-3"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.45 + i * 0.06 }}
+                >
+                  <span className="text-oe-green/60">├─</span> {item}
+                </motion.div>
+              ))}
+            </div>
+            <div className="mt-5 font-mono text-base bg-secondary/60 text-oe-green px-4 py-3 rounded-lg border border-border/40">
+              $ openeye mlops promote yolov8 --to production
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </SlideLayout>
+  );
+}
+
 // ─── Plugin Architecture Slide ────────────────────────────────────────────
 
 function PluginSlide() {
   const plugins = [
-    { category: "Input Plugins", items: ["VLM (OpenAI, Gemini)", "Local YOLO", "Video File", "Perception Pipeline"], accent: "text-oe-blue" },
-    { category: "LLM Plugins", items: ["OpenAI GPT-4o", "Nebius (Qwen, Llama)", "OpenRouter (free)"], accent: "text-primary" },
-    { category: "Action Plugins", items: ["Log to console", "Robot connectors", "Custom handlers"], accent: "text-oe-red" },
-    { category: "Adapters", items: ["yolov8", "depth_anything", "grounding_dino", "ONNX / TensorRT"], accent: "text-oe-green" },
+    { category: "Input Plugins", items: ["Perception Pipeline", "VLM + Local YOLO", "Video File", "Camera Stream"], accent: "text-oe-blue" },
+    { category: "LLM Plugins", items: ["Nebius (Qwen 72B)", "OpenRouter", "OpenAI GPT-4o"], accent: "text-primary" },
+    { category: "Action Plugins", items: ["Log to console", "Unitree G1 connector", "Safety search (Tavily)", "Custom handlers"], accent: "text-oe-red" },
+    { category: "Adapters", items: ["yolov8 / yolo26", "depth_anything", "grounding_dino", "sam2 / rfdetr / smolvla"], accent: "text-oe-green" },
   ];
 
   return (
@@ -685,13 +871,13 @@ function DeploySlide() {
     },
     {
       label: "API Server",
-      desc: "FastAPI server with REST + WebSocket. Send images, get structured JSON. Built-in dashboard.",
+      desc: "FastAPI server with REST, WebSocket, and Agentic endpoints. VLM reasoning, scene graphs, and a built-in dashboard.",
       cmd: "openeye serve yolov8 --port 8000",
       icon: "🌐",
     },
     {
       label: "Fleet Management",
-      desc: "Register edge devices, deploy models, canary rollouts, rolling updates from the CLI.",
+      desc: "Register edge devices, deploy models with canary/rolling/blue-green strategies, OTA updates, and a device agent.",
       cmd: "openeye fleet deploy --strategy canary",
       icon: "📡",
     },
@@ -867,6 +1053,8 @@ const slides: SlideData[] = [
   { id: "architecture", content: <ArchitectureSlide /> },
   { id: "models", content: <ModelsSlide /> },
   { id: "safety", content: <SafetySlide /> },
+  { id: "agentic", content: <AgenticSlide /> },
+  { id: "governance", content: <GovernanceSlide /> },
   { id: "plugins", content: <PluginSlide /> },
   { id: "deploy", content: <DeploySlide /> },
   { id: "use-cases", content: <UseCasesSlide /> },

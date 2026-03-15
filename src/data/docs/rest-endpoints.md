@@ -2,17 +2,28 @@
 title: REST Endpoints
 ---
 
+The self-hosted server (`openeye serve`) runs on port 8000 by default and exposes the following REST endpoints.
+
 ### GET /health
 
 Health check endpoint.
 
 ```json
-{"status": "ok", "model": "yolov8"}
+{
+  "status": "ok",
+  "model": "yolov8",
+  "model_loaded": true,
+  "uptime_seconds": 123.4
+}
 ```
 
 ### POST /predict
 
-Run inference on an uploaded image. Request: Multipart form with file field (JPEG/PNG, max 20MB).
+Run inference on an uploaded image. Request: Multipart form with `file` field (JPEG/PNG, max 20MB).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| prompt | string | null | Text prompt for open-vocabulary models (e.g. grounding-dino) |
 
 ```json
 {
@@ -29,6 +40,41 @@ Run inference on an uploaded image. Request: Multipart form with file field (JPE
 }
 ```
 
+### GET /config & PUT /config
+
+Get or update runtime configuration. PUT body: JSON object with config fields to update.
+
+### GET /metrics
+
+Prometheus-format metrics endpoint. Returns counters and histograms for request counts, latencies, and inference times.
+
+### GET /queue/status
+
+Inference queue status.
+
+```json
+{"active": 0, "queued": 2}
+```
+
+### GET /nebius/stats
+
+Nebius Token Factory VLM usage statistics.
+
+```json
+{
+  "total_calls": 42,
+  "total_tokens_estimated": 8400,
+  "total_latency_ms": 21000.0,
+  "avg_latency_ms": 500.0,
+  "errors": 1,
+  "last_call_at": 1710500000.0,
+  "model": "Qwen/Qwen2.5-VL-72B-Instruct",
+  "provider": "Nebius Token Factory",
+  "configured": true,
+  "uptime_seconds": 3600.0
+}
+```
+
 ### Error Responses
 
 | Status | Description |
@@ -36,7 +82,4 @@ Run inference on an uploaded image. Request: Multipart form with file field (JPE
 | 400 | Cannot decode image |
 | 413 | File too large |
 | 500 | Inference failed |
-
-### GET /config & PUT /config
-
-Get or update runtime configuration. PUT body: JSON object with config fields to update.
+| 503 | Server busy (queue full) |

@@ -2,10 +2,12 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const dashboardFeatures = [
-  { label: "Live Stream", description: "Real-time camera feeds with detection overlays, safety zone HUD, and FPS metrics" },
-  { label: "Fleet Management", description: "Device inventory, health monitoring, OTA updates, and deployment orchestration across edge nodes" },
-  { label: "Model Registry", description: "Browse available models, check installed versions, and manage adapters from the dashboard" },
+  { label: "Live Stream", description: "Real-time camera feeds with detection overlays, safety zone HUD, FPS/latency color coding, and VLM reasoning panel" },
+  { label: "Fleet Management", description: "Device inventory, health monitoring, deployment wizards, canary rollouts, maintenance scheduling, and alerts" },
   { label: "Agentic Loop", description: "Continuous perception-reasoning-action cycle with memory, scene graphs, and chain-of-thought planning" },
+  { label: "MLOps", description: "A/B testing, shadow deployments, feedback loops, model lifecycle management, and automated retraining" },
+  { label: "Governance", description: "Policy editor, violation monitoring, audit trails, and safety presets to enforce compliance across your fleet" },
+  { label: "Model Registry", description: "Browse available models, benchmark results, check installed versions, and manage adapters from the dashboard" },
 ];
 
 export function ProductionDashboardSection() {
@@ -25,11 +27,11 @@ export function ProductionDashboardSection() {
             Monitor and manage your perception stack.
           </h2>
           <p className="text-muted-foreground mb-12 max-w-2xl">
-            A built-in web dashboard for managing devices, monitoring camera feeds, and exploring model outputs.
+            A built-in web dashboard for managing devices, monitoring camera feeds, enforcing safety policies, and running MLOps workflows.
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {dashboardFeatures.map((feature, i) => (
             <motion.div
               key={feature.label}

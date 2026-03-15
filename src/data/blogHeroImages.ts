@@ -8,7 +8,7 @@ import modelAgnostic from "@/assets/blog/model-agnostic.jpg";
 import onePipeline from "@/assets/blog/one-pipeline.jpg";
 import vsProprietary from "@/assets/blog/vs-proprietary.jpg";
 import perceptionInfrastructure from "@/assets/blog/perception-infrastructure.jpg";
-import grpcStreaming from "@/assets/blog/grpc-streaming.jpg";
+import websocketStreaming from "@/assets/blog/grpc-streaming.jpg";
 import twoBrain from "@/assets/blog/two-brain.jpg";
 import cliInstead from "@/assets/blog/cli-instead.jpg";
 import safetyCrisis from "@/assets/blog/safety-crisis.jpg";
@@ -23,7 +23,7 @@ export const blogHeroImages: Record<string, string> = {
   "one-pipeline-every-robot": onePipeline,
   "openeye-vs-proprietary-vision-stacks": vsProprietary,
   "perception-as-infrastructure": perceptionInfrastructure,
-  "real-time-perception-streaming-with-grpc": grpcStreaming,
+  "real-time-perception-streaming-with-websockets": websocketStreaming,
   "two-brain-architecture-yolo-meets-vlm": twoBrain,
   "why-we-built-a-cli-instead-of-a-dashboard": cliInstead,
   "the-safety-crisis-no-one-in-robotics-is-talking-about": safetyCrisis,

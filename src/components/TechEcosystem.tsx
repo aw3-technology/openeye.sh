@@ -24,20 +24,21 @@ const categories = [
 const projects: Project[] = [
   // Real-Time Detection
   { name: "YOLOv8", creator: "Ultralytics", description: "Real-time object detection — 80 COCO classes with ONNX and TensorRT support", category: "Real-Time Detection", integrated: true },
-  { name: "RF-DETR", creator: "Roboflow", description: "Real-time detection transformer — end-to-end object detection without NMS", category: "Real-Time Detection" },
+  { name: "YOLO26", creator: "Ultralytics", description: "Latest generation YOLO (YOLO11) — faster and lighter than YOLOv8", category: "Real-Time Detection", integrated: true },
+  { name: "RF-DETR", creator: "Roboflow", description: "Real-time detection transformer — end-to-end object detection without NMS", category: "Real-Time Detection", integrated: true },
   { name: "YOLOWorld", creator: "Tencent AILab", description: "Open-vocabulary real-time detection with text prompts", category: "Real-Time Detection" },
   { name: "DAMO-YOLO", creator: "Alibaba DAMO", description: "Efficient YOLO variant with NAS-optimized architecture", category: "Real-Time Detection" },
   { name: "Gold-YOLO", creator: "Huazhong UST", description: "Gather-and-distribute mechanism for multi-scale feature fusion", category: "Real-Time Detection" },
 
   // Segmentation
-  { name: "SAM2", creator: "Meta AI", description: "Segment Anything Model 2 — zero-shot segmentation for any object in any image", category: "Segmentation" },
+  { name: "SAM 2", creator: "Meta AI", description: "Segment Anything Model 2 — zero-shot segmentation for any object in any image", category: "Segmentation", integrated: true },
   { name: "Grounded-SAM", creator: "IDEA Research", description: "Combines Grounding DINO with SAM for text-prompted segmentation", category: "Segmentation" },
   { name: "FastSAM", creator: "CASIA-IVA", description: "CNN-based SAM alternative running 50x faster", category: "Segmentation" },
   { name: "EfficientSAM", creator: "Meta AI", description: "Lightweight SAM with SAMI-distilled image encoders", category: "Segmentation" },
   { name: "Mask2Former", creator: "Meta AI", description: "Unified architecture for panoptic, instance, and semantic segmentation", category: "Segmentation" },
 
   // VLMs
-  { name: "Qwen2.5-VL", creator: "Alibaba Qwen", description: "Multimodal vision-language model with native visual grounding", category: "VLMs" },
+  { name: "Qwen2.5-VL", creator: "Alibaba Qwen", description: "Multimodal vision-language model with native visual grounding", category: "VLMs", integrated: true },
   { name: "LLaVA-NeXT", creator: "UW / Microsoft", description: "Improved visual instruction tuning with dynamic high-res support", category: "VLMs" },
   { name: "InternVL 2.5", creator: "Shanghai AI Lab", description: "Open-source multimodal model with strong visual reasoning", category: "VLMs" },
   { name: "CogVLM2", creator: "Tsinghua / Zhipu", description: "Visual expert architecture for deep image understanding", category: "VLMs" },

@@ -9,6 +9,8 @@ import type {
   InferenceFailureAnnotation,
   PromotionRecord,
   ExportResult,
+  ModelLineage,
+  FeedbackBatch,
 } from "@/types/mlops";
 
 export const stageBadgeVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -98,6 +100,22 @@ export function useExports(baseUrl: string) {
   return useQuery({
     queryKey: ["mlops", "exports"],
     queryFn: () => fetchJson<ExportResult[]>(baseUrl, "/mlops/exports"),
+    enabled: !!baseUrl,
+  });
+}
+
+export function useLineage(baseUrl: string) {
+  return useQuery({
+    queryKey: ["mlops", "lineage"],
+    queryFn: () => fetchJson<ModelLineage[]>(baseUrl, "/mlops/lineage"),
+    enabled: !!baseUrl,
+  });
+}
+
+export function useFeedbackBatches(baseUrl: string) {
+  return useQuery({
+    queryKey: ["mlops", "feedback-batches"],
+    queryFn: () => fetchJson<FeedbackBatch[]>(baseUrl, "/mlops/feedback-batches"),
     enabled: !!baseUrl,
   });
 }

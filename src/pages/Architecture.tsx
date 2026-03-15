@@ -37,12 +37,12 @@ const pipelineLayers: PipelineLayer[] = [
     title: "YOLO26 runs every frame.",
     description:
       "The fast detection layer processes every frame at 30fps using YOLO26. Model adapters let you swap to any supported detector without code changes. This is the safety-critical path — pure geometry, no LLM latency.",
-    terminalCommand: "$ openeye detect image.jpg --model yolo26 --conf 0.4",
+    terminalCommand: "$ openeye run yolo26 image.jpg --conf 0.4",
     details: [
-      "YOLO26 as default fast-layer detector",
+      "YOLO26 and YOLOv8 as fast-layer detectors",
       "Model adapter pattern for hot-swapping",
-      "Grounding DINO 1.5 for open-vocabulary queries",
-      "SAM 3 for pixel-precise segmentation",
+      "Grounding DINO for open-vocabulary queries",
+      "SAM 2 for pixel-precise segmentation",
     ],
   },
   {
@@ -64,10 +64,10 @@ const pipelineLayers: PipelineLayer[] = [
     overlineColor: "text-terminal-amber",
     title: "The smart layer thinks.",
     description:
-      "Every 2-3 seconds, a VLM analyzes the scene for context-dependent risks that geometry alone can't catch. Powered by Qwen3-VL via Nebius Token Factory for fast, affordable inference.",
-    terminalCommand: "$ openeye watch --reason --vlm qwen3-vl",
+      "Every 2-3 seconds, a VLM analyzes the scene for context-dependent risks that geometry alone can't catch. Powered by Qwen2.5-VL via Nebius Token Factory for fast, affordable inference.",
+    terminalCommand: "$ openeye watch --reason --vlm qwen2.5-vl",
     details: [
-      "Qwen3-VL for multimodal scene reasoning",
+      "Qwen2.5-VL for multimodal scene reasoning",
       "Nebius Token Factory for hosted inference",
       "OpenRouter fallback for model flexibility",
       "Catches context-dependent risks (knife near edge, unstable stack)",
@@ -92,11 +92,11 @@ const pipelineLayers: PipelineLayer[] = [
     overlineColor: "text-terminal-green",
     title: "Plans become robot actions.",
     description:
-      "The adapter layer translates action plans into robot-specific commands. Support for Solo CLI, OpenClaw, and ROS integration. Halt signals bypass the full pipeline for sub-100ms emergency stops.",
-    terminalCommand: "$ openeye exec --adapter solo-cli --plan plan.json",
+      "The adapter layer translates action plans into robot-specific commands. Unitree G1 connector with SDK, HTTP, and dry-run modes. Halt signals bypass the full pipeline for sub-100ms emergency stops.",
+    terminalCommand: "$ openeye g1-demo --source usb --dry-run",
     details: [
-      "Solo CLI for direct servo control",
-      "OpenClaw for dexterous manipulation",
+      "Unitree G1 connector (SDK / HTTP / dry-run)",
+      "Auto-detect camera transport (USB, RTSP, SDK)",
       "ROS 2 integration (coming soon)",
       "Sub-100ms halt signal path",
     ],
@@ -168,11 +168,11 @@ export default function Architecture() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 rounded-full bg-terminal-green" />
-                  Adapter-ready: Solo CLI, OpenClaw, ROS
+                  Adapter-ready: Unitree G1, ROS (soon)
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 rounded-full bg-terminal-amber" />
-                  REST + gRPC endpoints for any consumer
+                  REST + WebSocket endpoints for any consumer
                 </div>
               </div>
             </div>

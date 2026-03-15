@@ -89,6 +89,14 @@ export const milestones: Milestone[] = [
     event: "Open-sourced under Apache 2.0",
   },
   {
+    date: "Mar 2026",
+    event: "8 model adapters integrated — YOLO, RF-DETR, DINO, SAM 2, Depth, SmolVLA, Qwen2.5-VL",
+  },
+  {
+    date: "Mar 2026",
+    event: "Fleet control plane, MLOps pipeline, and governance framework shipped",
+  },
+  {
     date: "Next",
     event: "ROS 2 adapter, persistent scene memory, multi-camera fusion",
   },

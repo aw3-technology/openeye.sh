@@ -103,10 +103,9 @@
     "changes": [
       { "type": "added", "text": "Live stream mode with RTSP / webcam / HTTP-FLV support" },
       { "type": "added", "text": "Dashboard live view with real-time bounding box overlay" },
-      { "type": "added", "text": "CLI `openeye stream` command" },
-      { "type": "added", "text": "gRPC perception streaming endpoint on port 50051" },
-      { "type": "changed", "text": "Config format v2 — see migration guide" },
-      { "type": "removed", "text": "Deprecated `openeye watch` command (use `openeye stream`)" }
+      { "type": "added", "text": "CLI `openeye watch` command for continuous monitoring" },
+      { "type": "added", "text": "WebSocket perception streaming endpoints (/ws, /ws/perception, /ws/vlm, /ws/agentic)" },
+      { "type": "changed", "text": "Config format v2 — see migration guide" }
     ]
   },
   {

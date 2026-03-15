@@ -7,7 +7,7 @@ const safetyTerminalLines = [
   { text: "[SAFETY] ✓ Scene stable — 4 objects, 0 anomalies", color: "green" as const },
   { text: "", color: "default" as const },
   { text: "[ANOMALY] ⚠ Human hand detected in robot workspace", color: "red" as const },
-  { text: "[SAFETY] → Sending HALT to task agent via OpenClaw", color: "red" as const },
+  { text: "[SAFETY] → Sending HALT to robot controller", color: "red" as const },
   { text: "[AGENT] Task agent paused. Waiting for clearance...", color: "muted" as const },
   { text: "", color: "default" as const },
   { text: "[SAFETY] ✓ Hand withdrawn. Workspace clear.", color: "green" as const },

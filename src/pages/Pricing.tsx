@@ -2,7 +2,13 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { pricingTiers, pricingFaq, type PricingPlanTier } from "@/data/pricingData";
+import {
+  pricingTiers,
+  pricingFaq,
+  competitorNames,
+  competitorFeatures,
+  type PricingPlanTier,
+} from "@/data/pricingData";
 import {
   Accordion,
   AccordionContent,
@@ -85,6 +91,39 @@ function PricingCard({ tier }: { tier: PricingPlanTier }) {
   );
 }
 
+function ComparisonCell({
+  value,
+  highlighted,
+}: {
+  value: string | boolean;
+  highlighted?: boolean;
+}) {
+  if (value === true) {
+    return (
+      <span
+        className={`inline-block w-2 h-2 rounded-full ${
+          highlighted ? "bg-terminal-green" : "bg-terminal-green/70"
+        }`}
+        aria-label="Yes"
+      />
+    );
+  }
+  if (value === false) {
+    return (
+      <span className="inline-block w-2 h-2 rounded-full bg-foreground/10" aria-label="No" />
+    );
+  }
+  return (
+    <span
+      className={`text-xs font-mono ${
+        highlighted ? "text-terminal-green" : "text-muted-foreground"
+      }`}
+    >
+      {value}
+    </span>
+  );
+}
+
 export default function Pricing() {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -117,6 +156,64 @@ export default function Pricing() {
             {pricingTiers.map((tier) => (
               <PricingCard key={tier.name} tier={tier} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Competitor Matrix */}
+      <section className="py-20 px-4 border-t border-foreground/[0.06]">
+        <div className="container max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+              Comparison
+            </div>
+            <h2 className="text-3xl font-semibold font-display mb-3">
+              How OpenEye stacks up
+            </h2>
+            <p className="text-muted-foreground max-w-lg mx-auto text-sm">
+              A side-by-side look at OpenEye versus proprietary vision AI platforms.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto -mx-4 px-4">
+            <table className="w-full text-sm border-collapse min-w-[640px]">
+              <thead>
+                <tr className="border-b border-foreground/[0.06]">
+                  <th className="text-left py-3 pr-4 font-mono text-xs uppercase tracking-widest text-muted-foreground w-[200px]">
+                    Feature
+                  </th>
+                  <th className="py-3 px-3 text-center font-mono text-xs uppercase tracking-widest text-terminal-green w-[100px]">
+                    OpenEye
+                  </th>
+                  {competitorNames.map((name) => (
+                    <th
+                      key={name}
+                      className="py-3 px-3 text-center font-mono text-xs uppercase tracking-widest text-muted-foreground w-[100px]"
+                    >
+                      {name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {competitorFeatures.map((feature) => (
+                  <tr
+                    key={feature.label}
+                    className="border-b border-foreground/[0.04] hover:bg-foreground/[0.02] transition-colors"
+                  >
+                    <td className="py-3 pr-4 font-medium">{feature.label}</td>
+                    <td className="py-3 px-3 text-center">
+                      <ComparisonCell value={feature.openeye} highlighted />
+                    </td>
+                    {competitorNames.map((name) => (
+                      <td key={name} className="py-3 px-3 text-center">
+                        <ComparisonCell value={feature.competitors[name]} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </section>

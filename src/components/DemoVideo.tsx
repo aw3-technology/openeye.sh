@@ -6,7 +6,7 @@ const terminalLines = [
   { text: "", delay: 400 },
   { text: "[INFO] Camera 0 connected — 1280x720 @ 30fps", delay: 800 },
   { text: "[INFO] Loading YOLO26-xl... done (1.2s)", delay: 1600 },
-  { text: "[INFO] Loading Qwen3-VL reasoning layer... done", delay: 2400 },
+  { text: "[INFO] Loading Qwen2.5-VL reasoning layer... done", delay: 2400 },
   { text: "[INFO] Guardian mode active. Monitoring workspace.", delay: 3200 },
   { text: "", delay: 3600 },
   { text: "[DETECT] robot_arm: 0.99 — [320, 110, 680, 420]", delay: 4000 },

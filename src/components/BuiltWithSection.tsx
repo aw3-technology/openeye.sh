@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-const tools = ["Hugging Face", "OpenRouter", "YOLOv8", "Grounding DINO", "Depth Anything", "ONNX Runtime", "TensorRT", "FastAPI"];
+const tools = ["Hugging Face", "Nebius AI", "OpenRouter", "YOLOv8", "YOLO26", "RF-DETR", "Grounding DINO", "SAM 2", "Depth Anything", "SmolVLA", "ONNX Runtime", "TensorRT", "FastAPI", "Supabase", "Prometheus"];
 
 export function BuiltWithSection() {
   return (

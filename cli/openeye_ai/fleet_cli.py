@@ -409,3 +409,328 @@ def start_agent(
     except KeyboardInterrupt:
         agent.stop()
         rprint("[yellow]Agent stopped[/yellow]")
+
+
+# ── OTA Update ──────────────────────────────────────────────────
+
+
+@fleet_app.command("ota")
+def ota_update(
+    firmware_url: str = typer.Option(..., "--url", "-u", help="Firmware/software URL"),
+    version: str = typer.Option(..., "--version", "-v", help="Target version string"),
+    group_id: Optional[str] = typer.Option(None, "--group", "-g", help="Target device group"),
+    device_ids: Optional[str] = typer.Option(None, "--devices", "-d", help="Comma-separated device IDs"),
+    force: bool = typer.Option(False, "--force", help="Force update even if same version"),
+) -> None:
+    """Push an OTA firmware/software update to devices."""
+    payload: dict = {
+        "firmware_url": firmware_url,
+        "version": version,
+        "force": force,
+    }
+    if group_id:
+        payload["target_group_id"] = group_id
+    if device_ids:
+        payload["target_device_ids"] = [d.strip() for d in device_ids.split(",")]
+    result = _post("/ota/update", payload)
+    rprint(f"[green]OTA update queued:[/green] {result.get('id', '?')}")
+    rprint(f"  Version: {version} | Targets: {result.get('target_count', '?')} devices")
+
+
+# ── Deployment Advance / Pause ──────────────────────────────────
+
+
+@fleet_app.command("advance")
+def advance_deployment(
+    deployment_id: str = typer.Argument(..., help="Deployment UUID"),
+) -> None:
+    """Advance a canary deployment to the next stage."""
+    result = _post(f"/deployments/{deployment_id}/advance")
+    rprint(f"[green]Deployment advanced:[/green] stage {result.get('current_stage', '?')}")
+
+
+@fleet_app.command("pause-deployment")
+def pause_deployment(
+    deployment_id: str = typer.Argument(..., help="Deployment UUID"),
+) -> None:
+    """Pause a running deployment."""
+    result = _post(f"/deployments/{deployment_id}/pause")
+    rprint(f"[yellow]Deployment paused:[/yellow] {result.get('status', '?')}")
+
+
+# ── Alert Resolution ────────────────────────────────────────────
+
+
+@fleet_app.command("resolve-alert")
+def resolve_alert(
+    alert_id: str = typer.Argument(..., help="Alert UUID"),
+) -> None:
+    """Resolve a fleet alert."""
+    _post(f"/alerts/{alert_id}/resolve")
+    rprint(f"[green]Alert resolved:[/green] {alert_id}")
+
+
+# ── Device Resources ────────────────────────────────────────────
+
+
+@fleet_app.command("resources")
+def device_resources(
+    device_id: str = typer.Argument(..., help="Device UUID"),
+    limit: int = typer.Option(20, "--limit", "-n", help="Number of data points"),
+) -> None:
+    """Show resource usage history for a device."""
+    data = _get(f"/devices/{device_id}/resources?limit={limit}")
+
+    entries = data if isinstance(data, list) else data.get("entries", [])
+    if not entries:
+        rprint("[dim]No resource data available.[/dim]")
+        return
+
+    tbl = Table(title=f"Resource Usage: {device_id[:12]}")
+    tbl.add_column("Time", style="dim")
+    tbl.add_column("CPU %", justify="right")
+    tbl.add_column("Memory %", justify="right")
+    tbl.add_column("Disk %", justify="right")
+    tbl.add_column("Infer/s", justify="right", style="cyan")
+    tbl.add_column("GPU %", justify="right")
+
+    for e in entries:
+        cpu = e.get("cpu_percent", 0)
+        mem = e.get("memory_percent", 0)
+        cpu_style = "green" if cpu < 70 else "yellow" if cpu < 90 else "red"
+        mem_style = "green" if mem < 70 else "yellow" if mem < 90 else "red"
+        tbl.add_row(
+            str(e.get("timestamp", "—")),
+            f"[{cpu_style}]{cpu:.1f}[/{cpu_style}]",
+            f"[{mem_style}]{mem:.1f}[/{mem_style}]",
+            f"{e.get('disk_percent', 0):.1f}",
+            str(e.get("inference_rate", "—")),
+            f"{e.get('gpu_percent', 0):.1f}" if e.get("gpu_percent") is not None else "—",
+        )
+    err_console.print(tbl)
+
+
+# ── Batch Operations ────────────────────────────────────────────
+
+
+@fleet_app.command("batch")
+def batch_command(
+    command: str = typer.Argument(..., help="Command to send: restart, update_config, update_model"),
+    tag_filter: Optional[str] = typer.Option(None, "--tag", "-t", help="Tag filter as key=value"),
+    payload_json: Optional[str] = typer.Option(None, "--payload", "-p", help="JSON payload for the command"),
+) -> None:
+    """Send a batch command to devices matching a tag filter."""
+    body: dict = {"command": command}
+    if tag_filter:
+        if "=" not in tag_filter:
+            rprint("[red]Tag filter must be key=value format[/red]")
+            raise typer.Exit(code=1)
+        k, v = tag_filter.split("=", 1)
+        body["tag_filter"] = {k: v}
+    if payload_json:
+        try:
+            body["payload"] = json.loads(payload_json)
+        except json.JSONDecodeError:
+            rprint("[red]Invalid JSON payload[/red]")
+            raise typer.Exit(code=1)
+    result = _post("/devices/batch", body)
+    rprint(f"[green]Batch command sent:[/green] {result.get('affected_devices', '?')} devices")
+
+
+# ── Group Membership ────────────────────────────────────────────
+
+
+@fleet_app.command("group-add")
+def group_add_device(
+    group_id: str = typer.Argument(..., help="Group UUID"),
+    device_id: str = typer.Argument(..., help="Device UUID to add"),
+) -> None:
+    """Add a device to a group."""
+    _post(f"/groups/{group_id}/members", {"device_id": device_id})
+    rprint(f"[green]Device {device_id[:12]} added to group {group_id[:12]}[/green]")
+
+
+@fleet_app.command("group-remove")
+def group_remove_device(
+    group_id: str = typer.Argument(..., help="Group UUID"),
+    device_id: str = typer.Argument(..., help="Device UUID to remove"),
+) -> None:
+    """Remove a device from a group."""
+    _delete(f"/groups/{group_id}/members/{device_id}")
+    rprint(f"[yellow]Device {device_id[:12]} removed from group {group_id[:12]}[/yellow]")
+
+
+@fleet_app.command("group-members")
+def group_members(
+    group_id: str = typer.Argument(..., help="Group UUID"),
+) -> None:
+    """List devices in a group."""
+    members = _get(f"/groups/{group_id}/members")
+
+    entries = members if isinstance(members, list) else members.get("members", [])
+    if not entries:
+        rprint("[dim]No members in this group.[/dim]")
+        return
+
+    tbl = Table(title=f"Group Members: {group_id[:12]}")
+    tbl.add_column("Name", style="bold")
+    tbl.add_column("ID", max_width=12)
+    tbl.add_column("Type")
+    tbl.add_column("Status")
+    for d in entries:
+        status_style = {"online": "green", "offline": "dim", "error": "red"}.get(d.get("status", ""), "")
+        tbl.add_row(
+            d.get("name", "?"),
+            d.get("id", d.get("device_id", "?"))[:12],
+            d.get("device_type", "—"),
+            f"[{status_style}]{d.get('status', '?')}[/{status_style}]" if status_style else d.get("status", "?"),
+        )
+    err_console.print(tbl)
+
+
+@fleet_app.command("group-scaling")
+def group_scaling(
+    group_id: str = typer.Argument(..., help="Group UUID"),
+    enabled: bool = typer.Option(True, "--enabled/--disabled", help="Enable or disable auto-scaling"),
+    min_devices: int = typer.Option(1, "--min", help="Minimum devices"),
+    max_devices: int = typer.Option(10, "--max", help="Maximum devices"),
+    target_cpu: float = typer.Option(70.0, "--target-cpu", help="Target CPU percentage"),
+) -> None:
+    """Set auto-scaling policy for a device group."""
+    policy = {
+        "enabled": enabled,
+        "min_devices": min_devices,
+        "max_devices": max_devices,
+        "target_cpu_percent": target_cpu,
+    }
+    _put(f"/groups/{group_id}/scaling", policy)
+    state = "enabled" if enabled else "disabled"
+    rprint(f"[green]Auto-scaling {state}[/green] (min={min_devices}, max={max_devices}, cpu={target_cpu}%)")
+
+
+# ── Maintenance Windows ─────────────────────────────────────────
+
+
+@fleet_app.command("maintenance-create")
+def maintenance_create(
+    name: str = typer.Option(..., "--name", "-n", help="Window name"),
+    start: str = typer.Option(..., "--start", help="Start time (ISO 8601)"),
+    end: str = typer.Option(..., "--end", help="End time (ISO 8601)"),
+    device_ids: Optional[str] = typer.Option(None, "--devices", "-d", help="Comma-separated device IDs"),
+    group_id: Optional[str] = typer.Option(None, "--group", "-g", help="Target group ID"),
+) -> None:
+    """Create a maintenance window."""
+    payload: dict = {
+        "name": name,
+        "start_time": start,
+        "end_time": end,
+    }
+    if device_ids:
+        payload["device_ids"] = [d.strip() for d in device_ids.split(",")]
+    if group_id:
+        payload["group_id"] = group_id
+    result = _post("/maintenance", payload)
+    rprint(f"[green]Maintenance window created:[/green] {result.get('id', '?')}")
+
+
+@fleet_app.command("maintenance-list")
+def maintenance_list(
+    active_only: bool = typer.Option(False, "--active", help="Show only active windows"),
+) -> None:
+    """List maintenance windows."""
+    qs = f"?active_only={str(active_only).lower()}"
+    windows = _get(f"/maintenance{qs}")
+
+    entries = windows if isinstance(windows, list) else windows.get("windows", [])
+    if not entries:
+        rprint("[dim]No maintenance windows.[/dim]")
+        return
+
+    tbl = Table(title="Maintenance Windows")
+    tbl.add_column("Name", style="bold")
+    tbl.add_column("ID", max_width=12)
+    tbl.add_column("Start")
+    tbl.add_column("End")
+    tbl.add_column("Status")
+    for w in entries:
+        tbl.add_row(
+            w.get("name", "?"),
+            w.get("id", "?")[:12],
+            str(w.get("start_time", "—")),
+            str(w.get("end_time", "—")),
+            w.get("status", "—"),
+        )
+    err_console.print(tbl)
+
+
+@fleet_app.command("maintenance-update")
+def maintenance_update(
+    window_id: str = typer.Argument(..., help="Maintenance window UUID"),
+    name: Optional[str] = typer.Option(None, "--name", "-n"),
+    start: Optional[str] = typer.Option(None, "--start"),
+    end: Optional[str] = typer.Option(None, "--end"),
+) -> None:
+    """Update a maintenance window."""
+    payload: dict = {}
+    if name:
+        payload["name"] = name
+    if start:
+        payload["start_time"] = start
+    if end:
+        payload["end_time"] = end
+    if not payload:
+        rprint("[yellow]No fields to update. Use --name, --start, or --end.[/yellow]")
+        raise typer.Exit(code=1)
+    _patch(f"/maintenance/{window_id}", payload)
+    rprint(f"[green]Maintenance window updated:[/green] {window_id[:12]}")
+
+
+@fleet_app.command("maintenance-delete")
+def maintenance_delete(
+    window_id: str = typer.Argument(..., help="Maintenance window UUID"),
+) -> None:
+    """Delete a maintenance window."""
+    _delete(f"/maintenance/{window_id}")
+    rprint(f"[yellow]Maintenance window deleted:[/yellow] {window_id[:12]}")
+
+
+# ── Commands Queue ──────────────────────────────────────────────
+
+
+@fleet_app.command("commands")
+def list_commands(
+    device_id: Optional[str] = typer.Option(None, "--device", "-d", help="Filter by device ID"),
+    status: Optional[str] = typer.Option(None, "--status", "-s", help="Filter by status"),
+) -> None:
+    """List pending device commands."""
+    params = []
+    if device_id:
+        params.append(f"device_id={device_id}")
+    if status:
+        params.append(f"status={status}")
+    qs = "?" + "&".join(params) if params else ""
+
+    commands = _get(f"/commands{qs}")
+
+    entries = commands if isinstance(commands, list) else commands.get("commands", [])
+    if not entries:
+        rprint("[dim]No commands found.[/dim]")
+        return
+
+    tbl = Table(title="Device Commands")
+    tbl.add_column("ID", max_width=12)
+    tbl.add_column("Device", max_width=12)
+    tbl.add_column("Command", style="cyan")
+    tbl.add_column("Status")
+    tbl.add_column("Created")
+    for c in entries:
+        status_val = c.get("status", "?")
+        status_style = {"pending": "yellow", "completed": "green", "failed": "red"}.get(status_val, "")
+        tbl.add_row(
+            c.get("id", "?")[:12],
+            c.get("device_id", "?")[:12],
+            c.get("command_type", c.get("command", "?")),
+            f"[{status_style}]{status_val}[/{status_style}]" if status_style else status_val,
+            str(c.get("created_at", "—")),
+        )
+    err_console.print(tbl)
