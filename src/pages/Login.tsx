@@ -1,42 +1,23 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { lovable } from "@/integrations/lovable/index";
-import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import logoVertical from "@/assets/openeye-logo-vertical.png";
+
+type AuthMode = "sign_in" | "sign_up";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [success, setSuccess] = useState<string | null>(null);
+  const [mode, setMode] = useState<AuthMode>("sign_in");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    document.title = "Sign In | OpenEye";
-  }, []);
-
-  // Capture OAuth redirect errors from URL hash (#2)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-    const urlError = params.get("error_description") || params.get("error");
-    if (urlError) {
-      setError(decodeURIComponent(urlError));
-      window.history.replaceState(null, "", window.location.pathname);
-    }
-  }, []);
-
-  // Redirect if already authenticated, preserving intended destination (#3)
-  useEffect(() => {
-    if (!authLoading && user) {
-      const from = (location.state as { from?: string })?.from || "/dashboard";
-      navigate(from, { replace: true });
-    }
-  }, [user, authLoading, navigate, location.state]);
-
-  const handleSignIn = async (provider: "google" | "apple") => {
+  const handleOAuthSignIn = async (provider: "google" | "apple") => {
     setLoading(provider);
     setError(null);
+    setSuccess(null);
     const result = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: window.location.origin,
     });
@@ -46,14 +27,34 @@ export default function LoginPage() {
     }
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4" role="status" aria-label="Loading">
-        <img src={logoVertical} alt="OpenEye" className="h-20 animate-pulse" />
-        <span className="sr-only">Loading...</span>
-      </div>
-    );
-  }
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading("email");
+    setError(null);
+    setSuccess(null);
+
+    if (mode === "sign_up") {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccess("Check your email to confirm your account.");
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setError(error.message);
+      }
+    }
+    setLoading(null);
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -65,19 +66,63 @@ export default function LoginPage() {
       >
         <div className="text-center mb-8">
           <img src={logoVertical} alt="OpenEye" className="h-20 mx-auto mb-6" />
-          <h1 className="text-2xl font-semibold font-display mb-2">Sign in to OpenEye</h1>
+          <h1 className="text-2xl font-semibold font-display mb-2">
+            {mode === "sign_in" ? "Sign in to OpenEye" : "Create an account"}
+          </h1>
           <p className="text-sm text-muted-foreground">
             Access the open-source perception engine.
           </p>
         </div>
 
+        {/* Email/Password Form */}
+        <form onSubmit={handleEmailAuth} className="space-y-3 mb-4">
+          <input
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full bg-card border border-foreground/[0.06] rounded-inner px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+            className="w-full bg-card border border-foreground/[0.06] rounded-inner px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+          />
+          <button
+            type="submit"
+            disabled={!!loading}
+            className="w-full bg-primary text-primary-foreground rounded-inner px-4 py-3 text-sm font-medium hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50"
+          >
+            {loading === "email"
+              ? "Loading..."
+              : mode === "sign_in"
+                ? "Sign In"
+                : "Create Account"}
+          </button>
+        </form>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-foreground/[0.06]" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-3 text-muted-foreground tracking-widest">or</span>
+          </div>
+        </div>
+
+        {/* OAuth Buttons */}
         <div className="space-y-3">
           <button
-            onClick={() => handleSignIn("google")}
+            onClick={() => handleOAuthSignIn("google")}
             disabled={!!loading}
-            className="w-full flex items-center justify-center gap-3 bg-card border border-foreground/[0.06] rounded-inner px-4 py-3 text-sm font-medium hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+            className="w-full flex items-center justify-center gap-3 bg-card border border-foreground/[0.06] rounded-inner px-4 py-3 text-sm font-medium hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 18 18">
               <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
               <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
               <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
@@ -87,11 +132,11 @@ export default function LoginPage() {
           </button>
 
           <button
-            onClick={() => handleSignIn("apple")}
+            onClick={() => handleOAuthSignIn("apple")}
             disabled={!!loading}
-            className="w-full flex items-center justify-center gap-3 bg-foreground text-background rounded-inner px-4 py-3 text-sm font-medium hover:bg-foreground/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+            className="w-full flex items-center justify-center gap-3 bg-foreground text-background rounded-inner px-4 py-3 text-sm font-medium hover:bg-foreground/90 transition-all active:scale-[0.98] disabled:opacity-50"
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
               <path d="M14.94 9.88c-.02-2.08 1.7-3.08 1.78-3.13-0.97-1.42-2.48-1.61-3.01-1.63-1.28-0.13-2.5 0.75-3.15 0.75s-1.65-0.73-2.71-0.71c-1.39 0.02-2.68 0.81-3.4 2.06-1.45 2.51-0.37 6.24 1.04 8.28 0.69 1 1.51 2.12 2.59 2.08 1.04-0.04 1.43-0.67 2.69-0.67s1.61 0.67 2.71 0.65c1.12-0.02 1.82-1.02 2.5-2.02 0.79-1.16 1.11-2.28 1.13-2.34-0.02-0.01-2.17-0.83-2.19-3.3zM12.89 3.42c0.57-0.69 0.96-1.65 0.85-2.6-0.82 0.03-1.82 0.55-2.41 1.24-0.53 0.61-0.99 1.59-0.87 2.52 0.92 0.07 1.85-0.46 2.43-1.16z"/>
             </svg>
             {loading === "apple" ? "Signing in..." : "Continue with Apple"}
@@ -99,10 +144,37 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <p className="mt-4 text-sm text-center text-destructive" role="alert">{error}</p>
+          <p className="mt-4 text-sm text-center text-destructive">{error}</p>
+        )}
+        {success && (
+          <p className="mt-4 text-sm text-center text-green-600">{success}</p>
         )}
 
-        <p className="mt-8 text-center text-xs text-muted-foreground">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          {mode === "sign_in" ? (
+            <>
+              Don't have an account?{" "}
+              <button
+                onClick={() => { setMode("sign_up"); setError(null); setSuccess(null); }}
+                className="text-primary hover:underline font-medium"
+              >
+                Sign up
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <button
+                onClick={() => { setMode("sign_in"); setError(null); setSuccess(null); }}
+                className="text-primary hover:underline font-medium"
+              >
+                Sign in
+              </button>
+            </>
+          )}
+        </p>
+
+        <p className="mt-4 text-center text-xs text-muted-foreground">
           By signing in, you agree to OpenEye's open-source terms.
         </p>
       </motion.div>
