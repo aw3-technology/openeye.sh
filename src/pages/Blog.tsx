@@ -149,7 +149,8 @@ export default function Blog() {
                       <span className="text-foreground/10">|</span>
                       <span>{post.readTime}</span>
                     </div>
-                  </div>
+                    </div>
+                    </div>
                 </Link>
               </motion.div>
             ))}
