@@ -1,20 +1,20 @@
-# openeye-ai
+# openeye-sh
 
 **Ollama for vision AI models** — pull, run, and serve computer-vision models from your terminal.
 
 ## Install
 
 ```bash
-pip install openeye-ai
+pip install openeye-sh
 ```
 
 With extras:
 
 ```bash
-pip install openeye-ai[yolo]        # YOLO object detection
-pip install openeye-ai[depth]       # Monocular depth estimation
-pip install openeye-ai[camera]      # OpenCV camera support
-pip install openeye-ai[all]         # YOLO + depth + grounding + camera
+pip install openeye-sh[yolo]        # YOLO object detection
+pip install openeye-sh[depth]       # Monocular depth estimation
+pip install openeye-sh[camera]      # OpenCV camera support
+pip install openeye-sh[all]         # YOLO + depth + grounding + camera
 ```
 
 ## Quick Start

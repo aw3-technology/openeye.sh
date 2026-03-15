@@ -297,14 +297,14 @@ openeye mlops feedback MODEL_KEY OUTPUT
 ## Pip Install Extras
 
 ```bash
-pip install openeye-ai[yolo]        # YOLOv8 (ultralytics>=8.2)
-pip install openeye-ai[depth]       # Depth Anything (transformers, torch, accelerate)
-pip install openeye-ai[grounding]   # Grounding DINO (transformers, torch, accelerate)
-pip install openeye-ai[onnx]        # ONNX Runtime (onnxruntime>=1.17)
-pip install openeye-ai[onnx-gpu]    # ONNX with GPU (onnxruntime-gpu>=1.17)
-pip install openeye-ai[tensorrt]    # TensorRT (tensorrt>=10.0)
-pip install openeye-ai[camera]      # Live camera (opencv-python>=4.9)
-pip install openeye-ai[all]         # Everything
+pip install openeye-sh[yolo]        # YOLOv8 (ultralytics>=8.2)
+pip install openeye-sh[depth]       # Depth Anything (transformers, torch, accelerate)
+pip install openeye-sh[grounding]   # Grounding DINO (transformers, torch, accelerate)
+pip install openeye-sh[onnx]        # ONNX Runtime (onnxruntime>=1.17)
+pip install openeye-sh[onnx-gpu]    # ONNX with GPU (onnxruntime-gpu>=1.17)
+pip install openeye-sh[tensorrt]    # TensorRT (tensorrt>=10.0)
+pip install openeye-sh[camera]      # Live camera (opencv-python>=4.9)
+pip install openeye-sh[all]         # Everything
 ```
 
 ## File Paths

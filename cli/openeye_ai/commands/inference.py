@@ -514,7 +514,7 @@ def watch(
         except ImportError:
             rprint(
                 "[red]Missing opencv-python.[/red]\n"
-                "Install with: [bold]pip install openeye-ai\\[camera][/bold]"
+                "Install with: [bold]pip install openeye-sh\\[camera][/bold]"
             )
             if not video:
                 raise typer.Exit(code=1)

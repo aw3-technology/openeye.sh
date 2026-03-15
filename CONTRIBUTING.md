@@ -12,7 +12,7 @@ Thanks for your interest in contributing to OpenEye! This guide will help you ge
 
 ```
 perceptify-the-world/
-├── cli/              # openeye-ai CLI & inference server (Python)
+├── cli/              # openeye-sh CLI & inference server (Python)
 ├── backend/          # Perception engine runtime (Python)
 ├── src/              # React frontend (TypeScript)
 ├── docs/             # MkDocs documentation site

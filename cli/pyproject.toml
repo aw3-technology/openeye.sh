@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "openeye-ai"
+name = "openeye-sh"
 version = "0.1.0"
 description = "Ollama for vision AI models — pull, run, and serve computer-vision models from your terminal."
 readme = "README.md"
@@ -43,7 +43,7 @@ tensorrt = ["tensorrt>=10.0", "onnxruntime-gpu>=1.17"]
 sam = ["segment-anything-2>=0.1", "torch>=2.0"]
 rfdetr = ["rfdetr>=1.0"]
 smolvla = ["lerobot>=0.1", "torch>=2.0"]
-all = ["openeye-ai[yolo,depth,grounding]", "opencv-python>=4.9"]
+all = ["openeye-sh[yolo,depth,grounding]", "opencv-python>=4.9"]
 camera = ["opencv-python>=4.9"]
 mcp = ["mcp[cli]>=1.2.0"]
 

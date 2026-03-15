@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { TerminalBlock } from "@/components/TerminalBlock";
 
 const heroTerminalLines = [
-  { text: "$ pip install openeye-ai", color: "green" as const },
+  { text: "$ pip install openeye-sh", color: "green" as const },
   { text: "", color: "default" as const },
   { text: "$ openeye pull yolov8", color: "green" as const },
   { text: "[REGISTRY] Downloading ultralytics/yolov8n... 6.2MB", color: "muted" as const },
@@ -50,7 +50,7 @@ export function HeroSection() {
             </p>
             <div className="flex flex-wrap gap-3">
               <div className="font-mono text-sm bg-card text-oe-green px-4 py-2.5 rounded-inner border border-foreground/[0.06]">
-                pip install openeye-ai
+                pip install openeye-sh
               </div>
               <a
                 href="https://github.com/aw3-technology/openeye.sh"

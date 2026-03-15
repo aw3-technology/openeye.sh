@@ -69,7 +69,7 @@
 - [ ] Tokens include `sub`, `email`, `name`, `roles`, `exp`, `iat`, `iss` claims — downstream middleware uses `roles` for authorization (see story 104)
 - [ ] `openeye auth test --provider okta` validates the OIDC configuration by performing a discovery fetch and token validation dry run
 - [ ] Refresh tokens are supported: when the access token expires, the client can use `/auth/refresh` to obtain a new access token without re-authentication (see story 113)
-- [ ] `pip install openeye-ai[security]` installs `python-jose`, `authlib`, and `httpx` for OIDC support
+- [ ] `pip install openeye-sh[security]` installs `python-jose`, `authlib`, and `httpx` for OIDC support
 
 ### Edge Cases
 
@@ -143,7 +143,7 @@ oidc:
 - [ ] SAML assertions must be encrypted if `--saml-require-encrypted-assertions` is set — unencrypted assertions are rejected with a `400`
 - [ ] SP certificate and private key for signing/encryption are loaded from `--saml-sp-cert` and `--saml-sp-key` (default: `~/.openeye/saml/sp.crt` and `sp.key`)
 - [ ] `openeye auth saml test` performs a metadata exchange validation and reports any configuration issues (missing attributes, certificate expiry, endpoint mismatches)
-- [ ] SAML dependencies: `pip install openeye-ai[saml]` installs `python3-saml` (OneLogin's SAML toolkit)
+- [ ] SAML dependencies: `pip install openeye-sh[saml]` installs `python3-saml` (OneLogin's SAML toolkit)
 
 ### Edge Cases
 
@@ -409,7 +409,7 @@ tenants:
 - [ ] Key rotation: `openeye encrypt rotate-key --new-key-file new-master.key` re-wraps all DEKs with the new master key without re-encrypting the data (fast operation)
 - [ ] Performance: encryption/decryption adds <5% overhead on file I/O — AES-NI hardware acceleration is used when available
 - [ ] KMS-backed keys: DEK wrapping/unwrapping calls KMS only once per file open (the wrapped DEK is cached in the file header) — no KMS call on every read/write
-- [ ] `pip install openeye-ai[encryption]` installs `cryptography` (which provides AES-GCM via OpenSSL)
+- [ ] `pip install openeye-sh[encryption]` installs `cryptography` (which provides AES-GCM via OpenSSL)
 
 ### Edge Cases
 
@@ -540,26 +540,26 @@ tenants:
 - [ ] Scan output reports: CVE ID, severity (CRITICAL/HIGH/MEDIUM/LOW), affected package, installed version, fixed version (if available), and a brief description
 - [ ] `openeye security scan --format json > report.json` outputs machine-readable results for CI/CD integration
 - [ ] `openeye security scan --fail-on high` exits with code 1 if any HIGH or CRITICAL vulnerabilities are found — suitable as a CI gate
-- [ ] Docker images (`ghcr.io/openeye-ai/openeye:latest`) include a Software Bill of Materials (SBOM) in SPDX format at `/sbom.spdx.json`
+- [ ] Docker images (`ghcr.io/openeye-sh/openeye:latest`) include a Software Bill of Materials (SBOM) in SPDX format at `/sbom.spdx.json`
 - [ ] CI/CD pipeline runs Trivy or Grype on every Docker image build and blocks release if CRITICAL CVEs are found in the base image or dependencies
-- [ ] `openeye security sbom` generates an SBOM (SPDX or CycloneDX format) for the currently installed `openeye-ai` package and all transitive dependencies
+- [ ] `openeye security sbom` generates an SBOM (SPDX or CycloneDX format) for the currently installed `openeye-sh` package and all transitive dependencies
 - [ ] Vulnerability database is updated automatically on each scan (`--offline` flag disables network access and uses the last cached DB at `~/.openeye/vuln-db/`)
-- [ ] `openeye security advisories` lists all published security advisories for `openeye-ai` from the GitHub Security Advisories database
+- [ ] `openeye security advisories` lists all published security advisories for `openeye-sh` from the GitHub Security Advisories database
 - [ ] Known false positives or accepted risks can be suppressed via `~/.openeye/vuln-allowlist.yaml` with CVE ID, justification, and expiry date
 - [ ] Nightly scheduled scan: `openeye security scan --schedule "0 2 * * *"` runs a cron-style scheduled scan and sends results to a configured webhook (see story 195)
-- [ ] Container image signing: Docker images are signed with Cosign (Sigstore) — `cosign verify ghcr.io/openeye-ai/openeye:latest` validates image provenance
+- [ ] Container image signing: Docker images are signed with Cosign (Sigstore) — `cosign verify ghcr.io/openeye-sh/openeye:latest` validates image provenance
 
 ### Edge Cases
 
 - [ ] Vulnerability database unreachable (air-gapped environment): uses cached database with a `VULN_DB_STALE` warning showing the age of the cached data. If no cached database exists, `--offline` mode exits with a clear error
-- [ ] Transitive dependency vulnerability (e.g., CVE in `pillow` pulled by `openeye-ai`): clearly reports the dependency chain: `openeye-ai -> transformers -> pillow` so the user understands the exposure path
+- [ ] Transitive dependency vulnerability (e.g., CVE in `pillow` pulled by `openeye-sh`): clearly reports the dependency chain: `openeye-sh -> transformers -> pillow` so the user understands the exposure path
 - [ ] False positive in a dependency that is imported but not used in the vulnerable code path: allowlist entries support a `reason: "code_path_not_reachable"` justification — flagged differently in reports than fully accepted risks
 - [ ] Multiple CVEs for the same package: grouped by package in the output for readability — not listed as separate entries that clutter the report
 - [ ] SBOM generation for packages installed from git (e.g., `pip install git+https://...`): includes the git commit SHA as the version identifier, not "0.0.0" or "unknown"
 - [ ] Docker base image (`python:3.11-slim`) has CVEs in OS packages: scan includes both Python package and OS-level (dpkg/apk) vulnerability results. `--python-only` flag restricts to Python packages only
 - [ ] Allowlist entry has expired: the CVE is re-reported with a `ALLOWLIST_EXPIRED` flag — the user must re-evaluate and re-suppress or remediate
 - [ ] CVE with no fixed version available: reported with `fix_version: null` and a `MITIGATION` section with recommended workarounds (if available from the advisory)
-- [ ] Scanning detects a CRITICAL CVE in the `openeye-ai` package itself: the report includes a prominent `UPGRADE REQUIRED` banner with the fixed version and upgrade command (`pip install --upgrade openeye-ai`)
+- [ ] Scanning detects a CRITICAL CVE in the `openeye-sh` package itself: the report includes a prominent `UPGRADE REQUIRED` banner with the fixed version and upgrade command (`pip install --upgrade openeye-sh`)
 - [ ] Rate limiting from vulnerability databases (NVD API): handles `429` responses with backoff and caches results aggressively (24-hour TTL per CVE lookup)
 - [ ] SBOM completeness for native/C extensions: Python packages with compiled C extensions (numpy, pillow) may include native libraries not captured by Python-level SBOM tools — validate SBOM against `ldd` output
 - [ ] SBOM for GPU-specific dependencies: CUDA, cuDNN, TensorRT libraries may have CVEs but are not Python packages — ensure scan covers runtime dependencies
@@ -606,7 +606,7 @@ tenants:
 - [ ] Custom controls: `--soc2-custom-controls controls.yaml` allows organizations to add company-specific controls that are evaluated alongside the built-in SOC 2 mapping
 - [ ] Evidence tampering detection: evidence files are integrity-checked using the same HMAC chain as audit logs (story 106) — tampered evidence is flagged in the report
 - [ ] Compliance report generation fails mid-way (e.g., OOM on large deployments): partial report is saved with a `REPORT_INCOMPLETE` status and a list of unchecked controls
-- [ ] SOC 2 criteria updates: when AICPA updates the trust service criteria, `openeye-ai` package updates include the revised control mappings — the compliance engine version is shown in the report header
+- [ ] SOC 2 criteria updates: when AICPA updates the trust service criteria, `openeye-sh` package updates include the revised control mappings — the compliance engine version is shown in the report header
 - [ ] Concurrent compliance report requests: serialized to avoid conflicting evidence collection — the second request waits for the first to complete
 - [ ] False PASS on controls: if compliance check only verifies a config flag is set (e.g., `--encrypt-at-rest`) but does not verify encryption is working, the control could pass while the measure is broken — controls should include functional verification
 - [ ] Compliance report as attack target: if an attacker can trigger `openeye compliance soc2 report`, they can observe failing controls — compliance endpoints must require admin authorization and be rate-limited
@@ -616,7 +616,7 @@ tenants:
 
 - Compliance engine lives in `cli/openeye_ai/compliance/soc2.py` with control checks in `cli/openeye_ai/compliance/controls/`
 - Each control is implemented as a `ComplianceCheck` class with `evaluate() -> ComplianceResult` method
-- PDF generation uses `reportlab` (optional dependency: `pip install openeye-ai[compliance]`)
+- PDF generation uses `reportlab` (optional dependency: `pip install openeye-sh[compliance]`)
 - Control-to-criteria mapping is defined in `cli/openeye_ai/compliance/soc2_mapping.yaml`
 - Evidence is stored as timestamped JSON files with HMAC integrity: `~/.openeye/compliance/evidence/<timestamp>-<control-id>.json`
 - Continuous monitoring uses `apscheduler` for cron-style scheduling within the server process
@@ -662,7 +662,7 @@ tenants:
 ### Technical Notes
 
 - Privacy controls live in `cli/openeye_ai/privacy/` with modules: `retention.py`, `anonymizer.py`, `dsar.py`, `erasure.py`
-- Face anonymization uses RetinaFace (lightweight variant, ~5MB) from `insightface` — bundled as a dependency in `pip install openeye-ai[privacy]`
+- Face anonymization uses RetinaFace (lightweight variant, ~5MB) from `insightface` — bundled as a dependency in `pip install openeye-sh[privacy]`
 - License plate anonymization uses a custom YOLO-NAS model trained on plate detection — bundled separately (`~10MB`)
 - Retention purge runs as a background task in the server process (configurable interval: `--purge-interval 1h`)
 - DSAR export format follows the EU's recommended portable data format guidelines (JSON + referenced media files)

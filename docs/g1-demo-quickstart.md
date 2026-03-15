@@ -79,7 +79,7 @@ G1 Head Camera (RealSense D435i)
 ## Requirements
 
 ```bash
-pip install openeye-ai[camera]          # OpenCV for camera
+pip install openeye-sh[camera]          # OpenCV for camera
 pip install unitree-sdk2py              # Only for SDK control mode
 ```
 

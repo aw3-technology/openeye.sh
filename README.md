@@ -23,13 +23,13 @@ OpenEye is a CLI-first perception engine that turns raw video into structured wo
 ## Quick Install
 
 ```bash
-pip install openeye-ai
+pip install openeye-sh
 ```
 
 With YOLO support:
 
 ```bash
-pip install "openeye-ai[yolo]"
+pip install "openeye-sh[yolo]"
 ```
 
 ## Quick Start
@@ -140,7 +140,7 @@ openeye run grounding-dino photo.jpg --prompt "person. hard hat. forklift."
 
 ```
 perceptify-the-world/
-├── cli/              # openeye-ai CLI & inference server (Python)
+├── cli/              # openeye-sh CLI & inference server (Python)
 ├── backend/          # Perception engine runtime (Python)
 ├── src/              # React web frontend (TypeScript)
 └── docs/             # MkDocs documentation site

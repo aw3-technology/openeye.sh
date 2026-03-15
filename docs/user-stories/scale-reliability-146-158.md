@@ -8,8 +8,8 @@
 
 ### Acceptance Criteria
 
-- [ ] An official Helm chart is published at `oci://ghcr.io/openeye-ai/charts/openeye` and indexed in the Helm repository at `https://charts.openeye.ai`
-- [ ] `helm install openeye oci://ghcr.io/openeye-ai/charts/openeye --namespace openeye --create-namespace` deploys a working OpenEye inference server with sensible defaults
+- [ ] An official Helm chart is published at `oci://ghcr.io/openeye-sh/charts/openeye` and indexed in the Helm repository at `https://charts.openeye.ai`
+- [ ] `helm install openeye oci://ghcr.io/openeye-sh/charts/openeye --namespace openeye --create-namespace` deploys a working OpenEye inference server with sensible defaults
 - [ ] Chart source lives in `deploy/helm/openeye/` with `Chart.yaml`, `values.yaml`, and templates for Deployment, Service, ConfigMap, Secret, ServiceAccount, Ingress, PDB, HPA, and PVC
 - [ ] `values.yaml` exposes all key configuration: `replicaCount`, `image.repository`, `image.tag`, `resources.requests`, `resources.limits`, `gpu.enabled`, `gpu.count`, `model.name`, `model.version`, `ingress.enabled`, `ingress.className`, `ingress.hosts`, `ingress.tls`
 - [ ] GPU support: setting `gpu.enabled: true` and `gpu.count: 1` adds `nvidia.com/gpu: 1` to resource requests/limits and sets `runtimeClassName: nvidia`
@@ -49,7 +49,7 @@
 
 ### Technical Notes
 
-- Base container image: `ghcr.io/openeye-ai/openeye:latest` (or pinned tag)
+- Base container image: `ghcr.io/openeye-sh/openeye:latest` (or pinned tag)
 - Chart templates use Helm's `tpl` function for templated values (e.g., `ingress.hosts[0].host: "{{ .Values.global.domain }}"`)
 - Default resource requests: `cpu: 500m`, `memory: 1Gi` (CPU mode); `cpu: 1`, `memory: 4Gi`, `nvidia.com/gpu: 1` (GPU mode)
 - PodDisruptionBudget is enabled by default with `minAvailable: 1` for HA deployments (see story 150)
@@ -59,13 +59,13 @@
 
 ```bash
 # Basic deployment
-helm install openeye oci://ghcr.io/openeye-ai/charts/openeye \
+helm install openeye oci://ghcr.io/openeye-sh/charts/openeye \
   --namespace openeye --create-namespace \
   --set model.name=yolov8 \
   --set replicaCount=2
 
 # GPU-enabled with ingress
-helm install openeye oci://ghcr.io/openeye-ai/charts/openeye \
+helm install openeye oci://ghcr.io/openeye-sh/charts/openeye \
   --namespace openeye --create-namespace \
   --values custom-values.yaml
 
@@ -445,7 +445,7 @@ affinity:
 
 ```bash
 # Rolling update with new image
-helm upgrade openeye oci://ghcr.io/openeye-ai/charts/openeye \
+helm upgrade openeye oci://ghcr.io/openeye-sh/charts/openeye \
   --set image.tag=v2.0.0
 
 # Check rollout status
@@ -455,7 +455,7 @@ kubectl rollout status deployment/openeye -n openeye
 helm rollback openeye 1
 
 # Canary with 10% traffic
-helm upgrade openeye oci://ghcr.io/openeye-ai/charts/openeye \
+helm upgrade openeye oci://ghcr.io/openeye-sh/charts/openeye \
   --set canary.enabled=true \
   --set canary.replicaCount=1 \
   --set canary.trafficWeight=10 \
@@ -652,7 +652,7 @@ persistence:
 - RabbitMQ uses manual acknowledgment (`basic_ack` after processing, `basic_nack` on failure)
 - SQS uses `receive_message` with long polling (`WaitTimeSeconds: 20`) and `delete_message` after successful processing
 - Queue consumer lives in `cli/openeye_ai/queue/consumer.py` with provider-specific implementations in `redis.py`, `rabbitmq.py`, `sqs.py`
-- Dependencies: `pip install openeye-ai[redis]` (installs `redis`), `pip install openeye-ai[rabbitmq]` (installs `pika`), `pip install openeye-ai[sqs]` (installs `boto3`)
+- Dependencies: `pip install openeye-sh[redis]` (installs `redis`), `pip install openeye-sh[rabbitmq]` (installs `pika`), `pip install openeye-sh[sqs]` (installs `boto3`)
 
 ### Example Usage
 
@@ -889,14 +889,14 @@ failover:
 - [ ] Load test against production: `--target` pointing at a production endpoint — the tool warns "This will send real load to the target. Are you sure? Use --confirm-production to proceed." Without the flag, the test is aborted
 - [ ] Target server overwhelmed: if the server returns >10% error rate during the first 30 seconds, the test pauses and warns "High error rate detected. The target may not handle this load. Continue? [y/N]" — `--force` skips the prompt
 - [ ] Load test from single client bottleneck: if the load test client itself becomes the bottleneck (CPU-bound image generation, network bandwidth), the tool detects this by monitoring client-side CPU and network utilization and warns "Client may be the bottleneck — consider distributed load testing"
-- [ ] Distributed load testing: `openeye loadtest --distributed --workers 5 --worker-image ghcr.io/openeye-ai/openeye-loadtest` runs the load test from multiple K8s pods (as a Job) for higher aggregate RPS — results are collected and aggregated by a coordinator pod
+- [ ] Distributed load testing: `openeye loadtest --distributed --workers 5 --worker-image ghcr.io/openeye-sh/openeye-loadtest` runs the load test from multiple K8s pods (as a Job) for higher aggregate RPS — results are collected and aggregated by a coordinator pod
 - [ ] Clock synchronization in distributed tests: all worker pods use NTP-synchronized clocks. If clock skew between workers exceeds 100ms, the coordinator logs a warning about potential latency measurement inaccuracy
 - [ ] Capacity plan for multi-model deployment: if the deployment runs multiple models (e.g., `yolov8` + `depth-anything`), `openeye capacity-plan --models yolov8,depth-anything` accounts for the combined GPU memory and inference time
 - [ ] GPU benchmark with thermal throttling: if the GPU throttles during the benchmark (detected via `nvidia-smi` clock speed monitoring), the benchmark report flags the results as "thermally limited" and reports both peak and sustained throughput
 - [ ] Capacity plan cloud cost estimation: `--cloud aws` uses AWS GPU instance pricing (e.g., `p3.2xlarge` for V100, `g5.xlarge` for A10G). Pricing data is fetched from a bundled pricing table updated quarterly — `--refresh-pricing` fetches the latest pricing from the cloud provider's API
 - [ ] Load test with authentication: `--api-key sk-...` includes the API key in all requests. `--api-key-per-request` generates a unique API key per request to test authentication overhead
 - [ ] Streaming endpoint load test: `--mode stream --stream-duration 60 --stream-clients 50` opens 50 concurrent WebSocket streaming connections, each lasting 60 seconds — reports per-stream frame rate, latency jitter, and dropped frames
-- [ ] HTML report generation fails (missing dependency): `plotly` is an optional dependency for HTML reports. If not installed, the tool falls back to a plain-text summary and logs "Install plotly for HTML reports: pip install openeye-ai[loadtest]"
+- [ ] HTML report generation fails (missing dependency): `plotly` is an optional dependency for HTML reports. If not installed, the tool falls back to a plain-text summary and logs "Install plotly for HTML reports: pip install openeye-sh[loadtest]"
 - [ ] Load test resume: if the load test is interrupted (`Ctrl+C`), partial results collected so far are saved to `--output` — the report is marked as "partial" with the actual test duration noted
 - [ ] Load test with autoscaling feedback loop: running a load test against a system with HPA (story 147) enabled creates a feedback loop — the test triggers scale-up, which changes capacity, which changes the test's results. The load test report notes whether replica count changed during the test (via `kubectl get hpa` or Prometheus metric query). For stable benchmarking, document the recommendation to fix replica count (`kubectl scale --replicas=N`) during load tests and re-enable HPA afterward
 - [ ] Result validation for correctness: the load test measures latency and error rates but does not validate inference result accuracy. A server under extreme load might return truncated JSON, empty detection arrays, or results from a wrong model version. `--validate-results` enables optional result validation: a subset of test images have known-good detection outputs, and the load test verifies that server responses match expected labels and bounding boxes within a tolerance threshold
@@ -915,7 +915,7 @@ failover:
 - Capacity planning formula: `replicas = ceil(target_rps / single_replica_max_rps * (1 + headroom_factor))` where `headroom_factor` defaults to 0.3 (30% headroom for spikes)
 - HTML report uses `plotly` for interactive charts rendered to a self-contained HTML file
 - Distributed load testing uses Kubernetes Jobs with a shared results volume (or S3 bucket for cross-cluster tests)
-- Dependencies: `pip install openeye-ai[loadtest]` installs `plotly` and `httpx` (if not already installed)
+- Dependencies: `pip install openeye-sh[loadtest]` installs `plotly` and `httpx` (if not already installed)
 
 ### Example Usage
 

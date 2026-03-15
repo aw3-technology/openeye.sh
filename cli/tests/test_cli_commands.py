@@ -87,7 +87,7 @@ class _StubAdapter:
 def test_version_flag():
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "openeye-ai" in result.output
+    assert "openeye-sh" in result.output
     assert "0.1.0" in result.output
 
 

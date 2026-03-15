@@ -28,7 +28,7 @@ export function CtaSection() {
               Get Started
             </Link>
             <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border">
-              pip install openeye-ai
+              pip install openeye-sh
             </div>
             <a
               href="https://github.com/aw3-technology/openeye.sh"

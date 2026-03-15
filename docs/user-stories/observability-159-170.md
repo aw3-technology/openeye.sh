@@ -152,7 +152,7 @@ scrape_configs:
 - Uses `opentelemetry-api`, `opentelemetry-sdk`, `opentelemetry-exporter-otlp` Python packages
 - Instrumentation lives in `cli/openeye_ai/tracing/otel.py` with auto-instrumentation for FastAPI via `opentelemetry-instrumentation-fastapi`
 - Trace-log correlation: `structlog` processor (story 159) reads `trace_id` and `span_id` from the current OpenTelemetry context and injects them into log entries
-- Optional dependency group: `pip install openeye-ai[tracing]`
+- Optional dependency group: `pip install openeye-sh[tracing]`
 - Span names follow OpenTelemetry semantic conventions where applicable (e.g., `http.request` prefix for HTTP spans)
 
 ---
@@ -304,7 +304,7 @@ scrape_configs:
 - PagerDuty uses the Events API v2 (`https://events.pagerduty.com/v2/enqueue`)
 - OpsGenie uses the REST API v2 (`https://api.opsgenie.com/v2/alerts`)
 - Slack uses Incoming Webhooks with Block Kit message formatting
-- Dependencies are optional: `pip install openeye-ai[alerting]` (pulls in `httpx` for async delivery)
+- Dependencies are optional: `pip install openeye-sh[alerting]` (pulls in `httpx` for async delivery)
 
 ### Example Config
 
@@ -395,7 +395,7 @@ rules:
 - CloudWatch sink uses `boto3` `logs` client with `put_log_events` API
 - Sink logic lives in `cli/openeye_ai/logging/sinks/` with `elasticsearch.py`, `loki.py`, `cloudwatch.py`
 - All sinks implement a `LogSink` interface: `emit(log_entry)`, `flush()`, `close()`
-- Dependencies are optional: `pip install openeye-ai[elasticsearch]`, `[loki]`, `[cloudwatch]`
+- Dependencies are optional: `pip install openeye-sh[elasticsearch]`, `[loki]`, `[cloudwatch]`
 - Log schema in Elasticsearch follows the Elastic Common Schema (ECS) for native Kibana integration
 
 ---
@@ -585,7 +585,7 @@ slos:
 - Uses `scipy.stats` for Z-score calculation and `statsmodels` for seasonal decomposition (STL)
 - Baseline statistics are computed over a sliding window of `--anomaly-baseline-window` (default: 7 days) with 1-minute granularity
 - Anomaly scores are computed every `--anomaly-eval-interval` (default: 60 seconds) in a background thread
-- Dependencies are optional: `pip install openeye-ai[anomaly]` installs `scipy` and `statsmodels`
+- Dependencies are optional: `pip install openeye-sh[anomaly]` installs `scipy` and `statsmodels`
 - Anomaly alerts use the same destination adapters as story 164
 - Model change correlation uses the OpenTelemetry span event API (story 161) to check for recent `model.loaded` events
 
@@ -642,7 +642,7 @@ slos:
 # kubernetes deployment probe config
 containers:
   - name: openeye
-    image: ghcr.io/openeye-ai/openeye:latest
+    image: ghcr.io/openeye-sh/openeye:latest
     ports:
       - containerPort: 8000
     livenessProbe:
@@ -721,7 +721,7 @@ containers:
 - The Grafana cost dashboard uses both Prometheus queries (real-time) and the `/admin/costs` API (historical reports) via a mixed data source configuration
 - Cost forecast uses `scipy.optimize.curve_fit` for trend estimation with confidence intervals
 - CSV export follows a standardized billing format compatible with common enterprise finance tools
-- Dependencies: `pip install openeye-ai[billing]` installs `scipy` (for forecasting)
+- Dependencies: `pip install openeye-sh[billing]` installs `scipy` (for forecasting)
 
 ### Example Config
 

@@ -91,7 +91,7 @@
 
 - TOTP implementation uses `pyotp` library for secret generation and code verification
 - WebAuthn server-side uses `py-webauthn` (fido2) library for registration and authentication ceremonies
-- SMS delivery uses `twilio` or `boto3` (SNS) — optional dependencies: `pip install openeye-ai[mfa-sms]`
+- SMS delivery uses `twilio` or `boto3` (SNS) — optional dependencies: `pip install openeye-sh[mfa-sms]`
 - MFA state is stored in the `user_mfa` table with columns: `user_id`, `method`, `secret_encrypted`, `credential_id` (WebAuthn), `created_at`, `last_used_at`
 - Recovery codes are stored as bcrypt hashes — the plaintext is shown exactly once at generation
 - WebAuthn challenge storage uses a short-lived server-side session (Redis or in-memory with 5 min TTL)
@@ -322,7 +322,7 @@ rotation:
 - Redaction logic lives in `cli/openeye_ai/privacy/` with `detector.py`, `redactor.py`, `original_store.py`
 - Unredacted originals are stored in `~/.openeye/originals/` encrypted with AES-256-GCM using a key from the secrets rotation system (story 119)
 - The `--redact` flag is orthogonal to `--models` — redaction models are always available and loaded on demand
-- Dependencies: `pip install openeye-ai[privacy]` installs the redaction models and `opencv-contrib-python` for blur/pixelate operations
+- Dependencies: `pip install openeye-sh[privacy]` installs the redaction models and `opencv-contrib-python` for blur/pixelate operations
 - References story 120 for DLP policy integration, story 124 for compliance reporting, story 125 for data residency of original frames
 
 ---
@@ -522,7 +522,7 @@ playbooks:
 - Compliance engine lives in `backend/compliance/` with `frameworks/soc2.py`, `frameworks/gdpr.py`, `frameworks/hipaa.py`, `frameworks/iso27001.py`, `evaluator.py`, `reports.py`
 - Control-to-feature mapping is defined in `backend/compliance/mappings.yaml` — each control has an `evaluator` function that queries platform state
 - Dashboard frontend is a React component served at `/admin/compliance` using the existing dashboard shell
-- PDF report generation uses `weasyprint` or `reportlab` — optional dependency: `pip install openeye-ai[compliance-reports]`
+- PDF report generation uses `weasyprint` or `reportlab` — optional dependency: `pip install openeye-sh[compliance-reports]`
 - Compliance snapshots are stored in the `compliance_snapshots` table: `framework`, `control_id`, `status`, `evidence_ref`, `evaluated_at`
 - API endpoints: `GET /admin/compliance/frameworks`, `GET /admin/compliance/controls?framework=soc2`, `POST /admin/compliance/reports`
 - References stories 116–123, 125–130 as the underlying controls being evaluated
@@ -653,7 +653,7 @@ residency:
 - TLS configuration in the FastAPI/Uvicorn server uses `ssl.SSLContext` with configurable cipher suites and min protocol version (`--tls-min-version TLSv1.2`, default: TLSv1.2)
 - OCSP stapling is configured via the `ssl` module's `SSLContext.set_ocsp_client_callback()`
 - Certificate management logic lives in `backend/certs/` with `acme_client.py`, `monitor.py`, `store.py`
-- Dependencies: `pip install openeye-ai[tls]` installs `acme`, `cryptography`, `josepy`
+- Dependencies: `pip install openeye-sh[tls]` installs `acme`, `cryptography`, `josepy`
 - References story 119 for key rotation of the certificate private key, story 122 for TLS security scanning, story 127 for API gateway TLS termination
 
 ---
@@ -700,7 +700,7 @@ residency:
 - AWS API Gateway uses `boto3` for API creation and configuration
 - Istio integration generates Kubernetes YAML manifests and applies them via `kubectl apply` or the Kubernetes Python client (`kubernetes` library)
 - The `--gateway-export` feature generates declarative configs compatible with GitOps tools (Flux, ArgoCD for Istio; decK for Kong; Terraform/CDK for AWS)
-- Dependencies: `pip install openeye-ai[kong]` installs `httpx` (already present); `pip install openeye-ai[aws-gateway]` installs `boto3`; `pip install openeye-ai[istio]` installs `kubernetes`
+- Dependencies: `pip install openeye-sh[kong]` installs `httpx` (already present); `pip install openeye-sh[aws-gateway]` installs `boto3`; `pip install openeye-sh[istio]` installs `kubernetes`
 - References story 126 for TLS termination at the gateway, story 128 for SIEM integration via gateway access logs, story 118 for service account auth at the gateway level
 
 ---
@@ -749,7 +749,7 @@ residency:
 - Splunk HEC uses `httpx` with batch POST (`/services/collector/event` with multiple events per request)
 - Sentinel uses the `azure-monitor-ingestion` library or direct REST API calls to the Data Collector API
 - All SIEM connectors implement a `SIEMSink` interface: `send_event(event)`, `flush()`, `close()` — similar to `EventSink` (story 193) but with SIEM-specific formatting
-- Dependencies: `pip install openeye-ai[siem]` installs base syslog support (stdlib); `pip install openeye-ai[splunk]` installs `httpx`; `pip install openeye-ai[sentinel]` installs `azure-monitor-ingestion`
+- Dependencies: `pip install openeye-sh[siem]` installs base syslog support (stdlib); `pip install openeye-sh[splunk]` installs `httpx`; `pip install openeye-sh[sentinel]` installs `azure-monitor-ingestion`
 - References story 123 for incident response events, story 124 for compliance audit events, story 120 for DLP access events
 
 ---
@@ -814,15 +814,15 @@ residency:
 - [ ] `openeye sbom generate --format spdx` generates an SPDX SBOM for the currently installed OpenEye package and all its dependencies (direct and transitive)
 - [ ] `openeye sbom generate --format cyclonedx` generates a CycloneDX SBOM with identical dependency information
 - [ ] SBOM includes: package name, version, PURL (Package URL), license (SPDX license identifier), supplier, SHA-256 hash, and dependency relationships
-- [ ] Docker image SBOMs are attached as attestations using `cosign attach sbom` and are retrievable via `cosign download sbom ghcr.io/openeye-ai/openeye:latest`
-- [ ] PyPI release includes SBOM as a supplementary file in the GitHub release assets: `openeye-ai-<version>.spdx.json` and `openeye-ai-<version>.cdx.json`
+- [ ] Docker image SBOMs are attached as attestations using `cosign attach sbom` and are retrievable via `cosign download sbom ghcr.io/openeye-sh/openeye:latest`
+- [ ] PyPI release includes SBOM as a supplementary file in the GitHub release assets: `openeye-sh-<version>.spdx.json` and `openeye-sh-<version>.cdx.json`
 - [ ] `openeye sbom audit` scans the generated SBOM against the OSV (Open Source Vulnerabilities) database and reports known CVEs affecting any dependency
 - [ ] `openeye sbom audit --fail-on high` exits with code 1 if any dependency has a `high` or `critical` CVE — usable as a CI/CD gate
 - [ ] SBOM includes system-level dependencies for Docker images: OS packages (apt/apk), CUDA runtime, cuDNN, TensorRT versions
 - [ ] `openeye sbom diff --old v1.2.0 --new v1.3.0` shows dependency changes between versions: added, removed, and version-changed packages with their CVE impact
 - [ ] SBOM generation includes the OpenEye model files as components with their SHA-256 hashes, versions, and licenses (where applicable)
 - [ ] `openeye sbom export --format vex` generates a VEX (Vulnerability Exploitability eXchange) document for known CVEs, indicating whether they are exploitable in the OpenEye context (e.g., a vulnerability in `pillow`'s TIFF parser may be "not affected" if TIFF input is never used)
-- [ ] SBOMs are signed with the release signing key: `openeye sbom verify --sbom openeye-ai-1.3.0.spdx.json --key release-key.pub` validates the SBOM signature
+- [ ] SBOMs are signed with the release signing key: `openeye sbom verify --sbom openeye-sh-1.3.0.spdx.json --key release-key.pub` validates the SBOM signature
 
 ### Edge Cases
 
@@ -850,8 +850,8 @@ residency:
 - VEX generation uses the OpenVEX specification format (JSON-LD)
 - SBOM logic lives in `cli/openeye_ai/sbom/` with `generator.py`, `auditor.py`, `vex.py`, `signer.py`
 - CI/CD integration: GitHub Actions workflow in `.github/workflows/release.yml` generates SBOMs post-build, signs them with `cosign`, and attaches to the release
-- Docker SBOM attestation uses Sigstore/cosign: `cosign attest --predicate sbom.spdx.json --type spdxjson ghcr.io/openeye-ai/openeye:$TAG`
+- Docker SBOM attestation uses Sigstore/cosign: `cosign attest --predicate sbom.spdx.json --type spdxjson ghcr.io/openeye-sh/openeye:$TAG`
 - PURL format for Python packages: `pkg:pypi/package-name@version`
-- PURL format for Docker: `pkg:docker/openeye-ai/openeye@sha256:digest`
-- Dependencies: `pip install openeye-ai[sbom]` installs `cyclonedx-bom`, `spdx-tools`; `syft` is used in CI only (Go binary, not a Python dependency)
+- PURL format for Docker: `pkg:docker/openeye-sh/openeye@sha256:digest`
+- Dependencies: `pip install openeye-sh[sbom]` installs `cyclonedx-bom`, `spdx-tools`; `syft` is used in CI only (Go binary, not a Python dependency)
 - References story 122 for security scanning that uses the SBOM for vulnerability context, story 124 for compliance reporting of SBOM coverage

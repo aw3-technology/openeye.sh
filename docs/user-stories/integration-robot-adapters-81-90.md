@@ -17,7 +17,7 @@
 - [ ] Frame ID (`--frame-id`, default `camera_link`) is included in all message headers
 - [ ] Publisher works with ROS2 Humble and Jazzy distributions
 - [ ] Detections include `header.stamp` synchronized with the source camera frame timestamp
-- [ ] `ros2` is an optional dependency: `pip install openeye-ai[ros2]` installs `rclpy` and `vision_msgs`
+- [ ] `ros2` is an optional dependency: `pip install openeye-sh[ros2]` installs `rclpy` and `vision_msgs`
 - [ ] Graceful error if `rclpy` is not installed — prints install instructions and exits
 
 ### Edge Cases
@@ -285,7 +285,7 @@ curl http://localhost:8000/stream
 - [ ] End-to-end latency from frame capture to client receipt is under 50ms on localhost
 - [ ] gRPC reflection is enabled for dynamic client discovery (`grpc_reflection`)
 - [ ] Health check service implements the gRPC health checking protocol
-- [ ] `grpc` is an optional dependency: `pip install openeye-ai[grpc]` installs `grpcio` and `grpcio-tools`
+- [ ] `grpc` is an optional dependency: `pip install openeye-sh[grpc]` installs `grpcio` and `grpcio-tools`
 - [ ] Generated Python stubs are included in the package at `openeye_ai/proto/`
 - [ ] Channel options support TLS via `--tls-cert` and `--tls-key` flags
 
@@ -348,7 +348,7 @@ curl http://localhost:8000/stream
 ### Technical Notes
 
 - RTSP input uses OpenCV's `VideoCapture` with `CAP_FFMPEG` backend
-- MAVLink integration uses `pymavlink` (optional dependency: `pip install openeye-ai[drone]`)
+- MAVLink integration uses `pymavlink` (optional dependency: `pip install openeye-sh[drone]`)
 - GPS projection requires camera intrinsics + extrinsics + altitude — uses pinhole camera model
 - The existing `Camera` class in `utils/camera.py` should be extended with an `RTSPSource` and `MAVLinkSource`
 
@@ -416,7 +416,7 @@ openeye watch --models yolov8 --export label-studio --output session/
 
 ### Acceptance Criteria
 
-- [ ] `pip install openeye-ai` installs and runs on `aarch64` (ARM64) Linux — tested on Jetson Orin Nano, Orin NX, AGX Orin
+- [ ] `pip install openeye-sh` installs and runs on `aarch64` (ARM64) Linux — tested on Jetson Orin Nano, Orin NX, AGX Orin
 - [ ] All core CLI commands (`list`, `pull`, `run`, `serve`, `watch`) work on ARM64 without modification
 - [ ] YOLO adapter uses TensorRT backend when available on Jetson (`--backend tensorrt`), falling back to PyTorch
 - [ ] TensorRT engine files are cached after first conversion at `~/.openeye/models/<model>/tensorrt/`
@@ -425,7 +425,7 @@ openeye watch --models yolov8 --export label-studio --output session/
 - [ ] Half-precision (FP16) inference is the default on Jetson; configurable via `--precision fp16|fp32|int8`
 - [ ] INT8 quantization is supported with calibration: `openeye quantize yolov8 --precision int8 --calibration-data images/`
 - [ ] `openeye serve` works on Jetson with the same REST/WebSocket API as x86
-- [ ] Docker image provided: `ghcr.io/openeye-ai/openeye:jetson` based on `nvcr.io/nvidia/l4t-pytorch`
+- [ ] Docker image provided: `ghcr.io/openeye-sh/openeye:jetson` based on `nvcr.io/nvidia/l4t-pytorch`
 - [ ] JetPack 5.x and 6.x are supported
 - [ ] Power mode awareness: `openeye watch --power-mode maxn` sets Jetson power mode before inference
 - [ ] Temperature monitoring: warns if device thermal throttling is detected during inference
@@ -444,7 +444,7 @@ openeye watch --models yolov8 --export label-studio --output session/
 - [ ] Auto-recovery after thermal throttling: inference continues at reduced throughput — does not crash or halt. Logs when clocks recover to normal
 - [ ] TensorRT engine input size is locked at build time — if the user passes an image with a different resolution than the engine was built for, auto-resizes the input and logs a warning about potential accuracy loss
 - [ ] Dynamic batch size: TensorRT engines are built with `--max-batch-size` (default: 1). Batch sizes exceeding the engine's max fall back to PyTorch with a warning
-- [ ] Raspberry Pi 5 with Hailo-8L accelerator: if `hailort` is detected, uses Hailo backend for ~15 FPS YOLO (vs ~3 FPS CPU-only) — optional dependency `pip install openeye-ai[hailo]`
+- [ ] Raspberry Pi 5 with Hailo-8L accelerator: if `hailort` is detected, uses Hailo backend for ~15 FPS YOLO (vs ~3 FPS CPU-only) — optional dependency `pip install openeye-sh[hailo]`
 - [ ] Multi-process: if two OpenEye instances try to use the same GPU, the second instance gets a clear `CUDA out of memory` error with a message about GPU sharing limitations
 - [ ] `openeye pull` on Jetson: downloads ARM-compatible weights only. If a model only has x86 ONNX weights, fails with a message about unsupported architecture rather than downloading and failing at load time
 - [ ] Container vs native: detects if running inside Docker and adjusts device paths (`/dev/video*`, `/dev/nvhost-*`) — warns if GPU devices are not mapped into the container
@@ -452,7 +452,7 @@ openeye watch --models yolov8 --export label-studio --output session/
 ### Technical Notes
 
 - Jetson-specific dependencies: `tensorrt`, `pycuda`, `jetson-stats` (for monitoring)
-- Optional dependency group: `pip install openeye-ai[jetson]`
+- Optional dependency group: `pip install openeye-sh[jetson]`
 - The `ModelAdapter` base class should support a `backend` parameter to switch between PyTorch/TensorRT/ONNX
 - ARM wheels for `torch`, `torchvision` are available from NVIDIA's PyPI index
 - CI should include an ARM64 build target (can use QEMU for GitHub Actions)

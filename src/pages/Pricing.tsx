@@ -266,7 +266,7 @@ export default function Pricing() {
               Read the Docs
             </Link>
             <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border select-all cursor-text">
-              pip install openeye-ai
+              pip install openeye-sh
             </div>
           </div>
         </div>

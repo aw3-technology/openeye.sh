@@ -20,7 +20,7 @@ app = typer.Typer(
 
 def version_callback(value: bool) -> None:
     if value:
-        rprint(f"[bold]openeye-ai[/bold] v{__version__}")
+        rprint(f"[bold]openeye-sh[/bold] v{__version__}")
         raise typer.Exit()
 
 

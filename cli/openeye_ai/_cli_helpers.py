@@ -54,6 +54,6 @@ def dependency_error(model: str, exc: ImportError) -> None:
     extra = _EXTRAS.get(model, model)
     rprint(
         f"[red]Missing dependencies for '{model}': {exc.name or exc}[/red]\n"
-        f"Install with: [bold]pip install openeye-ai\\[{extra}][/bold]"
+        f"Install with: [bold]pip install openeye-sh\\[{extra}][/bold]"
     )
     raise typer.Exit(code=1)

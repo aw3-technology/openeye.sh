@@ -2,7 +2,14 @@
 
 import { createLovableAuth } from "@lovable.dev/cloud-auth-js";
 import { supabase } from "../supabase/client";
-const lovableAuth = createLovableAuth();
+
+// When running locally, the /~oauth/initiate route doesn't exist because it's
+// served by Lovable's hosting infrastructure. Point the broker to the production
+// URL so the OAuth flow initiates there and redirects back to localhost.
+const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+const lovableAuth = createLovableAuth(
+  isLocal ? { oauthBrokerUrl: "https://openeye.sh/~oauth/initiate" } : undefined,
+);
 
 type SignInOptions = {
   redirect_uri?: string;
