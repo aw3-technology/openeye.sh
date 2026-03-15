@@ -2,30 +2,21 @@
 title: Credits System
 ---
 
-All hosted API calls are billed in credits. Every new account receives 1,000 free credits to get started.
+> [!warning] The hosted API and credits system are not yet available. This page describes planned functionality. Self-hosted inference via `openeye serve` is available today at no cost.
 
-### Credit Costs
+### Planned Credit Costs
 
 | Endpoint | Model | Credits |
 |----------|-------|---------|
 | POST /v1/detect | YOLOv8 | 1 |
 | POST /v1/depth | Depth Anything V2 | 2 |
-| POST /v1/describe | GPT-4o Vision | 3 |
-| WS /v1/stream | YOLOv8 (per frame) | 1 |
-| GET /v1/models | — | 0 (free) |
-| GET /v1/usage | — | 0 (free) |
+| POST /v1/describe | VLM | 3 |
 
-### Purchasing Credits
+### Self-Hosted Alternative
 
-Purchase additional credits from the Dashboard → Billing page. Credits never expire and are non-refundable.
+All inference is available today via the self-hosted CLI and API server at no cost:
 
-### Automatic Refunds
-
-If an inference call fails after credits have been deducted (e.g. model unavailable, internal error), credits are automatically refunded to your balance. No action is required on your part.
-
-### Free Tier
-
-- 1,000 free credits on signup
-- Rate limit: 60 requests/minute
-- All models and endpoints available
-- No credit card required to start
+```bash
+openeye serve yolov8 --port 8000
+curl -X POST http://localhost:8000/predict -F "file=@photo.jpg"
+```

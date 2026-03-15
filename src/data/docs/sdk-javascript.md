@@ -7,11 +7,9 @@ title: JavaScript / TypeScript
 ```typescript
 const form = new FormData();
 form.append("file", fileInput.files[0]);
-form.append("confidence", "0.3");
 
-const resp = await fetch("https://api.openeye.ai/v1/detect", {
+const resp = await fetch("http://localhost:8000/predict", {
   method: "POST",
-  headers: { "X-API-Key": "oe_live_abc123" },
   body: form,
 });
 
@@ -31,12 +29,9 @@ import FormData from "form-data";
 const form = new FormData();
 form.append("file", fs.createReadStream("photo.jpg"));
 
-const resp = await fetch("https://api.openeye.ai/v1/detect", {
+const resp = await fetch("http://localhost:8000/predict", {
   method: "POST",
-  headers: {
-    "X-API-Key": "oe_live_abc123",
-    ...form.getHeaders(),
-  },
+  headers: form.getHeaders(),
   body: form,
 });
 
@@ -47,17 +42,15 @@ console.log(data);
 ### WebSocket (Browser)
 
 ```typescript
-const ws = new WebSocket("wss://api.openeye.ai/v1/stream");
+const ws = new WebSocket("ws://localhost:8000/ws");
 
 ws.onopen = () => {
-  ws.send(JSON.stringify({ api_key: "oe_live_abc123" }));
+  console.log("Connected! Send base64-encoded frames.");
 };
 
 ws.onmessage = ({ data }) => {
   const msg = JSON.parse(data);
-  if (msg.status === "authenticated") {
-    console.log("Connected! Send frames now.");
-  } else if (msg.objects) {
+  if (msg.objects) {
     console.log("Detections:", msg.objects);
   }
 };

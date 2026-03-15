@@ -102,11 +102,10 @@ export default function Pricing() {
             Pricing
           </div>
           <h1 className="text-4xl md:text-5xl font-semibold font-display mb-4">
-            Open source. Cloud ready.
+            Open source. Self-hosted.
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Start with the free CLI. Scale with hosted inference when you need
-            it. Enterprise-grade when you're ready.
+            Start with the free CLI. Hosted inference coming soon.
           </p>
         </div>
       </section>
@@ -160,18 +159,12 @@ export default function Pricing() {
             Ready to get started?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Install the CLI or grab an API key and start building with OpenEye in minutes.
+            Install the CLI and start building with OpenEye in minutes.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              to="/login"
-              className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
-            >
-              Get API Key
-            </Link>
-            <Link
               to="/docs#installation"
-              className="font-mono text-sm border border-foreground/[0.06] text-foreground px-5 py-2.5 rounded-inner hover:bg-foreground/[0.03] transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none"
+              className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
             >
               Read the Docs
             </Link>

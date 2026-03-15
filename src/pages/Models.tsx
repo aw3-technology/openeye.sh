@@ -62,13 +62,13 @@ export default function Models() {
             </p>
             <div className="space-y-2">
               <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5">
-                $ openeye detect image.jpg --model yolo26
+                $ openeye run yolov8 image.jpg
               </div>
               <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5">
-                $ openeye detect image.jpg --model grounding-dino
+                $ openeye run grounding-dino image.jpg --prompt "red mug"
               </div>
               <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5">
-                $ openeye scene image.jpg --vlm qwen3-vl
+                $ openeye run depth-anything scene.jpg
               </div>
             </div>
           </motion.div>
