@@ -32,27 +32,25 @@
 @layer base {
   :root {
     /* Dark mode as default per brand guide */
-    --background: 0 0% 7%;           /* #111111 */
-    --foreground: 0 0% 93%;          /* #EDEDED */
+    --background: 0 0% 7%;
+    --foreground: 0 0% 93%;
 
-    --card: 0 0% 12%;                /* #1F1F1F */
+    --card: 0 0% 12%;
     --card-foreground: 0 0% 93%;
 
     --popover: 0 0% 12%;
     --popover-foreground: 0 0% 93%;
 
-    /* OpenEye Blue - sensing */
-    --primary: 199 58% 44%;          /* #2F86B3 */
+    --primary: 199 58% 44%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 17%;           /* #2B2B2B */
+    --secondary: 0 0% 17%;
     --secondary-foreground: 0 0% 90%;
 
     --muted: 0 0% 25%;
     --muted-foreground: 0 0% 55%;
 
-    /* OpenEye Red - reasoning */
-    --accent: 0 72% 50%;             /* #D62828 */
+    --accent: 0 72% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 50%;
@@ -64,22 +62,19 @@
 
     --radius: 0.75rem;
 
-    /* Brand colors */
-    --oe-blue: 199 58% 44%;          /* #2F86B3 - sensing */
-    --oe-red: 0 72% 50%;             /* #D62828 - reasoning */
-    --oe-black: 0 0% 12%;            /* #1E1E1E - output */
-    --oe-green: 153 100% 50%;        /* #00FF88 - vision/detection accent */
+    --oe-blue: 199 58% 44%;
+    --oe-red: 0 72% 50%;
+    --oe-black: 0 0% 12%;
+    --oe-green: 153 100% 50%;
 
-    /* Terminal tokens */
-    --terminal-bg: 0 0% 7%;          /* matches background */
+    --terminal-bg: 0 0% 7%;
     --terminal-fg: 0 0% 75%;
-    --terminal-green: 153 100% 50%;  /* #00FF88 vision green */
-    --terminal-amber: 199 58% 55%;   /* use blue for primary highlights */
-    --terminal-red: 0 72% 50%;       /* OpenEye Red */
+    --terminal-green: 153 100% 50%;
+    --terminal-amber: 199 58% 55%;
+    --terminal-red: 0 72% 50%;
     --terminal-muted: 0 0% 35%;
-    --terminal-blue: 199 58% 44%;    /* OpenEye Blue */
+    --terminal-blue: 199 58% 44%;
 
-    /* Vision */
     --vision-glow: 199 58% 44% / 0.12;
     --vision-border: 199 58% 44%;
 
@@ -88,6 +83,58 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow-md: 0 4px 16px -4px rgb(0 0 0 / 0.3);
     --shadow-lg: 0 10px 30px -10px rgb(0 0 0 / 0.4);
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 8%;
+
+    --card: 210 20% 97%;
+    --card-foreground: 0 0% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
+
+    --primary: 199 58% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 0 0% 12%;
+
+    --muted: 0 0% 80%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 0 72% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 0% / 0.08;
+    --input: 0 0% 0% / 0.08;
+    --ring: 199 58% 40%;
+
+    --oe-blue: 199 58% 40%;
+    --oe-red: 0 72% 50%;
+    --oe-black: 0 0% 12%;
+    --oe-green: 153 80% 35%;
+
+    --terminal-bg: 0 0% 6%;
+    --terminal-fg: 0 0% 75%;
+    --terminal-green: 153 100% 40%;
+    --terminal-amber: 199 58% 45%;
+    --terminal-red: 0 72% 50%;
+    --terminal-muted: 0 0% 40%;
+    --terminal-blue: 199 58% 40%;
+
+    --vision-glow: 199 58% 40% / 0.1;
+    --vision-border: 199 58% 40%;
+
+    --surface-elevated: 210 20% 98%;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    --shadow-md: 0 4px 16px -4px rgb(0 0 0 / 0.06);
+    --shadow-lg: 0 10px 30px -10px rgb(0 0 0 / 0.08);
   }
 }
 
