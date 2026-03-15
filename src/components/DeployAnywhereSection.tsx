@@ -17,11 +17,11 @@ export function DeployAnywhereSection() {
             Your cameras. Your hardware. Your data.
           </h2>
           <p className="text-muted-foreground mb-12 max-w-2xl">
-            Use the hosted API for instant access, or self-host for full data sovereignty. Camera feeds never leave your network when running on-prem — deploy anywhere from laptops to air-gapped facilities.
+            All inference runs locally. Camera feeds never leave your network — deploy on laptops, edge devices, or on-prem servers.
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -29,13 +29,13 @@ export function DeployAnywhereSection() {
             transition={{ delay: 0, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
             className="border border-foreground/[0.06] rounded-outer p-6 bg-foreground/[0.02]"
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-terminal-amber mb-3">Hosted API</div>
-            <h3 className="font-display text-base font-medium mb-2">Zero setup</h3>
+            <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">Self-Hosted</div>
+            <h3 className="font-display text-base font-medium mb-2">Full data sovereignty</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Get an API key and start detecting in seconds. Object detection, depth estimation, and scene description — pay per call with credits.
+              All inference runs locally. No data leaves your premises — run in air-gapped environments or on-device at the edge.
             </p>
             <div className="font-mono text-xs bg-terminal-bg text-terminal-green px-3 py-2 rounded-inner border border-foreground/5 mt-3 overflow-x-auto">
-              curl -X POST api.openeye.ai/v1/detect
+              openeye serve yolov8 --port 8000
             </div>
           </motion.div>
           <motion.div
@@ -45,11 +45,14 @@ export function DeployAnywhereSection() {
             transition={{ delay: 0.05, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
             className="border border-foreground/[0.06] rounded-outer p-6 bg-foreground/[0.02]"
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">Self-Hosted</div>
-            <h3 className="font-display text-base font-medium mb-2">Air-gapped ready</h3>
+            <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">REST + WebSocket</div>
+            <h3 className="font-display text-base font-medium mb-2">API-first architecture</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              All inference runs locally. No data leaves your premises — deploy in air-gapped environments, classified facilities, and on-device at the edge.
+              FastAPI server with REST endpoints for image inference, WebSocket streams for real-time feeds, and a built-in browser dashboard.
             </p>
+            <div className="font-mono text-xs bg-terminal-bg text-terminal-green px-3 py-2 rounded-inner border border-foreground/5 mt-3 overflow-x-auto">
+              curl -X POST localhost:8000/predict -F "file=@photo.jpg"
+            </div>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -58,27 +61,14 @@ export function DeployAnywhereSection() {
             transition={{ delay: 0.1, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
             className="border border-foreground/[0.06] rounded-outer p-6 bg-foreground/[0.02]"
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">Docker</div>
-            <h3 className="font-display text-base font-medium mb-2">One command deploy</h3>
+            <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">Fleet</div>
+            <h3 className="font-display text-base font-medium mb-2">Multi-device management</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              From zero to serving detections in 30 seconds. Multi-stage build with pre-pulled model weights and health checks built in.
+              Register and monitor edge devices from the CLI. Canary deployments, rolling updates, and device configuration built in.
             </p>
             <div className="font-mono text-xs bg-terminal-bg text-terminal-green px-3 py-2 rounded-inner border border-foreground/5 mt-3 overflow-x-auto">
-              docker run -p 8000:8000 ghcr.io/openeye-ai/openeye serve
+              openeye fleet deploy --strategy canary
             </div>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.15, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-            className="border border-foreground/[0.06] rounded-outer p-6 bg-foreground/[0.02]"
-          >
-            <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">Fleet</div>
-            <h3 className="font-display text-base font-medium mb-2">Production at scale</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Manage hundreds of devices from a single dashboard. Canary deployments, rolling updates, real-time telemetry, and maintenance scheduling.
-            </p>
           </motion.div>
         </div>
       </div>

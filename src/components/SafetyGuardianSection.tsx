@@ -37,19 +37,19 @@ export function SafetyGuardianSection() {
           <div className="space-y-2">
             <div className="font-mono text-xs uppercase tracking-widest text-terminal-green">Fast Layer</div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              YOLOv8 runs every frame at 30fps. Pure geometry — is a hand inside the danger zone? Sub-100ms halt. No LLM latency.
+              YOLOv8 runs every frame for real-time detection. Pure geometry — is a hand inside the danger zone? Low-latency halt with no LLM overhead.
             </p>
           </div>
           <div className="space-y-2">
             <div className="font-mono text-xs uppercase tracking-widest text-terminal-amber">Smart Layer</div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              VLM on Nebius Token Factory analyzes every 2-3 seconds. Catches what YOLO can't — a knife that wasn't there before, an unstable stack, context-dependent risks.
+              A VLM analyzes periodically for contextual understanding. Catches what YOLO can't — a knife that wasn't there before, an unstable stack, context-dependent risks.
             </p>
           </div>
           <div className="space-y-2">
             <div className="font-mono text-xs uppercase tracking-widest text-terminal-red">Halt Protocol</div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              When danger is detected, OpenEye sends an immediate halt to the robot controller via OpenClaw. Operations resume only when the workspace is confirmed clear.
+              When danger is detected, OpenEye sends a halt signal to the connected robot controller. Operations resume only when the workspace is confirmed clear.
             </p>
           </div>
         </motion.div>

@@ -33,15 +33,15 @@ export const planTerminalLines: TerminalLine[] = [
 export const commands: Command[] = [
   { label: "Run", command: "openeye run yolov8 image.jpg", description: "Run inference on any image with any model. Returns unified JSON with objects, depth maps, segmentation masks, or VLA actions." },
   { label: "Watch", command: "openeye watch --safety", description: "Live camera feed with real-time detection, safety zone monitoring, and hazard alerts. Supports multi-model stacking." },
-  { label: "Serve", command: "openeye serve yolov8 --port 8000", description: "Start a FastAPI server with REST API, WebSocket streams, live dashboard, and Prometheus metrics." },
+  { label: "Serve", command: "openeye serve yolov8 --port 8000", description: "Start a FastAPI server with REST API, WebSocket streams, and a live dashboard." },
   { label: "Bench", command: "openeye bench yolov8 --runs 20", description: "Benchmark any model's inference speed. Reports mean, median, and p95 latency with FPS across hardware targets." },
-  { label: "Fleet", command: "openeye fleet ls --type robot", description: "Register, monitor, and deploy to hundreds of edge devices. Canary rollouts, OTA updates, and real-time alerts." },
-  { label: "MLOps", command: "openeye mlops registry", description: "Enterprise model lifecycle — versioning, A/B testing, shadow deployments, batch inference, and feedback-driven retraining." },
+  { label: "Fleet", command: "openeye fleet ls --type robot", description: "Register, monitor, and deploy to edge devices. Supports canary rollouts, OTA updates, and real-time alerts." },
+  { label: "Pull", command: "openeye pull grounding-dino", description: "Download and configure any vision model from the registry. Handles weights, dependencies, and runtime setup automatically." },
 ];
 
 export const valueProps: ValueProp[] = [
-  { label: "Safety-first", description: "Sub-100ms human detection and robot halt" },
+  { label: "Safety-first", description: "Real-time human detection and robot halt" },
   { label: "Model-agnostic", description: "YOLOv8, SAM2, Grounding DINO, Depth Anything, and more" },
-  { label: "Hosted + self-host", description: "API key access or full on-prem deployment" },
+  { label: "Self-hosted", description: "All inference runs locally — your data never leaves your network" },
   { label: "Open source", description: "Apache 2.0 — inspect, modify, deploy freely" },
 ];

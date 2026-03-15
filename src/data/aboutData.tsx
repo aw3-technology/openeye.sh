@@ -51,7 +51,7 @@ export const values: Value[] = [
     icon: <ShieldCheck className="w-5 h-5 text-terminal-red" />,
     label: "Safety is non-negotiable",
     detail:
-      "Every design decision starts with safety. Dual-layer detection, sub-100ms halt protocols, and fail-safe defaults are not features — they are the foundation.",
+      "Every design decision starts with safety. Real-time human detection, halt protocols, and fail-safe defaults are not features — they are the foundation.",
   },
   {
     icon: <Lock className="w-5 h-5 text-terminal-amber" />,
