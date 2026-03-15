@@ -137,9 +137,9 @@ function MetricsBar() {
       ].map((stat) => (
         <div
           key={stat.label}
-          className="bg-terminal-bg rounded-inner border border-foreground/5 px-3 py-2 text-center"
+          className="bg-card rounded-inner border px-3 py-2 text-center"
         >
-          <div className="font-mono text-[10px] text-terminal-muted uppercase tracking-wider">
+          <div className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
             {stat.label}
           </div>
           <div

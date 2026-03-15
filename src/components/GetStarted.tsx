@@ -114,7 +114,7 @@ export function GetStarted() {
             >
               View Full Documentation
             </a>
-            <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-5 py-2.5 rounded-inner border border-foreground/5">
+            <div className="font-mono text-sm bg-secondary text-oe-green px-5 py-2.5 rounded-inner border">
               pip install openeye-ai
             </div>
           </div>
