@@ -80,7 +80,7 @@ export function LiveCameraFeed() {
   const hasPerson = safetyStatus !== null;
 
   return (
-    <div className="relative rounded-lg overflow-hidden bg-black border border-foreground/10 shadow-2xl">
+    <div className="relative rounded-lg overflow-hidden bg-terminal-bg border border-foreground/10 shadow-2xl">
       <video
         ref={videoRef as React.RefObject<HTMLVideoElement>}
         className="w-full aspect-video object-cover"
