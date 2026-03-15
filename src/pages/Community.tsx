@@ -16,7 +16,7 @@ const channels = [
     label: "GitHub Discussions",
     description:
       "Long-form conversations, RFCs, and feature requests. The best place for async technical discussion.",
-    href: "https://github.com/openeye-ai/openeye/discussions",
+    href: "https://github.com/aw3-technology/openeye.sh/discussions",
     cta: "Open Discussions",
     mono: "github.com/.../discussions",
   },
