@@ -108,9 +108,7 @@ export function CameraFeed({
                     backgroundColor: isHaltedArm
                       ? "hsl(var(--terminal-red))"
                       : "hsl(var(--terminal-green))",
-                    color: isHaltedArm
-                      ? "hsl(0 0% 100%)"
-                      : "hsl(var(--foreground))",
+                    color: "hsl(0 0% 100%)",
                   }}
                   transition={{ duration: animDuration }}
                 >
