@@ -31,13 +31,13 @@ export function useInferenceHistory(page = 0, pageSize = 20) {
       const from = page * pageSize;
       const to = from + pageSize - 1;
       const { data, count, error } = await supabase
-        .from("inference_history")
+        .from("inference_history" as any)
         .select("*", { count: "exact" })
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .range(from, to);
       if (error) throw error;
-      return { data: (data || []) as InferenceHistoryRow[], count: count || 0 };
+      return { data: (data || []) as unknown as InferenceHistoryRow[], count: count || 0 };
     },
     enabled: !!user,
   });
@@ -50,7 +50,7 @@ export function useSaveInference() {
     mutationFn: async (row: Omit<InferenceHistoryRow, "id" | "user_id" | "created_at">) => {
       if (!user) throw new Error("Not authenticated");
       const { error } = await supabase
-        .from("inference_history")
+        .from("inference_history" as any)
         .insert({ ...row, user_id: user.id });
       if (error) throw error;
     },
@@ -67,12 +67,12 @@ export function useApiKeys() {
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
-        .from("api_keys")
+        .from("api_keys" as any)
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as ApiKeyRow[];
+      return (data || []) as unknown as ApiKeyRow[];
     },
     enabled: !!user,
   });
@@ -85,12 +85,12 @@ export function useDevices() {
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
-        .from("devices")
+        .from("devices" as any)
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as DeviceRow[];
+      return (data || []) as unknown as DeviceRow[];
     },
     enabled: !!user,
   });
