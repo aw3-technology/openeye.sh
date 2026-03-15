@@ -61,7 +61,7 @@ async function request<T>(
 
 export const credApi = {
   syncUser() {
-    return request<{ ok: boolean }>("sync-user", { method: "POST" });
+    return request<{ ok: boolean }>("users", { method: "POST" });
   },
 
   getBalance() {
@@ -76,9 +76,9 @@ export const credApi = {
   },
 
   refund(amount: number, description: string) {
-    return request<CreditBalance>("refund", {
+    return request<CreditBalance>("issue", {
       method: "POST",
-      body: JSON.stringify({ amount, description }),
+      body: JSON.stringify({ amount, reason: description }),
     });
   },
 
@@ -86,15 +86,16 @@ export const credApi = {
     return request<CheckoutSession>("checkout", {
       method: "POST",
       body: JSON.stringify({
-        tier_id: tierId,
+        pricing_tier_id: tierId,
         success_url: successUrl,
         cancel_url: cancelUrl,
       }),
     });
   },
 
-  getPricingTiers() {
-    return request<PricingTier[]>("tiers");
+  async getPricingTiers() {
+    const res = await request<{ pricing_tiers: PricingTier[] }>("pricing-tiers");
+    return res.pricing_tiers;
   },
 
   getTransactions(page = 0, pageSize = 20) {

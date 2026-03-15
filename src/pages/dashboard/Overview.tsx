@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
 import { useDevices, useInferenceHistory } from "@/hooks/useOpenEyeQueries";
 import { useCreditBalance } from "@/hooks/useCredits";
+import { getTotalBalance } from "@/types/credits";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { ServerUrlDialog } from "@/components/dashboard/ServerUrlDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -129,7 +130,7 @@ export default function Overview() {
         />
         <MetricCard
           label="Credits"
-          value={creditData?.balance ?? "—"}
+          value={getTotalBalance(creditData) ?? "—"}
           icon={Coins}
           color="bg-yellow-500/15 text-yellow-500"
         />
