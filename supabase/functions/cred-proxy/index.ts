@@ -44,6 +44,8 @@ Deno.serve(async (req) => {
       ? await req.text()
       : undefined;
 
+    console.log(`cred-proxy → ${req.method} ${targetUrl}`);
+
     const res = await fetch(targetUrl, {
       method: req.method,
       headers: {
@@ -55,7 +57,19 @@ Deno.serve(async (req) => {
     });
 
     const data = await res.text();
-    return new Response(data, {
+    console.log(`cred-proxy ← ${res.status} (${data.length} bytes) ${data.substring(0, 200)}`);
+
+    // Validate that the upstream returned valid JSON before forwarding
+    if (data) {
+      try {
+        JSON.parse(data);
+      } catch {
+        console.error("cred-proxy: upstream returned non-JSON:", data.substring(0, 500));
+        return json({ error: "Upstream returned invalid response", status: res.status, preview: data.substring(0, 200) }, 502);
+      }
+    }
+
+    return new Response(data || "{}", {
       status: res.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
