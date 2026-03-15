@@ -40,11 +40,11 @@ export function useDeductCredits() {
   });
 }
 
-export function useRefundCredits() {
+export function useIssueCredits() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ amount, description }: { amount: number; description: string }) =>
-      credApi.refund(amount, description),
+      credApi.issue(amount, description),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["credits", "balance"] });
       qc.invalidateQueries({ queryKey: ["credits", "transactions"] });
