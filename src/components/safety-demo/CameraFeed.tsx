@@ -33,7 +33,7 @@ export function CameraFeed({
         }}
         transition={{ duration: animDuration }}
       >
-        <div className="relative aspect-video bg-gradient-to-br from-foreground via-foreground/95 to-foreground/90">
+        <div className="relative aspect-video bg-terminal-bg">
           {/* Grid overlay */}
           <div
             className="absolute inset-0 opacity-10"
