@@ -328,6 +328,7 @@ function SafetyDemo() {
 const sampleImages = [
   {
     name: "Workshop",
+    image: sceneWorkshopImg,
     objects: [
       { label: "robot_arm", confidence: 0.98, bbox: { x: 0.25, y: 0.1, w: 0.35, h: 0.6 }, color: "green" as const },
       { label: "screwdriver", confidence: 0.92, bbox: { x: 0.65, y: 0.4, w: 0.1, h: 0.25 }, color: "amber" as const },
