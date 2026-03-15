@@ -171,9 +171,9 @@ export function InteractiveTerminal() {
       </div>
 
       {/* Terminal window */}
-      <div className="bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden shadow-lg">
+      <div className="bg-card rounded-outer border overflow-hidden shadow-lg">
         {/* Window chrome */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/5">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
           <div className="w-3 h-3 rounded-full bg-terminal-red/20 border border-terminal-red/50" />
           <div className="w-3 h-3 rounded-full bg-terminal-amber/20 border border-terminal-amber/50" />
           <div className="w-3 h-3 rounded-full bg-terminal-green/20 border border-terminal-green/50" />
