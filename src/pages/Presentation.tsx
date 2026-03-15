@@ -191,7 +191,7 @@ function TitleSlide() {
       <GlowOrb color="hsl(var(--oe-red))" size={400} x="70%" y="60%" blur={200} />
       <ScanLine />
 
-      <div className="flex-1 flex flex-col items-center justify-center px-20 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center px-20 pt-16 relative z-10">
         <motion.div
           className="mb-10"
           initial={{ opacity: 0, y: 20 }}
