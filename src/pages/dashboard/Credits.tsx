@@ -58,7 +58,7 @@ function PricingTierCard({
       </CardHeader>
       <CardContent className="space-y-3">
         <div>
-          <span className="text-2xl font-bold">${(tier.price_cents / 100).toFixed(2)}</span>
+          <span className="text-2xl font-bold">${parseFloat(tier.price).toFixed(2)}</span>
         </div>
         <p className="text-sm text-muted-foreground">
           {tier.credits.toLocaleString()} credits
