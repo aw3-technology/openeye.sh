@@ -161,7 +161,7 @@ export function InteractiveTerminal() {
               className={`font-mono text-xs whitespace-nowrap px-3 py-1.5 rounded-inner border transition-all focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-1 focus-visible:ring-offset-background outline-none ${
                 activeCommand === i
                   ? "bg-terminal-green/15 text-terminal-green border-terminal-green/30"
-                  : "bg-terminal-bg text-muted-foreground border-foreground/5 hover:text-foreground hover:border-foreground/10"
+                  : "bg-card text-muted-foreground border-border hover:text-foreground hover:border-foreground/10"
               }`}
             >
               {label}
@@ -171,13 +171,13 @@ export function InteractiveTerminal() {
       </div>
 
       {/* Terminal window */}
-      <div className="bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden shadow-lg">
+      <div className="bg-card rounded-outer border overflow-hidden shadow-lg">
         {/* Window chrome */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/5">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
           <div className="w-3 h-3 rounded-full bg-terminal-red/20 border border-terminal-red/50" />
           <div className="w-3 h-3 rounded-full bg-terminal-amber/20 border border-terminal-amber/50" />
           <div className="w-3 h-3 rounded-full bg-terminal-green/20 border border-terminal-green/50" />
-          <span className="ml-2 text-xs font-mono text-terminal-muted uppercase tracking-widest">
+          <span className="ml-2 text-xs font-mono text-muted-foreground uppercase tracking-widest">
             openeye — interactive demo
           </span>
         </div>
@@ -211,7 +211,7 @@ export function InteractiveTerminal() {
         </div>
       </div>
 
-      <p className="font-mono text-[11px] text-terminal-muted text-center">
+      <p className="font-mono text-[11px] text-muted-foreground text-center">
         Click a command above to see OpenEye in action
       </p>
     </div>

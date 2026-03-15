@@ -205,7 +205,7 @@ export default function Architecture() {
               <p className="text-muted-foreground mb-4 max-w-2xl">
                 {layer.description}
               </p>
-              <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5 inline-block mb-8">
+              <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border inline-block mb-8">
                 {layer.terminalCommand}
               </div>
             </motion.div>

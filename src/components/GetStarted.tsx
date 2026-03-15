@@ -64,7 +64,7 @@ export function GetStarted() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-display text-base font-medium mb-2">{item.title}</h3>
-                  <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-3 py-2 rounded-inner border border-foreground/5 mb-3 overflow-x-auto">
+                  <div className="font-mono text-sm bg-secondary text-oe-green px-3 py-2 rounded-inner border mb-3 overflow-x-auto">
                     $ {item.command}
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -90,7 +90,7 @@ export function GetStarted() {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-display text-base font-medium mb-2">Want an API? Start the server.</h3>
-              <div className="font-mono text-xs sm:text-sm bg-terminal-bg text-terminal-green px-3 py-2 rounded-inner border border-foreground/5 mb-3 overflow-x-auto whitespace-nowrap">
+              <div className="font-mono text-xs sm:text-sm bg-secondary text-oe-green px-3 py-2 rounded-inner border mb-3 overflow-x-auto whitespace-nowrap">
                 $ openeye serve yolov8 --port 8000
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -114,7 +114,7 @@ export function GetStarted() {
             >
               View Full Documentation
             </a>
-            <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-5 py-2.5 rounded-inner border border-foreground/5">
+            <div className="font-mono text-sm bg-secondary text-oe-green px-5 py-2.5 rounded-inner border">
               pip install openeye-ai
             </div>
           </div>

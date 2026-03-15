@@ -112,7 +112,7 @@ export function TechEcosystem() {
               className={`font-mono text-xs whitespace-nowrap px-3 py-1.5 rounded-inner border transition-colors focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-1 focus-visible:ring-offset-background outline-none ${
                 active === cat
                   ? "bg-terminal-green/15 text-terminal-green border-terminal-green/30"
-                  : "bg-terminal-bg text-muted-foreground border-foreground/5 hover:text-foreground hover:border-foreground/10"
+                  : "bg-card text-muted-foreground border-border hover:text-foreground hover:border-foreground/10"
               }`}
             >
               {cat}

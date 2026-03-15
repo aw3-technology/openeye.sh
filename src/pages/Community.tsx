@@ -163,7 +163,7 @@ export default function Community() {
                 </div>
               </div>
 
-              <div className="bg-terminal-bg rounded-inner border border-foreground/5 p-4 font-mono text-[13px] text-terminal-fg overflow-x-auto">
+              <div className="bg-card rounded-inner border p-4 font-mono text-[13px] text-foreground overflow-x-auto">
                 <div className="text-terminal-muted"># Example: Add a new model adapter</div>
                 <div className="text-terminal-amber">from openeye.adapters import ModelAdapter</div>
                 <div className="h-3" />

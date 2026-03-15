@@ -14,7 +14,7 @@ export function EcosystemCard({ name, creator, description, integrated }: Ecosys
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-      className="bg-terminal-bg border border-foreground/5 rounded-inner p-3 flex flex-col gap-1"
+      className="bg-card border rounded-inner p-3 flex flex-col gap-1"
     >
       <div className="flex items-center gap-2 min-w-0">
         <span className="font-mono text-sm text-terminal-green font-medium truncate min-w-0">{name}</span>

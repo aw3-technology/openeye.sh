@@ -32,7 +32,7 @@ export function UseCaseSection({ uc, index }: UseCaseSectionProps) {
           <p className="text-muted-foreground mb-4 max-w-2xl">
             {uc.description}
           </p>
-          <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5 inline-block mb-12">
+          <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border inline-block mb-12">
             {uc.terminalCommand}
           </div>
         </motion.div>
