@@ -106,23 +106,18 @@ export function Navbar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden flex flex-col gap-1.5 p-2"
+          className="md:hidden flex flex-col gap-2 p-2"
           aria-label="Toggle menu"
           aria-expanded={mobileOpen}
         >
           <motion.span
             className="block w-5 h-px bg-foreground origin-center"
-            animate={mobileOpen ? { rotate: 45, y: 3.5 } : { rotate: 0, y: 0 }}
+            animate={mobileOpen ? { rotate: 45, y: 1 } : { rotate: 0, y: 0 }}
             transition={{ duration: 0.15 }}
           />
           <motion.span
-            className="block w-5 h-px bg-foreground"
-            animate={mobileOpen ? { opacity: 0 } : { opacity: 1 }}
-            transition={{ duration: 0.1 }}
-          />
-          <motion.span
             className="block w-5 h-px bg-foreground origin-center"
-            animate={mobileOpen ? { rotate: -45, y: -3.5 } : { rotate: 0, y: 0 }}
+            animate={mobileOpen ? { rotate: -45, y: -1 } : { rotate: 0, y: 0 }}
             transition={{ duration: 0.15 }}
           />
         </button>
