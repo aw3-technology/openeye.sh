@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 const dashboardFeatures = [
-  { label: "Live Stream", description: "Real-time camera feeds with detection overlays, safety zone HUD, FPS metrics, and VLM reasoning panel" },
-  { label: "Fleet Management", description: "Device inventory, health monitoring, OTA updates, and deployment orchestration across hundreds of edge nodes" },
-  { label: "MLOps Pipeline", description: "Model registry, A/B testing, shadow deployments, batch inference, and feedback-driven retraining" },
+  { label: "Live Stream", description: "Real-time camera feeds with detection overlays, safety zone HUD, and FPS metrics" },
+  { label: "Fleet Management", description: "Device inventory, health monitoring, OTA updates, and deployment orchestration across edge nodes" },
+  { label: "Model Registry", description: "Browse available models, check installed versions, and manage adapters from the dashboard" },
   { label: "Agentic Loop", description: "Continuous perception-reasoning-action cycle with memory, scene graphs, and chain-of-thought planning" },
 ];
 
@@ -19,13 +19,13 @@ export function ProductionDashboardSection() {
           transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
         >
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-            Production Ready
+            Dashboard
           </div>
           <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
-            Not a prototype. A platform.
+            Monitor and manage your perception stack.
           </h2>
           <p className="text-muted-foreground mb-12 max-w-2xl">
-            Dashboard, fleet management, and deployment orchestration built in. Manage hundreds of devices, roll out model updates, and monitor everything from a single interface.
+            A built-in web dashboard for managing devices, monitoring camera feeds, and exploring model outputs.
           </p>
         </motion.div>
 

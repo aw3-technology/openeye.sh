@@ -1,18 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-type Language = "python" | "ros" | "http" | "hosted";
+type Language = "python" | "http" | "ros";
 
-const tabs: { key: Language; label: string }[] = [
+const tabs: { key: Language; label: string; badge?: string }[] = [
   { key: "python", label: "Python" },
-  { key: "hosted", label: "Hosted API" },
-  { key: "ros", label: "ROS 2" },
-  { key: "http", label: "Self-Hosted" },
+  { key: "http", label: "Self-Hosted API" },
+  { key: "ros", label: "ROS 2", badge: "Roadmap" },
 ];
 
 const codeSnippets: Record<Language, { code: string; description: string }> = {
   python: {
-    description: "Use the Python SDK to detect objects, estimate depth, segment scenes, and run safety monitoring.",
+    description: "Use the Python SDK to detect objects, estimate depth, and run safety monitoring.",
     code: `from openeye import OpenEye
 
 eye = OpenEye()
@@ -31,54 +30,46 @@ result = eye.run("grounding-dino", "kitchen.jpg",
                  prompt="find the coffee mug")
 print(result.objects)    # open-vocabulary detections
 
-# Zero-shot segmentation
-masks = eye.run("sam2", "workspace.jpg")
-for mask in masks.segmentation_masks:
-    print(f"Area: {mask.area}, Stability: {mask.stability_score}")
-
 # Live camera with safety monitoring
 for frame in eye.watch(models=["yolov8"], safety=True):
     if frame.safety_alerts:
         print(f"ALERT: {frame.safety_alerts[0].zone_level}")`,
   },
-  hosted: {
-    description: "Use the hosted API with your oe_ API key. No GPU or self-hosting required — just HTTP requests.",
-    code: `# Object detection (1 credit)
-curl -X POST https://api.openeye.ai/v1/detect \\
-  -H "X-API-Key: oe_live_abc123" \\
-  -F "file=@workspace.jpg" \\
-  -F "confidence=0.3"
+  http: {
+    description: "Self-host the API on your own infrastructure. REST and WebSocket endpoints built in.",
+    code: `# Start the server locally
+openeye serve yolov8 --port 8000
+
+# Detect objects in an image
+curl -X POST http://localhost:8000/predict \\
+  -F "file=@workspace.jpg" | jq
 
 # Response:
 # {
 #   "model": "yolov8",
 #   "objects": [
 #     { "label": "cup", "confidence": 0.94,
-#       "bbox": { "x": 0.46, "y": 0.52, "w": 0.04, "h": 0.11 } }
+#       "bbox": { "x1": 0.46, "y1": 0.52, "x2": 0.50, "y2": 0.63 } }
 #   ],
-#   "image": { "width": 1280, "height": 720 },
-#   "inference_ms": 14.2,
-#   "credits_used": 1
+#   "inference_ms": 14.2
 # }
 
-# Depth estimation (2 credits)
-curl -X POST https://api.openeye.ai/v1/depth \\
-  -H "X-API-Key: oe_live_abc123" \\
-  -F "file=@scene.jpg"
+# Stream detections via WebSocket
+wscat -c ws://localhost:8000/ws
 
-# Scene description (3 credits)
-curl -X POST https://api.openeye.ai/v1/describe \\
-  -H "X-API-Key: oe_live_abc123" \\
-  -F "file=@warehouse.jpg" \\
-  -F "prompt=Count the pallets"
+# Health check
+curl http://localhost:8000/health
 
-# Check your balance
-curl https://api.openeye.ai/v1/usage \\
-  -H "X-API-Key: oe_live_abc123"`,
+# Read / update config
+curl http://localhost:8000/config
+curl -X PUT http://localhost:8000/config -d '{"backend":"onnx"}'`,
   },
   ros: {
-    description: "Subscribe to OpenEye topics in ROS 2 for real-time perception in your robot stack.",
-    code: `import rclpy
+    description: "ROS 2 integration is on the roadmap. Subscribe to OpenEye topics for real-time perception in your robot stack.",
+    code: `# ROS 2 adapter — coming soon
+# Track progress: github.com/openeye-ai/openeye/issues
+
+import rclpy
 from rclpy.node import Node
 from openeye_msgs.msg import SceneGraph, Detection, HazardAlert
 
@@ -117,28 +108,6 @@ class PerceptionNode(Node):
         # Trigger emergency stop
         self.publish_halt()`,
   },
-  http: {
-    description: "Self-host the API on your own infrastructure. REST, WebSocket, and Prometheus metrics built in.",
-    code: `# Start the server locally
-openeye serve yolov8 --port 8000
-
-# Detect objects in an image
-curl -X POST http://localhost:8000/predict \\
-  -F "file=@workspace.jpg" | jq
-
-# Stream detections via WebSocket
-wscat -c ws://localhost:8000/ws
-
-# VLM reasoning stream
-wscat -c ws://localhost:8000/ws/vlm
-
-# Agentic perception loop
-wscat -c ws://localhost:8000/ws/agentic
-
-# Health check + Prometheus metrics
-curl http://localhost:8000/health
-curl http://localhost:8000/metrics`,
-  },
 };
 
 function SyntaxLine({ line, language }: { line: string; language: Language }) {
@@ -150,17 +119,12 @@ function SyntaxLine({ line, language }: { line: string; language: Language }) {
   }
 
   // Curl commands
-  if ((language === "http" || language === "hosted") && line.trimStart().startsWith("curl")) {
+  if (language === "http" && line.trimStart().startsWith("curl")) {
     return <div className="text-terminal-green">{line}</div>;
   }
 
   // Python imports
-  if (language === "python" && (line.trimStart().startsWith("from ") || line.trimStart().startsWith("import "))) {
-    return <div className="text-terminal-amber">{line}</div>;
-  }
-
-  // ROS imports
-  if (language === "ros" && (line.trimStart().startsWith("from ") || line.trimStart().startsWith("import "))) {
+  if ((language === "python" || language === "ros") && (line.trimStart().startsWith("from ") || line.trimStart().startsWith("import "))) {
     return <div className="text-terminal-amber">{line}</div>;
   }
 
@@ -193,7 +157,7 @@ export function CodeExamples() {
             Works with your stack.
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl">
-            Hosted API, Python SDK, ROS 2 topics, or self-hosted HTTP — integrate OpenEye perception into any system in minutes.
+            Python SDK, self-hosted HTTP API, or upcoming ROS 2 topics — integrate OpenEye perception into any system.
           </p>
         </motion.div>
 
@@ -212,12 +176,18 @@ export function CodeExamples() {
                     : "bg-card border-foreground/[0.06] text-muted-foreground hover:text-foreground hover:border-foreground/10"
                 }`}
               >
-                <div className="font-mono text-sm font-medium">{tab.label}</div>
+                <div className="font-mono text-sm font-medium flex items-center gap-2">
+                  {tab.label}
+                  {tab.badge && (
+                    <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-terminal-amber/15 text-terminal-amber border border-terminal-amber/20">
+                      {tab.badge}
+                    </span>
+                  )}
+                </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
                   {tab.key === "python" && "SDK with full type hints"}
-                  {tab.key === "hosted" && "API key auth, no GPU needed"}
-                  {tab.key === "ros" && "Native ROS 2 messages"}
                   {tab.key === "http" && "Self-host on your hardware"}
+                  {tab.key === "ros" && "Coming soon — on the roadmap"}
                 </div>
               </button>
             ))}
@@ -235,7 +205,7 @@ export function CodeExamples() {
                 <div className="w-3 h-3 rounded-full bg-terminal-amber/20 border border-terminal-amber/50" />
                 <div className="w-3 h-3 rounded-full bg-terminal-green/20 border border-terminal-green/50" />
                 <span className="ml-2 text-xs font-mono text-terminal-muted uppercase tracking-widest">
-                  {active === "python" ? "app.py" : active === "ros" ? "perception_node.py" : active === "hosted" ? "terminal" : "terminal"}
+                  {active === "python" ? "app.py" : active === "ros" ? "perception_node.py" : "terminal"}
                 </span>
               </div>
               <div className="p-4 md:p-6 font-mono text-[13px] leading-relaxed overflow-x-auto scrollbar-thin max-h-[480px] overflow-y-auto">
