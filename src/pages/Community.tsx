@@ -203,7 +203,7 @@ export default function Community() {
                 We welcome contributions of all sizes — from typo fixes to major
                 features. Check out the{" "}
                 <a
-                  href="https://github.com/openeye-ai/openeye/blob/main/CONTRIBUTING.md"
+                  href="https://github.com/aw3-technology/openeye.sh/blob/main/CONTRIBUTING.md"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground hover:text-terminal-green transition-colors underline underline-offset-4 decoration-foreground/20 rounded-sm focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
