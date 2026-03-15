@@ -2,40 +2,33 @@
 title: Streaming Protocol
 ---
 
-The /v1/stream WebSocket endpoint enables real-time inference on video frames. Each frame costs 1 credit.
+### Self-Hosted WebSocket
+
+The self-hosted server provides a WebSocket endpoint at `ws://host:port/ws` for real-time inference.
 
 ### Connection Steps
 
-- 1. Connect to wss://api.openeye.ai/v1/stream
-- 2. Send auth JSON: {"api_key": "oe_live_abc123"}
-- 3. Receive: {"status": "authenticated"}
-- 4. (Optional) Send config: {"model": "yolov8", "confidence": 0.3}
-- 5. Send base64-encoded image frames as text messages
-- 6. Receive JSON detection results for each frame
-
-### Auth Handshake
-
-```json
-// Client sends:
-{ "api_key": "oe_live_abc123" }
-
-// Server responds:
-{ "status": "authenticated" }
-
-// Or on failure:
-// Connection closed with code 4001
-```
-
-### Config Message (Optional)
-
-```json
-// Client sends:
-{ "model": "yolov8", "confidence": 0.3 }
-
-// Server responds:
-{ "status": "configured", "model": "yolov8" }
-```
+- 1. Connect to `ws://localhost:8000/ws`
+- 2. Send base64-encoded image frames as text messages
+- 3. Receive JSON detection results for each frame
 
 ### Frame Format
 
-Send each frame as a base64-encoded string (no data URI prefix). The server responds with the same JSON schema as POST /v1/detect.
+Send each frame as a base64-encoded string (no data URI prefix). The server responds with the same JSON schema as `POST /predict`.
+
+### Example
+
+```python
+import asyncio, base64, json, websockets
+
+async def stream():
+    async with websockets.connect("ws://localhost:8000/ws") as ws:
+        with open("frame.jpg", "rb") as f:
+            await ws.send(base64.b64encode(f.read()).decode())
+        result = json.loads(await ws.recv())
+        print(result["objects"])
+
+asyncio.run(stream())
+```
+
+> [!warning] Hosted WebSocket streaming (wss://api.openeye.ai/v1/stream) with API key authentication is planned but not yet available.

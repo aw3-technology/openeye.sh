@@ -2,40 +2,20 @@
 title: Authentication
 ---
 
-All hosted API endpoints require an API key prefixed with oe_. Create keys from the Dashboard → API Keys page. Keys are stored as SHA-256 hashes — the plaintext is shown only once at creation time.
+> [!warning] The hosted API with API key authentication is not yet available. This page describes planned functionality.
 
-### Sending Your Key
+### Self-Hosted Server
 
-Pass your API key in either header (not both):
+The self-hosted server (`openeye serve`) does not require authentication by default. To add authentication to your self-hosted deployment, configure it in your reverse proxy or application layer.
 
 ```bash
-# Option 1 — Authorization header
-curl -H "Authorization: Bearer oe_live_abc123..." ...
+# Start the server (no auth required)
+openeye serve yolov8 --port 8000
 
-# Option 2 — X-API-Key header
-curl -H "X-API-Key: oe_live_abc123..." ...
+# Query it directly
+curl -X POST http://localhost:8000/predict -F "file=@photo.jpg"
 ```
 
-### Key Formats
+### Planned Hosted API Authentication
 
-| Prefix | Environment | Description |
-|--------|-------------|-------------|
-| oe_live_ | Production | Full access, billed against your credit balance |
-| oe_test_ | Sandbox | Returns mock responses, no credits charged |
-
-### Key Scopes
-
-Each API key has configurable scopes that control access:
-
-| Scope | Endpoints |
-|-------|-----------|
-| inference | /v1/detect, /v1/depth, /v1/describe, /v1/stream |
-| fleet | /devices, /deployments, /commands (requires JWT) |
-
-### Security Notes
-
-- Never expose API keys in client-side code or public repositories
-- Rotate keys immediately if compromised — delete from Dashboard and create a new one
-- Each key has configurable scopes and a per-minute rate limit (default: 60 req/min)
-- last_used_at is updated with a UTC timestamp on every authenticated request
-- Image uploads are streamed in 64 KB chunks to enforce the 20 MB size limit without buffering the entire file
+When the hosted API launches, API keys will be prefixed with `oe_` and passed via the `X-API-Key` or `Authorization` header.
