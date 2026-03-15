@@ -26,6 +26,8 @@ import Inference from "./pages/dashboard/Inference.tsx";
 import LiveStream from "./pages/dashboard/LiveStream.tsx";
 import History from "./pages/dashboard/History.tsx";
 import ModelSettings from "./pages/dashboard/ModelSettings.tsx";
+import ModelRegistry from "./pages/dashboard/ModelRegistry.tsx";
+import BenchmarkPage from "./pages/dashboard/Benchmark.tsx";
 import Metrics from "./pages/dashboard/Metrics.tsx";
 import Export from "./pages/dashboard/Export.tsx";
 import ApiKeys from "./pages/dashboard/ApiKeys.tsx";
