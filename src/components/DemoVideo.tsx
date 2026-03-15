@@ -237,7 +237,7 @@ export function DemoVideo() {
                     whileTap={{ scale: 0.95 }}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="ml-1" aria-hidden="true">
-                      <path d="M8 5v14l11-7z" fill="hsl(var(--foreground))" />
+                      <path d="M8 5v14l11-7z" fill="hsl(0, 0%, 7%)" />
                     </svg>
                   </motion.div>
                 </button>
