@@ -13,6 +13,7 @@ export interface DetectedObject {
   label: string;
   confidence: number;
   bbox: BBox;
+  track_id?: string;
 }
 
 export interface ImageInfo {
