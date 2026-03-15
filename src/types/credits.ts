@@ -35,3 +35,9 @@ export interface CheckoutSession {
 }
 
 export const INFERENCE_CREDIT_COST = 1;
+
+/** Sum all balances from the Cred API response into a single number */
+export function getTotalBalance(data: CreditBalance | undefined | null): number {
+  if (!data?.balances?.length) return 0;
+  return data.balances.reduce((sum, b) => sum + b.balance, 0);
+}

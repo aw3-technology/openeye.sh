@@ -119,7 +119,7 @@ export default function Credits() {
     return { totalSpent, totalAdded, txCount };
   }, [transactions.data]);
 
-  const currentBalance = balance.data?.balance ?? 0;
+  const currentBalance = getTotalBalance(balance.data);
 
   const creditCosts = [
     { endpoint: "POST /v1/detect", model: "YOLOv8", credits: 1, icon: Eye },
