@@ -39,6 +39,7 @@ export interface DashboardNavItem {
 
 /** Public site navigation (Navbar) */
 export const publicNavLinks: NavLink[] = [
+  { href: "/demo", label: "Demo" },
   { href: "/docs", label: "Docs" },
   { href: "/pricing", label: "Pricing" },
   { href: "/blog", label: "Blog" },

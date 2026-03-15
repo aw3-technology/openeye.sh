@@ -48,6 +48,7 @@ import Demo from "./pages/dashboard/Demo.tsx";
 import AgenticDemo from "./pages/dashboard/AgenticDemo.tsx";
 import Governance from "./pages/dashboard/Governance.tsx";
 import Presentation from "./pages/Presentation.tsx";
+import LiveDemo from "./pages/LiveDemo.tsx";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="/models" element={<Models />} />
             <Route path="/architecture" element={<Architecture />} />
             <Route path="/presentation" element={<Presentation />} />
+            <Route path="/demo" element={<LiveDemo />} />
 
             <Route
               path="/dashboard"
