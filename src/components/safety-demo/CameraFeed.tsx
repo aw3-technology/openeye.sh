@@ -22,7 +22,7 @@ export function CameraFeed({
   return (
     <div className="lg:col-span-3">
       <motion.div
-        className="relative border rounded-outer overflow-hidden bg-foreground"
+        className="relative border rounded-outer overflow-hidden bg-terminal-bg"
         animate={{
           borderColor: config.border,
           boxShadow: currentState === "danger"
