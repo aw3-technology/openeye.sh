@@ -34,7 +34,16 @@ export function OpenEyeConnectionProvider({ children }: { children: ReactNode })
     queryClient.clear();
   }, [queryClient]);
 
+  // Skip health polling when using default localhost URL on a deployed (non-localhost) origin
+  const isDefaultLocalhost = serverUrl === "http://localhost:8000" && typeof window !== "undefined" && window.location.hostname !== "localhost";
+
   useEffect(() => {
+    if (isDefaultLocalhost) {
+      setIsConnected(false);
+      setHealthData(null);
+      return;
+    }
+
     let cancelled = false;
 
     const poll = async () => {
