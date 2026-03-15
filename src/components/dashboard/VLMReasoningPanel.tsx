@@ -51,7 +51,7 @@ export function VLMReasoningPanel() {
             <Loader2 className="w-3 h-3 text-terminal-amber animate-spin" />
           )}
           {latestVLM && (
-            <span className="font-mono text-[10px] text-terminal-muted tabular-nums">
+            <span className="font-mono text-[10px] text-muted-foreground tabular-nums">
               {(latestVLM.latency_ms / 1000).toFixed(1)}s
             </span>
           )}
