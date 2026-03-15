@@ -16,6 +16,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+// Demo scene images
+import safetyWorkspaceImg from "@/assets/demo/safety-workspace.jpg";
+import sceneWorkshopImg from "@/assets/demo/scene-workshop.jpg";
+import sceneKitchenImg from "@/assets/demo/scene-kitchen.jpg";
+import sceneWarehouseImg from "@/assets/demo/scene-warehouse.jpg";
+
 // ─── Types ────────────────────────────────────────────────────────────────
 
 interface DetectedObject {
@@ -120,6 +126,13 @@ function SafetyDemo() {
           transition={{ duration: 0.3 }}
         >
           <div className="relative aspect-video bg-terminal-bg">
+            {/* Scene image */}
+            <img
+              src={safetyWorkspaceImg}
+              alt="Safety workspace"
+              className="absolute inset-0 w-full h-full object-cover opacity-70"
+            />
+
             {/* Grid */}
             <div
               className="absolute inset-0 opacity-[0.06]"
@@ -315,6 +328,7 @@ function SafetyDemo() {
 const sampleImages = [
   {
     name: "Workshop",
+    image: sceneWorkshopImg,
     objects: [
       { label: "robot_arm", confidence: 0.98, bbox: { x: 0.25, y: 0.1, w: 0.35, h: 0.6 }, color: "green" as const },
       { label: "screwdriver", confidence: 0.92, bbox: { x: 0.65, y: 0.4, w: 0.1, h: 0.25 }, color: "amber" as const },
@@ -324,6 +338,7 @@ const sampleImages = [
   },
   {
     name: "Kitchen",
+    image: sceneKitchenImg,
     objects: [
       { label: "cup", confidence: 0.94, bbox: { x: 0.6, y: 0.3, w: 0.1, h: 0.15 }, color: "green" as const },
       { label: "plate", confidence: 0.91, bbox: { x: 0.3, y: 0.45, w: 0.2, h: 0.1 }, color: "green" as const },
@@ -334,6 +349,7 @@ const sampleImages = [
   },
   {
     name: "Warehouse",
+    image: sceneWarehouseImg,
     objects: [
       { label: "forklift", confidence: 0.97, bbox: { x: 0.05, y: 0.2, w: 0.3, h: 0.6 }, color: "green" as const },
       { label: "pallet", confidence: 0.95, bbox: { x: 0.4, y: 0.5, w: 0.25, h: 0.2 }, color: "green" as const },
@@ -387,12 +403,12 @@ function DetectionPlayground() {
         {/* Detection viewport */}
         <div className="lg:col-span-2">
           <div className="relative aspect-video bg-card border rounded-xl overflow-hidden">
-            {/* Placeholder scene */}
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary via-card to-secondary flex items-center justify-center">
-              <div className="font-mono text-muted-foreground text-sm">
-                {sample.name} scene — {sample.objects.length} ground truth objects
-              </div>
-            </div>
+            {/* Scene image */}
+            <img
+              src={sample.image}
+              alt={`${sample.name} scene`}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
 
             {/* Detection boxes */}
             <AnimatePresence>

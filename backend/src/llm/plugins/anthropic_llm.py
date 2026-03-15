@@ -6,6 +6,7 @@ import time
 import typing as T
 from enum import Enum
 
+import openai
 from anthropic import AsyncAnthropic
 from pydantic import BaseModel, Field
 
@@ -56,9 +57,10 @@ class AnthropicLLM(LLM[R]):
             base_url=config.base_url,
         )
 
-        # history_length=0 means the decorator short-circuits before any
-        # OpenAI call, so no real client is needed.
-        self.history_manager = LLMHistoryManager(self._config, None)  # type: ignore[arg-type]
+        # LLMHistoryManager requires an openai client for its type signature.
+        # With history_length=0, it never actually calls the OpenAI API.
+        dummy_openai_client = openai.AsyncClient(api_key="unused")
+        self.history_manager = LLMHistoryManager(self._config, dummy_openai_client)
 
         # Convert OpenAI-style function schemas to Anthropic tool format
         self._anthropic_tools = self._convert_tools(self.function_schemas)

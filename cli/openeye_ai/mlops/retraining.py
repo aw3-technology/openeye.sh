@@ -6,7 +6,7 @@ import subprocess
 import uuid
 from collections import deque
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -27,17 +27,22 @@ _RUNS_PATH = OPENEYE_HOME / "retraining_runs.yaml"
 # In-memory accuracy buffer for drift detection
 _accuracy_buffer: dict[str, deque] = {}
 
+
 def _load_pipelines() -> list[dict]:
     return safe_load_yaml_list(_PIPELINES_PATH)
+
 
 def _save_pipelines(pipelines: list[dict]) -> None:
     atomic_save_yaml(_PIPELINES_PATH, pipelines)
 
+
 def _load_runs() -> list[dict]:
     return safe_load_yaml_list(_RUNS_PATH)
 
+
 def _save_runs(runs: list[dict]) -> None:
     atomic_save_yaml(_RUNS_PATH, runs)
+
 
 def create_pipeline(config: RetrainingPipelineConfig) -> RetrainingPipelineConfig:
     """Register a new retraining pipeline."""
@@ -49,6 +54,7 @@ def create_pipeline(config: RetrainingPipelineConfig) -> RetrainingPipelineConfi
     _save_pipelines(pipelines)
     return config
 
+
 def get_pipeline(name: str) -> RetrainingPipelineConfig:
     """Get a pipeline by name."""
     pipelines = _load_pipelines()
@@ -57,13 +63,15 @@ def get_pipeline(name: str) -> RetrainingPipelineConfig:
             return RetrainingPipelineConfig(**p)
     raise KeyError(f"Pipeline '{name}' not found.")
 
-def list_pipelines(model_key: str | None = None) -> list[RetrainingPipelineConfig]:
+
+def list_pipelines(model_key: Optional[str] = None) -> list[RetrainingPipelineConfig]:
     """List all retraining pipelines."""
     pipelines = _load_pipelines()
     result = [RetrainingPipelineConfig(**p) for p in pipelines]
     if model_key:
         result = [p for p in result if p.model_key == model_key]
     return result
+
 
 def record_accuracy(model_key: str, accuracy: float) -> bool:
     """Record an accuracy measurement and check for drift.
@@ -104,6 +112,7 @@ def record_accuracy(model_key: str, accuracy: float) -> bool:
 
     return False
 
+
 def trigger_retraining(
     pipeline_name: str,
     triggered_by: str = "manual",
@@ -134,6 +143,7 @@ def trigger_retraining(
     _save_runs(runs)
 
     return run
+
 
 def execute_retraining(run_id: str) -> RetrainingRun:
     """Execute a retraining run by invoking the training script.
@@ -200,6 +210,7 @@ def execute_retraining(run_id: str) -> RetrainingRun:
 
     return run
 
+
 def get_run(run_id: str) -> RetrainingRun:
     """Get a retraining run by ID."""
     runs = _load_runs()
@@ -208,8 +219,9 @@ def get_run(run_id: str) -> RetrainingRun:
             return RetrainingRun(**r)
     raise KeyError(f"Run '{run_id}' not found.")
 
+
 def list_runs(
-    pipeline_name: str | None = None, model_key: str | None = None
+    pipeline_name: Optional[str] = None, model_key: Optional[str] = None
 ) -> list[RetrainingRun]:
     """List retraining runs, optionally filtered."""
     runs = _load_runs()

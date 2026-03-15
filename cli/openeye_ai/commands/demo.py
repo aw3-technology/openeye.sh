@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 import typer
 
 
@@ -15,7 +17,7 @@ def g1_demo(
     caution_m: float = typer.Option(1.5, "--caution-m", help="Caution zone threshold (metres)"),
     clear_duration: float = typer.Option(2.0, "--clear-duration", help="Seconds clear before resume"),
     max_fps: float = typer.Option(15.0, "--max-fps", help="Max frame rate from camera"),
-    video: str | None = typer.Option(None, "--video", "-v", help="Video file path (fallback if camera fails)"),
+    video: Optional[str] = typer.Option(None, "--video", "-v", help="Video file path (fallback if camera fails)"),
     demo: bool = typer.Option(False, "--demo", help="Demo mode: warm up model before starting for zero cold-start"),
 ) -> None:
     """Run the Unitree G1 Safety Guardian demo.
@@ -25,9 +27,11 @@ def g1_demo(
     Use --video <path> to use a pre-recorded video file instead of a live camera.
     Use --demo to warm up the model before starting for zero cold-start latency.
     """
-    from openeye_ai.demos.g1_safety_demo import DemoArgs, run_demo
+    import argparse
 
-    args = DemoArgs(
+    from openeye_ai.demos.g1_safety_demo import run_demo
+
+    args = argparse.Namespace(
         transport=transport,
         host=host,
         camera_index=camera_index,

@@ -46,7 +46,6 @@ nav:
   - Tutorials:
       - Custom Adapter: tutorials/custom-adapter.md
       - Docker Deployment: tutorials/docker.md
-      - G1 Safety Guardian: g1-demo-quickstart.md
 
 markdown_extensions:
   - pymdownx.highlight:

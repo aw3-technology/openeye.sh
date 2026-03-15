@@ -9,7 +9,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -24,17 +24,22 @@ from .schemas import (
 _ANNOTATIONS_PATH = OPENEYE_HOME / "annotations.yaml"
 _BATCHES_PATH = OPENEYE_HOME / "feedback_batches.yaml"
 
+
 def _load_annotations() -> list[dict]:
     return safe_load_yaml_list(_ANNOTATIONS_PATH)
+
 
 def _save_annotations(annotations: list[dict]) -> None:
     atomic_save_yaml(_ANNOTATIONS_PATH, annotations)
 
+
 def _load_batches() -> list[dict]:
     return safe_load_yaml_list(_BATCHES_PATH)
 
+
 def _save_batches(batches: list[dict]) -> None:
     atomic_save_yaml(_BATCHES_PATH, batches)
+
 
 def annotate_failure(
     model_key: str,
@@ -43,9 +48,9 @@ def annotate_failure(
     correct_label: str,
     annotation_label: AnnotationLabel,
     *,
-    predicted_label: str | None = None,
-    predicted_confidence: float | None = None,
-    correct_bbox: dict[str, float] | None = None,
+    predicted_label: Optional[str] = None,
+    predicted_confidence: Optional[float] = None,
+    correct_bbox: Optional[dict[str, float]] = None,
     annotator: str = "",
     notes: str = "",
 ) -> InferenceFailureAnnotation:
@@ -73,6 +78,7 @@ def annotate_failure(
     _save_annotations(annotations)
     return annotation
 
+
 def get_annotation(annotation_id: str) -> InferenceFailureAnnotation:
     """Get an annotation by ID."""
     annotations = _load_annotations()
@@ -81,9 +87,10 @@ def get_annotation(annotation_id: str) -> InferenceFailureAnnotation:
             return InferenceFailureAnnotation(**a)
     raise KeyError(f"Annotation '{annotation_id}' not found.")
 
+
 def list_annotations(
-    model_key: str | None = None,
-    annotation_label: AnnotationLabel | None = None,
+    model_key: Optional[str] = None,
+    annotation_label: Optional[AnnotationLabel] = None,
     unfed_only: bool = False,
 ) -> list[InferenceFailureAnnotation]:
     """List annotations with optional filters."""
@@ -97,12 +104,13 @@ def list_annotations(
         result = [a for a in result if not a.fed_back]
     return result
 
+
 def create_feedback_batch(
     model_key: str,
     output_dataset_path: str,
     *,
-    annotation_ids: list[str] | None = None,
-    annotation_label: AnnotationLabel | None = None,
+    annotation_ids: Optional[list[str]] = None,
+    annotation_label: Optional[AnnotationLabel] = None,
 ) -> FeedbackBatch:
     """Create a feedback batch from annotations.
 
@@ -134,6 +142,7 @@ def create_feedback_batch(
     batches.append(batch.model_dump())
     _save_batches(batches)
     return batch
+
 
 def execute_feedback_batch(batch_id: str) -> FeedbackBatch:
     """Execute a feedback batch — generate a correction dataset.
@@ -204,6 +213,7 @@ def execute_feedback_batch(batch_id: str) -> FeedbackBatch:
     _save_batches(batches)
     return batch
 
+
 def get_feedback_batch(batch_id: str) -> FeedbackBatch:
     """Get a feedback batch by ID."""
     batches = _load_batches()
@@ -212,7 +222,8 @@ def get_feedback_batch(batch_id: str) -> FeedbackBatch:
             return FeedbackBatch(**b)
     raise KeyError(f"Feedback batch '{batch_id}' not found.")
 
-def list_feedback_batches(model_key: str | None = None) -> list[FeedbackBatch]:
+
+def list_feedback_batches(model_key: Optional[str] = None) -> list[FeedbackBatch]:
     """List feedback batches."""
     batches = _load_batches()
     result = [FeedbackBatch(**b) for b in batches]

@@ -1,13 +1,16 @@
 """Nebius Token Factory LLM plugin — OpenAI-compatible endpoint."""
 
+import logging
+import time
 import typing as T
 from enum import Enum
 
 import openai
 from pydantic import Field
 
-from llm import LLMConfig
-from llm.plugins.openai_compatible_base import BaseOpenAICompatibleLLM
+from llm import LLM, LLMConfig
+from llm.function_schemas import convert_function_calls_to_actions
+from llm.output_model import CortexOutputModel
 from providers.llm_history_manager import LLMHistoryManager
 
 R = T.TypeVar("R")
@@ -40,10 +43,7 @@ class NebiusConfig(LLMConfig):
     )
 
 
-class NebiusLLM(BaseOpenAICompatibleLLM[R]):
-    _log_prefix = "Nebius"
-    _default_model = NebiusModel.QWEN3_235B
-
+class NebiusLLM(LLM[R]):
     def __init__(
         self,
         config: NebiusConfig,
@@ -61,3 +61,58 @@ class NebiusLLM(BaseOpenAICompatibleLLM[R]):
             api_key=config.api_key,
         )
         self.history_manager = LLMHistoryManager(self._config, self._client)
+
+    @LLMHistoryManager.update_history()
+    async def ask(
+        self, prompt: str, messages: T.Optional[T.List[T.Dict[str, str]]] = None
+    ) -> T.Optional[R]:
+        if messages is None:
+            messages = []
+        try:
+            logging.info(f"Nebius input: {prompt}")
+
+            self.io_provider.llm_start_time = time.time()
+            self.io_provider.llm_prompt = prompt
+
+            formatted_messages = [
+                {"role": msg.get("role", "user"), "content": msg.get("content", "")}
+                for msg in messages
+            ]
+            formatted_messages.append({"role": "user", "content": prompt})
+
+            response = await self._client.chat.completions.create(
+                model=self._config.model or NebiusModel.QWEN3_235B,
+                messages=T.cast(T.Any, formatted_messages),
+                tools=T.cast(T.Any, self.function_schemas),
+                tool_choice="auto",
+                timeout=self._config.timeout,
+            )
+
+            if not response.choices:
+                logging.warning("Nebius API returned empty choices")
+                return None
+
+            message = response.choices[0].message
+            self.io_provider.llm_end_time = time.time()
+
+            if message.tool_calls:
+                logging.info(f"Received {len(message.tool_calls)} function calls")
+
+                function_call_data = [
+                    {
+                        "function": {
+                            "name": getattr(tc, "function").name,
+                            "arguments": getattr(tc, "function").arguments,
+                        }
+                    }
+                    for tc in message.tool_calls
+                ]
+
+                actions = convert_function_calls_to_actions(function_call_data)
+                result = CortexOutputModel(actions=actions)
+                return T.cast(R, result)
+
+            return None
+        except Exception as e:
+            logging.error(f"Nebius API error: {e}")
+            return None

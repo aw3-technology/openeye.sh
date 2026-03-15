@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { InteractiveTerminal } from "@/components/InteractiveTerminal";
 import { valueProps } from "@/data/indexPageData";
-import { ease } from "@/lib/motion";
 
 export function HeroSection() {
   return (
@@ -11,7 +10,7 @@ export function HeroSection() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease }}
+            transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
           >
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
               Open-Source Perception Engine
@@ -20,7 +19,7 @@ export function HeroSection() {
               Open-source eyes for the agent era.
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed mb-6 max-w-lg">
-              A perception engine that turns raw video into structured world models for robots and autonomous agents. Self-host on your own hardware or deploy with Docker — see, understand, and act safely.
+              A perception engine that turns raw video into structured world models for robots and autonomous agents. Use the hosted API or self-host — see, understand, and act safely.
             </p>
 
             <div className="grid grid-cols-2 gap-3 mb-8">
@@ -46,7 +45,7 @@ export function HeroSection() {
                 pip install openeye-ai
               </div>
               <a
-                href="https://github.com/aw3-technology/openeye.sh"
+                href="https://github.com/openeye-ai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono text-sm text-muted-foreground px-4 py-2.5 rounded-inner border border-foreground/[0.06] hover:text-foreground hover:border-foreground/10 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none"
@@ -59,7 +58,7 @@ export function HeroSection() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1, ease }}
+            transition={{ duration: 0.3, delay: 0.1, ease: [0.2, 0.8, 0.2, 1] }}
           >
             <InteractiveTerminal />
           </motion.div>

@@ -8,8 +8,9 @@ from enum import Enum
 import openai
 from pydantic import Field
 
-from llm import LLMConfig
-from llm.plugins.openai_compatible_base import BaseOpenAICompatibleLLM
+from llm import LLM, LLMConfig
+from llm.function_schemas import convert_function_calls_to_actions
+from llm.output_model import CortexOutputModel
 from providers.llm_history_manager import LLMHistoryManager
 
 R = T.TypeVar("R")
@@ -53,10 +54,7 @@ class OpenRouterConfig(LLMConfig):
     )
 
 
-class OpenRouterLLM(BaseOpenAICompatibleLLM[R]):
-    _log_prefix = "OpenRouter"
-    _default_model = OpenRouterModel.QWEN3_VL_235B_FREE
-
+class OpenRouterLLM(LLM[R]):
     def __init__(
         self,
         config: OpenRouterConfig,
@@ -89,7 +87,32 @@ class OpenRouterLLM(BaseOpenAICompatibleLLM[R]):
             tool_choice="auto",
             timeout=self._config.timeout,
         )
-        return self._parse_response(response)
+
+        if not response.choices:
+            logging.warning(f"OpenRouter ({model}) returned empty choices")
+            return None
+
+        message = response.choices[0].message
+        self.io_provider.llm_end_time = time.time()
+
+        if message.tool_calls:
+            logging.info(f"Received {len(message.tool_calls)} function calls")
+
+            function_call_data = [
+                {
+                    "function": {
+                        "name": getattr(tc, "function").name,
+                        "arguments": getattr(tc, "function").arguments,
+                    }
+                }
+                for tc in message.tool_calls
+            ]
+
+            actions = convert_function_calls_to_actions(function_call_data)
+            result = CortexOutputModel(actions=actions)
+            return T.cast(R, result)
+
+        return None
 
     @LLMHistoryManager.update_history()
     async def ask(

@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 import time
 import uuid
-from typing import Any
+from typing import Any, Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -23,17 +23,22 @@ _RUNS_PATH = OPENEYE_HOME / "validation_runs.yaml"
 # Pattern: "metric_name operator threshold"
 _CONDITION_PATTERN = re.compile(r"(\w+)\s*(>=|<=|>|<|==|!=)\s*([\d.]+)")
 
+
 def _load_tests() -> list[dict]:
     return safe_load_yaml_list(_TESTS_PATH)
+
 
 def _save_tests(tests: list[dict]) -> None:
     atomic_save_yaml(_TESTS_PATH, tests)
 
+
 def _load_runs() -> list[dict]:
     return safe_load_yaml_list(_RUNS_PATH)
 
+
 def _save_runs(runs: list[dict]) -> None:
     atomic_save_yaml(_RUNS_PATH, runs)
+
 
 def create_validation_test(
     name: str,
@@ -70,6 +75,7 @@ def create_validation_test(
     _save_tests(tests)
     return test
 
+
 def get_validation_test(test_id: str) -> ValidationTest:
     """Get a validation test by ID."""
     tests = _load_tests()
@@ -78,13 +84,15 @@ def get_validation_test(test_id: str) -> ValidationTest:
             return ValidationTest(**t)
     raise KeyError(f"Validation test '{test_id}' not found.")
 
-def list_validation_tests(model_key: str | None = None) -> list[ValidationTest]:
+
+def list_validation_tests(model_key: Optional[str] = None) -> list[ValidationTest]:
     """List validation tests."""
     tests = _load_tests()
     result = [ValidationTest(**t) for t in tests]
     if model_key:
         result = [t for t in result if t.model_key == model_key]
     return result
+
 
 def _evaluate_condition(condition: str, metrics: dict[str, float]) -> ValidationConditionResult:
     """Evaluate a single condition against computed metrics."""
@@ -114,13 +122,14 @@ def _evaluate_condition(condition: str, metrics: dict[str, float]) -> Validation
         passed=passed,
     )
 
+
 def run_validation_test(
     test_id: str,
     model_key: str,
     model_version: str,
     adapter,
     *,
-    ground_truth: dict[str, Any] | None = None,
+    ground_truth: Optional[dict[str, Any]] = None,
 ) -> ValidationTestRun:
     """Run a validation test against a model version.
 
@@ -217,9 +226,10 @@ def run_validation_test(
 
     return run
 
+
 def list_validation_runs(
-    test_id: str | None = None,
-    model_key: str | None = None,
+    test_id: Optional[str] = None,
+    model_key: Optional[str] = None,
 ) -> list[ValidationTestRun]:
     """List validation test runs."""
     runs = _load_runs()

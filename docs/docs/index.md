@@ -6,18 +6,10 @@ OpenEye is a CLI-first perception engine that turns raw video into structured wo
 
 ## Features
 
-- **Object Detection** — YOLOv8, YOLO26, Grounding DINO, RF-DETR, and custom adapters
+- **Object Detection** — YOLOv8, Grounding DINO, and custom adapters
 - **Depth Estimation** — Monocular depth via Depth Anything V2
-- **Segmentation** — Segment Anything 2 (SAM2)
-- **Scene Understanding** — Spatial relationships, hazard detection, scene graphs
-- **Safety Guardian** — Sub-100ms human detection and robot halt
-- **Agentic Loop** — Continuous perception + reasoning + planning cycle
-- **VLM Reasoning** — Cloud VLM integration (Nebius, OpenAI, Gemini, Anthropic, OpenRouter)
-- **Fleet Management** — Edge device management, OTA updates, staged deployments
-- **Governance** — Policy enforcement, PII filtering, rate limiting, safety zones
-- **Desktop Vision** — Screen capture and analysis tools
-- **MCP Server** — Model Context Protocol for desktop vision tools
-- **ROS 2 Bridge** — Robotics integration via ROS 2 perception node
+- **Scene Understanding** — Spatial relationships, scene graphs
+- **Safety Monitoring** — Real-time human detection and robot halt
 - **CLI-Native** — Every capability accessible from the terminal
 - **Model-Agnostic** — Swap models without code changes via adapters
 - **REST + WebSocket API** — Serve models over HTTP with a single command
@@ -46,19 +38,12 @@ openeye run yolov8 photo.jpg
 
 # Start the server
 openeye serve yolov8
-
-# Live camera detections
-openeye watch
-
-# G1 Safety Guardian demo
-openeye g1-demo
 ```
 
 ## Packages
 
 | Package | Description | Language |
 |---------|-------------|----------|
-| `cli/` | CLI tool, model adapters, and FastAPI inference server | Python |
-| `backend/` | Perception pipeline, fleet control plane, governance engine | Python |
-| `src/` | Web dashboard with live streaming, fleet management, and MLOps | TypeScript/React |
-| `integrations/` | ROS 2 perception node, OpenClaw integration | Python |
+| `cli/` | CLI tool & inference server | Python |
+| `backend/` | Perception engine runtime | Python |
+| `src/` | Web frontend | TypeScript/React |

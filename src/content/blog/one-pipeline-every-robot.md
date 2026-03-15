@@ -67,7 +67,7 @@ Hardware-agnosticism extends to the ML models themselves. OpenEye's vision layer
 - **Custom models**: Any ONNX or TorchScript model with the right output format
 
 And for the reasoning layer:
-- **Cloud VLMs**: GPT-4o, Claude, Qwen2.5-VL via API
+- **Cloud VLMs**: GPT-4o, Claude, Qwen3-VL via API
 - **Local VLMs**: Any model running through Ollama or vLLM
 - **Fine-tuned models**: Your own domain-specific models
 

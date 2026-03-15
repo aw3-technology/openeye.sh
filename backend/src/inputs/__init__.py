@@ -37,7 +37,7 @@ def find_module_with_class(class_name: str) -> T.Optional[str]:
                 content = f.read()
 
             pattern = (
-                rf"^class\s+{re.escape(class_name)}\s*\([^)]*(?:FuserInput|BaseVLMPlugin)[^)]*\)\s*:"
+                rf"^class\s+{re.escape(class_name)}\s*\([^)]*FuserInput[^)]*\)\s*:"
             )
 
             if re.search(pattern, content, re.MULTILINE):

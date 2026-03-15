@@ -8,7 +8,6 @@ import logoDark from "@/assets/openeye-logo-horizontal-dark.png";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { publicNavItems, isDropdown, GITHUB_URL } from "@/data/navigation";
 import type { NavDropdown } from "@/data/navigation";
-import { ease } from "@/lib/motion";
 
 function DropdownMenu({ item, isActive }: { item: NavDropdown; isActive: (href: string) => boolean }) {
   const [open, setOpen] = useState(false);
@@ -186,7 +185,7 @@ export function Navbar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease }}
+            transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
             className="md:hidden overflow-hidden border-t border-foreground/[0.06] bg-background/95 backdrop-blur-sm"
           >
             <div className="px-4 py-4 space-y-1 font-mono text-sm">

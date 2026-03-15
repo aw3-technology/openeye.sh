@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { captureFrame } from "@/lib/frame-capture";
 import { OpenEyeWebSocket } from "@/lib/openeye-ws";
 import { useOpenEyeConnection } from "./useOpenEyeConnection";
 import type { VLMReasoning } from "@/types/openeye";
@@ -82,8 +81,17 @@ export function useVLMStream(): VLMStreamState {
       const sendFrame = () => {
         const video = videoRefLocal.current?.current;
         if (!video || !ws.connected) return;
-        const base64 = captureFrame(video, canvas, { quality: 0.6, maxWidth: 640 });
-        if (!base64) return;
+        if (video.videoWidth === 0 || video.videoHeight === 0) return;
+
+        // Scale down for VLM to save bandwidth (640px wide max)
+        const scale = Math.min(1, 640 / video.videoWidth);
+        canvas.width = Math.round(video.videoWidth * scale);
+        canvas.height = Math.round(video.videoHeight * scale);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+        const base64 = dataUrl.split(",")[1];
         ws.send(base64);
         sendTimestampRef.current = performance.now();
         setIsPending(true);

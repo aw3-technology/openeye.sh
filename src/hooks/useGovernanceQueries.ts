@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { GovernanceClient } from "@/lib/governance-client";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 function useGovernanceClient(): GovernanceClient | null {
   const { serverUrl, isConnected } = useOpenEyeConnection();
@@ -77,9 +77,10 @@ export function useGovernanceViolations(limit = 50) {
 export function useEnablePolicy() {
   const client = useGovernanceClient();
   const qc = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: (name: string) => client!.enablePolicy(name),
-    onError: (err) => toast.error("Failed to enable policy", { description: String(err) }),
+    onError: (err) => toast({ title: "Failed to enable policy", description: String(err), variant: "destructive" }),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["governance", "policies"] });
       qc.invalidateQueries({ queryKey: ["governance", "status"] });
@@ -90,9 +91,10 @@ export function useEnablePolicy() {
 export function useDisablePolicy() {
   const client = useGovernanceClient();
   const qc = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: (name: string) => client!.disablePolicy(name),
-    onError: (err) => toast.error("Failed to disable policy", { description: String(err) }),
+    onError: (err) => toast({ title: "Failed to disable policy", description: String(err), variant: "destructive" }),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["governance", "policies"] });
       qc.invalidateQueries({ queryKey: ["governance", "status"] });
@@ -103,10 +105,11 @@ export function useDisablePolicy() {
 export function useLoadPreset() {
   const client = useGovernanceClient();
   const qc = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: (name: string) => client!.loadPreset(name),
-    onSuccess: (_, name) => toast.success(`Loaded preset: ${name}`),
-    onError: (err) => toast.error("Failed to load preset", { description: String(err) }),
+    onSuccess: (_, name) => toast({ title: `Loaded preset: ${name}` }),
+    onError: (err) => toast({ title: "Failed to load preset", description: String(err), variant: "destructive" }),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["governance"] });
     },
@@ -116,10 +119,11 @@ export function useLoadPreset() {
 export function useUpdateGovernanceConfig() {
   const client = useGovernanceClient();
   const qc = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: (yaml: string) => client!.updateConfig(yaml),
-    onSuccess: () => toast.success("Governance config updated"),
-    onError: (err) => toast.error("Invalid config", { description: String(err) }),
+    onSuccess: () => toast({ title: "Governance config updated" }),
+    onError: (err) => toast({ title: "Invalid config", description: String(err), variant: "destructive" }),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["governance"] });
     },

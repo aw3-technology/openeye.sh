@@ -1,6 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
-import { ease } from "@/lib/motion";
 
 interface TerminalLine {
   text: string;
@@ -91,7 +90,7 @@ export function TerminalBlock({ lines, title, animate = true }: TerminalBlockPro
             key={i}
             initial={animate && !shouldReduceMotion ? { opacity: 0, x: -4 } : undefined}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: animDuration, ease }}
+            transition={{ duration: animDuration, ease: [0.2, 0.8, 0.2, 1] }}
           >
             <span className={colorMap[line.color || "default"]}>{line.text}</span>
           </motion.div>

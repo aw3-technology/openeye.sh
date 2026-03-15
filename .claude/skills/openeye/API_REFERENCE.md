@@ -8,86 +8,16 @@ Started via `openeye serve <model>`, runs on `--host 0.0.0.0 --port 8000`.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/` | Browser dashboard (HTML) |
-| `GET` | `/health` | Health check with model info, load status, and uptime |
+| `GET` | `/health` | `{"status": "ok", "model": "<name>"}` |
 | `POST` | `/predict` | Multipart upload — returns `PredictionResult` |
 | `GET` | `/config` | Get runtime config |
 | `PUT` | `/config` | Update runtime config |
 | `GET` | `/metrics` | Prometheus-style inference metrics |
-| `GET` | `/queue/status` | Inference queue depth (active + queued counts) |
-| `GET` | `/nebius/stats` | Nebius Token Factory / VLM usage statistics |
+| `GET` | `/queue/status` | Request queue depth and status |
 
-#### Health Response
+### WebSocket
 
-```json
-{
-  "status": "ok",
-  "model": "yolov8",
-  "model_loaded": true,
-  "uptime_seconds": 123.4
-}
-```
-
-### Debug Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/debug/analyze` | Analyze a screenshot for UI issues using VLM. Upload via `file` field. |
-| `POST` | `/debug/diff` | Compare before/after screenshots for visual regressions. Upload via `before` and `after` fields. Returns VLM analysis plus optional pixel diff % and SSIM. |
-
-### WebSocket Endpoints
-
-| Path | Description |
-|------|-------------|
-| `WS /ws` | Basic real-time inference — send base64-encoded frames, receive `PredictionResult` JSON |
-| `WS /ws/perception` | Full perception pipeline — returns `PerceptionFrame` with scene graph, safety zones, and action suggestions |
-| `WS /ws/vlm` | VLM reasoning — send base64 JPEG, receive `{description, reasoning, latency_ms}` from Nebius/OpenRouter VLM |
-| `WS /ws/agentic` | Continuous agentic loop — send `{"frame": "<base64>", "goal": "...", "set_goal": "..."}`, receive agentic frame with detections, scene graph, VLM reasoning, action plan, memory, and latency breakdown |
-| `WS /ws/debug` | Live UI debug stream — send base64 frames, receive `DebugAnalysis` JSON with UI issue detection |
-| `WS /ws/desktop` | Desktop vision — send `{"frame": "<base64>", "query": "optional search"}`, receive UI element detection, layout analysis, and optional element search results |
-
-#### `/ws/agentic` Response Schema
-
-```json
-{
-  "type": "agentic_frame",
-  "frame_id": 1,
-  "goal": "monitor the scene",
-  "detections": [...],
-  "scene_graph": {"nodes": [], "relationships": [], "root_id": "scene"},
-  "scene_description": "...",
-  "vlm_reasoning": {"description": "...", "reasoning": "...", "latency_ms": 1200},
-  "action_plan": [{"action": "...", "target_id": null, "reason": "...", "priority": 0.6}],
-  "safety_zones": [...],
-  "safety_alerts": [...],
-  "change_alerts": [{"change_type": "object_appeared", "description": "...", "affected_track_ids": [...], "magnitude": 1.0}],
-  "memory": {
-    "objects_seen": {"track_id": {"label": "person", "frames_seen": 10, "seconds_tracked": 5.2}},
-    "timeline": [{"timestamp": 1710500000, "event": "object_appeared", "details": "..."}],
-    "frame_count": 42,
-    "total_objects_tracked": 5
-  },
-  "latency": {"detection_ms": 15.2, "vlm_ms": 1200.0, "total_ms": 1220.5}
-}
-```
-
-#### `/ws/desktop` Response Schema
-
-```json
-{
-  "type": "desktop_frame",
-  "frame_id": 1,
-  "detections": [...],
-  "active_window": {"title": "...", "application": "..."},
-  "ui_elements": [...],
-  "text_regions": [...],
-  "focused_element": null,
-  "layout_description": "...",
-  "latency": {"detection_ms": 12.0, "vlm_ms": 800.0, "total_ms": 815.0}
-}
-```
-
-When a `query` is provided, the response type changes to `"desktop_find"` with additional `found`, `query`, and `alternatives` fields.
+`WS /ws` — Send base64-encoded frames, receive `PredictionResult` JSON per frame.
 
 ### PredictionResult Schema
 
@@ -106,103 +36,6 @@ interface PredictionResult {
   inference_ms: number;
 }
 ```
-
----
-
-## Agent REST API (prefix `/agent`)
-
-Agentic pipeline endpoints for starting/stopping the agent loop and accessing observation memory.
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/agent/start` | Start agentic loop with `{"goal": "..."}`. Returns 409 if already running. |
-| `POST` | `/agent/stop` | Stop agentic loop. Returns tick count. |
-| `GET` | `/agent/status` | Get agent status: `{running, tick_count, current_plan, goal}` |
-| `GET` | `/agent/stream` | SSE stream of `AgentTickEvent` objects. Emits `{"done": true}` on stop. |
-| `GET` | `/agent/memory` | Get recent observations. Query param: `limit` (default 20). |
-| `POST` | `/agent/recall` | Query observation memory with a `RecallQuery` body. Returns `RecallResult`. |
-| `GET` | `/agent/demo/stream` | SSE stream of a scripted 10-tick demo scenario (no real backend needed). |
-
----
-
-## MLOps API (prefix `/mlops`)
-
-Model registry, lifecycle, pipeline orchestration, evaluation, deployment, and feedback endpoints.
-
-### Models (Registry)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/mlops/models/upload` | Upload and register a custom-trained model |
-| `GET` | `/mlops/models` | List all models in the registry |
-| `GET` | `/mlops/models/{model_key}` | Get a specific model |
-| `GET` | `/mlops/models/{model_key}/versions` | List all versions of a model |
-| `POST` | `/mlops/models/{model_key}/versions` | Add a new version to an existing model |
-
-### Lifecycle (Promotion & A/B Testing)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/mlops/models/{model_key}/promote` | Request promotion of a model version to a new stage |
-| `POST` | `/mlops/models/{model_key}/promote/approve` | Approve a pending promotion |
-| `POST` | `/mlops/models/{model_key}/promote/reject` | Reject a pending promotion |
-| `GET` | `/mlops/promotions` | List promotion records |
-| `POST` | `/mlops/ab-tests` | Create a new A/B test |
-| `GET` | `/mlops/ab-tests` | List A/B tests |
-| `GET` | `/mlops/ab-tests/{test_id}` | Get an A/B test by ID |
-| `POST` | `/mlops/ab-tests/{test_id}/complete` | Complete an A/B test and determine winner |
-
-### Pipelines (Retraining & Batch Inference)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/mlops/retraining/pipelines` | Create a new retraining pipeline |
-| `GET` | `/mlops/retraining/pipelines` | List retraining pipelines |
-| `POST` | `/mlops/retraining/pipelines/{pipeline_name}/trigger` | Trigger a retraining run |
-| `GET` | `/mlops/retraining/runs` | List retraining runs |
-| `GET` | `/mlops/retraining/runs/{run_id}` | Get a retraining run by ID |
-| `POST` | `/mlops/batch-inference` | Create a batch inference job |
-| `GET` | `/mlops/batch-inference` | List batch inference jobs |
-| `GET` | `/mlops/batch-inference/{job_id}` | Get a batch job by ID |
-
-### Evaluation (Benchmarks & Validation)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/mlops/benchmarks/{model_key}` | Get benchmark results for a model |
-| `POST` | `/mlops/validation-tests` | Create a validation test |
-| `GET` | `/mlops/validation-tests` | List validation tests |
-| `GET` | `/mlops/validation-tests/{test_id}` | Get a validation test |
-| `GET` | `/mlops/validation-runs` | List validation test runs |
-
-### Deployment (Lineage, Export & Shadow Mode)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/mlops/lineage/{model_key}/{version}` | Get lineage for a model version |
-| `GET` | `/mlops/lineage/{model_key}/{version}/chain` | Get the full lineage chain |
-| `GET` | `/mlops/lineage` | List all lineage records |
-| `POST` | `/mlops/export` | Export a model to ONNX, TensorRT, or CoreML |
-| `GET` | `/mlops/exports` | List model exports |
-| `POST` | `/mlops/shadow-deployments` | Create a shadow mode deployment |
-| `GET` | `/mlops/shadow-deployments` | List shadow deployments |
-| `GET` | `/mlops/shadow-deployments/{deployment_id}` | Get a shadow deployment |
-| `POST` | `/mlops/shadow-deployments/{deployment_id}/complete` | Complete a shadow deployment |
-
-### Feedback (Annotations)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/mlops/annotations` | Annotate an inference failure |
-| `GET` | `/mlops/annotations` | List annotations |
-| `POST` | `/mlops/feedback-batches` | Create and execute a feedback batch |
-| `GET` | `/mlops/feedback-batches` | List feedback batches |
-
----
-
-## Governance API (prefix `/govern`)
-
-Available when the `governance` package is installed. Provides policy definition, violation detection, and audit trails. The router is conditionally imported at app startup.
 
 ---
 
@@ -278,33 +111,18 @@ Runs on port 8001. All endpoints require `Authorization: Bearer <OPENEYE_TOKEN>`
 
 ---
 
-## gRPC Services (port 50051)
+## gRPC Perception Service (port 50051)
 
-### PerceptionService (`backend/src/perception_grpc/perception_service.py`)
-
-Streams detection events from the EventBus to robot controllers. Uses JSON-over-gRPC (no compiled stubs required).
+Defined in `backend/src/perception_grpc/perception_service.py`.
 
 | Method | Type | Description |
 |--------|------|-------------|
 | `GetLatestDetections` | Unary | Latest detection frame as JSON |
 | `GetTelemetry` | Unary | Current telemetry metrics |
 | `StreamDetections` | Server-streaming | Subscribe to detection events |
-| `StreamTelemetry` | Server-streaming | Stream telemetry at ~1s intervals |
+| `StreamTelemetry` | Server-streaming | Stream telemetry continuously |
 
-### RobotVisionService (`backend/src/perception_grpc/server.py`)
-
-Wraps the full `PerceptionPipeline` directly, returning complete `PerceptionFrame` data (objects, scene graph, safety, grasp points, floor plane). Also uses JSON-over-gRPC.
-
-| Method | Type | Description |
-|--------|------|-------------|
-| `Perceive` | Unary | Process a single frame. Send `{"frame_data": "<base64>", "width": 640, "height": 480}`, receive full perception result. |
-| `StreamPerception` | Bidirectional | Stream frames in, receive perception results out |
-| `Subscribe` | Server-streaming | Subscribe to perception results from other clients |
-| `Query` | Unary | Natural language query about the scene. Send `{"question": "..."}`, receive `{answer, matched_object_ids, confidence}` |
-| `SetGoal` | Unary | Update the pipeline's active goal. Send `{"goal": "..."}`, receive `{accepted, active_goal}` |
-| `Health` | Unary | Health check with model name, frames processed, and uptime |
-
-### Detection Frame Format (PerceptionService)
+### Detection Frame Format
 
 ```json
 {

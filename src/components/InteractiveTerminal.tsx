@@ -1,6 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { ease } from "@/lib/motion";
 
 interface TerminalLine {
   text: string;
@@ -63,7 +62,7 @@ const commands: Command[] = [
     output: [
       { text: "[OPENEYE] Loading scene context...", color: "muted" },
       { text: "[SCENE] 6 objects detected, 2 hazards flagged", color: "muted" },
-      { text: "[LLM] Reasoning with Qwen2.5-VL via Nebius...", color: "muted" },
+      { text: "[LLM] Reasoning with Qwen3-VL via Nebius...", color: "muted" },
       { text: "", color: "default" },
       { text: "[PLAN] Generated 4-step action plan:", color: "green" },
       { text: "  1. Move soldering_iron → safe_zone (hazard)", color: "green" },
@@ -199,7 +198,7 @@ export function InteractiveTerminal() {
               key={`${activeCommand}-${i}`}
               initial={shouldReduceMotion ? undefined : { opacity: 0, x: -4 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.12, ease }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.12, ease: [0.2, 0.8, 0.2, 1] }}
             >
               <span className={colorMap[line.color]}>{line.text}</span>
             </motion.div>

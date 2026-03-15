@@ -8,7 +8,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -25,11 +25,14 @@ _BATCH_JOBS_PATH = OPENEYE_HOME / "batch_jobs.yaml"
 
 _IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".webp"}
 
+
 def _load_jobs() -> list[dict]:
     return safe_load_yaml_list(_BATCH_JOBS_PATH)
 
+
 def _save_jobs(jobs: list[dict]) -> None:
     atomic_save_yaml(_BATCH_JOBS_PATH, jobs)
+
 
 def create_batch_job(config: BatchInferenceConfig) -> BatchInferenceJob:
     """Create a new batch inference job."""
@@ -43,6 +46,7 @@ def create_batch_job(config: BatchInferenceConfig) -> BatchInferenceJob:
     _save_jobs(jobs)
     return job
 
+
 def get_batch_job(job_id: str) -> BatchInferenceJob:
     """Get a batch job by ID."""
     jobs = _load_jobs()
@@ -51,13 +55,15 @@ def get_batch_job(job_id: str) -> BatchInferenceJob:
             return BatchInferenceJob(**j)
     raise KeyError(f"Batch job '{job_id}' not found.")
 
-def list_batch_jobs(model_key: str | None = None) -> list[BatchInferenceJob]:
+
+def list_batch_jobs(model_key: Optional[str] = None) -> list[BatchInferenceJob]:
     """List batch jobs."""
     jobs = _load_jobs()
     result = [BatchInferenceJob(**j) for j in jobs]
     if model_key:
         result = [j for j in result if j.config.model_key == model_key]
     return result
+
 
 def _list_local_images(input_path: str) -> list[Path]:
     """List all image files in a local directory."""
@@ -67,6 +73,7 @@ def _list_local_images(input_path: str) -> list[Path]:
     return sorted(
         p for p in d.rglob("*") if p.is_file() and p.suffix.lower() in _IMAGE_EXTENSIONS
     )
+
 
 def _list_s3_images(input_path: str) -> list[str]:
     """List image files in an S3 bucket/prefix."""
@@ -88,6 +95,7 @@ def _list_s3_images(input_path: str) -> list[str]:
                 images.append(f"s3://{bucket}/{key}")
     return images
 
+
 def _list_gcs_images(input_path: str) -> list[str]:
     """List image files in a GCS bucket/prefix."""
     from google.cloud import storage
@@ -104,6 +112,7 @@ def _list_gcs_images(input_path: str) -> list[str]:
         if Path(blob.name).suffix.lower() in _IMAGE_EXTENSIONS:
             images.append(f"gs://{bucket_name}/{blob.name}")
     return images
+
 
 def _write_results_local(results: list[dict], output_path: str, fmt: str) -> str:
     """Write results to local file."""
@@ -130,6 +139,7 @@ def _write_results_local(results: list[dict], output_path: str, fmt: str) -> str
     else:
         raise ValueError(f"Unsupported output format: {fmt}")
 
+
 def _format_results(results: list[dict], fmt: str) -> str:
     """Format results as JSONL or CSV string."""
     if fmt == "jsonl":
@@ -148,6 +158,7 @@ def _format_results(results: list[dict], fmt: str) -> str:
     else:
         raise ValueError(f"Unsupported output format: {fmt}")
 
+
 def _write_results_s3(results: list[dict], output_path: str, fmt: str) -> str:
     """Write results to S3."""
     import boto3
@@ -161,6 +172,7 @@ def _write_results_s3(results: list[dict], output_path: str, fmt: str) -> str:
     s3 = boto3.client("s3")
     s3.put_object(Bucket=bucket, Key=key, Body=body.encode())
     return f"s3://{bucket}/{key}"
+
 
 def _write_results_gcs(results: list[dict], output_path: str, fmt: str) -> str:
     """Write results to GCS."""
@@ -178,11 +190,12 @@ def _write_results_gcs(results: list[dict], output_path: str, fmt: str) -> str:
     blob.upload_from_string(body)
     return f"gs://{bucket_name}/{blob_name}"
 
+
 def run_batch_inference(
     job_id: str,
     adapter,
     *,
-    progress_callback: Any | None = None,
+    progress_callback: Optional[Any] = None,
 ) -> BatchInferenceJob:
     """Execute a batch inference job.
 

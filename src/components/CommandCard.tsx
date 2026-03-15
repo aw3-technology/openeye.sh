@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { ease } from "@/lib/motion";
 
 interface CommandCardProps {
   label: string;
@@ -13,7 +12,7 @@ export function CommandCard({ label, command, description }: CommandCardProps) {
       initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.3, ease }}
+      transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
       whileTap={{ scale: 0.98 }}
       className="bg-card rounded-outer border border-foreground/[0.06] p-6 hover:border-primary/20 hover:shadow-md transition-all cursor-default"
     >

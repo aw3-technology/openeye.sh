@@ -39,18 +39,14 @@ class ModelAdapter(ABC):
 
 ## Built-in Adapters
 
-| Adapter | Module | Task | Extras |
-|---------|--------|------|--------|
-| `yolov8` | `openeye_ai.adapters.yolov8` | Detection | `pip install openeye-ai[yolo]` |
-| `yolo26` | `openeye_ai.adapters.yolo26` | Detection | `pip install openeye-ai[yolo]` |
-| `depth_anything` | `openeye_ai.adapters.depth_anything` | Depth estimation | `pip install openeye-ai[depth]` |
-| `grounding_dino` | `openeye_ai.adapters.grounding_dino` | Open-vocabulary detection | `pip install openeye-ai[grounding]` |
-| `rfdetr` | `openeye_ai.adapters.rfdetr` | Detection | `pip install openeye-ai[rfdetr]` |
-| `sam2` | `openeye_ai.adapters.sam2` | Segmentation | `pip install openeye-ai[sam]` |
-| `smolvla` | `openeye_ai.adapters.smolvla` | Vision-language-action | `pip install openeye-ai[smolvla]` |
-| `yolov8:onnx` | `openeye_ai.adapters.yolov8_onnx` | Detection (ONNX) | `pip install openeye-ai[onnx]` |
-| `onnx_generic` | `openeye_ai.adapters.onnx_runtime` | Generic ONNX | `pip install openeye-ai[onnx]` |
-| `yolov8:tensorrt` | `openeye_ai.adapters.tensorrt_runtime` | Detection (TensorRT) | `pip install openeye-ai[tensorrt]` |
+| Adapter | Module | Models |
+|---------|--------|--------|
+| `yolov8` | `openeye_ai.adapters.yolov8` | YOLOv8 (ultralytics) |
+| `depth_anything` | `openeye_ai.adapters.depth_anything` | Depth Anything V2 |
+| `grounding_dino` | `openeye_ai.adapters.grounding_dino` | Grounding DINO |
+| `yolov8:onnx` | `openeye_ai.adapters.yolov8_onnx` | YOLOv8 ONNX |
+| `onnx_generic` | `openeye_ai.adapters.onnx_runtime` | Generic ONNX |
+| `yolov8:tensorrt` | `openeye_ai.adapters.tensorrt_runtime` | YOLOv8 TensorRT |
 
 ## Lifecycle
 
