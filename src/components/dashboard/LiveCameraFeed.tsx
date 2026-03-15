@@ -255,14 +255,14 @@ export function LiveCameraFeed() {
       {/* ----- HUD: Bottom-right LIVE indicator ----- */}
       {isStreaming && (
         <div className="absolute bottom-3 right-3 font-mono text-[11px] pointer-events-none">
-          <div className="bg-black/70 backdrop-blur-sm rounded-md border border-white/10 px-3 py-1.5">
+          <div className="bg-terminal-bg/70 backdrop-blur-sm rounded-md border border-terminal-muted/20 px-3 py-1.5">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-red opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-terminal-red" />
               </span>
-              <span className="text-red-400 font-bold tracking-wider">REC</span>
-              <span className="text-white/40 tabular-nums text-[10px]">
+              <span className="text-terminal-red font-bold tracking-wider">REC</span>
+              <span className="text-terminal-muted tabular-nums text-[10px]">
                 {metrics.frame_count}f
               </span>
             </div>
