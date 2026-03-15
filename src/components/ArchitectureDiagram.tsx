@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 
 const layers = [
-  { label: "Model Registry", sub: "openeye pull — YOLOv8 · GroundingDINO · SAM2 · SmolVLA", color: "oe-blue" },
-  { label: "Unified Runtime", sub: "Weights · Dependencies · Inference Engine", color: "oe-blue" },
-  { label: "Camera Adapter", sub: "USB · RTSP · Video Files · Simulated Feeds", color: "foreground" },
-  { label: "Structured Output", sub: "JSON Scene Graph · Detections · Depth Maps · Actions", color: "oe-blue" },
-  { label: "Safety Monitor", sub: "Anomaly Detection · Workspace Baseline · Agent Halt", color: "oe-red" },
-  { label: "Agent Bus", sub: "OpenClaw Skills · REST API · Robot Adapters", color: "oe-green" },
+  { label: "Camera Feed", sub: "USB · RTSP · Video Files · Simulated Feeds", color: "oe-blue" },
+  { label: "Vision Engine", sub: "YOLO26 · Grounding DINO 1.5 · SAM 3", color: "oe-blue" },
+  { label: "Scene Understanding", sub: "Objects · Spatial Map · Hazards", color: "oe-blue" },
+  { label: "LLM Reasoning", sub: "Qwen3-VL · OpenRouter · Nebius Token Factory", color: "oe-red" },
+  { label: "Action Planner", sub: "Structured Task Decomposition", color: "oe-blue" },
+  { label: "Robot Adapter", sub: "Solo CLI · OpenClaw · Simulation", color: "oe-green" },
 ];
 
 function Diamond({ colorClass }: { colorClass: string }) {
@@ -16,9 +16,9 @@ function Diamond({ colorClass }: { colorClass: string }) {
 const layerDiamondColors = [
   "bg-oe-blue",
   "bg-oe-blue",
-  "bg-foreground/60",
   "bg-oe-blue",
   "bg-oe-red",
+  "bg-oe-blue",
   "bg-oe-green",
 ];
 

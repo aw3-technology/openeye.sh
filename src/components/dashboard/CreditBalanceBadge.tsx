@@ -1,0 +1,23 @@
+import { Link } from "react-router-dom";
+import { Coins, AlertCircle } from "lucide-react";
+import { useCreditBalance } from "@/hooks/useCredits";
+
+export function CreditBalanceBadge() {
+  const { data, isLoading, isError } = useCreditBalance();
+
+  return (
+    <Link
+      to="/dashboard/credits"
+      className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium transition-colors hover:bg-muted"
+    >
+      {isError ? (
+        <AlertCircle className="h-4 w-4 text-destructive" />
+      ) : (
+        <Coins className="h-4 w-4 text-yellow-500" />
+      )}
+      <span className="tabular-nums">
+        {isLoading ? "—" : isError ? "!" : (data?.balance ?? 0)}
+      </span>
+    </Link>
+  );
+}

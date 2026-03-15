@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 
 interface TerminalLine {
   text: string;
@@ -23,9 +23,39 @@ const colorMap = {
 
 export function TerminalBlock({ lines, title, animate = true }: TerminalBlockProps) {
   const [visibleLines, setVisibleLines] = useState(animate ? 0 : lines.length);
+  const [hasBeenVisible, setHasBeenVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
+  // Use IntersectionObserver to start animation only when visible
   useEffect(() => {
-    if (!animate) return;
+    if (!animate || hasBeenVisible) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasBeenVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [animate, hasBeenVisible]);
+
+  // Run line-by-line animation once visible
+  useEffect(() => {
+    if (!animate || !hasBeenVisible) return;
+    if (shouldReduceMotion) {
+      setVisibleLines(lines.length);
+      return;
+    }
+
+    setVisibleLines(0);
     const interval = setInterval(() => {
       setVisibleLines((prev) => {
         if (prev >= lines.length) {
@@ -36,10 +66,12 @@ export function TerminalBlock({ lines, title, animate = true }: TerminalBlockPro
       });
     }, 120);
     return () => clearInterval(interval);
-  }, [lines.length, animate]);
+  }, [lines.length, animate, hasBeenVisible, shouldReduceMotion]);
+
+  const animDuration = shouldReduceMotion ? 0 : 0.15;
 
   return (
-    <div className="bg-card rounded-outer border border-foreground/[0.06] overflow-hidden shadow-lg">
+    <div ref={containerRef} className="bg-card rounded-outer border border-foreground/[0.06] overflow-hidden shadow-lg">
       {/* Window chrome — diamond dots */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/[0.06]">
         <div className="w-2 h-2 rotate-45 bg-oe-blue" />
@@ -56,9 +88,9 @@ export function TerminalBlock({ lines, title, animate = true }: TerminalBlockPro
         {lines.slice(0, visibleLines).map((line, i) => (
           <motion.div
             key={i}
-            initial={animate ? { opacity: 0, x: -4 } : undefined}
+            initial={animate && !shouldReduceMotion ? { opacity: 0, x: -4 } : undefined}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.15, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: animDuration, ease: [0.2, 0.8, 0.2, 1] }}
           >
             <span className={colorMap[line.color || "default"]}>{line.text}</span>
           </motion.div>

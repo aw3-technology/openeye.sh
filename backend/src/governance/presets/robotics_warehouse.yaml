@@ -1,0 +1,63 @@
+version: "1.0"
+name: "robotics_warehouse"
+domain: "robotics"
+extends:
+  - "robotics_safety"
+
+policies:
+  - name: "workspace_boundaries"
+    type: "zone_policy"
+    enabled: true
+    severity: "critical"
+    enforcement: "enforce"
+    config:
+      zones:
+        - name: "human_proximity"
+          level: "danger"
+          shape: "circle"
+          center: [0, 0, 0]
+          radius_m: 1.0
+          on_violation: "halt"
+        - name: "aisle_caution"
+          level: "caution"
+          shape: "circle"
+          center: [0, 0, 0]
+          radius_m: 3.0
+          on_violation: "warn"
+        - name: "forklift_zone"
+          level: "danger"
+          shape: "box"
+          min: [-5, -1, 0]
+          max: [5, 1, 10]
+          on_violation: "halt"
+
+  - name: "warehouse_objects"
+    type: "object_restriction"
+    enabled: true
+    severity: "high"
+    enforcement: "enforce"
+    config:
+      deny_labels:
+        - "forklift"
+        - "crane"
+      deny_patterns:
+        - "vehicle"
+        - "machinery"
+      on_violation: "deny"
+
+  - name: "action_safety"
+    type: "action_filter"
+    enabled: true
+    severity: "high"
+    enforcement: "enforce"
+    config:
+      deny_patterns:
+        - "throw"
+        - "launch"
+        - "stack.*high"
+      max_speed: 0.5
+
+settings:
+  log_all_decisions: true
+  fail_open: false
+  evaluation_timeout_ms: 50

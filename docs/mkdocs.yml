@@ -1,0 +1,61 @@
+site_name: OpenEye Documentation
+site_description: CLI-first perception engine for robots and autonomous agents
+site_url: https://docs.perceptify.dev
+repo_url: https://github.com/OpenEye/perceptify-the-world
+repo_name: OpenEye/perceptify-the-world
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: black
+      accent: green
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: black
+      accent: green
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quickstart: getting-started/quickstart.md
+  - CLI:
+      - Commands: cli/commands.md
+      - Server API: cli/server-api.md
+  - API Reference:
+      - Schema: api/schema.md
+      - Adapters: api/adapters.md
+  - Backend:
+      - Architecture: backend/architecture.md
+      - Configuration: backend/configuration.md
+  - Tutorials:
+      - Custom Adapter: tutorials/custom-adapter.md
+      - Docker Deployment: tutorials/docker.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true

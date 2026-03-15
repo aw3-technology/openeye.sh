@@ -22,3 +22,25 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python / CLI
+cli/.venv/
+cli/*.egg-info/
+cli/openeye_ai/*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+.eggs/
+build/
+dist/
+
+# Python backend
+backend/.venv/
+backend/.env
+backend/config/memory/
+backend/dump/
+backend/uv.lock
+*.pt
+*.pth

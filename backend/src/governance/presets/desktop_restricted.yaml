@@ -1,0 +1,64 @@
+version: "1.0"
+name: "desktop_restricted"
+domain: "desktop_agent"
+extends:
+  - "desktop_privacy"
+
+policies:
+  - name: "app_restrictions"
+    type: "interaction_boundary"
+    enabled: true
+    domain: "desktop_agent"
+    severity: "high"
+    enforcement: "enforce"
+    config:
+      denied_apps:
+        - "terminal"
+        - "cmd"
+        - "powershell"
+      denied_urls:
+        - "admin\\."
+        - "settings\\."
+        - "console\\.cloud"
+      deny_action_types:
+        - "delete"
+        - "remove"
+        - "send"
+        - "publish"
+        - "deploy"
+      read_only_apps:
+        - "banking"
+        - "bank"
+
+  - name: "region_allowlist"
+    type: "zone_policy"
+    enabled: true
+    domain: "desktop_agent"
+    severity: "high"
+    enforcement: "enforce"
+    config:
+      zones:
+        - name: "system_tray"
+          level: "danger"
+          region:
+            x1: 0.8
+            y1: 0.95
+            x2: 1.0
+            y2: 1.0
+          on_violation: "block"
+
+  - name: "strict_rate_limit"
+    type: "rate_limiter"
+    enabled: true
+    severity: "medium"
+    enforcement: "enforce"
+    config:
+      max_actions: 30
+      window_seconds: 60
+      error_cooldown_seconds: 10
+      max_errors: 2
+
+settings:
+  log_all_decisions: true
+  fail_open: false
+  evaluation_timeout_ms: 50

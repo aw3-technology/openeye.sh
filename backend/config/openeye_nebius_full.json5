@@ -1,0 +1,59 @@
+{
+  // OpenEye full-stack Nebius config — Qwen3-235B cortex + Qwen3-VL-72B vision
+  version: "v1.0.4",
+
+  default_mode: "perception",
+  allow_manual_switching: false,
+  mode_memory_enabled: false,
+
+  api_key: "${NEBIUS_API_KEY}",
+  system_governance: "",
+
+  cortex_llm: {
+    type: "NebiusLLM",
+    config: {
+      agent_name: "OpenEye",
+      history_length: 10,
+      model: "Qwen/Qwen3-235B-A22B-Instruct-2507",
+    },
+  },
+
+  modes: {
+    perception: {
+      display_name: "Nebius Full-Stack Perception",
+      description: "Full Nebius stack: Qwen3-235B cortex LLM with Qwen3-VL-72B vision",
+      system_prompt_base: "You are OpenEye, a perception engine. You receive visual observations from a camera processed by a vision language model. Describe what you see and identify interesting elements, people, objects, and activities. Be concise but informative.",
+      hertz: 1,
+
+      agent_inputs: [
+        {
+          type: "VLMNebius",
+          config: {
+            base_url: "https://api.tokenfactory.nebius.com/v1/",
+            model: "Qwen/Qwen3-VL-72B",
+            camera_index: 0,
+          },
+        },
+      ],
+
+      simulators: [
+        {
+          type: "WebSim",
+          config: {
+            port: 8765,
+          },
+        },
+      ],
+
+      agent_actions: [
+        {
+          name: "log_action",
+          llm_label: "log",
+          connector: "log",
+        },
+      ],
+    },
+  },
+
+  transition_rules: [],
+}

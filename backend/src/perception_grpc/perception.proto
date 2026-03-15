@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package openeye;
+
+// Perception service for streaming detections to robot controllers.
+service PerceptionService {
+  // Stream detection events in real-time.
+  rpc StreamDetections(StreamRequest) returns (stream DetectionFrame);
+
+  // Get the latest detection snapshot.
+  rpc GetLatestDetections(Empty) returns (DetectionFrame);
+
+  // Stream telemetry metrics.
+  rpc StreamTelemetry(StreamRequest) returns (stream TelemetryFrame);
+
+  // Get current telemetry snapshot.
+  rpc GetTelemetry(Empty) returns (TelemetryFrame);
+}
+
+message Empty {}
+
+message StreamRequest {
+  // Optional: filter by minimum confidence.
+  float min_confidence = 1;
+  // Optional: filter by class labels.
+  repeated string class_filter = 2;
+}
+
+message BoundingBox {
+  float x1 = 1;
+  float y1 = 2;
+  float x2 = 3;
+  float y2 = 4;
+}
+
+message Detection {
+  string label = 1;
+  float confidence = 2;
+  BoundingBox bbox = 3;
+}
+
+message DetectionFrame {
+  int64 frame_index = 1;
+  double timestamp = 2;
+  repeated Detection detections = 3;
+  string source = 4;
+  float inference_ms = 5;
+  float capture_ms = 6;
+}
+
+message TelemetryFrame {
+  double timestamp = 1;
+  float current_fps = 2;
+  float avg_capture_ms = 3;
+  float avg_inference_ms = 4;
+  float avg_total_ms = 5;
+  int64 frames_processed = 6;
+  int64 detections_total = 7;
+  int64 errors_total = 8;
+  double uptime_seconds = 9;
+}

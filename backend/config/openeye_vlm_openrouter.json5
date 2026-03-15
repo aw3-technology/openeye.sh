@@ -1,0 +1,64 @@
+{
+  // OpenEye VLM config — OpenRouter (free Qwen3-VL-235B)
+  version: "v1.0.3",
+
+  default_mode: "perception",
+  allow_manual_switching: false,
+  mode_memory_enabled: false,
+
+  api_key: "${OPENROUTER_API_KEY}",
+  system_governance: "",
+
+  cortex_llm: {
+    type: "OpenRouterLLM",
+    config: {
+      agent_name: "OpenEye",
+      history_length: 10,
+      model: "qwen/qwen3-vl-235b:free",
+      fallback_model: "google/gemma-3-27b-it:free",
+      site_url: "https://perceptify.dev",
+      site_name: "OpenEye",
+    },
+  },
+
+  modes: {
+    perception: {
+      display_name: "OpenRouter VLM Perception",
+      description: "Cloud VLM perception using OpenRouter free models",
+      system_prompt_base: "You are OpenEye, a perception engine. You receive visual observations from a camera processed by a vision language model. Describe what you see and identify interesting elements, people, objects, and activities. Be concise but informative.",
+      hertz: 1,
+
+      agent_inputs: [
+        {
+          type: "VLMOpenRouter",
+          config: {
+            base_url: "https://openrouter.ai/api/v1",
+            model: "qwen/qwen3-vl-235b:free",
+            camera_index: 0,
+            site_url: "https://perceptify.dev",
+            site_name: "OpenEye",
+          },
+        },
+      ],
+
+      simulators: [
+        {
+          type: "WebSim",
+          config: {
+            port: 8765,
+          },
+        },
+      ],
+
+      agent_actions: [
+        {
+          name: "log_action",
+          llm_label: "log",
+          connector: "log",
+        },
+      ],
+    },
+  },
+
+  transition_rules: [],
+}

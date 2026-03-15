@@ -14,7 +14,7 @@ export function CommandCard({ label, command, description }: CommandCardProps) {
       viewport={{ once: true }}
       transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
       whileTap={{ scale: 0.98 }}
-      className="bg-card rounded-outer border border-foreground/[0.06] p-6 hover:border-primary/20 transition-colors cursor-default"
+      className="bg-card rounded-outer border border-foreground/[0.06] p-6 hover:border-primary/20 hover:shadow-md transition-all cursor-default"
     >
       <div className="flex items-center gap-2 mb-3">
         <span className="w-2 h-2 rotate-45 bg-oe-blue" />

@@ -1,0 +1,71 @@
+version: "1.0"
+name: "robotics_safety"
+domain: "robotics"
+
+policies:
+  - name: "workspace_boundaries"
+    type: "zone_policy"
+    enabled: true
+    severity: "critical"
+    enforcement: "enforce"
+    config:
+      zones:
+        - name: "danger_zone"
+          level: "danger"
+          shape: "circle"
+          center: [0, 0, 0]
+          radius_m: 0.5
+          on_violation: "halt"
+        - name: "caution_zone"
+          level: "caution"
+          shape: "circle"
+          center: [0, 0, 0]
+          radius_m: 1.5
+          on_violation: "warn"
+
+  - name: "dangerous_objects"
+    type: "object_restriction"
+    enabled: true
+    severity: "high"
+    enforcement: "enforce"
+    config:
+      deny_labels:
+        - "knife"
+        - "scissors"
+        - "saw"
+        - "blade"
+        - "fire"
+        - "flame"
+      deny_patterns:
+        - "sharp"
+        - "weapon"
+        - "hazard"
+      on_violation: "deny"
+
+  - name: "action_safety"
+    type: "action_filter"
+    enabled: true
+    severity: "high"
+    enforcement: "enforce"
+    config:
+      deny_patterns:
+        - "throw"
+        - "launch"
+        - "drop.*heavy"
+      max_speed: 1.0
+
+  - name: "action_rate"
+    type: "rate_limiter"
+    enabled: true
+    severity: "medium"
+    enforcement: "enforce"
+    config:
+      max_actions: 30
+      window_seconds: 60
+      error_cooldown_seconds: 5
+      max_errors: 3
+
+settings:
+  log_all_decisions: true
+  fail_open: false
+  evaluation_timeout_ms: 50

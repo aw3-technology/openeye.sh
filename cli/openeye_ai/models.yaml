@@ -1,0 +1,116 @@
+schema_version: 2
+registry_url: https://raw.githubusercontent.com/OpenEye/perceptify-the-world/main/cli/openeye_ai/models.yaml
+models:
+  yolov8:
+    name: YOLOv8
+    task: detection
+    description: "Real-time object detection \u2014 80 COCO classes"
+    adapter: yolov8
+    hf_repo: ultralytics/yolov8
+    filename: yolov8n.pt
+    size_mb: 6
+    hardware:
+      cpu: true
+      cuda: true
+      mps: true
+    checksum:
+      algorithm: sha256
+      value: af00000000000000000000000000000000000000000000000000000000000000
+    variants:
+      quantized:
+        filename: yolov8n_int8.onnx
+        size_mb: 3
+        adapter: yolov8:onnx
+        checksum:
+          algorithm: sha256
+          value: bf00000000000000000000000000000000000000000000000000000000000000
+  depth-anything:
+    name: Depth Anything V2
+    task: depth
+    description: Monocular depth estimation
+    adapter: depth_anything
+    hf_repo: depth-anything/Depth-Anything-V2-Small-hf
+    filename: model.safetensors
+    size_mb: 98
+    hardware:
+      cpu: true
+      cuda: true
+      mps: true
+    checksum:
+      algorithm: sha256
+      value: cf00000000000000000000000000000000000000000000000000000000000000
+  grounding-dino:
+    name: Grounding DINO
+    task: detection
+    description: Open-vocabulary object detection with text prompts
+    adapter: grounding_dino
+    hf_repo: IDEA-Research/grounding-dino-tiny
+    filename: model.safetensors
+    size_mb: 341
+    hardware:
+      cpu: true
+      cuda: true
+      mps: false
+    checksum:
+      algorithm: sha256
+      value: df00000000000000000000000000000000000000000000000000000000000000
+  yolo26:
+    name: YOLO26
+    task: detection
+    description: "Latest YOLO generation \u2014 80 COCO classes, optimized for speed"
+    adapter: yolo26
+    hf_repo: ultralytics/yolo11
+    filename: yolo11n.pt
+    size_mb: 5
+    hardware:
+      cpu: true
+      cuda: true
+      mps: true
+    checksum:
+      algorithm: sha256
+      value: ef00000000000000000000000000000000000000000000000000000000000000
+  sam2:
+    name: SAM 2
+    task: segmentation
+    description: Zero-shot segmentation via Segment Anything 2
+    adapter: sam2
+    hf_repo: facebook/sam2-hiera-small
+    filename: sam2_hiera_small.pt
+    size_mb: 150
+    hardware:
+      cpu: true
+      cuda: true
+      mps: true
+    checksum:
+      algorithm: sha256
+      value: ff00000000000000000000000000000000000000000000000000000000000000
+  rfdetr:
+    name: RF-DETR
+    task: detection
+    description: Real-time detection transformer without NMS
+    adapter: rfdetr
+    hf_repo: rfdetr/rfdetr-base
+    filename: model.pt
+    size_mb: 120
+    hardware:
+      cpu: true
+      cuda: true
+      mps: false
+    checksum:
+      algorithm: sha256
+      value: 0f00000000000000000000000000000000000000000000000000000000000000
+  smolvla:
+    name: SmolVLA
+    task: vla
+    description: Vision-language-action model for robotic control
+    adapter: smolvla
+    hf_repo: HuggingFaceTB/SmolVLA-base
+    filename: model.safetensors
+    size_mb: 500
+    hardware:
+      cpu: true
+      cuda: true
+      mps: false
+    checksum:
+      algorithm: sha256
+      value: 1f00000000000000000000000000000000000000000000000000000000000000

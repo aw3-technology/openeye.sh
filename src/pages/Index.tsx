@@ -1,24 +1,43 @@
+import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
-import { HeroSection } from "@/components/sections/HeroSection";
-import { ModelRegistrySection } from "@/components/sections/ModelRegistrySection";
-import { SafetyMonitorSection } from "@/components/sections/SafetyMonitorSection";
-import { ArchitectureSection } from "@/components/sections/ArchitectureSection";
-import { CLISection } from "@/components/sections/CLISection";
-import { BuiltWithSection } from "@/components/sections/BuiltWithSection";
-import { CTASection } from "@/components/sections/CTASection";
-import { Footer } from "@/components/sections/Footer";
+import { Footer } from "@/components/Footer";
+import { TechEcosystem } from "@/components/TechEcosystem";
+import { CodeExamples } from "@/components/CodeExamples";
+import { GetStarted } from "@/components/GetStarted";
+import { DemoVideo } from "@/components/DemoVideo";
+import { HeroSection } from "@/components/HeroSection";
+import { VisionDemoSection } from "@/components/VisionDemoSection";
+import { SafetyGuardianSection } from "@/components/SafetyGuardianSection";
+import { PerceptionLoopSection } from "@/components/PerceptionLoopSection";
+import { ArchitectureSection } from "@/components/ArchitectureSection";
+import { CLICommandsSection } from "@/components/CLICommandsSection";
+import { ProductionDashboardSection } from "@/components/ProductionDashboardSection";
+import { DeployAnywhereSection } from "@/components/DeployAnywhereSection";
+import { BuiltWithSection } from "@/components/BuiltWithSection";
+import { FinalCTA } from "@/components/FinalCTA";
 
 export default function Index() {
+  useEffect(() => {
+    document.title = "OpenEye | Open-Source Perception Engine";
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
-      <ModelRegistrySection />
-      <SafetyMonitorSection />
+      <VisionDemoSection />
+      <SafetyGuardianSection />
+      <PerceptionLoopSection />
       <ArchitectureSection />
-      <CLISection />
+      <TechEcosystem />
+      <CodeExamples />
+      <CLICommandsSection />
+      <DemoVideo />
+      <ProductionDashboardSection />
+      <GetStarted />
+      <DeployAnywhereSection />
       <BuiltWithSection />
-      <CTASection />
+      <FinalCTA />
       <Footer />
     </div>
   );

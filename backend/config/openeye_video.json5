@@ -1,0 +1,62 @@
+{
+  // OpenEye Video File config — offline analysis of video files (Story 45)
+  version: "v1.0.3",
+
+  default_mode: "perception",
+  allow_manual_switching: false,
+  mode_memory_enabled: false,
+
+  api_key: "${OPENAI_API_KEY}",
+  system_governance: "",
+
+  cortex_llm: {
+    type: "OpenAILLM",
+    config: {
+      agent_name: "OpenEye",
+      history_length: 0,
+      model: "gpt-4o-mini",
+    },
+  },
+
+  modes: {
+    perception: {
+      display_name: "Video File Analysis",
+      description: "Offline YOLO perception from video files",
+      system_prompt_base: "You are OpenEye, a perception engine analyzing recorded video. You receive visual observations from a YOLO object detector processing a video file. Describe what you see. Be concise and factual.",
+      hertz: 1,
+
+      agent_inputs: [
+        {
+          type: "VLM_VideoFile",
+          config: {
+            video_path: "./data/sample.mp4",
+            fps: 4.0,
+            loop: false,
+            default_confidence: 0.25,
+            confidence_thresholds: {},
+            log_file: true,
+          },
+        },
+      ],
+
+      simulators: [
+        {
+          type: "WebSim",
+          config: {
+            port: 8765,
+          },
+        },
+      ],
+
+      agent_actions: [
+        {
+          name: "log_action",
+          llm_label: "log",
+          connector: "log",
+        },
+      ],
+    },
+  },
+
+  transition_rules: [],
+}

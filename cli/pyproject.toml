@@ -1,0 +1,74 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openeye-ai"
+version = "0.1.0"
+description = "Ollama for vision AI models — pull, run, and serve computer-vision models from your terminal."
+readme = {text = "Ollama for vision AI models.", content-type = "text/plain"}
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "OpenEye Team" }]
+keywords = ["vision", "ai", "cli", "yolo", "depth", "detection"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+    "typer[all]>=0.9",
+    "rich>=13.0",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "pillow>=10.0",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+    "huggingface-hub>=0.23",
+    "pydantic>=2.0",
+    "prometheus-client>=0.21",
+    "slowapi>=0.1.9",
+]
+
+[project.optional-dependencies]
+yolo = ["ultralytics>=8.2"]
+depth = ["transformers>=4.40", "torch>=2.0", "accelerate"]
+grounding = ["transformers>=4.40", "torch>=2.0", "accelerate"]
+onnx = ["onnxruntime>=1.17"]
+onnx-gpu = ["onnxruntime-gpu>=1.17"]
+tensorrt = ["tensorrt>=10.0", "onnxruntime-gpu>=1.17"]
+sam = ["segment-anything-2>=0.1", "torch>=2.0"]
+rfdetr = ["rfdetr>=1.0"]
+smolvla = ["lerobot>=0.1", "torch>=2.0"]
+all = ["openeye-ai[yolo,depth,grounding]", "opencv-python>=4.9"]
+camera = ["opencv-python>=4.9"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "ruff>=0.9",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+openeye = "openeye_ai.cli:app"
+
+[project.urls]
+Homepage = "https://perceptify.dev"
+Repository = "https://github.com/OpenEye/perceptify-the-world"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: marks tests that require real model downloads (deselect with '-m \"not integration\"')",
+    "slow: marks tests that take a long time to run",
+]
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+src = ["openeye_ai"]

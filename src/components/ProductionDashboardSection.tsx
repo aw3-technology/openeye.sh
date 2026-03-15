@@ -1,0 +1,69 @@
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+
+const dashboardFeatures = [
+  { label: "Live Stream", description: "Real-time camera feeds with detection overlays, safety zone HUD, FPS metrics, and VLM reasoning panel" },
+  { label: "Fleet Management", description: "Device inventory, health monitoring, OTA updates, and deployment orchestration across hundreds of edge nodes" },
+  { label: "MLOps Pipeline", description: "Model registry, A/B testing, shadow deployments, batch inference, and feedback-driven retraining" },
+  { label: "Agentic Loop", description: "Continuous perception-reasoning-action cycle with memory, scene graphs, and chain-of-thought planning" },
+];
+
+export function ProductionDashboardSection() {
+  return (
+    <section className="py-[15vh] px-4">
+      <div className="container max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+        >
+          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+            Production Ready
+          </div>
+          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+            Not a prototype. A platform.
+          </h2>
+          <p className="text-muted-foreground mb-12 max-w-2xl">
+            Dashboard, fleet management, and deployment orchestration built in. Manage hundreds of devices, roll out model updates, and monitor everything from a single interface.
+          </p>
+        </motion.div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {dashboardFeatures.map((feature, i) => (
+            <motion.div
+              key={feature.label}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+              className="border border-foreground/[0.06] rounded-outer p-5 bg-background"
+            >
+              <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-2">
+                {feature.label}
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+          className="text-center"
+        >
+          <Link
+            to="/dashboard"
+            className="font-mono text-sm text-muted-foreground hover:text-foreground border border-foreground/[0.06] hover:border-foreground/10 px-5 py-2.5 rounded-inner transition-colors active:scale-[0.98] inline-block"
+          >
+            Explore the Dashboard &rarr;
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}

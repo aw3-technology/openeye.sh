@@ -1,0 +1,74 @@
+{
+  // OpenEye Hackathon Demo — OpenRouter VLM + robot_control + safety_search
+  version: "v1.0.3",
+
+  default_mode: "perception",
+  allow_manual_switching: false,
+  mode_memory_enabled: false,
+
+  api_key: "${OPENROUTER_API_KEY}",
+  system_governance: "",
+
+  cortex_llm: {
+    type: "OpenRouterLLM",
+    config: {
+      agent_name: "OpenEye",
+      history_length: 10,
+      model: "qwen/qwen3-vl-235b:free",
+      fallback_model: "google/gemma-3-27b-it:free",
+      site_url: "https://perceptify.dev",
+      site_name: "OpenEye",
+    },
+  },
+
+  modes: {
+    perception: {
+      display_name: "Hackathon Perception",
+      description: "Full hackathon demo: OpenRouter VLM + safety search + robot control",
+      system_prompt_base: "You are OpenEye, an AI safety perception engine for robotic systems. You receive visual observations from a camera. Your goals: 1) Describe the scene. 2) Identify safety hazards (humans near machinery, obstacles, spills). 3) Use safety_search for unknown hazards. 4) Issue robot_control commands (halt/slow/resume) based on risk. Be concise and safety-focused.",
+      hertz: 1,
+
+      agent_inputs: [
+        {
+          type: "VLMOpenRouter",
+          config: {
+            base_url: "https://openrouter.ai/api/v1",
+            model: "qwen/qwen3-vl-235b:free",
+            camera_index: 0,
+            site_url: "https://perceptify.dev",
+            site_name: "OpenEye",
+          },
+        },
+      ],
+
+      simulators: [
+        {
+          type: "WebSim",
+          config: {
+            port: 8765,
+          },
+        },
+      ],
+
+      agent_actions: [
+        {
+          name: "log_action",
+          llm_label: "log",
+          connector: "log",
+        },
+        {
+          name: "safety_search",
+          llm_label: "safety_search",
+          connector: "tavily",
+        },
+        {
+          name: "robot_control",
+          llm_label: "robot_control",
+          connector: "solo",
+        },
+      ],
+    },
+  },
+
+  transition_rules: [],
+}
