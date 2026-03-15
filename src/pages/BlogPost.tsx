@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getBlogPost, formatDate } from "@/data/blogPosts";
 import { categoryColors } from "@/data/categoryColors";
+import { blogHeroImages } from "@/data/blogHeroImages";
 
 function renderMarkdown(content: string) {
   const blocks: React.ReactNode[] = [];
