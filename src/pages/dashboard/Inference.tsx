@@ -225,7 +225,7 @@ export default function Inference() {
         {isCloud && (
           <MetricCard
             label="Credits"
-            value={creditBalance.data?.balance ?? "—"}
+            value={creditBalance.data ? getTotalBalance(creditBalance.data) : "—"}
             icon={Coins}
             color="bg-yellow-500/15 text-yellow-500"
           />
