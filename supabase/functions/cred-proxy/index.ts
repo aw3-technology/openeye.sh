@@ -25,8 +25,7 @@ Deno.serve(async (req) => {
   const CRED_API_KEY = Deno.env.get("CRED_API_KEY");
   if (!CRED_API_KEY) return json({ error: "CRED_API_KEY not configured" }, 500);
 
-  const CRED_API_URL = Deno.env.get("CRED_API_URL");
-  if (!CRED_API_URL) return json({ error: "CRED_API_URL not configured" }, 500);
+  const CRED_API_URL = "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1/credits-api";
 
   const CRED_CREDIT_TYPE_ID = Deno.env.get("CRED_CREDIT_TYPE_ID");
 
