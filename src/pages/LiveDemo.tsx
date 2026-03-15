@@ -338,6 +338,7 @@ const sampleImages = [
   },
   {
     name: "Kitchen",
+    image: sceneKitchenImg,
     objects: [
       { label: "cup", confidence: 0.94, bbox: { x: 0.6, y: 0.3, w: 0.1, h: 0.15 }, color: "green" as const },
       { label: "plate", confidence: 0.91, bbox: { x: 0.3, y: 0.45, w: 0.2, h: 0.1 }, color: "green" as const },
