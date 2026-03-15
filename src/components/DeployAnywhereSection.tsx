@@ -50,7 +50,7 @@ export function DeployAnywhereSection() {
             <p className="text-sm text-muted-foreground leading-relaxed">
               FastAPI server with REST endpoints for image inference, WebSocket streams for real-time feeds, and a built-in browser dashboard.
             </p>
-            <div className="font-mono text-xs bg-terminal-bg text-terminal-green px-3 py-2 rounded-inner border border-foreground/5 mt-3 overflow-x-auto">
+            <div className="font-mono text-xs bg-secondary text-oe-green px-3 py-2 rounded-inner border mt-3 overflow-x-auto">
               curl -X POST localhost:8000/predict -F "file=@photo.jpg"
             </div>
           </motion.div>
