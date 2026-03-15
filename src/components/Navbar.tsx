@@ -12,9 +12,8 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-foreground/[0.06]">
       <div className="container max-w-6xl mx-auto flex items-center justify-between h-14 px-4">
         <a href="/" className="flex items-center gap-2">
-          <img src={logoDark} alt="OpenEye" className="h-6 hidden dark:block" />
-          <img src={logoDark} alt="OpenEye" className="h-6 block light:hidden" />
-          <img src={logoLight} alt="OpenEye" className="h-6 hidden light:block" />
+          <img src={logoDark} alt="OpenEye" className="h-6 logo-dark" />
+          <img src={logoLight} alt="OpenEye" className="h-6 logo-light" />
         </a>
         <div className="hidden md:flex items-center gap-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">
           <a href="#demo" className="hover:text-foreground transition-colors">Models</a>
