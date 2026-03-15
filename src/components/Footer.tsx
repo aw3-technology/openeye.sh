@@ -19,7 +19,7 @@ type CompanyLink = InternalLink | ExternalLink;
 
 const companyLinks: CompanyLink[] = [
   { label: "About", to: "/about" },
-  { label: "GitHub", href: "https://github.com/openeye-ai" },
+  { label: "GitHub", href: "https://github.com/aw3-technology/openeye.sh" },
 ];
 
 export function Footer() {
