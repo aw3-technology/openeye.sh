@@ -159,7 +159,7 @@ export default function Pricing() {
             Ready to get started?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Install the CLI or grab an API key and start building with OpenEye in minutes.
+            Install the CLI and start building with OpenEye in minutes.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
