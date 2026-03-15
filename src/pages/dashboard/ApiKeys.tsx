@@ -60,7 +60,7 @@ export default function ApiKeys() {
     const prefix = rawKey.slice(0, 7);
 
     const { error } = await supabase
-      .from("api_keys" as any)
+      .from("api_keys")
       .insert({ user_id: user.id, name, key_prefix: prefix, key_hash: hash });
 
     if (error) throw error;
@@ -70,7 +70,7 @@ export default function ApiKeys() {
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase
-      .from("api_keys" as any)
+      .from("api_keys")
       .delete()
       .eq("id", id);
     if (error) {

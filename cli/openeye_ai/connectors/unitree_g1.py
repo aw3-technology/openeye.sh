@@ -17,22 +17,18 @@ import json
 import logging
 import time
 from enum import Enum
-from typing import Optional
 
 logger = logging.getLogger(__name__)
-
 
 class G1ControlMode(str, Enum):
     SDK = "sdk"
     HTTP = "http"
     DRY_RUN = "dry_run"
 
-
 class G1RobotState(str, Enum):
     MOVING = "moving"
     HALTED = "halted"
     RESUMING = "resuming"
-
 
 class G1Connector:
     """Sends halt/resume commands to a Unitree G1 humanoid robot.
@@ -62,8 +58,8 @@ class G1Connector:
         self.http_port = http_port
 
         self._state = G1RobotState.MOVING
-        self._halt_time: Optional[float] = None
-        self._clear_since: Optional[float] = None
+        self._halt_time: float | None = None
+        self._clear_since: float | None = None
         self._sdk_client = None
         self._halt_count = 0
         self._resume_count = 0

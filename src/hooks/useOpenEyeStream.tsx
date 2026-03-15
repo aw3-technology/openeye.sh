@@ -1,10 +1,9 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect, type ReactNode } from "react";
+import { captureFrame, FpsCounter } from "@/lib/frame-capture";
 import { OpenEyeWebSocket } from "@/lib/openeye-ws";
 import { useOpenEyeConnection } from "./useOpenEyeConnection";
 import type { PredictionResult, ModelParameters, PerformanceMetrics } from "@/types/openeye";
 
-/** Max timestamps kept in the FPS sliding window */
-const FPS_BUFFER_SIZE = 30;
 /** Interval between frame captures sent to server (ms) */
 const FRAME_SEND_INTERVAL_MS = 100;
 
@@ -42,7 +41,7 @@ export function OpenEyeStreamProvider({ children }: { children: ReactNode }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const fpsBuffer = useRef<number[]>([]);
+  const fpsCounter = useRef(new FpsCounter());
   const frameCount = useRef(0);
 
   const stopStream = useCallback(() => {
@@ -86,17 +85,11 @@ export function OpenEyeStreamProvider({ children }: { children: ReactNode }) {
         if (result.objects) {
           setLatestResult(result);
           frameCount.current++;
-          const now = performance.now();
-          fpsBuffer.current.push(now);
-          if (fpsBuffer.current.length > FPS_BUFFER_SIZE) fpsBuffer.current.shift();
-          const elapsed = fpsBuffer.current.length > 1
-            ? (now - fpsBuffer.current[0]) / 1000
-            : 1;
           const latency = typeof result.inference_ms === "number" && Number.isFinite(result.inference_ms)
             ? result.inference_ms
             : 0;
           setMetrics({
-            fps: Math.round(fpsBuffer.current.length / elapsed),
+            fps: fpsCounter.current.tick(),
             latency_ms: latency,
             frame_count: frameCount.current,
           });
@@ -112,21 +105,13 @@ export function OpenEyeStreamProvider({ children }: { children: ReactNode }) {
       const sendFrame = () => {
         const video = videoRef.current;
         if (!video || !ws.connected || !streamRef.current) return;
-        // Skip frames until video metadata has loaded
-        if (video.videoWidth === 0 || video.videoHeight === 0) return;
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        ctx.drawImage(video, 0, 0);
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-        const base64 = dataUrl.split(",")[1];
-        ws.send(base64);
+        const base64 = captureFrame(video, canvas);
+        if (base64) ws.send(base64);
       };
 
       intervalRef.current = setInterval(sendFrame, FRAME_SEND_INTERVAL_MS);
       setIsStreaming(true);
-      fpsBuffer.current = [];
+      fpsCounter.current.reset();
       frameCount.current = 0;
     } catch (err) {
       // Clean up the camera stream if setup fails after acquiring it

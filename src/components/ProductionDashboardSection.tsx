@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { ease } from "@/lib/motion";
 
 const dashboardFeatures = [
   { label: "Live Stream", description: "Real-time camera feeds with detection overlays, safety zone HUD, and FPS metrics" },
@@ -16,7 +17,7 @@ export function ProductionDashboardSection() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ duration: 0.3, ease }}
         >
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
             Dashboard
@@ -36,7 +37,7 @@ export function ProductionDashboardSection() {
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.05, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+              transition={{ delay: i * 0.05, duration: 0.2, ease }}
               className="border border-foreground/[0.06] rounded-outer p-5 bg-background"
             >
               <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-2">
@@ -53,7 +54,7 @@ export function ProductionDashboardSection() {
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.2, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ delay: 0.2, duration: 0.2, ease }}
           className="text-center"
         >
           <Link

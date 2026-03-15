@@ -2,19 +2,14 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-from typing import Optional
-
 import typer
 from rich import print as rprint
 from rich.console import Console
 from rich.table import Table
 
-# Ensure backend/src is importable
-_BACKEND_SRC = str(Path(__file__).resolve().parents[3] / "backend" / "src")
-if _BACKEND_SRC not in sys.path:
-    sys.path.insert(0, _BACKEND_SRC)
+from openeye_ai._backend import ensure_backend_path
+
+ensure_backend_path()
 
 console = Console()
 
@@ -24,15 +19,13 @@ govern_app = typer.Typer(
     no_args_is_help=True,
 )
 
-
 def _get_engine():
     from governance.engine import GovernanceEngine
     return GovernanceEngine()
 
-
 @govern_app.command("status")
 def status(
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL to query"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL to query"),
 ):
     """Show current governance status."""
     if server:
@@ -50,7 +43,6 @@ def status(
         engine = _get_engine()
         _print_status(engine.get_status().model_dump())
 
-
 def _print_status(data: dict):
     table = Table(title="Governance Status", show_header=False)
     table.add_column("Field", style="cyan")
@@ -67,7 +59,6 @@ def _print_status(data: dict):
     table.add_row("Fail-open", "Yes" if data.get("fail_open") else "No")
 
     console.print(table)
-
 
 @govern_app.command("ls")
 def ls():
@@ -91,11 +82,10 @@ def ls():
 
     console.print(table)
 
-
 @govern_app.command("enable")
 def enable(
     name: str = typer.Argument(..., help="Policy name to enable"),
-    server: Optional[str] = typer.Option(None, "--server", "-s"),
+    server: str | None = typer.Option(None, "--server", "-s"),
 ):
     """Enable a governance policy."""
     if server:
@@ -110,11 +100,10 @@ def enable(
     else:
         rprint("[yellow]Use --server to enable policies on a running server.[/yellow]")
 
-
 @govern_app.command("disable")
 def disable(
     name: str = typer.Argument(..., help="Policy name to disable"),
-    server: Optional[str] = typer.Option(None, "--server", "-s"),
+    server: str | None = typer.Option(None, "--server", "-s"),
 ):
     """Disable a governance policy."""
     if server:
@@ -128,7 +117,6 @@ def disable(
             raise typer.Exit(1)
     else:
         rprint("[yellow]Use --server to disable policies on a running server.[/yellow]")
-
 
 @govern_app.command("presets")
 def presets():
@@ -148,11 +136,10 @@ def presets():
 
     console.print(table)
 
-
 @govern_app.command("load")
 def load(
     target: str = typer.Argument(..., help="Preset name or path to YAML config"),
-    server: Optional[str] = typer.Option(None, "--server", "-s"),
+    server: str | None = typer.Option(None, "--server", "-s"),
 ):
     """Load a preset or custom YAML governance config."""
     if server:
@@ -201,7 +188,6 @@ def load(
                 rprint(f"[red]Error:[/red] {e}")
                 raise typer.Exit(1)
 
-
 @govern_app.command("validate")
 def validate(
     file: str = typer.Argument(..., help="Path to YAML governance config"),
@@ -215,7 +201,6 @@ def validate(
     else:
         rprint(f"[red]Invalid[/red] — {message}")
         raise typer.Exit(1)
-
 
 @govern_app.command("audit")
 def audit(
@@ -258,7 +243,6 @@ def audit(
         )
 
     console.print(table)
-
 
 @govern_app.command("init")
 def init(

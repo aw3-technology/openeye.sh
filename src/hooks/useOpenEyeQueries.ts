@@ -14,6 +14,17 @@ export function useHealth() {
   });
 }
 
+export function useNebiusStats() {
+  const { client, serverUrl, isConnected } = useOpenEyeConnection();
+  return useQuery({
+    queryKey: ["openeye", "nebius-stats", serverUrl],
+    queryFn: () => client.nebiusStats(),
+    enabled: isConnected,
+    refetchInterval: 5000,
+    retry: false,
+  });
+}
+
 export function usePredict() {
   const { client } = useOpenEyeConnection();
   return useMutation({
@@ -31,7 +42,7 @@ export function useInferenceHistory(page = 0, pageSize = 20) {
       const from = page * pageSize;
       const to = from + pageSize - 1;
       const { data, count, error } = await supabase
-        .from("inference_history" as any)
+        .from("inference_history")
         .select("*", { count: "exact" })
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
@@ -50,7 +61,7 @@ export function useSaveInference() {
     mutationFn: async (row: Omit<InferenceHistoryRow, "id" | "user_id" | "created_at">) => {
       if (!user) throw new Error("Not authenticated");
       const { error } = await supabase
-        .from("inference_history" as any)
+        .from("inference_history")
         .insert({ ...row, user_id: user.id });
       if (error) throw error;
     },
@@ -67,7 +78,7 @@ export function useApiKeys() {
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
-        .from("api_keys" as any)
+        .from("api_keys")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
@@ -85,7 +96,7 @@ export function useDevices() {
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
-        .from("devices" as any)
+        .from("devices")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });

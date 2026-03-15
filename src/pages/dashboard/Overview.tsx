@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
-import { useDevices } from "@/hooks/useOpenEyeQueries";
+import { useDevices, useNebiusStats } from "@/hooks/useOpenEyeQueries";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { ServerUrlDialog } from "@/components/dashboard/ServerUrlDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,37 +14,11 @@ import {
   WifiOff,
   Zap,
 } from "lucide-react";
-import type { NebiusStats } from "@/lib/openeye-client";
 
 export default function Overview() {
-  const { isConnected, healthData, serverUrl, client } = useOpenEyeConnection();
+  const { isConnected, healthData, serverUrl } = useOpenEyeConnection();
   const { data: devices = [] } = useDevices();
-  const [nebiusStats, setNebiusStats] = useState<NebiusStats | null>(null);
-
-  useEffect(() => {
-    if (!isConnected) {
-      setNebiusStats(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    const poll = async () => {
-      try {
-        const stats = await client.nebiusStats();
-        if (!cancelled) setNebiusStats(stats);
-      } catch {
-        if (!cancelled) setNebiusStats(null);
-      }
-    };
-
-    poll();
-    const id = setInterval(poll, 5000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [isConnected, client]);
+  const { data: nebiusStats } = useNebiusStats();
 
   return (
     <div className="space-y-6">

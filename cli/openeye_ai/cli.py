@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 import typer
 from rich import print as rprint
 
@@ -17,22 +15,19 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
-
 def version_callback(value: bool) -> None:
     if value:
         rprint(f"[bold]openeye-ai[/bold] v{__version__}")
         raise typer.Exit()
 
-
 @app.callback()
 def main(
-    version: Optional[bool] = typer.Option(
+    version: bool | None = typer.Option(
         None, "--version", "-v", help="Show version.", callback=version_callback, is_eager=True
     ),
 ) -> None:
     """OpenEye — Ollama for vision AI models."""
     ensure_dirs()
-
 
 # ── Model management commands ─────────────────────────────────────────
 
@@ -90,3 +85,35 @@ app.add_typer(mlops_app, name="mlops")
 from openeye_ai.commands.governance import govern_app
 
 app.add_typer(govern_app, name="govern")
+
+# ── Desktop subcommands ──────────────────────────────────────────────
+
+from openeye_ai.commands.desktop import desktop_app
+
+app.add_typer(desktop_app, name="desktop")
+
+# ── Debug subcommands ────────────────────────────────────────────────
+
+from openeye_ai.commands.debug import debug_app
+
+app.add_typer(debug_app, name="debug")
+
+# ── MCP server command ───────────────────────────────────────────────
+
+@app.command("mcp")
+def mcp_command(
+    monitor: int = typer.Option(1, "--monitor", "-m", help="Monitor index (1=primary)"),
+    vlm_model: str | None = typer.Option(None, "--vlm-model", help="VLM model to use"),
+) -> None:
+    """Start the OpenEye MCP server (stdio transport) for desktop vision tools."""
+    import asyncio
+
+    from openeye_ai.mcp.server import run_mcp_server
+
+    asyncio.run(run_mcp_server(monitor=monitor, vlm_model=vlm_model))
+
+# ── Robotics subcommands ────────────────────────────────────────────
+
+from openeye_ai.commands.robotics import robotics_app
+
+app.add_typer(robotics_app, name="robotics")

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { OpenEyeStreamProvider, useOpenEyeStream } from "@/hooks/useOpenEyeStream";
+import { useOpenEyeStream } from "@/hooks/useOpenEyeStream";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Square } from "lucide-react";
@@ -199,9 +199,5 @@ function MetricsInner() {
 }
 
 export default function Metrics() {
-  return (
-    <OpenEyeStreamProvider>
-      <MetricsInner />
-    </OpenEyeStreamProvider>
-  );
+  return <MetricsInner />;
 }

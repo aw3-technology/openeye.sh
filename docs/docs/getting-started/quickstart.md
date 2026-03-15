@@ -50,7 +50,11 @@ The server starts at `http://localhost:8000` with:
 - `GET /health` — Health check
 - `POST /predict` — Upload an image for inference
 - `GET /` — Browser dashboard
-- `WebSocket /ws` — Real-time inference
+- `WS /ws` — Real-time inference streaming
+- `WS /ws/perception` — Full perception pipeline
+- `WS /ws/vlm` — VLM reasoning
+- `WS /ws/agentic` — Agentic loop (perception + reasoning + planning)
+- `GET /metrics` — Prometheus metrics
 
 ## 4. Query the API
 
@@ -59,10 +63,30 @@ curl -X POST http://localhost:8000/predict \
   -F "file=@photo.jpg"
 ```
 
-## 5. List Available Models
+## 5. Live Camera Feed
+
+Stream your webcam with real-time detections:
+
+```bash
+openeye watch
+```
+
+## 6. List Available Models
 
 ```bash
 openeye list
 ```
 
 Shows all registered models with download status.
+
+## 7. Benchmark Performance
+
+```bash
+openeye bench yolov8 --runs 20
+```
+
+## Next Steps
+
+- [CLI Commands](../cli/commands.md) — Full command reference
+- [Server API](../cli/server-api.md) — REST and WebSocket endpoints
+- [Architecture](../backend/architecture.md) — Backend perception pipeline

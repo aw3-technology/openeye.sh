@@ -52,7 +52,7 @@ The smart brain is where understanding happens. It doesn't just see a knife and 
 
 **Latency budget**: 500ms-2s per analysis
 **Hardware**: Cloud inference via API, or local with sufficient GPU
-**Model**: Configurable — Qwen3-VL, GPT-4o, Claude, or any VLM with an API
+**Model**: Configurable — Qwen2.5-VL, GPT-4o, Claude, or any VLM with an API
 
 ## How They Communicate
 

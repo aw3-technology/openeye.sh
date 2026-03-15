@@ -6,7 +6,7 @@ Traces which dataset, hyperparameters, and code commit produced each model versi
 from __future__ import annotations
 
 import subprocess
-from typing import Any, Optional
+from typing import Any
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -15,14 +15,11 @@ from .schemas import ModelLineage
 
 _LINEAGE_PATH = OPENEYE_HOME / "model_lineage.yaml"
 
-
 def _load_lineage() -> list[dict]:
     return safe_load_yaml_list(_LINEAGE_PATH)
 
-
 def _save_lineage(records: list[dict]) -> None:
     atomic_save_yaml(_LINEAGE_PATH, records)
-
 
 def _get_current_git_info() -> dict[str, str]:
     """Get current git commit, repo, and branch."""
@@ -50,22 +47,21 @@ def _get_current_git_info() -> dict[str, str]:
 
     return info
 
-
 def record_lineage(
     model_key: str,
     version: str,
     *,
     dataset: str,
     dataset_version: str = "",
-    dataset_size: Optional[int] = None,
-    hyperparameters: Optional[dict[str, Any]] = None,
+    dataset_size: int | None = None,
+    hyperparameters: dict[str, Any] | None = None,
     code_commit: str = "",
     code_repo: str = "",
     code_branch: str = "",
     training_framework: str = "",
-    training_duration_seconds: Optional[float] = None,
-    parent_model: Optional[str] = None,
-    environment: Optional[dict[str, str]] = None,
+    training_duration_seconds: float | None = None,
+    parent_model: str | None = None,
+    environment: dict[str, str] | None = None,
     auto_detect_git: bool = True,
 ) -> ModelLineage:
     """Record the lineage for a model version.
@@ -127,7 +123,6 @@ def record_lineage(
 
     return lineage
 
-
 def get_lineage(model_key: str, version: str) -> ModelLineage:
     """Get lineage for a specific model version."""
     records = _load_lineage()
@@ -136,15 +131,13 @@ def get_lineage(model_key: str, version: str) -> ModelLineage:
             return ModelLineage(**r)
     raise KeyError(f"No lineage found for {model_key} v{version}")
 
-
-def list_lineage(model_key: Optional[str] = None) -> list[ModelLineage]:
+def list_lineage(model_key: str | None = None) -> list[ModelLineage]:
     """List all lineage records."""
     records = _load_lineage()
     result = [ModelLineage(**r) for r in records]
     if model_key:
         result = [r for r in result if r.model_key == model_key]
     return result
-
 
 def get_lineage_chain(model_key: str, version: str) -> list[ModelLineage]:
     """Get the full lineage chain for a model version (follows parent_model links)."""

@@ -1,6 +1,7 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { SafetyState } from "./types";
 import { stateConfig, workspaceObjects, HAND_SIZE } from "./data";
+import { ease } from "@/lib/motion";
 
 interface CameraFeedProps {
   currentState: SafetyState;
@@ -136,7 +137,7 @@ export function CameraFeed({
                   x: "0%",
                 }}
                 exit={shouldReduceMotion ? { opacity: 0 } : { x: "-100%", opacity: 0 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: [0.2, 0.8, 0.2, 1] }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease }}
                 style={{ width: `${HAND_SIZE.w}%`, height: `${HAND_SIZE.h}%` }}
               >
                 <div className="w-full h-full border-[1.5px] border-terminal-red bg-terminal-red/15 animate-pulse" />

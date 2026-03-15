@@ -45,6 +45,10 @@ rfdetr = ["rfdetr>=1.0"]
 smolvla = ["lerobot>=0.1", "torch>=2.0"]
 all = ["openeye-ai[yolo,depth,grounding]", "opencv-python>=4.9"]
 camera = ["opencv-python>=4.9"]
+desktop = ["mss>=9.0"]
+mcp = ["mcp[cli]>=1.0", "mss>=9.0"]
+debug = ["mss>=9.0", "playwright>=1.40", "scikit-image>=0.22"]
+robotics = ["grpcio>=1.60", "grpcio-tools>=1.60", "paho-mqtt>=2.0"]
 
 [dependency-groups]
 dev = [

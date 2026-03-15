@@ -1,18 +1,15 @@
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ModelCard } from "@/components/ModelCard";
-import { modelGroups, productionModels } from "@/data/modelsData";
+import { modelGroups, productionModels } from "@/data/models";
+import { ease } from "@/lib/motion";
 
-const ease = [0.2, 0.8, 0.2, 1] as const;
 
 export default function Models() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.title = "Models | OpenEye";
-  }, []);
+  usePageMeta("Models");
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -17,9 +18,7 @@ export default function Docs() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const location = useLocation();
 
-  useEffect(() => {
-    document.title = "Documentation | OpenEye";
-  }, []);
+  usePageMeta("Documentation", [], false);
 
   const sectionIds = useMemo(
     () => docsContent.flatMap((g) => g.sections.map((s) => s.id)),

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import {
@@ -7,6 +8,7 @@ import {
   formatChangelogDate,
   changeTypeColors,
 } from "@/data/changelog";
+import { ease } from "@/lib/motion";
 
 /** Parses backtick-delimited segments into inline <code> elements. */
 function renderChangeText(text: string) {
@@ -27,10 +29,7 @@ function renderChangeText(text: string) {
 }
 
 export default function Changelog() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.title = "Changelog | OpenEye";
-  }, []);
+  usePageMeta("Changelog");
 
   // Scroll to hash on mount — waits for framer-motion animations to settle
   useEffect(() => {
@@ -56,7 +55,7 @@ export default function Changelog() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: 0.3, ease }}
           >
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
               Changelog
@@ -68,7 +67,7 @@ export default function Changelog() {
               Release history, breaking changes, and everything shipped. Follow
               along on{" "}
               <a
-                href="https://github.com/openeye-ai"
+                href="https://github.com/aw3-technology/openeye.sh"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-foreground hover:text-terminal-green transition-colors underline underline-offset-4 decoration-foreground/20"
@@ -88,7 +87,7 @@ export default function Changelog() {
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.05, ease: [0.2, 0.8, 0.2, 1] }}
+              transition={{ duration: 0.3, delay: 0.05, ease }}
               className="flex flex-wrap gap-2"
             >
               {changelog.map((entry) => (
@@ -124,7 +123,7 @@ export default function Changelog() {
                   transition={{
                     duration: 0.3,
                     delay: Math.min(0.1 + i * 0.05, 0.4),
-                    ease: [0.2, 0.8, 0.2, 1],
+                    ease,
                   }}
                 >
                   <div className="border border-foreground/[0.06] rounded-outer p-6 md:p-8 bg-foreground/[0.02]">

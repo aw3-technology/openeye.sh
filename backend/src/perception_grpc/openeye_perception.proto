@@ -1,0 +1,211 @@
+syntax = "proto3";
+
+package openeye;
+
+// Full perception service covering the entire PerceptionFrame output.
+service RobotVisionService {
+    // Unary: send a single frame, get full perception output.
+    rpc Perceive(PerceiveRequest) returns (PerceptionFrameProto);
+
+    // Bidirectional streaming: send frames, receive perception results.
+    rpc StreamPerception(stream PerceiveRequest) returns (stream PerceptionFrameProto);
+
+    // Server-streaming: subscribe to continuous perception output.
+    rpc Subscribe(SubscribeRequest) returns (stream PerceptionFrameProto);
+
+    // Query the current scene in natural language.
+    rpc Query(QueryRequest) returns (QueryResponse);
+
+    // Set the robot's current goal for action suggestions.
+    rpc SetGoal(GoalRequest) returns (GoalResponse);
+
+    // Health check.
+    rpc Health(Empty) returns (HealthResponse);
+}
+
+// ─── Requests ────────────────────────────────────────────────────────
+
+message Empty {}
+
+message PerceiveRequest {
+    bytes frame_data = 1;       // Raw RGB frame bytes
+    int32 width = 2;
+    int32 height = 3;
+    int32 channels = 4;         // Usually 3
+
+    // Optional depth data
+    bytes depth_data = 5;       // float32 depth map bytes
+    int32 depth_width = 6;
+    int32 depth_height = 7;
+}
+
+message SubscribeRequest {
+    float min_confidence = 1;          // Filter objects below this confidence
+    repeated string class_filter = 2;  // Only include these classes (empty = all)
+    bool include_scene_graph = 3;      // Include scene graph in output
+    bool include_safety = 4;           // Include safety alerts
+}
+
+message QueryRequest {
+    string question = 1;
+}
+
+message GoalRequest {
+    string goal = 1;
+}
+
+// ─── Responses ───────────────────────────────────────────────────────
+
+message QueryResponse {
+    string answer = 1;
+    repeated string matched_object_ids = 2;
+    float confidence = 3;
+}
+
+message GoalResponse {
+    bool accepted = 1;
+    string active_goal = 2;
+}
+
+message HealthResponse {
+    bool healthy = 1;
+    string model_name = 2;
+    int64 frames_processed = 3;
+    double uptime_seconds = 4;
+}
+
+// ─── Perception Frame ────────────────────────────────────────────────
+
+message PerceptionFrameProto {
+    int64 frame_id = 1;
+    double timestamp = 2;
+    float inference_ms = 3;
+
+    // Core detections
+    repeated DetectedObject3DProto objects = 4;
+
+    // Scene understanding
+    SceneGraphDataProto scene_graph = 5;
+    string scene_description = 6;
+
+    // Safety
+    repeated SafetyAlertProto safety_alerts = 7;
+    repeated SafetyZoneProto safety_zones = 8;
+
+    // Action suggestions
+    repeated ActionSuggestionProto action_suggestions = 9;
+
+    // Change detection
+    repeated ChangeAlertProto change_alerts = 10;
+
+    // Floor plane
+    FloorPlaneProto floor_plane = 11;
+
+    // Depth availability
+    bool depth_available = 12;
+}
+
+// ─── Geometry ────────────────────────────────────────────────────────
+
+message BBox2DProto {
+    float x1 = 1;
+    float y1 = 2;
+    float x2 = 3;
+    float y2 = 4;
+}
+
+message Position3DProto {
+    float x = 1;   // metres right
+    float y = 2;   // metres down
+    float z = 3;   // metres depth
+}
+
+message FloorPlaneProto {
+    float nx = 1;
+    float ny = 2;
+    float nz = 3;
+    float height = 4;
+    float confidence = 5;
+}
+
+// ─── Objects ─────────────────────────────────────────────────────────
+
+message GraspPointProto {
+    string object_track_id = 1;
+    Position3DProto position = 2;
+    float approach_x = 3;
+    float approach_y = 4;
+    float approach_z = 5;
+    float width_m = 6;
+    float confidence = 7;
+}
+
+message DetectedObject3DProto {
+    string track_id = 1;
+    string label = 2;
+    float confidence = 3;
+    BBox2DProto bbox = 4;
+    Position3DProto position_3d = 5;    // optional — check has_position_3d
+    bool has_position_3d = 6;
+    float depth_m = 7;
+    bool is_manipulable = 8;
+    repeated GraspPointProto grasp_points = 9;
+}
+
+// ─── Scene Graph ─────────────────────────────────────────────────────
+
+message SpatialRelationshipProto {
+    string subject_id = 1;
+    string relation = 2;    // RelationType enum as string
+    string object_id = 3;
+    float confidence = 4;
+}
+
+message SceneGraphNodeProto {
+    string track_id = 1;
+    string label = 2;
+    Position3DProto position_3d = 3;
+    bool has_position_3d = 4;
+    repeated string children = 5;
+}
+
+message SceneGraphDataProto {
+    repeated SceneGraphNodeProto nodes = 1;
+    repeated SpatialRelationshipProto relationships = 2;
+    string root_id = 3;
+}
+
+// ─── Safety ──────────────────────────────────────────────────────────
+
+message SafetyAlertProto {
+    string human_track_id = 1;
+    string zone = 2;           // ZoneLevel as string
+    float distance_m = 3;
+    string message = 4;
+    bool halt_recommended = 5;
+}
+
+message SafetyZoneProto {
+    string human_track_id = 1;
+    string zone = 2;           // ZoneLevel as string
+    float distance_m = 3;
+    float bearing_deg = 4;
+}
+
+// ─── Change Detection ────────────────────────────────────────────────
+
+message ChangeAlertProto {
+    string change_type = 1;    // ChangeType as string
+    string description = 2;
+    repeated string affected_track_ids = 3;
+    float magnitude = 4;
+}
+
+// ─── Action Suggestions ──────────────────────────────────────────────
+
+message ActionSuggestionProto {
+    string action = 1;
+    string target_id = 2;
+    string reason = 3;
+    float priority = 4;
+}
