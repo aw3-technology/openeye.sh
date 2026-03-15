@@ -20,7 +20,7 @@ export function SafetyGuardianSection() {
           <p className="text-muted-foreground mb-4 max-w-2xl">
             As robots enter homes and workplaces, OpenEye acts as a visual safety layer — monitoring any robot's workspace in real-time and intervening before accidents happen. Watch the demo below cycle through a live safety scenario.
           </p>
-          <div className="font-mono text-sm bg-card text-oe-green px-4 py-2.5 rounded-inner border border-border inline-block mb-12">
+          <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border inline-block mb-12">
             $ openeye watch --safety --danger-m 0.5 --caution-m 1.5
           </div>
         </motion.div>

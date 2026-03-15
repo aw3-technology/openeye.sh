@@ -211,7 +211,7 @@ export function InteractiveTerminal() {
         </div>
       </div>
 
-      <p className="font-mono text-[11px] text-terminal-muted text-center">
+      <p className="font-mono text-[11px] text-muted-foreground text-center">
         Click a command above to see OpenEye in action
       </p>
     </div>

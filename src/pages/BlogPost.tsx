@@ -174,7 +174,7 @@ function renderInline(text: string): React.ReactNode {
       );
     } else if (firstMatch.type === "code") {
       parts.push(
-        <code key={k++} className="font-mono text-sm bg-terminal-bg text-terminal-green px-1.5 py-0.5 rounded-inner break-all">
+        <code key={k++} className="font-mono text-sm bg-secondary text-oe-green px-1.5 py-0.5 rounded-inner break-all">
           {firstMatch.match[1]}
         </code>
       );
