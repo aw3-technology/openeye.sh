@@ -22,6 +22,76 @@ interface SlideData {
   content: React.ReactNode;
 }
 
+// ─── Visual Components ────────────────────────────────────────────────────
+
+function GridBackground({ opacity = 0.04 }: { opacity?: number }) {
+  return (
+    <div className="absolute inset-0 pointer-events-none" style={{ opacity }}>
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(hsl(var(--foreground) / 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, hsl(var(--foreground) / 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: "60px 60px",
+        }}
+      />
+    </div>
+  );
+}
+
+function GlowOrb({ color, size, x, y, blur = 200 }: { color: string; size: number; x: string; y: string; blur?: number }) {
+  return (
+    <div
+      className="absolute rounded-full pointer-events-none"
+      style={{
+        width: size,
+        height: size,
+        left: x,
+        top: y,
+        background: color,
+        filter: `blur(${blur}px)`,
+        opacity: 0.3,
+      }}
+    />
+  );
+}
+
+function ScanLine() {
+  return (
+    <motion.div
+      className="absolute left-0 right-0 h-px pointer-events-none"
+      style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), transparent)" }}
+      animate={{ top: ["0%", "100%"] }}
+      transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+    />
+  );
+}
+
+function PulsingDot({ color, delay = 0 }: { color: string; delay?: number }) {
+  return (
+    <motion.span
+      className={`inline-block w-3 h-3 rounded-full ${color}`}
+      animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+      transition={{ duration: 2, repeat: Infinity, delay }}
+    />
+  );
+}
+
+function AnimatedCounter({ value, suffix = "" }: { value: string; suffix?: string }) {
+  return (
+    <motion.span
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="tabular-nums"
+    >
+      {value}{suffix}
+    </motion.span>
+  );
+}
+
 // ─── ScaledSlide ──────────────────────────────────────────────────────────
 
 function ScaledSlide({
@@ -82,7 +152,7 @@ function SlideLayout({
 }) {
   return (
     <div
-      className={`w-full h-full bg-background text-foreground flex flex-col ${className}`}
+      className={`w-full h-full bg-background text-foreground flex flex-col overflow-hidden relative ${className}`}
       style={{ width: 1920, height: 1080 }}
     >
       {children}
@@ -116,29 +186,63 @@ function SlideNumber({ n, total }: { n: number; total: number }) {
 function TitleSlide() {
   return (
     <SlideLayout>
-      <div className="flex-1 flex flex-col items-center justify-center px-20">
-        <div className="flex items-center gap-4 mb-10">
-          <Diamond className="bg-oe-blue" />
-          <Diamond className="bg-oe-red" />
-          <Diamond className="bg-foreground" />
-        </div>
-        <div className="mb-10">
+      <GridBackground opacity={0.06} />
+      <GlowOrb color="hsl(var(--oe-blue))" size={600} x="10%" y="-20%" blur={250} />
+      <GlowOrb color="hsl(var(--oe-red))" size={400} x="70%" y="60%" blur={200} />
+      <ScanLine />
+
+      <div className="flex-1 flex flex-col items-center justify-center px-20 relative z-10">
+        <motion.div
+          className="flex items-center gap-5 mb-10"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <PulsingDot color="bg-oe-blue" delay={0} />
+          <PulsingDot color="bg-oe-red" delay={0.3} />
+          <PulsingDot color="bg-foreground" delay={0.6} />
+        </motion.div>
+        <motion.div
+          className="mb-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           <img src={logoVerticalDark} alt="OpenEye" className="h-40 logo-dark" />
           <img src={logoVertical} alt="OpenEye" className="h-40 logo-light" />
-        </div>
-        <h1 className="text-[96px] font-semibold font-display leading-[1] text-center tracking-tight mb-8">
+        </motion.div>
+        <motion.h1
+          className="text-[96px] font-semibold font-display leading-[1] text-center tracking-tight mb-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
           Open-source eyes for
           <br />
-          <span className="text-primary">the agent era.</span>
-        </h1>
-        <p className="text-[32px] text-muted-foreground text-center max-w-[1200px] leading-relaxed">
+          <span
+            className="bg-gradient-to-r from-primary to-oe-blue bg-clip-text text-transparent"
+          >
+            the agent era.
+          </span>
+        </motion.h1>
+        <motion.p
+          className="text-[32px] text-muted-foreground text-center max-w-[1200px] leading-relaxed"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
           A perception engine that turns raw video into structured world models
           for robots and autonomous agents.
-        </p>
+        </motion.p>
       </div>
-      <div className="pb-12 text-center font-mono text-lg text-muted-foreground">
+      <motion.div
+        className="pb-12 text-center font-mono text-lg text-muted-foreground relative z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+      >
         github.com/openeye-ai &nbsp;·&nbsp; Apache 2.0
-      </div>
+      </motion.div>
     </SlideLayout>
   );
 }
@@ -146,32 +250,64 @@ function TitleSlide() {
 // ─── Problem Slide ────────────────────────────────────────────────────────
 
 function ProblemSlide() {
+  const items = ["Detection", "Depth", "Tracking", "Scene Graph", "Safety", "Planning"];
   return (
     <SlideLayout>
-      <div className="flex-1 flex px-20 py-20">
+      <GridBackground opacity={0.03} />
+      <GlowOrb color="hsl(var(--oe-red))" size={500} x="60%" y="10%" blur={200} />
+
+      <div className="flex-1 flex px-20 py-20 relative z-10">
         <div className="flex-1 flex flex-col justify-center">
-          <div className="font-mono text-xl uppercase tracking-widest text-oe-red mb-6">
+          <motion.div
+            className="font-mono text-xl uppercase tracking-widest text-oe-red mb-6 flex items-center gap-3"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <span className="w-8 h-px bg-oe-red" />
             The Problem
-          </div>
-          <h2 className="text-[72px] font-semibold font-display leading-[1.05] mb-10">
+          </motion.div>
+          <motion.h2
+            className="text-[72px] font-semibold font-display leading-[1.05] mb-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             Robots can move.
             <br />
             They can't <span className="text-oe-red">see.</span>
-          </h2>
+          </motion.h2>
           <div className="space-y-6 text-[28px] text-muted-foreground leading-relaxed max-w-[900px]">
-            <p>Every robotics team rebuilds the same vision stack from scratch — YOLO wrappers, depth pipelines, safety logic, tracking.</p>
-            <p>There's no shared, pluggable perception layer for physical AI.</p>
-            <p className="text-foreground font-medium">Until now.</p>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+              Every robotics team rebuilds the same vision stack from scratch — YOLO wrappers, depth pipelines, safety logic, tracking.
+            </motion.p>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+              There's no shared, pluggable perception layer for physical AI.
+            </motion.p>
+            <motion.p
+              className="text-foreground font-medium text-[32px]"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              Until now.
+            </motion.p>
           </div>
         </div>
         <div className="w-[500px] flex items-center justify-center">
-          <div className="space-y-6 font-mono text-xl text-muted-foreground">
-            {["Detection", "Depth", "Tracking", "Scene Graph", "Safety", "Planning"].map((item, i) => (
-              <div key={item} className="flex items-center gap-4">
+          <div className="space-y-5 font-mono text-xl">
+            {items.map((item, i) => (
+              <motion.div
+                key={item}
+                className="flex items-center gap-4 bg-card/50 border border-border/50 rounded-lg px-5 py-3"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + i * 0.1 }}
+              >
                 <span className="text-oe-red text-2xl">✗</span>
-                <span className={i < 4 ? "line-through opacity-50" : ""}>{item}</span>
-                <span className="text-muted-foreground/40 ml-auto">Built from scratch</span>
-              </div>
+                <span className={`flex-1 ${i < 4 ? "line-through text-muted-foreground/50" : "text-muted-foreground"}`}>{item}</span>
+                <span className="text-muted-foreground/30 text-sm">rebuilt every time</span>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -183,29 +319,52 @@ function ProblemSlide() {
 // ─── Solution Slide ───────────────────────────────────────────────────────
 
 function SolutionSlide() {
+  const commands = [
+    { cmd: "openeye pull yolov8", desc: "Pull open-source vision models from a registry — like Docker for CV.", icon: "↓" },
+    { cmd: "openeye run yolov8 image.jpg", desc: "Run inference on images or live camera feeds with one command.", icon: "▶" },
+    { cmd: "openeye watch --safety", desc: "Real-time workspace monitoring with automatic safety halt.", icon: "◉" },
+  ];
+
   return (
     <SlideLayout>
-      <div className="flex-1 flex flex-col justify-center px-20 py-20">
-        <div className="font-mono text-xl uppercase tracking-widest text-primary mb-6">
+      <GridBackground opacity={0.04} />
+      <GlowOrb color="hsl(var(--primary))" size={500} x="50%" y="-10%" blur={250} />
+
+      <div className="flex-1 flex flex-col justify-center px-20 py-20 relative z-10">
+        <motion.div
+          className="font-mono text-xl uppercase tracking-widest text-primary mb-6 flex items-center gap-3"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <span className="w-8 h-px bg-primary" />
           The Solution
-        </div>
-        <h2 className="text-[72px] font-semibold font-display leading-[1.05] mb-10">
+        </motion.div>
+        <motion.h2
+          className="text-[72px] font-semibold font-display leading-[1.05] mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
           One CLI. Any model.
           <br />
-          Any camera. <span className="text-primary">Any robot.</span>
-        </h2>
-        <div className="grid grid-cols-3 gap-10 mt-6">
-          {[
-            { cmd: "openeye pull yolov8", desc: "Pull open-source vision models from a registry — like Docker for CV." },
-            { cmd: "openeye run yolov8 image.jpg", desc: "Run inference on images or live camera feeds with one command." },
-            { cmd: "openeye watch --safety", desc: "Real-time workspace monitoring with automatic safety halt." },
-          ].map((item) => (
-            <div key={item.cmd} className="space-y-4">
-              <div className="font-mono text-xl bg-secondary text-oe-green px-5 py-3 rounded-lg border">
+          Any camera. <span className="bg-gradient-to-r from-primary to-oe-blue bg-clip-text text-transparent">Any robot.</span>
+        </motion.h2>
+        <div className="grid grid-cols-3 gap-8">
+          {commands.map((item, i) => (
+            <motion.div
+              key={item.cmd}
+              className="bg-card/80 border border-border/60 rounded-xl p-8 space-y-5 backdrop-blur-sm relative overflow-hidden group"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.15 }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+              <div className="font-mono text-5xl text-primary/30 mb-2">{item.icon}</div>
+              <div className="font-mono text-xl text-oe-green px-4 py-3 rounded-lg bg-secondary/80 border border-border/40">
                 $ {item.cmd}
               </div>
-              <p className="text-[24px] text-muted-foreground leading-relaxed">{item.desc}</p>
-            </div>
+              <p className="text-[22px] text-muted-foreground leading-relaxed">{item.desc}</p>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -217,42 +376,81 @@ function SolutionSlide() {
 
 function ArchitectureSlide() {
   const layers = [
-    { label: "Input Layer", items: ["USB Camera", "RTSP Stream", "Video File", "Image"], color: "bg-oe-blue" },
-    { label: "Perception Pipeline", items: ["Detection (YOLO)", "Depth Estimation", "Object Tracking", "3D Position"], color: "bg-primary" },
-    { label: "Intelligence Layer", items: ["Scene Graph", "Safety Evaluation", "Change Detection", "Action Suggestions"], color: "bg-oe-red" },
-    { label: "Output Layer", items: ["REST API", "WebSocket", "gRPC", "Event Bus"], color: "bg-foreground" },
+    { label: "Input", items: ["USB Camera", "RTSP Stream", "Video File", "Image"], color: "bg-oe-blue", glow: "hsl(var(--oe-blue))" },
+    { label: "Perception", items: ["Detection (YOLO)", "Depth Estimation", "Object Tracking", "3D Position"], color: "bg-primary", glow: "hsl(var(--primary))" },
+    { label: "Intelligence", items: ["Scene Graph", "Safety Eval", "Change Detection", "Action Suggest"], color: "bg-oe-red", glow: "hsl(var(--oe-red))" },
+    { label: "Output", items: ["REST API", "WebSocket", "gRPC", "Event Bus"], color: "bg-foreground", glow: "hsl(var(--foreground))" },
   ];
 
   return (
     <SlideLayout>
-      <div className="flex-1 flex flex-col px-20 py-20">
-        <div className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6">
+      <GridBackground opacity={0.05} />
+
+      <div className="flex-1 flex flex-col px-20 py-20 relative z-10">
+        <motion.div
+          className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="w-8 h-px bg-muted-foreground" />
           Architecture
-        </div>
-        <h2 className="text-[60px] font-semibold font-display leading-[1.05] mb-14">
+        </motion.div>
+        <motion.h2
+          className="text-[60px] font-semibold font-display leading-[1.05] mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
           Multi-stage perception pipeline
-        </h2>
+        </motion.h2>
         <div className="flex-1 flex items-center">
-          <div className="w-full flex gap-6">
+          <div className="w-full flex gap-4 items-stretch">
             {layers.map((layer, i) => (
-              <div key={layer.label} className="flex-1 flex flex-col">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-5 h-5 rotate-45 ${layer.color}`} />
-                  <span className="font-mono text-lg uppercase tracking-widest text-foreground">
+              <motion.div
+                key={layer.label}
+                className="flex-1 flex flex-col relative"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 + i * 0.12 }}
+              >
+                {/* Connector arrow */}
+                {i < layers.length - 1 && (
+                  <div className="absolute -right-4 top-1/2 z-20 text-muted-foreground/50">
+                    <motion.span
+                      className="text-3xl block"
+                      animate={{ x: [0, 6, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
+                    >
+                      →
+                    </motion.span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 mb-4">
+                  <motion.div
+                    className={`w-4 h-4 rotate-45 ${layer.color}`}
+                    animate={{ rotate: [45, 135, 45] }}
+                    transition={{ duration: 8, repeat: Infinity, delay: i * 0.5 }}
+                  />
+                  <span className="font-mono text-base uppercase tracking-widest text-foreground">
                     {layer.label}
                   </span>
                 </div>
-                <div className="bg-card border rounded-xl p-6 flex-1 space-y-4">
-                  {layer.items.map((item) => (
-                    <div key={item} className="font-mono text-xl text-muted-foreground flex items-center gap-3">
-                      <span className="text-oe-green">▸</span> {item}
-                    </div>
+                <div className="bg-card/80 border border-border/60 rounded-xl p-5 flex-1 space-y-3 relative overflow-hidden backdrop-blur-sm">
+                  <div className={`absolute top-0 left-0 right-0 h-0.5 ${layer.color} opacity-40`} />
+                  {layer.items.map((item, j) => (
+                    <motion.div
+                      key={item}
+                      className="font-mono text-lg text-muted-foreground flex items-center gap-3"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 + i * 0.12 + j * 0.05 }}
+                    >
+                      <span className="text-oe-green text-sm">▸</span> {item}
+                    </motion.div>
                   ))}
                 </div>
-                {i < layers.length - 1 && (
-                  <div className="flex justify-center my-2 text-muted-foreground text-3xl">→</div>
-                )}
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -265,30 +463,51 @@ function ArchitectureSlide() {
 
 function ModelsSlide() {
   const models = [
-    { name: "YOLOv8", type: "Detection", desc: "Real-time object detection, multiple variants (nano to xlarge)" },
-    { name: "Depth Anything v2", type: "Depth", desc: "Monocular depth estimation for 3D spatial reasoning" },
-    { name: "Grounding DINO", type: "Open-Vocab", desc: "Text-prompted detection — find anything by description" },
-    { name: "SAM2", type: "Segmentation", desc: "Segment Anything Model for precise object masks" },
-    { name: "ONNX Runtime", type: "Runtime", desc: "Cross-platform inference with hardware acceleration" },
-    { name: "TensorRT", type: "Runtime", desc: "NVIDIA-optimized inference for edge deployment" },
+    { name: "YOLOv8", type: "Detection", desc: "Real-time object detection, multiple variants (nano to xlarge)", accent: "text-oe-green" },
+    { name: "Depth Anything v2", type: "Depth", desc: "Monocular depth estimation for 3D spatial reasoning", accent: "text-oe-blue" },
+    { name: "Grounding DINO", type: "Open-Vocab", desc: "Text-prompted detection — find anything by description", accent: "text-primary" },
+    { name: "SAM2", type: "Segmentation", desc: "Segment Anything Model for precise object masks", accent: "text-oe-red" },
+    { name: "ONNX Runtime", type: "Runtime", desc: "Cross-platform inference with hardware acceleration", accent: "text-terminal-amber" },
+    { name: "TensorRT", type: "Runtime", desc: "NVIDIA-optimized inference for edge deployment", accent: "text-oe-green" },
   ];
 
   return (
     <SlideLayout>
-      <div className="flex-1 flex flex-col px-20 py-20">
-        <div className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6">
+      <GridBackground opacity={0.03} />
+      <GlowOrb color="hsl(var(--oe-blue))" size={400} x="80%" y="70%" blur={200} />
+      <GlowOrb color="hsl(var(--primary))" size={300} x="5%" y="20%" blur={180} />
+
+      <div className="flex-1 flex flex-col px-20 py-20 relative z-10">
+        <motion.div
+          className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="w-8 h-px bg-muted-foreground" />
           Model Registry
-        </div>
-        <h2 className="text-[60px] font-semibold font-display leading-[1.05] mb-14">
-          Plug in any model. <span className="text-primary">Swap freely.</span>
-        </h2>
-        <div className="grid grid-cols-3 gap-6 flex-1">
-          {models.map((m) => (
-            <div key={m.name} className="bg-card border rounded-xl p-8 flex flex-col">
-              <div className="font-mono text-base uppercase tracking-widest text-oe-green mb-3">{m.type}</div>
-              <div className="text-[32px] font-semibold mb-3">{m.name}</div>
-              <p className="text-xl text-muted-foreground leading-relaxed flex-1">{m.desc}</p>
-            </div>
+        </motion.div>
+        <motion.h2
+          className="text-[60px] font-semibold font-display leading-[1.05] mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          Plug in any model. <span className="bg-gradient-to-r from-primary to-oe-blue bg-clip-text text-transparent">Swap freely.</span>
+        </motion.h2>
+        <div className="grid grid-cols-3 gap-5 flex-1">
+          {models.map((m, i) => (
+            <motion.div
+              key={m.name}
+              className="bg-card/60 border border-border/50 rounded-xl p-7 flex flex-col backdrop-blur-sm relative overflow-hidden group hover:border-primary/30 transition-colors"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15 + i * 0.08 }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+              <div className={`font-mono text-sm uppercase tracking-widest ${m.accent} mb-3`}>{m.type}</div>
+              <div className="text-[30px] font-semibold mb-3">{m.name}</div>
+              <p className="text-lg text-muted-foreground leading-relaxed flex-1">{m.desc}</p>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -299,43 +518,93 @@ function ModelsSlide() {
 // ─── Safety Slide ─────────────────────────────────────────────────────────
 
 function SafetySlide() {
+  const terminalLines = [
+    { text: "$ openeye watch --safety", color: "text-oe-green" },
+    { text: "[SAFETY] Monitoring workspace...", color: "text-muted-foreground" },
+    { text: "[SAFETY] ✓ Scene stable — 4 objects", color: "text-oe-green" },
+    { text: "[ANOMALY] ⚠ Human hand detected in zone A", color: "text-oe-red" },
+    { text: "[SAFETY] → HALT signal sent to robot", color: "text-oe-red" },
+    { text: "[AGENT] Paused. Awaiting clearance...", color: "text-muted-foreground" },
+    { text: "[SAFETY] ✓ Zone A clear. Resuming.", color: "text-oe-green" },
+  ];
+
   return (
     <SlideLayout>
-      <div className="flex-1 flex px-20 py-20">
+      <GlowOrb color="hsl(var(--oe-red))" size={600} x="60%" y="20%" blur={250} />
+      <GridBackground opacity={0.03} />
+
+      <div className="flex-1 flex px-20 py-20 relative z-10">
         <div className="flex-1 flex flex-col justify-center">
-          <div className="font-mono text-xl uppercase tracking-widest text-oe-red mb-6">
+          <motion.div
+            className="font-mono text-xl uppercase tracking-widest text-oe-red mb-6 flex items-center gap-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <motion.span
+              className="inline-block w-3 h-3 rounded-full bg-oe-red"
+              animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
             Safety Guardian
-          </div>
-          <h2 className="text-[72px] font-semibold font-display leading-[1.05] mb-10">
+          </motion.div>
+          <motion.h2
+            className="text-[72px] font-semibold font-display leading-[1.05] mb-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
             Who watches
             <br />
             <span className="text-oe-red">the robots?</span>
-          </h2>
-          <div className="space-y-8 text-[26px] text-muted-foreground leading-relaxed max-w-[800px]">
-            <div className="flex items-start gap-4">
-              <span className="font-mono text-oe-green text-2xl mt-1">▸</span>
-              <div><strong className="text-foreground">Fast Layer:</strong> YOLO runs every frame — pure geometry for real-time detection.</div>
-            </div>
-            <div className="flex items-start gap-4">
-              <span className="font-mono text-primary text-2xl mt-1">▸</span>
-              <div><strong className="text-foreground">Smart Layer:</strong> VLM analyzes periodically for contextual understanding.</div>
-            </div>
-            <div className="flex items-start gap-4">
-              <span className="font-mono text-oe-red text-2xl mt-1">▸</span>
-              <div><strong className="text-foreground">Halt Protocol:</strong> Danger detected → halt signal → resume when clear.</div>
-            </div>
+          </motion.h2>
+          <div className="space-y-7 text-[24px] text-muted-foreground leading-relaxed max-w-[750px]">
+            {[
+              { color: "bg-oe-green", label: "Fast Layer", desc: "YOLO runs every frame — pure geometry for real-time detection." },
+              { color: "bg-primary", label: "Smart Layer", desc: "VLM analyzes periodically for contextual understanding." },
+              { color: "bg-oe-red", label: "Halt Protocol", desc: "Danger detected → halt signal → resume when clear." },
+            ].map((item, i) => (
+              <motion.div
+                key={item.label}
+                className="flex items-start gap-4 bg-card/40 border border-border/30 rounded-lg px-6 py-4"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.15 }}
+              >
+                <span className={`mt-2 w-2.5 h-2.5 rounded-full ${item.color} shrink-0`} />
+                <div><strong className="text-foreground">{item.label}:</strong> {item.desc}</div>
+              </motion.div>
+            ))}
           </div>
         </div>
         <div className="w-[700px] flex items-center justify-center">
-          <div className="w-full bg-card border rounded-xl p-10 font-mono text-lg leading-loose space-y-1">
-            <div className="text-oe-green">$ openeye watch --safety</div>
-            <div className="text-muted-foreground">[SAFETY] Monitoring workspace...</div>
-            <div className="text-oe-green">[SAFETY] ✓ Scene stable — 4 objects</div>
-            <div className="text-oe-red">[ANOMALY] ⚠ Human hand in workspace</div>
-            <div className="text-oe-red">[SAFETY] → HALT sent to robot</div>
-            <div className="text-muted-foreground">[AGENT] Paused. Waiting...</div>
-            <div className="text-oe-green">[SAFETY] ✓ Workspace clear. Resumed.</div>
-          </div>
+          <motion.div
+            className="w-full bg-card/80 border border-border/60 rounded-xl p-8 font-mono text-lg leading-loose space-y-1.5 relative overflow-hidden backdrop-blur-sm"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            {/* Blinking status light */}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <motion.span
+                className="w-2 h-2 rounded-full bg-oe-green"
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+              />
+              <span className="text-xs text-muted-foreground">LIVE</span>
+            </div>
+
+            {terminalLines.map((line, i) => (
+              <motion.div
+                key={i}
+                className={line.color}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + i * 0.15 }}
+              >
+                {line.text}
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </div>
     </SlideLayout>
@@ -346,38 +615,69 @@ function SafetySlide() {
 
 function PluginSlide() {
   const plugins = [
-    { category: "Input Plugins", items: ["VLM (OpenAI, Gemini)", "Local YOLO", "Video File", "Perception Pipeline"] },
-    { category: "LLM Plugins", items: ["OpenAI GPT-4o", "Nebius (Qwen, Llama)", "OpenRouter (free fallbacks)"] },
-    { category: "Action Plugins", items: ["Log to console", "Robot connectors", "Custom handlers"] },
-    { category: "Adapters", items: ["yolov8", "depth_anything", "grounding_dino", "ONNX / TensorRT"] },
+    { category: "Input Plugins", items: ["VLM (OpenAI, Gemini)", "Local YOLO", "Video File", "Perception Pipeline"], accent: "text-oe-blue" },
+    { category: "LLM Plugins", items: ["OpenAI GPT-4o", "Nebius (Qwen, Llama)", "OpenRouter (free)"], accent: "text-primary" },
+    { category: "Action Plugins", items: ["Log to console", "Robot connectors", "Custom handlers"], accent: "text-oe-red" },
+    { category: "Adapters", items: ["yolov8", "depth_anything", "grounding_dino", "ONNX / TensorRT"], accent: "text-oe-green" },
   ];
 
   return (
     <SlideLayout>
-      <div className="flex-1 flex flex-col px-20 py-20">
-        <div className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6">
+      <GridBackground opacity={0.04} />
+      <GlowOrb color="hsl(var(--primary))" size={400} x="50%" y="50%" blur={250} />
+
+      <div className="flex-1 flex flex-col px-20 py-20 relative z-10">
+        <motion.div
+          className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="w-8 h-px bg-muted-foreground" />
           Extensibility
-        </div>
-        <h2 className="text-[60px] font-semibold font-display leading-[1.05] mb-14">
-          Everything is a <span className="text-primary">plugin.</span>
-        </h2>
-        <div className="grid grid-cols-4 gap-8 flex-1">
-          {plugins.map((p) => (
-            <div key={p.category} className="flex flex-col">
-              <div className="font-mono text-base uppercase tracking-widest text-primary mb-5">{p.category}</div>
-              <div className="bg-card border rounded-xl p-6 flex-1 space-y-4">
-                {p.items.map((item) => (
-                  <div key={item} className="font-mono text-xl text-muted-foreground">
-                    <span className="text-oe-green mr-3">├─</span>{item}
-                  </div>
+        </motion.div>
+        <motion.h2
+          className="text-[60px] font-semibold font-display leading-[1.05] mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          Everything is a <span className="bg-gradient-to-r from-primary to-oe-green bg-clip-text text-transparent">plugin.</span>
+        </motion.h2>
+        <div className="grid grid-cols-4 gap-6 flex-1">
+          {plugins.map((p, i) => (
+            <motion.div
+              key={p.category}
+              className="flex flex-col"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 + i * 0.1 }}
+            >
+              <div className={`font-mono text-sm uppercase tracking-widest ${p.accent} mb-4`}>{p.category}</div>
+              <div className="bg-card/60 border border-border/50 rounded-xl p-6 flex-1 space-y-4 relative overflow-hidden backdrop-blur-sm">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+                {p.items.map((item, j) => (
+                  <motion.div
+                    key={item}
+                    className="font-mono text-lg text-muted-foreground flex items-center gap-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 + i * 0.1 + j * 0.05 }}
+                  >
+                    <span className="text-oe-green/60 mr-1">├─</span>{item}
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-        <div className="mt-8 font-mono text-xl text-muted-foreground text-center">
+        <motion.div
+          className="mt-8 font-mono text-xl text-muted-foreground text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+        >
           Discovery-based plugin pattern — drop a file, it's loaded automatically
-        </div>
+        </motion.div>
       </div>
     </SlideLayout>
   );
@@ -386,40 +686,66 @@ function PluginSlide() {
 // ─── Deployment Slide ─────────────────────────────────────────────────────
 
 function DeploySlide() {
+  const options = [
+    {
+      label: "Self-Hosted",
+      desc: "All inference runs locally. No data leaves your premises. Deploy in air-gapped environments.",
+      cmd: "pip install openeye-ai",
+      icon: "🔒",
+    },
+    {
+      label: "API Server",
+      desc: "FastAPI server with REST + WebSocket. Send images, get structured JSON. Built-in dashboard.",
+      cmd: "openeye serve yolov8 --port 8000",
+      icon: "🌐",
+    },
+    {
+      label: "Fleet Management",
+      desc: "Register edge devices, deploy models, canary rollouts, rolling updates from the CLI.",
+      cmd: "openeye fleet deploy --strategy canary",
+      icon: "📡",
+    },
+  ];
+
   return (
     <SlideLayout>
-      <div className="flex-1 flex flex-col px-20 py-20">
-        <div className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6">
+      <GridBackground opacity={0.04} />
+      <GlowOrb color="hsl(var(--oe-green))" size={400} x="80%" y="10%" blur={200} />
+
+      <div className="flex-1 flex flex-col px-20 py-20 relative z-10">
+        <motion.div
+          className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="w-8 h-px bg-muted-foreground" />
           Deployment
-        </div>
-        <h2 className="text-[60px] font-semibold font-display leading-[1.05] mb-14">
-          Your hardware. Your data. <span className="text-primary">Your network.</span>
-        </h2>
-        <div className="grid grid-cols-3 gap-10 flex-1">
-          {[
-            {
-              label: "Self-Hosted",
-              desc: "All inference runs locally. No data leaves your premises. Deploy in air-gapped environments.",
-              cmd: "pip install openeye-ai",
-            },
-            {
-              label: "API Server",
-              desc: "FastAPI server with REST + WebSocket. Send images, get structured JSON. Built-in dashboard.",
-              cmd: "openeye serve yolov8 --port 8000",
-            },
-            {
-              label: "Fleet Management",
-              desc: "Register edge devices, deploy models, canary rollouts, rolling updates from the CLI.",
-              cmd: "openeye fleet deploy --strategy canary",
-            },
-          ].map((item) => (
-            <div key={item.label} className="bg-card border rounded-xl p-8 flex flex-col">
-              <div className="font-mono text-base uppercase tracking-widest text-oe-green mb-4">{item.label}</div>
-              <p className="text-[24px] text-muted-foreground leading-relaxed flex-1 mb-6">{item.desc}</p>
-              <div className="font-mono text-lg bg-secondary text-oe-green px-4 py-3 rounded-lg border">
+        </motion.div>
+        <motion.h2
+          className="text-[60px] font-semibold font-display leading-[1.05] mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          Your hardware. Your data. <span className="bg-gradient-to-r from-primary to-oe-green bg-clip-text text-transparent">Your network.</span>
+        </motion.h2>
+        <div className="grid grid-cols-3 gap-8 flex-1">
+          {options.map((item, i) => (
+            <motion.div
+              key={item.label}
+              className="bg-card/60 border border-border/50 rounded-xl p-8 flex flex-col backdrop-blur-sm relative overflow-hidden"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.12 }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+              <div className="text-[40px] mb-3">{item.icon}</div>
+              <div className="font-mono text-sm uppercase tracking-widest text-oe-green mb-4">{item.label}</div>
+              <p className="text-[22px] text-muted-foreground leading-relaxed flex-1 mb-6">{item.desc}</p>
+              <div className="font-mono text-base bg-secondary/60 text-oe-green px-4 py-3 rounded-lg border border-border/40">
                 $ {item.cmd}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -441,20 +767,41 @@ function UseCasesSlide() {
 
   return (
     <SlideLayout>
-      <div className="flex-1 flex flex-col px-20 py-20">
-        <div className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6">
+      <GridBackground opacity={0.03} />
+      <GlowOrb color="hsl(var(--oe-blue))" size={400} x="10%" y="70%" blur={200} />
+      <GlowOrb color="hsl(var(--oe-red))" size={300} x="85%" y="15%" blur={180} />
+
+      <div className="flex-1 flex flex-col px-20 py-20 relative z-10">
+        <motion.div
+          className="font-mono text-xl uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="w-8 h-px bg-muted-foreground" />
           Use Cases
-        </div>
-        <h2 className="text-[60px] font-semibold font-display leading-[1.05] mb-14">
-          Built for the <span className="text-primary">physical world.</span>
-        </h2>
-        <div className="grid grid-cols-3 gap-8 flex-1">
-          {cases.map((c) => (
-            <div key={c.title} className="bg-card border rounded-xl p-8 flex flex-col">
-              <div className="text-[48px] mb-4">{c.icon}</div>
-              <div className="text-[28px] font-semibold mb-3">{c.title}</div>
-              <p className="text-xl text-muted-foreground leading-relaxed flex-1">{c.desc}</p>
-            </div>
+        </motion.div>
+        <motion.h2
+          className="text-[60px] font-semibold font-display leading-[1.05] mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          Built for the <span className="bg-gradient-to-r from-primary to-oe-blue bg-clip-text text-transparent">physical world.</span>
+        </motion.h2>
+        <div className="grid grid-cols-3 gap-5 flex-1">
+          {cases.map((c, i) => (
+            <motion.div
+              key={c.title}
+              className="bg-card/50 border border-border/40 rounded-xl p-7 flex flex-col backdrop-blur-sm relative overflow-hidden group"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15 + i * 0.08 }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="text-[44px] mb-3">{c.icon}</div>
+              <div className="text-[26px] font-semibold mb-2">{c.title}</div>
+              <p className="text-lg text-muted-foreground leading-relaxed flex-1">{c.desc}</p>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -467,29 +814,56 @@ function UseCasesSlide() {
 function CTASlide() {
   return (
     <SlideLayout>
-      <div className="flex-1 flex flex-col items-center justify-center px-20">
-        <div className="flex items-center gap-4 mb-10">
-          <Diamond className="bg-oe-blue" />
-          <Diamond className="bg-oe-red" />
-          <Diamond className="bg-foreground" />
-        </div>
-        <h2 className="text-[80px] font-semibold font-display leading-[1.05] text-center mb-8">
+      <GridBackground opacity={0.06} />
+      <GlowOrb color="hsl(var(--oe-blue))" size={600} x="20%" y="30%" blur={280} />
+      <GlowOrb color="hsl(var(--oe-red))" size={500} x="70%" y="50%" blur={250} />
+      <GlowOrb color="hsl(var(--primary))" size={400} x="50%" y="10%" blur={220} />
+      <ScanLine />
+
+      <div className="flex-1 flex flex-col items-center justify-center px-20 relative z-10">
+        <motion.div
+          className="flex items-center gap-5 mb-10"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <PulsingDot color="bg-oe-blue" delay={0} />
+          <PulsingDot color="bg-oe-red" delay={0.3} />
+          <PulsingDot color="bg-foreground" delay={0.6} />
+        </motion.div>
+        <motion.h2
+          className="text-[80px] font-semibold font-display leading-[1.05] text-center mb-10"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
           The perception layer
           <br />
-          is <span className="text-primary">open.</span>
-        </h2>
-        <div className="space-y-6 text-center mb-14">
-          <div className="font-mono text-[28px] bg-secondary text-oe-green px-8 py-4 rounded-lg border inline-block">
+          is <span className="bg-gradient-to-r from-primary via-oe-blue to-oe-green bg-clip-text text-transparent">open.</span>
+        </motion.h2>
+        <motion.div
+          className="space-y-6 text-center mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <div className="font-mono text-[28px] bg-card/80 text-oe-green px-10 py-5 rounded-xl border border-border/60 inline-block backdrop-blur-sm relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-oe-green/40 to-transparent" />
             pip install openeye-ai
           </div>
-        </div>
-        <div className="flex items-center gap-10 font-mono text-2xl text-muted-foreground">
+        </motion.div>
+        <motion.div
+          className="flex items-center gap-10 font-mono text-2xl text-muted-foreground"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+        >
           <span>github.com/openeye-ai</span>
-          <span>·</span>
+          <span className="text-primary">·</span>
           <span>Apache 2.0</span>
-          <span>·</span>
+          <span className="text-primary">·</span>
           <span>openeye.lovable.app</span>
-        </div>
+        </motion.div>
       </div>
     </SlideLayout>
   );
@@ -586,7 +960,7 @@ export default function Presentation() {
       hideTimer.current = setTimeout(() => setShowControls(false), 2500);
     };
 
-    onMove(); // start timer
+    onMove();
     window.addEventListener("mousemove", onMove);
     return () => {
       window.removeEventListener("mousemove", onMove);
@@ -725,9 +1099,9 @@ export default function Presentation() {
           {/* Progress bar */}
           <div className="absolute bottom-0 left-0 right-0 z-50 h-1 bg-border">
             <motion.div
-              className="h-full bg-primary"
+              className="h-full bg-gradient-to-r from-oe-blue via-primary to-oe-green"
               animate={{ width: `${((current + 1) / total) * 100}%` }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.3 }}
             />
           </div>
         </>
