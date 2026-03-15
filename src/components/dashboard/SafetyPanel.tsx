@@ -116,8 +116,8 @@ export function SafetyPanel() {
       </motion.div>
 
       {/* Safety log */}
-      <div className="bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden flex-1 min-h-0">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/5">
+      <div className="bg-card rounded-outer border overflow-hidden flex-1 min-h-0">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
           <span className="font-mono text-xs text-terminal-muted uppercase tracking-widest">
             Safety Log — live
           </span>
