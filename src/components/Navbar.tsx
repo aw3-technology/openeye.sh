@@ -91,7 +91,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+        <div className="hidden lg:flex items-center gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
           {publicNavItems.map((item) =>
             isDropdown(item) ? (
               <DropdownMenu key={item.label} item={item} isActive={isActive} />
