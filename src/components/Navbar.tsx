@@ -27,9 +27,7 @@ function DropdownMenu({ item, isActive }: { item: NavDropdown; isActive: (href: 
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-1 uppercase tracking-widest transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
-          hasActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-        }`}
+        className="flex items-center gap-1 uppercase tracking-widest transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none text-muted-foreground hover:text-foreground"
       >
         {item.label}
         <ChevronDown
