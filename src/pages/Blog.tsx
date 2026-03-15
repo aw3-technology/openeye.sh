@@ -121,7 +121,18 @@ export default function Blog() {
                   to={`/blog/${post.slug}`}
                   className="block group h-full rounded-outer focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
                 >
-                  <div className="border border-foreground/[0.06] rounded-outer p-6 h-full bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-colors flex flex-col">
+                  <div className="border border-foreground/[0.06] rounded-outer overflow-hidden h-full bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-colors flex flex-col">
+                    {blogHeroImages[post.slug] && (
+                      <div className="aspect-video overflow-hidden">
+                        <img
+                          src={blogHeroImages[post.slug]}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6 flex flex-col flex-1">
                     <div className="flex items-center gap-3 mb-4">
                       <span className={`font-mono text-[10px] uppercase tracking-widest px-2 py-1 border rounded-inner ${categoryColors[post.category] || "text-muted-foreground border-foreground/10"}`}>
                         {post.category}
