@@ -104,6 +104,7 @@ const App = () => (
               <Route path="settings" element={<SettingsHub />} />
               <Route path="settings/api-keys" element={<SettingsHub />} />
               <Route path="settings/credits" element={<SettingsHub />} />
+              <Route path="credits" element={<Navigate to="/dashboard/settings/credits" replace />} />
               <Route path="mlops" element={<MLOps />} />
               <Route path="agent" element={<AgentLoop />} />
               <Route path="memory" element={<MemoryPage />} />
