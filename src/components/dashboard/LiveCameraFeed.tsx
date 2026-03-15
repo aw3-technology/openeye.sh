@@ -31,7 +31,7 @@ function getPersonSafetyZone(obj: DetectedObject): SafetyZoneInfo | null {
       color: "text-terminal-amber",
       borderColor: "border-terminal-amber",
       bgColor: "bg-terminal-amber/15",
-      textColor: "bg-terminal-amber text-black",
+      textColor: "bg-terminal-amber text-primary-foreground",
     };
   }
   return {
