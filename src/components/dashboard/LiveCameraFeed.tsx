@@ -19,10 +19,10 @@ function getPersonSafetyZone(obj: DetectedObject): SafetyZoneInfo | null {
   if (obj.bbox.h > 0.6) {
     return {
       level: "DANGER",
-      color: "text-red-400",
-      borderColor: "border-red-500",
-      bgColor: "bg-red-500/15",
-      textColor: "bg-red-500 text-white",
+      color: "text-terminal-red",
+      borderColor: "border-terminal-red",
+      bgColor: "bg-terminal-red/15",
+      textColor: "bg-terminal-red text-primary-foreground",
     };
   }
   if (obj.bbox.h > 0.3) {
@@ -31,7 +31,7 @@ function getPersonSafetyZone(obj: DetectedObject): SafetyZoneInfo | null {
       color: "text-terminal-amber",
       borderColor: "border-terminal-amber",
       bgColor: "bg-terminal-amber/15",
-      textColor: "bg-terminal-amber text-black",
+      textColor: "bg-terminal-amber text-primary-foreground",
     };
   }
   return {
@@ -39,7 +39,7 @@ function getPersonSafetyZone(obj: DetectedObject): SafetyZoneInfo | null {
     color: "text-terminal-green",
     borderColor: "border-terminal-green",
     bgColor: "bg-terminal-green/15",
-    textColor: "bg-terminal-green text-black",
+    textColor: "bg-terminal-green text-primary-foreground",
   };
 }
 
@@ -80,7 +80,7 @@ export function LiveCameraFeed() {
   const hasPerson = safetyStatus !== null;
 
   return (
-    <div className="relative rounded-lg overflow-hidden bg-black border border-foreground/10 shadow-2xl">
+    <div className="relative rounded-lg overflow-hidden bg-terminal-bg border border-foreground/10 shadow-2xl">
       <video
         ref={videoRef as React.RefObject<HTMLVideoElement>}
         className="w-full aspect-video object-cover"
@@ -255,14 +255,14 @@ export function LiveCameraFeed() {
       {/* ----- HUD: Bottom-right LIVE indicator ----- */}
       {isStreaming && (
         <div className="absolute bottom-3 right-3 font-mono text-[11px] pointer-events-none">
-          <div className="bg-black/70 backdrop-blur-sm rounded-md border border-white/10 px-3 py-1.5">
+          <div className="bg-terminal-bg/70 backdrop-blur-sm rounded-md border border-terminal-muted/20 px-3 py-1.5">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terminal-red opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-terminal-red" />
               </span>
-              <span className="text-red-400 font-bold tracking-wider">REC</span>
-              <span className="text-white/40 tabular-nums text-[10px]">
+              <span className="text-terminal-red font-bold tracking-wider">REC</span>
+              <span className="text-terminal-muted tabular-nums text-[10px]">
                 {metrics.frame_count}f
               </span>
             </div>

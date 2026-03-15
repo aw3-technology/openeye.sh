@@ -22,7 +22,7 @@ export function CameraFeed({
   return (
     <div className="lg:col-span-3">
       <motion.div
-        className="relative border rounded-outer overflow-hidden bg-foreground"
+        className="relative border rounded-outer overflow-hidden bg-terminal-bg"
         animate={{
           borderColor: config.border,
           boxShadow: currentState === "danger"
@@ -33,7 +33,7 @@ export function CameraFeed({
         }}
         transition={{ duration: animDuration }}
       >
-        <div className="relative aspect-video bg-gradient-to-br from-foreground via-foreground/95 to-foreground/90">
+        <div className="relative aspect-video bg-terminal-bg">
           {/* Grid overlay */}
           <div
             className="absolute inset-0 opacity-10"
@@ -108,9 +108,7 @@ export function CameraFeed({
                     backgroundColor: isHaltedArm
                       ? "hsl(var(--terminal-red))"
                       : "hsl(var(--terminal-green))",
-                    color: isHaltedArm
-                      ? "hsl(0 0% 100%)"
-                      : "hsl(var(--foreground))",
+                    color: "hsl(0 0% 100%)",
                   }}
                   transition={{ duration: animDuration }}
                 >
@@ -142,7 +140,7 @@ export function CameraFeed({
                 style={{ width: `${HAND_SIZE.w}%`, height: `${HAND_SIZE.h}%` }}
               >
                 <div className="w-full h-full border-[1.5px] border-terminal-red bg-terminal-red/15 animate-pulse" />
-                <span className="absolute -top-4 left-0 text-[9px] font-mono px-1 py-0.5 bg-terminal-red text-white whitespace-nowrap leading-none">
+                <span className="absolute -top-4 left-0 text-[9px] font-mono px-1 py-0.5 bg-terminal-red text-primary-foreground whitespace-nowrap leading-none">
                   HUMAN_HAND [97.3%]
                 </span>
                 <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-terminal-red" />
@@ -221,7 +219,7 @@ export function CameraFeed({
                 exit={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.9 }}
                 transition={{ duration: animDuration }}
               >
-                <div className="bg-terminal-red/90 text-white font-mono text-xs sm:text-sm md:text-base px-4 sm:px-6 py-2 sm:py-3 rounded-inner backdrop-blur-sm">
+                <div className="bg-terminal-red/90 text-primary-foreground font-mono text-xs sm:text-sm md:text-base px-4 sm:px-6 py-2 sm:py-3 rounded-inner backdrop-blur-sm">
                   HUMAN DETECTED — OPERATIONS HALTED
                 </div>
               </motion.div>
