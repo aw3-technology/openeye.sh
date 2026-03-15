@@ -204,7 +204,7 @@ export default function Credits() {
       <div>
         <h2 className="mb-3 text-lg font-medium">Buy Credits</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tiers.data?.map((tier) => (
+          {tiers.data?.pricing_tiers?.map((tier) => (
             <PricingTierCard
               key={tier.id}
               tier={tier}
