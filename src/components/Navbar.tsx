@@ -1,11 +1,70 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import logoLight from "@/assets/openeye-logo-horizontal.png";
 import logoDark from "@/assets/openeye-logo-horizontal-dark.png";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { publicNavLinks, GITHUB_URL } from "@/data/navigation";
+import { publicNavItems, isDropdown, GITHUB_URL } from "@/data/navigation";
+import type { NavDropdown } from "@/data/navigation";
+
+function DropdownMenu({ item, isActive }: { item: NavDropdown; isActive: (href: string) => boolean }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const hasActive = item.items.some((link) => isActive(link.href));
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex items-center gap-1 transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
+          hasActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+        }`}
+      >
+        {item.label}
+        <ChevronDown
+          className={`w-3 h-3 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.12 }}
+            className="absolute top-full right-0 mt-2 min-w-[160px] bg-background border border-foreground/[0.08] rounded-md shadow-lg py-1 z-50"
+          >
+            {item.items.map((link) => (
+              <Link
+                key={link.label}
+                to={link.href}
+                onClick={() => setOpen(false)}
+                className={`block px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
+                  isActive(link.href)
+                    ? "text-foreground bg-foreground/[0.04]"
+                    : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function Navbar() {
   const { user, loading, signOut } = useAuth();
@@ -13,13 +72,11 @@ export function Navbar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
@@ -37,26 +94,26 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          {publicNavLinks.map((link) => (
-            <Link
-              key={link.label}
-              to={link.href}
-              className={`transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
-                isActive(link.href)
-                  ? "text-foreground"
-                  : "hover:text-foreground"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {publicNavItems.map((item) =>
+            isDropdown(item) ? (
+              <DropdownMenu key={item.label} item={item} isActive={isActive} />
+            ) : (
+              <Link
+                key={item.label}
+                to={item.href}
+                className={`transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
+                  isActive(item.href) ? "text-foreground" : "hover:text-foreground"
+                }`}
+              >
+                {item.label}
+              </Link>
+            )
+          )}
           {user && (
             <Link
               to="/dashboard"
               className={`transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
-                isActive("/dashboard")
-                  ? "text-foreground"
-                  : "hover:text-foreground"
+                isActive("/dashboard") ? "text-foreground" : "hover:text-foreground"
               }`}
             >
               Dashboard
@@ -134,20 +191,37 @@ export function Navbar() {
             className="md:hidden overflow-hidden border-t border-foreground/[0.06] bg-background/95 backdrop-blur-sm"
           >
             <div className="px-4 py-4 space-y-1 font-mono text-sm">
-              {publicNavLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`block py-2.5 transition-colors uppercase tracking-widest text-xs ${
-                    isActive(link.href)
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {publicNavItems.map((item) =>
+                isDropdown(item) ? (
+                  item.items.map((link) => (
+                    <Link
+                      key={link.label}
+                      to={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`block py-2.5 transition-colors uppercase tracking-widest text-xs ${
+                        isActive(link.href)
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))
+                ) : (
+                  <Link
+                    key={item.label}
+                    to={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block py-2.5 transition-colors uppercase tracking-widest text-xs ${
+                      isActive(item.href)
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              )}
               {user && (
                 <Link
                   to="/dashboard"

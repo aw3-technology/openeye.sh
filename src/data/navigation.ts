@@ -31,18 +31,35 @@ export interface NavLink {
   label: string;
 }
 
+export interface NavDropdown {
+  label: string;
+  items: NavLink[];
+}
+
 export interface DashboardNavItem {
   label: string;
   icon: LucideIcon;
   path: string;
 }
 
+export type NavItem = NavLink | NavDropdown;
+
+export function isDropdown(item: NavItem): item is NavDropdown {
+  return "items" in item;
+}
+
 /** Public site navigation (Navbar) */
-export const publicNavLinks: NavLink[] = [
-  { href: "/demo", label: "Demo" },
+export const publicNavItems: NavItem[] = [
   { href: "/docs", label: "Docs" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/blog", label: "Blog" },
+  {
+    label: "Resources",
+    items: [
+      { href: "/demo", label: "Demo" },
+      { href: "/presentation", label: "Pitch Deck" },
+      { href: "/blog", label: "Blog" },
+    ],
+  },
 ];
 
 /** Dashboard sidebar — main section */
