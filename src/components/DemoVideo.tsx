@@ -180,7 +180,7 @@ export function DemoVideo() {
                     className="absolute top-[35%] left-[5%] w-[14%] h-[20%]"
                   >
                     <div className="w-full h-full border-2 border-terminal-red/70 bg-terminal-red/15 rounded-sm animate-pulse" />
-                    <span className="absolute -top-5 left-0 text-[10px] font-mono px-1.5 py-0.5 bg-terminal-red/80 text-foreground">
+                    <span className="absolute -top-5 left-0 text-[10px] font-mono px-1.5 py-0.5 bg-terminal-red/80 text-primary-foreground">
                       HUMAN_HAND
                     </span>
                   </motion.div>
