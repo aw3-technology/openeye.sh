@@ -33,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { PricingTier } from "@/types/credits";
+import { getTotalBalance } from "@/types/credits";
 
 function PricingTierCard({
   tier,
@@ -44,11 +45,11 @@ function PricingTierCard({
   loading: boolean;
 }) {
   return (
-    <Card className={tier.popular ? "border-primary" : ""}>
+    <Card className={tier.is_popular ? "border-primary" : ""}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-base">
           {tier.name}
-          {tier.popular && (
+          {tier.is_popular && (
             <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
               Popular
             </span>
@@ -57,7 +58,7 @@ function PricingTierCard({
       </CardHeader>
       <CardContent className="space-y-3">
         <div>
-          <span className="text-2xl font-bold">${(tier.price_cents / 100).toFixed(2)}</span>
+          <span className="text-2xl font-bold">${parseFloat(tier.price).toFixed(2)}</span>
         </div>
         <p className="text-sm text-muted-foreground">
           {tier.credits.toLocaleString()} credits
@@ -118,7 +119,7 @@ export default function Credits() {
     return { totalSpent, totalAdded, txCount };
   }, [transactions.data]);
 
-  const currentBalance = balance.data?.balance ?? 0;
+  const currentBalance = getTotalBalance(balance.data);
 
   const creditCosts = [
     { endpoint: "POST /v1/detect", model: "YOLOv8", credits: 1, icon: Eye },
