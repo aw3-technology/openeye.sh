@@ -261,7 +261,7 @@ export default function Inference() {
       <InsufficientCreditsDialog
         open={showCreditsDialog}
         onOpenChange={setShowCreditsDialog}
-        balance={creditBalance.data?.balance ?? 0}
+        balance={getTotalBalance(creditBalance.data)}
       />
 
       {/* ---- Loading State ---- */}
