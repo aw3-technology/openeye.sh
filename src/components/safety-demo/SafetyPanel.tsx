@@ -61,7 +61,7 @@ export function SafetyPanel({ currentState, logs, cycleId }: SafetyPanelProps) {
       {/* Log */}
       <div className="bg-card rounded-outer border overflow-hidden flex-1 min-h-0">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-          <span className="font-mono text-xs text-terminal-muted uppercase tracking-widest">
+          <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
             Safety Log — live
           </span>
         </div>
