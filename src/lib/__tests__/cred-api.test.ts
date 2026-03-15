@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 
 // Mock supabase client
 vi.mock("@/integrations/supabase/client", () => ({
@@ -32,21 +32,21 @@ describe("credApi (edge function proxy)", () => {
   });
 
   it("getBalance calls edge function", async () => {
-    globalThis.fetch = mockFetchOk({ balance: 100, user_id: "u1", project_id: "p1" });
+    globalThis.fetch = mockFetchOk({ user_id: "u1", balances: [{ balance: 100 }] });
     const result = await credApi.getBalance();
-    expect(result.balance).toBe(100);
+    expect(result.balances[0].balance).toBe(100);
   });
 
-  it("deduct sends amount and description", async () => {
-    globalThis.fetch = mockFetchOk({ balance: 90, user_id: "u1", project_id: "p1" });
+  it("deduct sends amount and reason", async () => {
+    globalThis.fetch = mockFetchOk({ success: true, new_balance: 90 });
     const result = await credApi.deduct(10, "test deduction");
-    expect(result.balance).toBe(90);
+    expect(result.new_balance).toBe(90);
   });
 
-  it("syncUser calls sync-user endpoint", async () => {
-    globalThis.fetch = mockFetchOk({ ok: true });
+  it("syncUser calls users endpoint", async () => {
+    globalThis.fetch = mockFetchOk({ user: { id: "u1" }, created: true });
     const result = await credApi.syncUser();
-    expect(result.ok).toBe(true);
+    expect(result.created).toBe(true);
   });
 
   it("createCheckout sends correct body", async () => {
@@ -55,7 +55,7 @@ describe("credApi (edge function proxy)", () => {
     await credApi.createCheckout("tier-1", "https://ok.com", "https://cancel.com");
     const [, opts] = fetchMock.mock.calls[0];
     expect(JSON.parse(opts.body)).toEqual({
-      tier_id: "tier-1",
+      pricing_tier_id: "tier-1",
       success_url: "https://ok.com",
       cancel_url: "https://cancel.com",
     });

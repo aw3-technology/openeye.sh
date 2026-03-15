@@ -48,7 +48,7 @@ export default function Inference() {
   const saveInference = useSaveInference();
   const creditBalance = useCreditBalance();
   const deductCredits = useDeductCredits();
-  const refundCredits = useRefundCredits();
+  const refundCredits = useIssueCredits();
   const { data: historyData } = useInferenceHistory(0, 1);
   const prevUrlRef = useRef<string | null>(null);
 
