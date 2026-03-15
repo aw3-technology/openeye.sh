@@ -25,6 +25,7 @@ export function Navbar() {
           >
             GitHub
           </a>
+          <ThemeToggle />
 
           {!loading && (
             user ? (
