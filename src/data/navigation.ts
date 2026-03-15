@@ -94,4 +94,4 @@ export const fleetNavItems: DashboardNavItem[] = [
   { label: "Alerts", icon: Bell, path: "/dashboard/fleet/alerts" },
 ];
 
-export const GITHUB_URL = "https://github.com/openeye-ai";
+export const GITHUB_URL = "https://github.com/aw3-technology/openeye.sh";

@@ -231,7 +231,7 @@ function TitleSlide() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
       >
-        github.com/openeye-ai &nbsp;·&nbsp; Apache 2.0
+        github.com/aw3-technology/openeye.sh &nbsp;·&nbsp; Apache 2.0
       </motion.div>
     </SlideLayout>
   );
@@ -847,7 +847,7 @@ function CTASlide() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
         >
-          <span>github.com/openeye-ai</span>
+          <span>github.com/aw3-technology/openeye.sh</span>
           <span className="text-primary">·</span>
           <span>Apache 2.0</span>
           <span className="text-primary">·</span>

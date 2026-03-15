@@ -68,7 +68,7 @@ export default function Changelog() {
               Release history, breaking changes, and everything shipped. Follow
               along on{" "}
               <a
-                href="https://github.com/openeye-ai"
+                href="https://github.com/aw3-technology/openeye.sh"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-foreground hover:text-terminal-green transition-colors underline underline-offset-4 decoration-foreground/20"

@@ -16,7 +16,7 @@ const channels = [
     label: "GitHub Discussions",
     description:
       "Long-form conversations, RFCs, and feature requests. The best place for async technical discussion.",
-    href: "https://github.com/openeye-ai/openeye/discussions",
+    href: "https://github.com/aw3-technology/openeye.sh/discussions",
     cta: "Open Discussions",
     mono: "github.com/.../discussions",
   },
@@ -203,7 +203,7 @@ export default function Community() {
                 We welcome contributions of all sizes — from typo fixes to major
                 features. Check out the{" "}
                 <a
-                  href="https://github.com/openeye-ai/openeye/blob/main/CONTRIBUTING.md"
+                  href="https://github.com/aw3-technology/openeye.sh/blob/main/CONTRIBUTING.md"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground hover:text-terminal-green transition-colors underline underline-offset-4 decoration-foreground/20 rounded-sm focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
@@ -243,7 +243,7 @@ export default function Community() {
             className="text-center"
           >
             <a
-              href="https://github.com/openeye-ai/openeye"
+              href="https://github.com/aw3-technology/openeye.sh"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-foreground text-background px-6 py-3 rounded-inner font-mono text-xs uppercase tracking-widest hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
