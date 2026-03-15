@@ -981,8 +981,9 @@ export default function Presentation() {
               >
                 <X className="w-4 h-4" />
               </button>
-              <div className="h-6">
-                <LogoMark />
+              <div className="h-7 flex items-center">
+                <img src={logoHorizontalDark} alt="OpenEye" className="h-7 logo-dark" />
+                <img src={logoHorizontal} alt="OpenEye" className="h-7 logo-light" />
               </div>
               <span className="font-mono text-sm text-muted-foreground">
                 Slide {current + 1} of {total}
