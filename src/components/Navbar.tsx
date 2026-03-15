@@ -112,12 +112,12 @@ export function Navbar() {
         >
           <motion.span
             className="block w-5 h-px bg-foreground origin-center"
-            animate={mobileOpen ? { rotate: 45, y: 5 } : { rotate: 0, y: 0 }}
+            animate={mobileOpen ? { rotate: 45, y: 4.5 } : { rotate: 0, y: 0 }}
             transition={{ duration: 0.15 }}
           />
           <motion.span
             className="block w-5 h-px bg-foreground origin-center"
-            animate={mobileOpen ? { rotate: -45, y: -5 } : { rotate: 0, y: 0 }}
+            animate={mobileOpen ? { rotate: -45, y: -4.5 } : { rotate: 0, y: 0 }}
             transition={{ duration: 0.15 }}
           />
         </button>
