@@ -64,7 +64,7 @@ export function GetStarted() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-display text-base font-medium mb-2">{item.title}</h3>
-                  <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-3 py-2 rounded-inner border border-foreground/5 mb-3 overflow-x-auto">
+                  <div className="font-mono text-sm bg-secondary text-oe-green px-3 py-2 rounded-inner border mb-3 overflow-x-auto">
                     $ {item.command}
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
