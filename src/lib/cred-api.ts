@@ -93,8 +93,9 @@ export const credApi = {
     });
   },
 
-  getPricingTiers() {
-    return request<PricingTier[]>("pricing-tiers");
+  async getPricingTiers() {
+    const res = await request<{ pricing_tiers: PricingTier[] }>("pricing-tiers");
+    return res.pricing_tiers;
   },
 
   getTransactions(page = 0, pageSize = 20) {
