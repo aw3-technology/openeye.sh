@@ -40,7 +40,7 @@ function CodeBlock({ block }: { block: DocBlock }) {
           <CopyButton text={block.content || ""} />
         </div>
       )}
-      <pre className="p-4 overflow-x-auto font-mono text-sm leading-relaxed text-terminal-green">
+      <pre className="p-4 overflow-x-auto font-mono text-sm leading-relaxed text-oe-green">
         <code>{block.content}</code>
       </pre>
     </div>

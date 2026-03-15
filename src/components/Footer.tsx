@@ -93,7 +93,7 @@ export function Footer() {
             <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-4">
               Get Started
             </div>
-            <div className="font-mono text-xs sm:text-sm bg-terminal-bg text-terminal-green px-3 sm:px-4 py-2.5 rounded-inner border border-foreground/5 overflow-x-auto whitespace-nowrap scrollbar-hide select-all cursor-text">
+            <div className="font-mono text-xs sm:text-sm bg-secondary text-oe-green px-3 sm:px-4 py-2.5 rounded-inner border overflow-x-auto whitespace-nowrap scrollbar-hide select-all cursor-text">
               pip install openeye-ai
             </div>
           </div>
