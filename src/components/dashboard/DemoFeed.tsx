@@ -38,7 +38,7 @@ export function DemoFeed() {
 
   return (
     <motion.div
-      className="relative border rounded-outer overflow-hidden bg-foreground"
+      className="relative border rounded-outer overflow-hidden bg-terminal-bg"
       animate={{
         borderColor: isActive ? config.border : "hsl(var(--border))",
         boxShadow: isActive ? config.shadow : "none",
