@@ -134,9 +134,9 @@ export function DemoSceneGraph() {
   const objectCount = sceneGraph?.nodes.length ?? 0;
 
   return (
-    <div className="bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/5">
-        <span className="font-mono text-xs text-terminal-muted uppercase tracking-widest">
+    <div className="bg-card rounded-outer border overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+        <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
           Scene Graph — {objectCount} nodes
         </span>
       </div>
