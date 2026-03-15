@@ -12,6 +12,8 @@ import {
 
 import logoHorizontal from "@/assets/openeye-logo-horizontal.png";
 import logoHorizontalDark from "@/assets/openeye-logo-horizontal-dark.png";
+import logoVertical from "@/assets/openeye-logo-vertical.png";
+import logoVerticalDark from "@/assets/openeye-logo-vertical-dark.png";
 
 // ─── Slide Data ───────────────────────────────────────────────────────────
 
