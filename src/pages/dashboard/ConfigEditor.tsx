@@ -141,8 +141,14 @@ export default function ConfigEditor() {
   }
 
   // Group model options by provider
-  const vlmByProvider = Object.groupBy(vlmModelOptions, (m) => m.provider);
-  const cortexByProvider = Object.groupBy(cortexLlmOptions, (m) => m.provider);
+  const vlmByProvider: Record<string, typeof vlmModelOptions> = {};
+  for (const m of vlmModelOptions) {
+    (vlmByProvider[m.provider] ??= []).push(m);
+  }
+  const cortexByProvider: Record<string, typeof cortexLlmOptions> = {};
+  for (const m of cortexLlmOptions) {
+    (cortexByProvider[m.provider] ??= []).push(m);
+  }
 
   return (
     <div className="space-y-6">
