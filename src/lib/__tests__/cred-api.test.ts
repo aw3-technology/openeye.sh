@@ -55,7 +55,7 @@ describe("credApi (edge function proxy)", () => {
     await credApi.createCheckout("tier-1", "https://ok.com", "https://cancel.com");
     const [, opts] = fetchMock.mock.calls[0];
     expect(JSON.parse(opts.body)).toEqual({
-      tier_id: "tier-1",
+      pricing_tier_id: "tier-1",
       success_url: "https://ok.com",
       cancel_url: "https://cancel.com",
     });
