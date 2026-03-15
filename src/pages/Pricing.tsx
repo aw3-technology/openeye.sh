@@ -102,11 +102,10 @@ export default function Pricing() {
             Pricing
           </div>
           <h1 className="text-4xl md:text-5xl font-semibold font-display mb-4">
-            Open source. Cloud ready.
+            Open source. Self-hosted.
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Start with the free CLI. Scale with hosted inference when you need
-            it. Enterprise-grade when you're ready.
+            Start with the free CLI. Hosted inference coming soon.
           </p>
         </div>
       </section>
