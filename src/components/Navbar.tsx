@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import logoHorizontal from "@/assets/openeye-logo-horizontal.png";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Navbar() {
   const { user, loading, signOut } = useAuth();
@@ -24,6 +25,7 @@ export function Navbar() {
           >
             GitHub
           </a>
+          <ThemeToggle />
 
           {!loading && (
             user ? (
