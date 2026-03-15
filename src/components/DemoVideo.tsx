@@ -149,10 +149,10 @@ export function DemoVideo() {
                     }`}
                   />
                   <span
-                    className={`absolute -top-5 left-0 text-[10px] font-mono px-1.5 py-0.5 transition-colors duration-300 ${
+                    className={`absolute -top-5 left-0 text-[10px] font-mono px-1.5 py-0.5 text-primary-foreground transition-colors duration-300 ${
                       isPlaying && visibleLines >= 14 && visibleLines < 21
-                        ? "bg-terminal-red/80 text-foreground"
-                        : "bg-terminal-green/80 text-foreground"
+                        ? "bg-terminal-red/80"
+                        : "bg-terminal-green/80"
                     }`}
                   >
                     {isPlaying && visibleLines >= 14 && visibleLines < 21
