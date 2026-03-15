@@ -4,40 +4,22 @@ import type {
   PricingTier,
   CheckoutSession,
 } from "@/types/credits";
-
-function getApiUrl(): string {
-  const url = import.meta.env.VITE_CRED_API_URL;
-  if (!url) throw new Error("VITE_CRED_API_URL is not configured");
-  return url as string;
-}
-
-function getApiKey(): string {
-  const key = import.meta.env.VITE_CRED_API_KEY;
-  if (!key) throw new Error("VITE_CRED_API_KEY is not configured");
-  return key as string;
-}
-
-function getProjectId(): string {
-  const id = import.meta.env.VITE_CRED_PROJECT_ID;
-  if (!id) throw new Error("VITE_CRED_PROJECT_ID is not configured");
-  return id as string;
-}
-
-function headers(userToken: string) {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${getApiKey()}`,
-    "x-user-token": userToken,
-  };
-}
+import { supabase } from "@/integrations/supabase/client";
 
 const REQUEST_TIMEOUT_MS = 15_000;
 
+async function getToken(): Promise<string> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Not authenticated");
+  return token;
+}
+
 async function request<T>(
-  path: string,
-  userToken: string,
+  subPath: string,
   options?: RequestInit,
 ): Promise<T> {
+  const token = await getToken();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -47,14 +29,23 @@ async function request<T>(
   }
 
   try {
-    const res = await fetch(`${getApiUrl()}${path}`, {
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const url = `https://${projectId}.supabase.co/functions/v1/cred-proxy/${subPath}`;
+
+    const res = await fetch(url, {
       ...options,
-      headers: { ...headers(userToken), ...options?.headers },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        ...(options?.headers as Record<string, string> || {}),
+      },
       signal: controller.signal,
     });
+
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`cred.diy API error ${res.status}: ${body}`);
+      throw new Error(`cred API error ${res.status}: ${body}`);
     }
     return res.json();
   } catch (err) {
@@ -69,74 +60,46 @@ async function request<T>(
 }
 
 export const credApi = {
-  syncUser(userToken: string) {
-    return request<{ ok: boolean }>(
-      `/projects/${getProjectId()}/sync-user`,
-      userToken,
-      { method: "POST" },
-    );
+  syncUser() {
+    return request<{ ok: boolean }>("sync-user", { method: "POST" });
   },
 
-  getBalance(userToken: string) {
-    return request<CreditBalance>(
-      `/projects/${getProjectId()}/balance`,
-      userToken,
-    );
+  getBalance() {
+    return request<CreditBalance>("balance");
   },
 
-  deduct(userToken: string, amount: number, description: string) {
-    return request<CreditBalance>(
-      `/projects/${getProjectId()}/deduct`,
-      userToken,
-      {
-        method: "POST",
-        body: JSON.stringify({ amount, description }),
-      },
-    );
+  deduct(amount: number, description: string) {
+    return request<CreditBalance>("deduct", {
+      method: "POST",
+      body: JSON.stringify({ amount, description }),
+    });
   },
 
-  refund(userToken: string, amount: number, description: string) {
-    return request<CreditBalance>(
-      `/projects/${getProjectId()}/refund`,
-      userToken,
-      {
-        method: "POST",
-        body: JSON.stringify({ amount, description }),
-      },
-    );
+  refund(amount: number, description: string) {
+    return request<CreditBalance>("refund", {
+      method: "POST",
+      body: JSON.stringify({ amount, description }),
+    });
   },
 
-  createCheckout(
-    userToken: string,
-    tierId: string,
-    successUrl: string,
-    cancelUrl: string,
-  ) {
-    return request<CheckoutSession>(
-      `/projects/${getProjectId()}/checkout`,
-      userToken,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          tier_id: tierId,
-          success_url: successUrl,
-          cancel_url: cancelUrl,
-        }),
-      },
-    );
+  createCheckout(tierId: string, successUrl: string, cancelUrl: string) {
+    return request<CheckoutSession>("checkout", {
+      method: "POST",
+      body: JSON.stringify({
+        tier_id: tierId,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+      }),
+    });
   },
 
-  getPricingTiers(userToken: string) {
-    return request<PricingTier[]>(
-      `/projects/${getProjectId()}/tiers`,
-      userToken,
-    );
+  getPricingTiers() {
+    return request<PricingTier[]>("tiers");
   },
 
-  getTransactions(userToken: string, page = 0, pageSize = 20) {
+  getTransactions(page = 0, pageSize = 20) {
     return request<{ data: CreditTransaction[]; count: number }>(
-      `/projects/${getProjectId()}/transactions?offset=${page * pageSize}&limit=${pageSize}`,
-      userToken,
+      `transactions?offset=${page * pageSize}&limit=${pageSize}`,
     );
   },
 };
