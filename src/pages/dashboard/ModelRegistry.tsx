@@ -260,7 +260,7 @@ function CliCommandCard({
         {icon}
         <span className="text-sm font-medium">{title}</span>
       </div>
-      <code className="block text-xs font-mono bg-terminal-bg text-terminal-green px-2 py-1.5 rounded">
+      <code className="block text-xs font-mono bg-secondary text-oe-green px-2 py-1.5 rounded">
         $ {command}
       </code>
       <p className="text-xs text-muted-foreground">{description}</p>

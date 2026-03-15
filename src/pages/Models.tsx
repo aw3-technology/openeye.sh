@@ -61,13 +61,13 @@ export default function Models() {
               with a single flag. No code changes, no redeployment.
             </p>
             <div className="space-y-2">
-              <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5">
+              <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border">
                 $ openeye run yolov8 image.jpg
               </div>
-              <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5">
+              <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border">
                 $ openeye run grounding-dino image.jpg --prompt "red mug"
               </div>
-              <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5">
+              <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border">
                 $ openeye run depth-anything scene.jpg
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function Models() {
               >
                 Read the Docs
               </Link>
-              <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5 select-all cursor-text">
+              <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border select-all cursor-text">
                 pip install openeye-ai
               </div>
             </div>

@@ -32,8 +32,8 @@ function renderMarkdown(content: string) {
               {lang}
             </div>
           )}
-          <pre className="bg-terminal-bg p-4 overflow-x-auto">
-            <code className="font-mono text-sm text-terminal-green leading-relaxed">
+          <pre className="bg-card p-4 overflow-x-auto">
+            <code className="font-mono text-sm text-oe-green leading-relaxed">
               {codeLines.join("\n")}
             </code>
           </pre>
@@ -174,7 +174,7 @@ function renderInline(text: string): React.ReactNode {
       );
     } else if (firstMatch.type === "code") {
       parts.push(
-        <code key={k++} className="font-mono text-sm bg-terminal-bg text-terminal-green px-1.5 py-0.5 rounded-inner break-all">
+        <code key={k++} className="font-mono text-sm bg-secondary text-oe-green px-1.5 py-0.5 rounded-inner break-all">
           {firstMatch.match[1]}
         </code>
       );

@@ -285,7 +285,7 @@ export default function Benchmark() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-2">
-            <code className="block text-xs font-mono bg-terminal-bg text-terminal-green px-3 py-2 rounded">
+            <code className="block text-xs font-mono bg-secondary text-oe-green px-3 py-2 rounded">
               $ openeye bench yolov8 --runs {runs} --width {width} --height{" "}
               {height}
             </code>

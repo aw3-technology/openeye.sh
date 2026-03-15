@@ -69,9 +69,9 @@ function TreeNode({ node, depth = 0, index = 0 }: { node: Node; depth?: number; 
 
 export function SceneGraph() {
   return (
-    <div className="bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden" role="tree" aria-label="Scene graph">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/5">
-        <span className="font-mono text-xs text-terminal-muted uppercase tracking-widest">
+    <div className="bg-card rounded-outer border overflow-hidden" role="tree" aria-label="Scene graph">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+        <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
           Scene Graph — workspace
         </span>
       </div>
