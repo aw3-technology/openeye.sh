@@ -36,7 +36,7 @@ function CodeBlock({ block }: { block: DocBlock }) {
         </div>
       )}
       {!block.filename && (
-        <div className="flex justify-end px-4 py-2 border-b border-foreground/5">
+        <div className="flex justify-end px-4 py-2 border-b border-border">
           <CopyButton text={block.content || ""} />
         </div>
       )}
