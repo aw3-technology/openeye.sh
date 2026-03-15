@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { usePredict, useSaveInference, useInferenceHistory } from "@/hooks/useOpenEyeQueries";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
-import { useCreditBalance, useDeductCredits, useRefundCredits } from "@/hooks/useCredits";
-import { INFERENCE_CREDIT_COST } from "@/types/credits";
+import { useCreditBalance, useDeductCredits, useIssueCredits } from "@/hooks/useCredits";
+import { INFERENCE_CREDIT_COST, getTotalBalance } from "@/types/credits";
 import { isCredSystemConfigured } from "@/lib/deployment-env";
 import { FileDropzone } from "@/components/dashboard/FileDropzone";
 import { DetectionCanvas } from "@/components/dashboard/DetectionCanvas";
