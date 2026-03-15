@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 interface TerminalLine {
   text: string;
@@ -39,7 +40,7 @@ export function TerminalBlock({ lines, title, animate = true }: TerminalBlockPro
 
   return (
     <div className="bg-card rounded-outer border border-foreground/[0.06] overflow-hidden shadow-lg">
-      {/* Window chrome */}
+      {/* Window chrome — diamond dots */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/[0.06]">
         <div className="w-2 h-2 rotate-45 bg-oe-blue" />
         <div className="w-2 h-2 rotate-45 bg-oe-red" />
@@ -69,5 +70,3 @@ export function TerminalBlock({ lines, title, animate = true }: TerminalBlockPro
     </div>
   );
 }
-
-import { useEffect, useState } from "react";
