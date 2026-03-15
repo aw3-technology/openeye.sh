@@ -91,11 +91,11 @@ export class LocalFleetClient implements FleetClientInterface {
     });
   }
 
-  async getResourceHistory(deviceId: string, limit = 100) {
+  async getResourceHistory(deviceId: string, limit = 100): Promise<Array<{ resource_usage: Record<string, number>; created_at: string }>> {
     return this.api["request"](`/devices/${deviceId}/resources?limit=${limit}`);
   }
 
-  async restartDevice(deviceId: string) {
+  async restartDevice(deviceId: string): Promise<{ status: string; command_id: string }> {
     return this.api["request"](`/devices/${deviceId}/restart`, { method: "POST" });
   }
 
