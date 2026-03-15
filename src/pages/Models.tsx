@@ -64,7 +64,7 @@ export default function Models() {
               <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border">
                 $ openeye run yolov8 image.jpg
               </div>
-              <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5">
+              <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border">
                 $ openeye run grounding-dino image.jpg --prompt "red mug"
               </div>
               <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5">
