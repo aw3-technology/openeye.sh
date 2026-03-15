@@ -12,6 +12,8 @@ import {
 
 import logoHorizontal from "@/assets/openeye-logo-horizontal.png";
 import logoHorizontalDark from "@/assets/openeye-logo-horizontal-dark.png";
+import logoVertical from "@/assets/openeye-logo-vertical.png";
+import logoVerticalDark from "@/assets/openeye-logo-vertical-dark.png";
 
 // ─── Slide Data ───────────────────────────────────────────────────────────
 
@@ -120,8 +122,9 @@ function TitleSlide() {
           <Diamond className="bg-oe-red" />
           <Diamond className="bg-foreground" />
         </div>
-        <div className="mb-8">
-          <LogoMark />
+        <div className="mb-10">
+          <img src={logoVerticalDark} alt="OpenEye" className="h-40 logo-dark" />
+          <img src={logoVertical} alt="OpenEye" className="h-40 logo-light" />
         </div>
         <h1 className="text-[96px] font-semibold font-display leading-[1] text-center tracking-tight mb-8">
           Open-source eyes for
