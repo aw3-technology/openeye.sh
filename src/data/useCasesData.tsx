@@ -39,38 +39,38 @@ export const useCases: UseCase[] = [
     subtitle:
       "Monitor autonomous mobile robots, robotic arms, and human workers sharing the same floor — in real time.",
     description:
-      "Warehouses are high-throughput, high-risk environments where robots and humans constantly cross paths. OpenEye provides a continuous visual safety layer that detects zone violations, monitors load stability, and halts operations before collisions happen.",
+      "Warehouses are high-throughput, high-risk environments where robots and humans constantly cross paths. OpenEye provides a continuous visual safety layer that detects zone violations, monitors workspace state, and can halt operations when hazards are detected.",
     scenarios: [
       {
         icon: <Users className="w-4 h-4" />,
         label: "Human-robot zone enforcement",
         detail:
-          "Detect when workers enter robotic arm reach zones. Sub-100ms halt signal via OpenClaw or ROS e-stop.",
+          "Detect when workers enter robotic arm reach zones. Send halt signals to connected robot controllers.",
       },
       {
         icon: <Package className="w-4 h-4" />,
-        label: "Load stability monitoring",
+        label: "Workspace monitoring",
         detail:
-          "VLM-powered analysis of pallet stacks, conveyor belt loads, and forklift cargo for tip-over risk.",
+          "VLM-powered analysis of workspace state — detect unexpected changes, misplaced objects, and potential hazards.",
       },
       {
         icon: <Truck className="w-4 h-4" />,
-        label: "AMR path conflict detection",
+        label: "Object tracking",
         detail:
-          "Track autonomous mobile robots in real time. Predict path intersections and reroute before deadlocks.",
+          "Track objects in real time with consistent IDs across frames for spatial awareness.",
       },
       {
         icon: <ScanLine className="w-4 h-4" />,
-        label: "PPE compliance checks",
+        label: "Safety zone monitoring",
         detail:
-          "Continuous verification of hard hats, vests, and safety glasses in designated zones using object detection.",
+          "Define danger and caution zones. OpenEye monitors zone boundaries and flags violations.",
       },
     ],
     terminalCommand:
-      '$ openeye watch --mode guardian --workspace "warehouse_floor" --zones "arm_1,arm_2,loading_bay"',
+      "$ openeye watch --safety --danger-m 0.5 --caution-m 1.5",
     stats: [
-      { value: "<100ms", label: "Halt latency" },
-      { value: "30fps", label: "Detection rate" },
+      { value: "Real-time", label: "Detection" },
+      { value: "YOLOv8", label: "Fast layer" },
       { value: "24/7", label: "Monitoring" },
     ],
   },
@@ -81,41 +81,41 @@ export const useCases: UseCase[] = [
     overlineColor: "text-terminal-green",
     title: "Safe robots in human spaces.",
     subtitle:
-      "Home robots operate around children, pets, and fragile objects. OpenEye ensures they navigate with awareness.",
+      "Home robots operate around children, pets, and fragile objects. OpenEye helps them navigate with awareness.",
     description:
-      "The home environment is unpredictable — a toddler runs into the room, a cat jumps on the counter, a glass sits near the table edge. OpenEye gives home robots continuous spatial awareness and safety reasoning so they can operate around families with confidence.",
+      "The home environment is unpredictable — a toddler runs into the room, a cat jumps on the counter, a glass sits near the table edge. OpenEye gives home robots continuous spatial awareness and safety reasoning so they can operate around families more safely.",
     scenarios: [
       {
         icon: <Baby className="w-4 h-4" />,
-        label: "Child and vulnerable person detection",
+        label: "Person detection",
         detail:
-          "Immediate detection of children, elderly, or anyone in a robot's path. Triggers slow-down or full stop.",
+          "Real-time detection of people in a robot's workspace. Can trigger slow-down or stop via connected controllers.",
       },
       {
         icon: <Dog className="w-4 h-4" />,
         label: "Pet awareness",
         detail:
-          "Detects and tracks pets in real time. Prevents collisions with animals that move unpredictably.",
+          "Detects and tracks pets in real time using object detection models.",
       },
       {
         icon: <AlertTriangle className="w-4 h-4" />,
         label: "Hazard identification",
         detail:
-          "Spots objects near edges, spills on floors, open cabinets, and other context-dependent risks using VLM reasoning.",
+          "Spots objects near edges, scene changes, and other context-dependent risks using VLM reasoning.",
       },
       {
         icon: <Flame className="w-4 h-4" />,
-        label: "Kitchen and appliance safety",
+        label: "Scene understanding",
         detail:
-          "Monitors stove states, detects hot surfaces, and prevents robots from interacting with dangerous appliances.",
+          "Scene graph generation with spatial relationships between detected objects for contextual awareness.",
       },
     ],
     terminalCommand:
-      '$ openeye watch --mode guardian --workspace "kitchen" --halt-on "child,pet,hazard"',
+      "$ openeye watch --models yolov8,depth-anything --safety",
     stats: [
-      { value: "360°", label: "Spatial awareness" },
+      { value: "Depth", label: "3D estimation" },
       { value: "VLM", label: "Context reasoning" },
-      { value: "Zero", label: "Cloud dependency" },
+      { value: "Local", label: "All on-device" },
     ],
   },
   {
@@ -125,40 +125,40 @@ export const useCases: UseCase[] = [
     overlineColor: "text-blue-400",
     title: "Perception API for agent frameworks.",
     subtitle:
-      "Give any LLM-based agent structured visual understanding of the physical world via CLI or gRPC.",
+      "Give any LLM-based agent structured visual understanding of the physical world via CLI or REST API.",
     description:
-      "Autonomous agents built on LangChain, CrewAI, or custom frameworks lack native perception. OpenEye provides a drop-in perception layer that converts camera feeds into structured scene graphs, spatial relationships, and action affordances — exactly the format agents need to reason and act.",
+      "Autonomous agents built on LangChain, CrewAI, or custom frameworks lack native perception. OpenEye provides a perception layer that converts camera feeds into structured JSON with objects, spatial relationships, and scene descriptions — the format agents need to reason and act.",
     scenarios: [
       {
         icon: <Brain className="w-4 h-4" />,
         label: "Scene graph as agent context",
         detail:
-          "Feed structured JSON scene descriptions directly into agent prompts. Objects, positions, relationships, hazards — all typed.",
+          "Feed structured JSON scene descriptions directly into agent prompts. Objects, positions, relationships — all typed.",
       },
       {
         icon: <Workflow className="w-4 h-4" />,
         label: "Action planning from perception",
         detail:
-          'Natural language goals like "clear the desk" become multi-step plans grounded in what OpenEye actually sees.',
+          'Structured perception output enables agents to plan actions grounded in what OpenEye actually sees.',
       },
       {
         icon: <Cog className="w-4 h-4" />,
-        label: "Tool-use integration",
+        label: "REST API integration",
         detail:
-          "Expose OpenEye as a LangChain tool, MCP server, or gRPC service. Agents call perception on demand.",
+          "Expose OpenEye as a REST API via `openeye serve`. Agents call perception on demand via HTTP.",
       },
       {
         icon: <Eye className="w-4 h-4" />,
-        label: "Persistent environment memory",
+        label: "Scene memory",
         detail:
-          "Agents recall previous observations. OpenEye maintains spatial memory across sessions for consistent reasoning.",
+          "Scene graph tracking with object persistence across frames for consistent spatial reasoning.",
       },
     ],
     terminalCommand:
-      "$ openeye stream --grpc --format scene_graph --subscribe agent_01",
+      "$ openeye serve yolov8 --port 8000",
     stats: [
       { value: "JSON", label: "Structured output" },
-      { value: "gRPC", label: "Streaming API" },
+      { value: "REST", label: "API server" },
       { value: "Any", label: "LLM framework" },
     ],
   },
