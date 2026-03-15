@@ -91,7 +91,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+        <div className="hidden lg:flex items-center gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
           {publicNavItems.map((item) =>
             isDropdown(item) ? (
               <DropdownMenu key={item.label} item={item} isActive={isActive} />
@@ -161,7 +161,7 @@ export function Navbar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden flex flex-col items-center justify-center gap-2 p-3 overflow-visible"
+          className="lg:hidden flex flex-col items-center justify-center gap-2 p-3 overflow-visible"
           aria-label="Toggle menu"
           aria-expanded={mobileOpen}
         >
@@ -186,7 +186,7 @@ export function Navbar() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-            className="md:hidden overflow-hidden border-t border-foreground/[0.06] bg-background/95 backdrop-blur-sm"
+            className="lg:hidden overflow-hidden border-t border-foreground/[0.06] bg-background/95 backdrop-blur-sm"
           >
             <div className="px-4 py-4 space-y-1 font-mono text-sm">
               {publicNavItems.map((item) =>
