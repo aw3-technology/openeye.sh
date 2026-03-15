@@ -1,0 +1,179 @@
+[
+  {
+    "version": "0.5.0",
+    "date": "2026-03-15",
+    "title": "MLOps lifecycle platform",
+    "tag": "latest",
+    "description": "Full MLOps pipeline with model registry, A/B testing, retraining, batch inference, and shadow deployments.",
+    "changes": [
+      { "type": "added", "text": "Model registry with versioned storage, stage management (dev / staging / production / archived), and format support for ONNX, TorchScript, SafeTensors, TensorRT, and CoreML" },
+      { "type": "added", "text": "A/B testing framework with traffic splitting, statistical comparison (accuracy, latency p95, error rate), and automatic winner detection" },
+      { "type": "added", "text": "Retraining pipelines with configurable triggers (accuracy drift, scheduled cron, manual, data volume) and auto-promotion after validation" },
+      { "type": "added", "text": "Batch inference jobs with S3 / GCS / local storage backends, parallel worker support, and progress tracking with ETA" },
+      { "type": "added", "text": "Benchmark matrix for cross-hardware performance comparison across Jetson, A100, T4, CPU, MPS, and TensorRT targets" },
+      { "type": "added", "text": "Shadow deployments to run candidate models alongside production with agreement rate and divergent sample tracking" },
+      { "type": "added", "text": "Feedback and annotation system for false positives, misclassifications, and bounding box corrections with dataset batching for retraining" },
+      { "type": "added", "text": "Validation test suite with configurable assertions and batch execution across model versions" },
+      { "type": "added", "text": "Model lineage tracking — parent models, dataset versions, code commits, hyperparameters, and training duration" },
+      { "type": "changed", "text": "Model export pipeline now supports conversion between ONNX, TensorRT, and CoreML from the dashboard" }
+    ]
+  },
+  {
+    "version": "0.4.1",
+    "date": "2026-03-13",
+    "title": "Fleet management",
+    "tag": "breaking",
+    "description": "Edge fleet control plane with device registration, staged deployments, OTA updates, and real-time monitoring.",
+    "changes": [
+      { "type": "added", "text": "Fleet control plane backend on port 8001 with device, deployment, heartbeat, command, OTA, alert, maintenance, and group services" },
+      { "type": "added", "text": "Device registration and discovery for cameras, robots, edge nodes, gateways, and drones with hardware spec capture" },
+      { "type": "added", "text": "Device groups with tag-based filtering, auto-scaling policies (CPU threshold, cooldown), and batch operations" },
+      { "type": "added", "text": "Staged model deployments with canary, rolling, blue-green, and all-at-once strategies, plus multi-stage rollout with percentage targets" },
+      { "type": "added", "text": "OTA firmware and model update distribution with checksum verification and bandwidth throttling" },
+      { "type": "added", "text": "Maintenance window scheduling with recurrence rules and device / group targeting" },
+      { "type": "added", "text": "Fleet alerts (device_offline, high_resource_usage, deployment_failed, heartbeat_missed, temperature_high, disk_full) with severity levels and resolution tracking" },
+      { "type": "added", "text": "Device command queue — restart, update_config, deploy_model, rollback, OTA update, and decommission with status tracking" },
+      { "type": "added", "text": "Device agent with heartbeat client, command executor, model cache, bandwidth limiter, resource monitor, and config manager" },
+      { "type": "added", "text": "Fleet dashboard with summary cards, device status table, deployment tracker, and 15-second auto-refresh" },
+      { "type": "added", "text": "CLI fleet commands — `openeye fleet devices`, `openeye fleet deploy`, `openeye fleet groups`, `openeye fleet alerts`, `openeye fleet ota`" },
+      { "type": "added", "text": "Supabase migrations for fleet tables (devices, device_groups, heartbeats, deployments, deployment_device_status, maintenance_windows, fleet_alerts, device_commands) with row-level security" },
+      { "type": "changed", "text": "Device registry schema expanded — breaking change for existing device records. Run `openeye fleet migrate` to update." }
+    ]
+  },
+  {
+    "version": "0.4.0",
+    "date": "2026-03-12",
+    "title": "Scene graph & export pipeline",
+    "description": "Full scene-graph output, batch export, and dashboard metrics view.",
+    "changes": [
+      { "type": "added", "text": "Scene graph output format with spatial relations between detected objects" },
+      { "type": "added", "text": "Batch export to JSON / CSV / COCO from dashboard" },
+      { "type": "added", "text": "Metrics dashboard with latency and throughput charts (Recharts)" },
+      { "type": "changed", "text": "WebSocket protocol upgraded to binary frames for large payloads" },
+      { "type": "fixed", "text": "RTSP reconnect loop on unstable networks" }
+    ]
+  },
+  {
+    "version": "0.3.3",
+    "date": "2026-03-05",
+    "title": "Credits & billing",
+    "description": "Credit-based billing system with Stripe checkout, balance tracking, and transaction history.",
+    "changes": [
+      { "type": "added", "text": "Credit-based billing — 1 credit per inference, with balance display and low-balance warnings" },
+      { "type": "added", "text": "Stripe-powered checkout via cred.diy with multiple pricing tiers" },
+      { "type": "added", "text": "Credit transaction history with filtering and pagination" },
+      { "type": "added", "text": "Insufficient credits dialog prompting users to purchase before inference" },
+      { "type": "added", "text": "Supabase Edge Functions for credit management (sync user, deduct, checkout)" },
+      { "type": "changed", "text": "Inference endpoint now validates credit balance before processing" }
+    ]
+  },
+  {
+    "version": "0.3.2",
+    "date": "2026-02-28",
+    "title": "Safety model improvements",
+    "description": "Improved safety classification accuracy and added configurable thresholds.",
+    "changes": [
+      { "type": "added", "text": "Configurable safety thresholds via config editor" },
+      { "type": "changed", "text": "Safety model upgraded to v2 with 12% better recall" },
+      { "type": "fixed", "text": "False positives on partially occluded objects" },
+      { "type": "fixed", "text": "Memory leak in long-running live stream sessions" }
+    ]
+  },
+  {
+    "version": "0.3.1",
+    "date": "2026-02-18",
+    "title": "Multi-LLM integration & adapters",
+    "description": "Pluggable LLM providers, expanded model adapter system, and depth estimation support.",
+    "changes": [
+      { "type": "added", "text": "LLM provider system with Gemini and OpenAI (GPT-4V) backends for vision-language queries" },
+      { "type": "added", "text": "Model adapter framework — pluggable interface for YOLOv8, Depth-Anything, and Grounding DINO" },
+      { "type": "added", "text": "Depth estimation pipeline with monocular depth output via Depth-Anything adapter" },
+      { "type": "added", "text": "Open-vocabulary object detection via Grounding DINO adapter" },
+      { "type": "added", "text": "CLI `openeye pull` / `openeye push` for model registry management with download resume" },
+      { "type": "added", "text": "Structured function calling schemas for LLM outputs (Pydantic models)" },
+      { "type": "changed", "text": "Perception pipeline refactored to use adapter interface instead of hardcoded YOLO path" }
+    ]
+  },
+  {
+    "version": "0.3.0",
+    "date": "2026-02-10",
+    "title": "Live stream mode",
+    "tag": "breaking",
+    "description": "Real-time inference on RTSP and webcam streams with sub-100ms latency.",
+    "changes": [
+      { "type": "added", "text": "Live stream mode with RTSP / webcam / HTTP-FLV support" },
+      { "type": "added", "text": "Dashboard live view with real-time bounding box overlay" },
+      { "type": "added", "text": "CLI `openeye stream` command" },
+      { "type": "added", "text": "gRPC perception streaming endpoint on port 50051" },
+      { "type": "changed", "text": "Config format v2 — see migration guide" },
+      { "type": "removed", "text": "Deprecated `openeye watch` command (use `openeye stream`)" }
+    ]
+  },
+  {
+    "version": "0.2.2",
+    "date": "2026-01-30",
+    "title": "Documentation site & config editor",
+    "description": "Interactive documentation with getting started guide, CLI reference, and runtime config editor.",
+    "changes": [
+      { "type": "added", "text": "Interactive documentation site with getting started, quickstart, and tutorials" },
+      { "type": "added", "text": "CLI command reference with examples for detect, describe, stream, and server commands" },
+      { "type": "added", "text": "Server API documentation with endpoint descriptions and request/response schemas" },
+      { "type": "added", "text": "Runtime config editor in dashboard with JSON editing and hot-reload support" },
+      { "type": "added", "text": "Custom adapter tutorial — step-by-step guide for writing model adapters" },
+      { "type": "changed", "text": "Dashboard settings page reorganized into tabbed layout (server, model, config)" }
+    ]
+  },
+  {
+    "version": "0.2.1",
+    "date": "2026-01-22",
+    "title": "API key management",
+    "description": "Dashboard API key creation, revocation, and usage tracking.",
+    "changes": [
+      { "type": "added", "text": "API key management page in dashboard with key hashing and secure storage" },
+      { "type": "added", "text": "Per-key usage tracking and rate limit display" },
+      { "type": "fixed", "text": "Auth token refresh race condition" }
+    ]
+  },
+  {
+    "version": "0.2.0",
+    "date": "2026-01-08",
+    "title": "Dashboard & inference history",
+    "description": "Web dashboard with image upload, inference history, and model settings.",
+    "changes": [
+      { "type": "added", "text": "Web dashboard with Google / Apple OAuth sign-in" },
+      { "type": "added", "text": "Image upload inference with detection overlay and bounding box visualization" },
+      { "type": "added", "text": "Inference history with search, filters, and thumbnail previews" },
+      { "type": "added", "text": "Model settings panel (confidence threshold, NMS, max detections, model variant, class filters)" },
+      { "type": "added", "text": "Server health monitoring with connection status and active model display" },
+      { "type": "changed", "text": "REST API response format standardized across all endpoints" }
+    ]
+  },
+  {
+    "version": "0.1.1",
+    "date": "2025-12-28",
+    "title": "Object tracking & change detection",
+    "description": "Frame-to-frame object tracking, change detection, and improved Docker workflow.",
+    "changes": [
+      { "type": "added", "text": "Object tracking across video frames with ID persistence" },
+      { "type": "added", "text": "Change detection module for identifying scene differences between frames" },
+      { "type": "added", "text": "Query system for searching detected objects by class, confidence, or spatial position" },
+      { "type": "added", "text": "Docker Compose setup for local development with hot-reload" },
+      { "type": "changed", "text": "CLI output formatting improved with color-coded results and progress bars" },
+      { "type": "fixed", "text": "Windows path handling in CLI for backslash-separated paths" }
+    ]
+  },
+  {
+    "version": "0.1.0",
+    "date": "2025-12-15",
+    "title": "Initial release",
+    "description": "Core perception engine, CLI tool, and Python/TypeScript SDKs.",
+    "changes": [
+      { "type": "added", "text": "Core perception engine with YOLO + CLIP pipeline" },
+      { "type": "added", "text": "CLI tool: `openeye detect`, `openeye describe`" },
+      { "type": "added", "text": "Python SDK and TypeScript SDK" },
+      { "type": "added", "text": "Docker image and Helm chart" },
+      { "type": "added", "text": "Safety module with validation and content filtering" },
+      { "type": "added", "text": "Comprehensive API documentation" }
+    ]
+  }
+]

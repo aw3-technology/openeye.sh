@@ -1,0 +1,60 @@
+# OpenEye Fleet Configuration — Unitree G1 Safety Guardian
+#
+# Deploy to a G1 fleet with:
+#   openeye fleet push-config --target tag:unitree-g1 --config configs/g1_safety_guardian.yaml
+#
+# Or run locally:
+#   openeye g1-demo --control-mode sdk --transport rtsp
+
+device:
+  type: unitree-g1
+  name: "${DEVICE_NAME:-g1-unit-01}"
+  site: "${SITE:-demo-floor}"
+  tags:
+    - unitree-g1
+    - humanoid
+    - safety-guardian
+
+camera:
+  transport: rtsp              # usb | rtsp | sdk | auto
+  host: "${G1_HOST:-192.168.123.161}"
+  rtsp_port: 8554
+  max_fps: 15
+  resolution: "640x480"        # Lower res for faster inference
+
+perception:
+  model: yolov8
+  backend: tensorrt            # Use TensorRT on Jetson companion, pytorch otherwise
+  precision: fp16
+  confidence_threshold: 0.4
+  target_classes:
+    - person
+    - human
+    - child
+
+safety:
+  mode: guardian
+  danger_m: 0.5                # Immediate halt zone
+  caution_m: 1.5               # Slow-down zone
+  clear_duration_s: 2.0        # Time clear before resume
+  emergency_halt_on_error: true  # Halt if perception pipeline crashes
+
+robot_control:
+  mode: sdk                    # sdk | http | dry_run
+  host: "${G1_HOST:-192.168.123.161}"
+  http_port: 8081
+  halt_command: stop_move
+  resume_command: move          # Zero-velocity move to release halt
+
+fleet:
+  heartbeat_interval_s: 10
+  metrics_interval_s: 30
+  telemetry:
+    - fps
+    - inference_ms
+    - safety_zone_counts
+    - halt_count
+    - resume_count
+    - cpu_percent
+    - gpu_percent
+    - temperature_c

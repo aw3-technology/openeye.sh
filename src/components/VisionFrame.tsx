@@ -100,7 +100,7 @@ export function VisionFrame() {
         </div>
 
         {/* Spatial relation line */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none">
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
           <line
             x1="49%"
             y1="46%"

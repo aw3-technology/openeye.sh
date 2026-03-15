@@ -1,0 +1,60 @@
+{
+  // OpenEye VLM config — Gemini provider variant
+  // Demonstrates switching VLM providers via config (Story 38)
+  version: "v1.0.3",
+
+  default_mode: "perception",
+  allow_manual_switching: false,
+  mode_memory_enabled: false,
+
+  api_key: "${GEMINI_API_KEY}",
+  system_governance: "",
+
+  cortex_llm: {
+    type: "OpenAILLM",
+    config: {
+      agent_name: "OpenEye",
+      history_length: 10,
+      model: "gpt-4o-mini",
+      api_key: "${OPENAI_API_KEY}",
+    },
+  },
+
+  modes: {
+    perception: {
+      display_name: "VLM Perception (Gemini)",
+      description: "Cloud VLM perception using Google Gemini vision",
+      system_prompt_base: "You are OpenEye, a perception engine. You receive visual observations from a camera processed by a vision language model. Describe what you see and identify interesting elements, people, objects, and activities. Be concise but informative.",
+      hertz: 1,
+
+      agent_inputs: [
+        {
+          type: "VLMGemini",
+          config: {
+            base_url: "https://generativelanguage.googleapis.com/v1beta/openai",
+            camera_index: 0,
+          },
+        },
+      ],
+
+      simulators: [
+        {
+          type: "WebSim",
+          config: {
+            port: 8765,
+          },
+        },
+      ],
+
+      agent_actions: [
+        {
+          name: "log_action",
+          llm_label: "log",
+          connector: "log",
+        },
+      ],
+    },
+  },
+
+  transition_rules: [],
+}

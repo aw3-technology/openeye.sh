@@ -1,0 +1,66 @@
+{
+  // OpenEye YOLO config — uses local YOLO detection + OpenAI LLM for reasoning
+  version: "v1.0.3",
+
+  default_mode: "perception",
+  allow_manual_switching: false,
+  mode_memory_enabled: false,
+
+  api_key: "${OPENAI_API_KEY}",
+  system_governance: "",
+
+  cortex_llm: {
+    type: "OpenAILLM",
+    config: {
+      agent_name: "OpenEye",
+      history_length: 0,
+      model: "gpt-4o-mini",
+    },
+  },
+
+  modes: {
+    perception: {
+      display_name: "YOLO Perception",
+      description: "Local YOLO object detection — no cloud API needed",
+      system_prompt_base: "You are OpenEye, a perception engine. You receive visual observations from a YOLO object detector and describe what you see. Be concise and factual.",
+      hertz: 1,
+
+      agent_inputs: [
+        {
+          type: "VLM_Local_YOLO",
+          config: {
+            camera_index: 0,
+            fps: 4.0,
+            default_confidence: 0.25,
+            // Per-class confidence thresholds (override default_confidence)
+            confidence_thresholds: {
+              // person: 0.5,
+              // car: 0.4,
+            },
+            reconnect_attempts: 5,
+            reconnect_delay: 2.0,
+          },
+        },
+      ],
+
+      simulators: [
+        {
+          type: "WebSim",
+          config: {
+            port: 8765,
+          },
+        },
+      ],
+
+      agent_actions: [
+        {
+          name: "log_action",
+          llm_label: "log",
+          connector: "log",
+        },
+      ],
+    },
+  },
+
+  transition_rules: [],
+}

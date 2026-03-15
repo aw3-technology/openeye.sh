@@ -1,0 +1,26 @@
+version: "1.0"
+name: "minimal"
+domain: "universal"
+
+policies:
+  - name: "audit_actions"
+    type: "action_filter"
+    enabled: true
+    severity: "info"
+    enforcement: "audit_only"
+    config:
+      deny_patterns: []
+
+  - name: "audit_rate"
+    type: "rate_limiter"
+    enabled: true
+    severity: "info"
+    enforcement: "audit_only"
+    config:
+      max_actions: 1000
+      window_seconds: 60
+
+settings:
+  log_all_decisions: true
+  fail_open: true
+  evaluation_timeout_ms: 100

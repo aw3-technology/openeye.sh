@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenEye Dashboard</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #23233a;
+    --accent: #6d5dfc;
+    --accent2: #40e0d0;
+    --text: #e0e0e0;
+    --dim: #888;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { font-size: 1.4rem; font-weight: 600; }
+  header h1 span { color: var(--accent); }
+  .badge {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  .badge.connected { background: #2ecc71; }
+  .badge.disconnected { background: #e74c3c; }
+  main {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .panel h2 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--dim);
+    margin-bottom: 1rem;
+  }
+  #preview-area {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  #preview-area video, #preview-area canvas, #preview-area img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  canvas#overlay { z-index: 2; }
+  .controls {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  button {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  button.primary:hover { opacity: 0.9; }
+  button.active { border-color: var(--accent2); color: var(--accent2); }
+  .stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat:last-child { border-bottom: none; }
+  .stat-label { color: var(--dim); font-size: 0.85rem; }
+  .stat-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+  #detections {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .detection-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.25rem;
+    background: rgba(109, 93, 252, 0.08);
+  }
+  .detection-label { font-weight: 500; }
+  .detection-conf {
+    font-size: 0.85rem;
+    color: var(--accent2);
+    font-variant-numeric: tabular-nums;
+  }
+  #upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    color: var(--dim);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  #upload-zone:hover { border-color: var(--accent); }
+  #upload-zone.dragover { border-color: var(--accent2); background: rgba(64, 224, 208, 0.05); }
+  input[type="file"] { display: none; }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1><span>OpenEye</span> Dashboard</h1>
+    <span class="badge disconnected" id="status-badge">Connecting...</span>
+  </header>
+  <main>
+    <div>
+      <div class="panel">
+        <h2>Preview</h2>
+        <div id="preview-area">
+          <video id="camera-feed" autoplay muted playsinline style="display:none"></video>
+          <img id="upload-preview" style="display:none" />
+          <canvas id="overlay"></canvas>
+        </div>
+        <div class="controls">
+          <button id="btn-camera" class="primary">Start Camera</button>
+          <button id="btn-upload">Upload Image</button>
+          <input type="file" id="file-input" accept="image/*" />
+        </div>
+        <div id="upload-zone">Drop an image here or click Upload</div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <h2>Stats</h2>
+        <div class="stat"><span class="stat-label">Model</span><span class="stat-value" id="s-model">—</span></div>
+        <div class="stat"><span class="stat-label">Inference</span><span class="stat-value" id="s-latency">— ms</span></div>
+        <div class="stat"><span class="stat-label">Objects</span><span class="stat-value" id="s-count">0</span></div>
+        <div class="stat"><span class="stat-label">FPS</span><span class="stat-value" id="s-fps">—</span></div>
+      </div>
+      <div class="panel" style="margin-top:1rem">
+        <h2>Detections</h2>
+        <div id="detections"><p style="color:var(--dim)">No detections yet.</p></div>
+      </div>
+    </div>
+  </main>
+
+<script>
+const WS_URL = `ws://${location.host}/ws`;
+let ws = null;
+let cameraStream = null;
+let sending = false;
+let frameCount = 0;
+let lastFpsTime = performance.now();
+
+const video = document.getElementById('camera-feed');
+const uploadPreview = document.getElementById('upload-preview');
+const overlay = document.getElementById('overlay');
+const ctx = overlay.getContext('2d');
+const badge = document.getElementById('status-badge');
+
+function connect() {
+  ws = new WebSocket(WS_URL);
+  ws.onopen = () => {
+    badge.textContent = 'Connected';
+    badge.className = 'badge connected';
+  };
+  ws.onclose = () => {
+    badge.textContent = 'Disconnected';
+    badge.className = 'badge disconnected';
+    setTimeout(connect, 2000);
+  };
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (data.error) return;
+    renderResult(data);
+    sending = false;
+  };
+}
+connect();
+
+function renderResult(data) {
+  document.getElementById('s-model').textContent = data.model;
+  document.getElementById('s-latency').textContent = `${data.inference_ms.toFixed(1)} ms`;
+  document.getElementById('s-count').textContent = (data.objects || []).length;
+
+  frameCount++;
+  const now = performance.now();
+  if (now - lastFpsTime > 1000) {
+    document.getElementById('s-fps').textContent = frameCount;
+    frameCount = 0;
+    lastFpsTime = now;
+  }
+
+  const detsEl = document.getElementById('detections');
+  if (!data.objects || data.objects.length === 0) {
+    detsEl.innerHTML = '<p style="color:var(--dim)">No detections.</p>';
+  } else {
+    detsEl.innerHTML = data.objects.map(o =>
+      `<div class="detection-item">
+        <span class="detection-label">${o.label}</span>
+        <span class="detection-conf">${(o.confidence * 100).toFixed(1)}%</span>
+      </div>`
+    ).join('');
+  }
+
+  // Draw bounding boxes
+  const area = document.getElementById('preview-area');
+  overlay.width = area.clientWidth;
+  overlay.height = area.clientHeight;
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+  if (data.objects) {
+    ctx.strokeStyle = '#6d5dfc';
+    ctx.lineWidth = 2;
+    ctx.font = '13px -apple-system, sans-serif';
+    ctx.fillStyle = '#6d5dfc';
+    for (const obj of data.objects) {
+      const bx = obj.bbox.x * overlay.width;
+      const by = obj.bbox.y * overlay.height;
+      const bw = obj.bbox.w * overlay.width;
+      const bh = obj.bbox.h * overlay.height;
+      ctx.strokeRect(bx, by, bw, bh);
+      const label = `${obj.label} ${(obj.confidence * 100).toFixed(0)}%`;
+      ctx.fillStyle = 'rgba(109,93,252,0.8)';
+      ctx.fillRect(bx, by - 18, ctx.measureText(label).width + 8, 18);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(label, bx + 4, by - 4);
+      ctx.fillStyle = '#6d5dfc';
+    }
+  }
+}
+
+// Camera
+document.getElementById('btn-camera').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-camera');
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+    video.style.display = 'none';
+    btn.textContent = 'Start Camera';
+    btn.classList.remove('active');
+    return;
+  }
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+    video.srcObject = cameraStream;
+    video.style.display = 'block';
+    uploadPreview.style.display = 'none';
+    btn.textContent = 'Stop Camera';
+    btn.classList.add('active');
+    sendFrameLoop();
+  } catch (err) {
+    console.error('Camera error:', err);
+  }
+});
+
+function sendFrameLoop() {
+  if (!cameraStream) return;
+  if (!sending && ws && ws.readyState === WebSocket.OPEN) {
+    sending = true;
+    const c = document.createElement('canvas');
+    c.width = video.videoWidth || 640;
+    c.height = video.videoHeight || 480;
+    c.getContext('2d').drawImage(video, 0, 0);
+    c.toBlob(blob => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const b64 = reader.result.split(',')[1];
+        ws.send(b64);
+      };
+      reader.readAsDataURL(blob);
+    }, 'image/jpeg', 0.8);
+  }
+  requestAnimationFrame(sendFrameLoop);
+}
+
+// Upload
+document.getElementById('btn-upload').addEventListener('click', () => {
+  document.getElementById('file-input').click();
+});
+
+document.getElementById('file-input').addEventListener('change', (e) => {
+  if (e.target.files[0]) sendFile(e.target.files[0]);
+});
+
+const dropZone = document.getElementById('upload-zone');
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) sendFile(e.dataTransfer.files[0]);
+});
+dropZone.addEventListener('click', () => document.getElementById('file-input').click());
+
+function sendFile(file) {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+    video.style.display = 'none';
+    document.getElementById('btn-camera').textContent = 'Start Camera';
+    document.getElementById('btn-camera').classList.remove('active');
+  }
+  const url = URL.createObjectURL(file);
+  uploadPreview.src = url;
+  uploadPreview.style.display = 'block';
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    const b64 = reader.result.split(',')[1];
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(b64);
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+</body>
+</html>

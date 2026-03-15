@@ -1,0 +1,58 @@
+{
+  // OpenEye VLM config — requires OPENAI_API_KEY
+  version: "v1.0.3",
+
+  default_mode: "perception",
+  allow_manual_switching: false,
+  mode_memory_enabled: false,
+
+  api_key: "${OPENAI_API_KEY}",
+  system_governance: "",
+
+  cortex_llm: {
+    type: "OpenAILLM",
+    config: {
+      agent_name: "OpenEye",
+      history_length: 10,
+      model: "gpt-4o-mini",
+    },
+  },
+
+  modes: {
+    perception: {
+      display_name: "VLM Perception",
+      description: "Cloud VLM perception using OpenAI GPT-4o-mini vision",
+      system_prompt_base: "You are OpenEye, a perception engine. You receive visual observations from a camera processed by a vision language model. Describe what you see and identify interesting elements, people, objects, and activities. Be concise but informative.",
+      hertz: 1,
+
+      agent_inputs: [
+        {
+          type: "VLMOpenAI",
+          config: {
+            base_url: "https://api.openai.com/v1",
+            camera_index: 0,
+          },
+        },
+      ],
+
+      simulators: [
+        {
+          type: "WebSim",
+          config: {
+            port: 8765,
+          },
+        },
+      ],
+
+      agent_actions: [
+        {
+          name: "log_action",
+          llm_label: "log",
+          connector: "log",
+        },
+      ],
+    },
+  },
+
+  transition_rules: [],
+}
