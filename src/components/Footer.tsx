@@ -103,6 +103,12 @@ export function Footer() {
             &copy; {new Date().getFullYear()} AW3 Technology, Inc. Apache 2.0 License.
           </div>
           <div className="flex items-center gap-6 font-mono text-xs text-muted-foreground">
+            <Link to="/terms" className="hover:text-foreground transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none">
+              Terms
+            </Link>
+            <Link to="/privacy" className="hover:text-foreground transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none">
+              Privacy
+            </Link>
             <a
               href="https://github.com/aw3-technology/openeye.sh"
               target="_blank"
