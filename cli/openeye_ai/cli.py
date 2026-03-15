@@ -63,9 +63,10 @@ app.command()(watch)
 
 # ── Demo commands ─────────────────────────────────────────────────────
 
-from openeye_ai.commands.demo import g1_demo
+from openeye_ai.commands.demo import g1_demo, vlm_demo
 
 app.command("g1-demo")(g1_demo)
+app.command("vlm-demo")(vlm_demo)
 
 # ── Config subcommands ────────────────────────────────────────────────
 

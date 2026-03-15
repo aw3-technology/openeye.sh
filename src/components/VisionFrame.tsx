@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import sceneWorkshop from "@/assets/demo/scene-workshop.jpg";
 
 interface DetectedObject {
   name: string;
@@ -27,8 +28,13 @@ export function VisionFrame() {
       className="relative border border-primary/20 rounded-outer overflow-hidden"
       style={{ outline: "2px solid hsl(var(--oe-blue) / 0.15)" }}
     >
-      {/* Simulated camera feed */}
+      {/* Camera feed with real image */}
       <div className="relative aspect-video bg-secondary">
+        <img
+          src={sceneWorkshop}
+          alt="Workshop scene with detected objects"
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        />
         {/* Grid overlay */}
         <div className="absolute inset-0 opacity-10"
           style={{

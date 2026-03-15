@@ -194,8 +194,137 @@ openeye mlops shadow <model> --prod-model <model>
 openeye mlops retraining <model> [--trigger]
 ```
 
+## Agent
+
+### `openeye agent`
+
+Agentic perception loop — perceive, reason, act.
+
+```bash
+openeye agent run --model yolov8 --goal "monitor workspace safety"
+openeye agent run --model yolov8 --video demo.mp4 --max-ticks 20
+openeye agent start --goal "detect hazards"
+openeye agent stop
+openeye agent status
+openeye agent memory --limit 10
+openeye agent recall "when did a person enter?"
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `run` | Run the agentic perception loop locally on camera or video |
+| `start` | Start the agentic loop on a running server |
+| `stop` | Stop the agentic loop on a running server |
+| `status` | Show agentic loop status (running, tick count, plan, goal) |
+| `memory` | Show recent observations from the agent's memory |
+| `recall` | Query agent memory with a natural language search |
+
+**`agent run` Options:**
+
+- `--model <name>` — Detection model to use (default: `yolov8`)
+- `--goal <text>` — Goal for the agent to pursue
+- `--hz <float>` — Tick frequency in Hz
+- `--video <path>` — Video file input (instead of camera)
+- `--max-ticks <n>` — Maximum ticks before stopping
+- `--vlm <id>` — VLM model for reasoning
+
+## Hosted API
+
+### `openeye api`
+
+Client commands for the hosted inference API.
+
+```bash
+openeye api detect photo.jpg --pretty
+openeye api depth scene.png
+openeye api describe photo.jpg --prompt "what hazards are present?"
+openeye api models
+openeye api usage --days 7
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `detect` | Run object detection via hosted API |
+| `depth` | Run depth estimation via hosted API |
+| `describe` | Get VLM scene description via hosted API |
+| `models` | List available hosted models and credit costs |
+| `usage` | Show credit balance and usage statistics |
+
+**Common Options:**
+
+- `--server <url>` — API server URL (default: `$OPENEYE_API_URL` or `http://localhost:8001`)
+- `--pretty` — Pretty-print JSON output
+- `--confidence <float>` — Minimum confidence threshold (for `detect`)
+- `--prompt <text>` — Custom prompt (for `describe`)
+- `--days <n>` — Usage history period (for `usage`, default: 30)
+
+## Server Utilities
+
+### `openeye health`
+
+Check server health and queue status.
+
+```bash
+openeye health
+openeye health --server http://localhost:9000
+```
+
+### `openeye nebius-stats`
+
+Show Nebius VLM usage statistics from a running server.
+
+```bash
+openeye nebius-stats
+```
+
+### `openeye server-config-get`
+
+Get runtime configuration from a running server.
+
+### `openeye server-config-set`
+
+Update a runtime config value on a running server.
+
+```bash
+openeye server-config-set vlm_model "Qwen/Qwen3-VL-72B"
+```
+
 ## Governance
 
 ### `openeye govern`
 
 Safety policy management, audit logs, and rule enforcement subcommands.
+
+```bash
+openeye govern status
+openeye govern ls
+openeye govern enable pii-filter
+openeye govern disable pii-filter
+openeye govern presets
+openeye govern load safety-strict
+openeye govern load custom-policy.yaml
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `status` | Show current governance status and policy count |
+| `ls` | List all available policies (built-in + plugins) |
+| `enable` | Enable a governance policy by name |
+| `disable` | Disable a governance policy by name |
+| `presets` | List available governance presets |
+| `load` | Load a preset or custom YAML config |
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENEYE_SERVER_URL` | `http://localhost:8000` | Default inference server URL |
+| `OPENEYE_FLEET_URL` | `http://localhost:8001` | Fleet control plane URL |
+| `OPENEYE_API_URL` | `http://localhost:8001` | Hosted API URL |
+| `OPENEYE_TOKEN` | — | Fleet authentication token |
+| `OPENEYE_API_KEY` | — | Hosted API key (format: `oe_...`) |
+| `NEBIUS_API_KEY` | — | Nebius VLM API key |
+| `NEBIUS_BASE_URL` | `https://api.studio.nebius.com/v1` | Nebius API endpoint |
+| `NEBIUS_MODEL` | `Qwen/Qwen2.5-VL-72B-Instruct` | Default VLM model |
+| `OPENROUTER_API_KEY` | — | OpenRouter VLM alternative key |
+| `CORS_ORIGINS` | `http://localhost:5173,http://localhost:3000` | Allowed CORS origins |

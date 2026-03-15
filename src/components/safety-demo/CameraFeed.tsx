@@ -1,6 +1,7 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { SafetyState } from "./types";
 import { stateConfig, workspaceObjects, HAND_SIZE } from "./data";
+import safetyWorkspace from "@/assets/demo/safety-workspace.jpg";
 
 interface CameraFeedProps {
   currentState: SafetyState;
@@ -34,6 +35,13 @@ export function CameraFeed({
         transition={{ duration: animDuration }}
       >
         <div className="relative aspect-video bg-terminal-bg">
+          {/* Background image */}
+          <img
+            src={safetyWorkspace}
+            alt="Robot workspace"
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+          />
+
           {/* Grid overlay */}
           <div
             className="absolute inset-0 opacity-10"

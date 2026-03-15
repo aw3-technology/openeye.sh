@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
 import { credApi } from "@/lib/cred-api";
+import { isCredSystemConfigured } from "@/lib/deployment-env";
 import { toastMutationError } from "@/lib/utils";
 
 export function useCreditBalance() {
@@ -21,10 +22,9 @@ export function useDeductCredits() {
       credApi.deduct(amount, description),
     onMutate: async ({ amount }) => {
       await qc.cancelQueries({ queryKey: ["credits", "balance"] });
-      const prev = qc.getQueryData<{ balances: { balance: number; credit_type_id: string }[] }>(["credits", "balance"]);
-      if (prev?.balances?.length) {
-        const updated = { ...prev, balances: prev.balances.map(b => ({ ...b, balance: Math.max(0, b.balance - amount) })) };
-        qc.setQueryData(["credits", "balance"], updated);
+      const prev = qc.getQueryData<{ balance: number }>(["credits", "balance"]);
+      if (prev) {
+        qc.setQueryData(["credits", "balance"], { ...prev, balance: Math.max(0, prev.balance - amount) });
       }
       return { prev };
     },

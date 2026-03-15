@@ -25,21 +25,18 @@ Deno.serve(async (req) => {
   const CRED_API_KEY = Deno.env.get("CRED_API_KEY");
   if (!CRED_API_KEY) return json({ error: "CRED_API_KEY not configured" }, 500);
 
-  const CRED_API_URL = "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1/credits-api";
+  const CRED_PROJECT_ID = Deno.env.get("CRED_PROJECT_ID");
+  if (!CRED_PROJECT_ID) return json({ error: "CRED_PROJECT_ID not configured" }, 500);
 
-  const CRED_CREDIT_TYPE_ID = Deno.env.get("CRED_CREDIT_TYPE_ID");
+  const CRED_API_URL = Deno.env.get("CRED_API_URL") || "https://cred.diy";
 
   // Extract the sub-path from the request URL
   const url = new URL(req.url);
   const path = url.pathname.replace(/^\/cred-proxy\/?/, "");
   const search = url.search;
 
-  // Map proxy paths to Cred API paths & build the target URL
-  // The Cred API uses x-api-key for auth and identifies project by key
-  const targetUrl = `${CRED_API_URL}/${path}${search}`;
-
-  // Extract the user's Supabase JWT to identify the end-user
-  const userToken = authHeader.replace("Bearer ", "");
+  // Forward to Cred API
+  const targetUrl = `${CRED_API_URL}/projects/${CRED_PROJECT_ID}/${path}${search}`;
 
   try {
     const body = req.method !== "GET" && req.method !== "HEAD"
@@ -52,8 +49,8 @@ Deno.serve(async (req) => {
       method: req.method,
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": CRED_API_KEY,
-        "x-user-token": userToken,
+        Authorization: `Bearer ${CRED_API_KEY}`,
+        "x-user-token": authHeader.replace("Bearer ", ""),
       },
       body,
     });

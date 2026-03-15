@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
 import {
   Dialog,
@@ -15,9 +15,13 @@ import { Label } from "@/components/ui/label";
 import { Settings } from "lucide-react";
 
 export function ServerUrlDialog() {
-  const { serverUrl, setServerUrl } = useOpenEyeConnection();
+  const { serverUrl, setServerUrl, isCloudDeployment } = useOpenEyeConnection();
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState(serverUrl);
+  const placeholder = useMemo(
+    () => isCloudDeployment ? "https://your-server.example.com" : "http://localhost:8000",
+    [isCloudDeployment],
+  );
 
   const isValidUrl = (s: string) => {
     try {
@@ -49,7 +53,9 @@ export function ServerUrlDialog() {
         <DialogHeader>
           <DialogTitle>OpenEye Server URL</DialogTitle>
           <DialogDescription>
-            Enter the URL of your running <code>openeye serve</code> instance.
+            {isCloudDeployment
+              ? "Enter the public URL of your OpenEye server to connect from the cloud dashboard."
+              : "Enter the URL of your running \u0060openeye serve\u0060 instance."}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
@@ -58,7 +64,7 @@ export function ServerUrlDialog() {
             id="server-url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="http://localhost:8000"
+            placeholder={placeholder}
           />
         </div>
         <DialogFooter>

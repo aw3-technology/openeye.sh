@@ -30,7 +30,7 @@
           type: "VLMNebius",
           config: {
             base_url: "https://api.tokenfactory.nebius.com/v1/",
-            model: "Qwen/Qwen3-VL-72B",
+            model: "Qwen/Qwen2.5-VL-72B-Instruct",
             camera_index: 0,
           },
         },

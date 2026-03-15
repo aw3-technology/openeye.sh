@@ -37,6 +37,29 @@ export function UseCaseSection({ uc, index }: UseCaseSectionProps) {
           </div>
         </motion.div>
 
+        {/* Hero image */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.3, delay: 0.05, ease }}
+          className="relative aspect-[21/9] rounded-outer overflow-hidden border border-foreground/[0.06] mb-12"
+        >
+          <img
+            src={uc.image}
+            alt={uc.title}
+            className="absolute inset-0 w-full h-full object-cover opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+          <div className="absolute bottom-4 left-4 font-mono text-[10px] text-terminal-green/70 space-y-0.5">
+            <div>OPENEYE v0.1.0 — {uc.overline.toUpperCase()}</div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-terminal-green animate-pulse" />
+              LIVE
+            </div>
+          </div>
+        </motion.div>
+
         {/* Scenario Grid */}
         <div className="grid sm:grid-cols-2 gap-6 mb-12">
           {uc.scenarios.map((scenario, i) => (

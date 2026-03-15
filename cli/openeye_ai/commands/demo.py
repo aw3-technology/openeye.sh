@@ -45,3 +45,32 @@ def g1_demo(
         demo=demo,
     )
     run_demo(args)
+
+
+def vlm_demo(
+    image: str = typer.Option("src/assets/demo/scene-warehouse.jpg", "--image", help="Path to image file"),
+    model: str = typer.Option("qwen/qwen3-vl-235b:free", "--model", "-m", help="OpenRouter model ID"),
+    prompt: str = typer.Option(
+        "Describe what you see in this image in detail. "
+        "Focus on objects, people, spatial layout, and any notable activities or hazards.",
+        "--prompt", "-p",
+        help="Custom prompt to send with the image",
+    ),
+    all_models: bool = typer.Option(False, "--all-models", help="Compare all free VLM models side-by-side"),
+) -> None:
+    """Run a VLM (Vision Language Model) demo via OpenRouter.
+
+    Sends an image to a free VLM on OpenRouter and displays the reasoning.
+    Use --all-models to compare Qwen3-VL, Qwen2.5-VL, and Gemma 3 side-by-side.
+    """
+    import argparse
+
+    from openeye_ai.demos.vlm_openrouter_demo import run_demo as run_vlm_demo
+
+    args = argparse.Namespace(
+        image=image,
+        model=model,
+        prompt=prompt,
+        all_models=all_models,
+    )
+    run_vlm_demo(args)

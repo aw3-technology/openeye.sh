@@ -1,10 +1,11 @@
 import type { HealthResponse, PredictionResult, RuntimeConfig } from "@/types/openeye";
 import { BaseApiClient } from "./base-api-client";
+import { isCloudDeployment } from "./deployment-env";
 
 const STORAGE_KEY = "openeye_server_url";
 
 export function getStoredServerUrl(): string {
-  return localStorage.getItem(STORAGE_KEY) || "http://localhost:8000";
+  return localStorage.getItem(STORAGE_KEY) || (isCloudDeployment() ? "" : "http://localhost:8000");
 }
 
 export function setStoredServerUrl(url: string) {
