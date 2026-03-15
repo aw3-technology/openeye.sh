@@ -35,7 +35,7 @@ export function SafetyPanel({ currentState, logs, cycleId }: SafetyPanelProps) {
         transition={{ duration: animDuration }}
       >
         <div className="px-4 py-3 flex items-center justify-between">
-          <span className="font-mono text-xs uppercase tracking-widest text-terminal-muted">
+          <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
             Safety Status
           </span>
           <motion.div
@@ -59,9 +59,9 @@ export function SafetyPanel({ currentState, logs, cycleId }: SafetyPanelProps) {
       </motion.div>
 
       {/* Log */}
-      <div className="bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden flex-1 min-h-0">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/5">
-          <span className="font-mono text-xs text-terminal-muted uppercase tracking-widest">
+      <div className="bg-card rounded-outer border overflow-hidden flex-1 min-h-0">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+          <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
             Safety Log — live
           </span>
         </div>
@@ -96,9 +96,9 @@ export function SafetyPanel({ currentState, logs, cycleId }: SafetyPanelProps) {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="bg-terminal-bg rounded-inner border border-foreground/5 px-3 py-2 text-center"
+            className="bg-card rounded-inner border px-3 py-2 text-center"
           >
-            <div className="font-mono text-[10px] text-terminal-muted uppercase tracking-wider">
+            <div className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
               {stat.label}
             </div>
             <div className="font-mono text-sm text-terminal-green tabular-nums">

@@ -41,9 +41,9 @@ export function VLMReasoningPanel() {
   }, [latestVLM]);
 
   return (
-    <div className="bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-foreground/5">
-        <span className="font-mono text-xs text-terminal-muted uppercase tracking-widest">
+    <div className="bg-card rounded-outer border overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
           VLM Reasoning
         </span>
         <div className="flex items-center gap-2">
@@ -51,7 +51,7 @@ export function VLMReasoningPanel() {
             <Loader2 className="w-3 h-3 text-terminal-amber animate-spin" />
           )}
           {latestVLM && (
-            <span className="font-mono text-[10px] text-terminal-muted tabular-nums">
+            <span className="font-mono text-[10px] text-muted-foreground tabular-nums">
               {(latestVLM.latency_ms / 1000).toFixed(1)}s
             </span>
           )}
@@ -84,7 +84,7 @@ export function VLMReasoningPanel() {
             key={`hist-${i}`}
             initial={{ opacity: 0.5 }}
             animate={{ opacity: 0.3 - i * 0.1 }}
-            className="text-terminal-muted border-t border-foreground/5 pt-2"
+            className="text-muted-foreground border-t border-border pt-2"
           >
             <span className="text-[10px] tabular-nums">
               [{(vlm.latency_ms / 1000).toFixed(1)}s]

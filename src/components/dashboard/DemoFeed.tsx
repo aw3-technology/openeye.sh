@@ -38,14 +38,14 @@ export function DemoFeed() {
 
   return (
     <motion.div
-      className="relative border rounded-outer overflow-hidden bg-foreground"
+      className="relative border rounded-outer overflow-hidden bg-terminal-bg"
       animate={{
         borderColor: isActive ? config.border : "hsl(var(--border))",
         boxShadow: isActive ? config.shadow : "none",
       }}
       transition={{ duration: 0.15 }}
     >
-      <div className="relative aspect-video bg-gradient-to-br from-foreground via-foreground/95 to-foreground/90">
+      <div className="relative aspect-video bg-terminal-bg">
         {/* Video element for live mode */}
         <video
           ref={videoRef as React.RefObject<HTMLVideoElement>}
