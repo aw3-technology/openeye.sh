@@ -21,6 +21,8 @@ import Pricing from "./pages/Pricing.tsx";
 import Models from "./pages/Models.tsx";
 import Architecture from "./pages/Architecture.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import TermsOfService from "./pages/TermsOfService.tsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import Overview from "./pages/dashboard/Overview.tsx";
 import Inference from "./pages/dashboard/Inference.tsx";
 import LiveStream from "./pages/dashboard/LiveStream.tsx";
@@ -74,6 +76,8 @@ const App = () => (
             <Route path="/architecture" element={<Architecture />} />
             <Route path="/presentation" element={<Presentation />} />
             <Route path="/demo" element={<LiveDemo />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
 
             <Route
               path="/dashboard"
