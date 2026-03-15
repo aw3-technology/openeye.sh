@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "openeye-ai"
 version = "0.1.0"
 description = "Ollama for vision AI models — pull, run, and serve computer-vision models from your terminal."
-readme = {text = "Ollama for vision AI models.", content-type = "text/plain"}
+readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [{ name = "OpenEye Team" }]
@@ -60,6 +60,9 @@ openeye = "openeye_ai.cli:app"
 [project.urls]
 Homepage = "https://perceptify.dev"
 Repository = "https://github.com/OpenEye/perceptify-the-world"
+
+[tool.hatch.build.targets.wheel]
+packages = ["openeye_ai"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
