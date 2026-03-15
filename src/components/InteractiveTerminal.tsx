@@ -177,7 +177,7 @@ export function InteractiveTerminal() {
           <div className="w-3 h-3 rounded-full bg-terminal-red/20 border border-terminal-red/50" />
           <div className="w-3 h-3 rounded-full bg-terminal-amber/20 border border-terminal-amber/50" />
           <div className="w-3 h-3 rounded-full bg-terminal-green/20 border border-terminal-green/50" />
-          <span className="ml-2 text-xs font-mono text-terminal-muted uppercase tracking-widest">
+          <span className="ml-2 text-xs font-mono text-muted-foreground uppercase tracking-widest">
             openeye — interactive demo
           </span>
         </div>
