@@ -50,7 +50,7 @@ export function useSaveInference() {
     mutationFn: async (row: Omit<InferenceHistoryRow, "id" | "user_id" | "created_at">) => {
       if (!user) throw new Error("Not authenticated");
       const { error } = await supabase
-        .from("inference_history")
+        .from("inference_history" as any)
         .insert({ ...row, user_id: user.id });
       if (error) throw error;
     },
