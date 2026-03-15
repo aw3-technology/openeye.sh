@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -104,6 +104,7 @@ const App = () => (
               <Route path="settings" element={<SettingsHub />} />
               <Route path="settings/api-keys" element={<SettingsHub />} />
               <Route path="settings/credits" element={<SettingsHub />} />
+              <Route path="credits" element={<Navigate to="/dashboard/settings/credits" replace />} />
               <Route path="mlops" element={<MLOps />} />
               <Route path="agent" element={<AgentLoop />} />
               <Route path="memory" element={<MemoryPage />} />
