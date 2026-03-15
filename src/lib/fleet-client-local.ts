@@ -231,7 +231,7 @@ export class LocalFleetClient implements FleetClientInterface {
 
   // ── OTA ──────────────────────────────────────────────────────
 
-  async pushOTAUpdate(req: OTAUpdateRequest) {
+  async pushOTAUpdate(req: OTAUpdateRequest): Promise<{ status: string; command_count: number }> {
     return this.api["request"]("/ota", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
