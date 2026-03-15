@@ -107,7 +107,7 @@ export class LocalFleetClient implements FleetClientInterface {
     });
   }
 
-  async batchOperation(req: BatchDeviceRequest) {
+  async batchOperation(req: BatchDeviceRequest): Promise<{ matched: number; commands: Array<{ device_id: string; command_id: string }> }> {
     return this.api["request"]("/devices/batch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
