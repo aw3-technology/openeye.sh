@@ -161,7 +161,7 @@ export function Navbar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden flex flex-col items-center justify-center gap-2 p-3 overflow-visible"
+          className="lg:hidden flex flex-col items-center justify-center gap-2 p-3 overflow-visible"
           aria-label="Toggle menu"
           aria-expanded={mobileOpen}
         >
