@@ -244,6 +244,17 @@ export default function BlogPost() {
               </div>
             </div>
 
+            {/* Hero Image */}
+            {blogHeroImages[post.slug] && (
+              <div className="rounded-outer overflow-hidden border border-foreground/[0.06] mb-12">
+                <img
+                  src={blogHeroImages[post.slug]}
+                  alt={post.title}
+                  className="w-full aspect-[21/9] object-cover"
+                />
+              </div>
+            )}
+
             {/* Content */}
             <div className="prose-openeye">
               {renderMarkdown(post.content)}
