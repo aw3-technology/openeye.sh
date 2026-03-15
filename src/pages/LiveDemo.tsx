@@ -126,6 +126,13 @@ function SafetyDemo() {
           transition={{ duration: 0.3 }}
         >
           <div className="relative aspect-video bg-terminal-bg">
+            {/* Scene image */}
+            <img
+              src={safetyWorkspaceImg}
+              alt="Safety workspace"
+              className="absolute inset-0 w-full h-full object-cover opacity-70"
+            />
+
             {/* Grid */}
             <div
               className="absolute inset-0 opacity-[0.06]"
