@@ -32,8 +32,8 @@ function renderMarkdown(content: string) {
               {lang}
             </div>
           )}
-          <pre className="bg-terminal-bg p-4 overflow-x-auto">
-            <code className="font-mono text-sm text-terminal-green leading-relaxed">
+          <pre className="bg-card p-4 overflow-x-auto">
+            <code className="font-mono text-sm text-oe-green leading-relaxed">
               {codeLines.join("\n")}
             </code>
           </pre>
