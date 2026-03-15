@@ -163,14 +163,8 @@ export default function Pricing() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              to="/login"
-              className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
-            >
-              Get API Key
-            </Link>
-            <Link
               to="/docs#installation"
-              className="font-mono text-sm border border-foreground/[0.06] text-foreground px-5 py-2.5 rounded-inner hover:bg-foreground/[0.03] transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none"
+              className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
             >
               Read the Docs
             </Link>
