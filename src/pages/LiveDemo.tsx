@@ -349,6 +349,7 @@ const sampleImages = [
   },
   {
     name: "Warehouse",
+    image: sceneWarehouseImg,
     objects: [
       { label: "forklift", confidence: 0.97, bbox: { x: 0.05, y: 0.2, w: 0.3, h: 0.6 }, color: "green" as const },
       { label: "pallet", confidence: 0.95, bbox: { x: 0.4, y: 0.5, w: 0.25, h: 0.2 }, color: "green" as const },
