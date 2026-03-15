@@ -147,7 +147,7 @@ export default function LoginPage() {
           <p className="mt-4 text-sm text-center text-destructive">{error}</p>
         )}
         {success && (
-          <p className="mt-4 text-sm text-center text-green-600">{success}</p>
+          <p className="mt-4 text-sm text-center text-primary">{success}</p>
         )}
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
