@@ -6,14 +6,14 @@ OpenEye is a CLI-first perception engine that turns raw video into structured wo
 
 ## Features
 
-- **Object Detection** — YOLO, Grounding DINO, and custom adapters
+- **Object Detection** — YOLOv8, Grounding DINO, and custom adapters
 - **Depth Estimation** — Monocular depth via Depth Anything V2
-- **Scene Understanding** — Spatial relationships, hazard detection, scene graphs
-- **Safety Guardian** — Sub-100ms human detection and robot halt
+- **Scene Understanding** — Spatial relationships, scene graphs
+- **Safety Monitoring** — Real-time human detection and robot halt
 - **CLI-Native** — Every capability accessible from the terminal
-- **Model-Agnostic** — Swap YOLO, VLMs, SAM without code changes
+- **Model-Agnostic** — Swap models without code changes via adapters
 - **REST + WebSocket API** — Serve models over HTTP with a single command
-- **Plugin Architecture** — Extensible inputs, actions, LLM providers
+- **Fleet Management** — Register, deploy, and monitor edge devices
 
 ## Quick Install
 
