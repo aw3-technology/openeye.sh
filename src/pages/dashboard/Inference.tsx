@@ -138,7 +138,7 @@ export default function Inference() {
 
   const handleFile = (file: File) => {
     if (isCloud) {
-      const balance = creditBalance.data?.balance ?? 0;
+      const balance = getTotalBalance(creditBalance.data);
       if (balance < INFERENCE_CREDIT_COST) {
         setShowCreditsDialog(true);
         return;
