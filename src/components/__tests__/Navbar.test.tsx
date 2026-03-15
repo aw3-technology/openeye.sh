@@ -32,6 +32,7 @@ describe("Navbar", () => {
       session: null,
       loading: false,
       signOut: vi.fn(),
+      tokenError: null,
     });
 
     renderNavbar();
