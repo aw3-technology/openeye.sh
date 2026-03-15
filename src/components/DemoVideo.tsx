@@ -227,7 +227,7 @@ export function DemoVideo() {
               {/* Play button */}
               {!isPlaying && (
                 <button
-                  className="absolute inset-0 flex items-center justify-center bg-terminal-bg/50 hover:bg-terminal-bg/60 focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors cursor-pointer"
+                  className="absolute inset-0 flex items-center justify-center bg-card/50 hover:bg-card/60 focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors cursor-pointer"
                   onClick={() => setIsPlaying(true)}
                   aria-label="Play demo animation"
                 >
