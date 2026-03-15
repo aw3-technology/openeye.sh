@@ -1,13 +1,16 @@
 export interface CreditBalance {
-  balance: number;
   user_id: string;
-  project_id: string;
+  balances: {
+    credit_type_id: string;
+    credit_type_name: string;
+    credit_type_symbol: string;
+    balance: number;
+  }[];
 }
 
 export interface CreditTransaction {
   id: string;
   user_id: string;
-  project_id: string;
   amount: number;
   type: "purchase" | "deduction" | "refund" | "bonus";
   description: string;
@@ -17,9 +20,13 @@ export interface CreditTransaction {
 export interface PricingTier {
   id: string;
   name: string;
+  description?: string;
   credits: number;
-  price_cents: number;
-  popular?: boolean;
+  price: string; // e.g. "9.99"
+  currency: string;
+  billing_type: string;
+  is_active: boolean;
+  is_popular: boolean;
 }
 
 export interface CheckoutSession {
