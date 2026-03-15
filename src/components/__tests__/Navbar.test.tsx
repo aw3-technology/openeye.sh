@@ -85,6 +85,7 @@ describe("Navbar", () => {
       session: null,
       loading: true,
       signOut: vi.fn(),
+      tokenError: null,
     });
 
     const { container } = renderNavbar();
