@@ -1,35 +1,24 @@
-import { useCallback, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
 import { credApi } from "@/lib/cred-api";
 import { toastMutationError } from "@/lib/utils";
 
-function useTokenGetter() {
-  const { session } = useAuth();
-  const tokenRef = useRef(session?.access_token ?? "");
-  useEffect(() => {
-    tokenRef.current = session?.access_token ?? "";
-  }, [session?.access_token]);
-  return useCallback(() => tokenRef.current, []);
-}
-
 export function useCreditBalance() {
-  const getToken = useTokenGetter();
+  const { user } = useAuth();
   return useQuery({
     queryKey: ["credits", "balance"],
-    queryFn: () => credApi.getBalance(getToken()),
-    enabled: !!getToken(),
+    queryFn: () => credApi.getBalance(),
+    enabled: !!user,
     refetchInterval: 30_000,
     refetchIntervalInBackground: false,
   });
 }
 
 export function useDeductCredits() {
-  const getToken = useTokenGetter();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ amount, description }: { amount: number; description: string }) =>
-      credApi.deduct(getToken(), amount, description),
+      credApi.deduct(amount, description),
     onMutate: async ({ amount }) => {
       await qc.cancelQueries({ queryKey: ["credits", "balance"] });
       const prev = qc.getQueryData<{ balance: number }>(["credits", "balance"]);
@@ -51,11 +40,10 @@ export function useDeductCredits() {
 }
 
 export function useRefundCredits() {
-  const getToken = useTokenGetter();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ amount, description }: { amount: number; description: string }) =>
-      credApi.refund(getToken(), amount, description),
+      credApi.refund(amount, description),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["credits", "balance"] });
       qc.invalidateQueries({ queryKey: ["credits", "transactions"] });
@@ -64,37 +52,35 @@ export function useRefundCredits() {
 }
 
 export function useCreateCheckout() {
-  const getToken = useTokenGetter();
   return useMutation({
     mutationFn: ({ tierId, successUrl, cancelUrl }: { tierId: string; successUrl: string; cancelUrl: string }) =>
-      credApi.createCheckout(getToken(), tierId, successUrl, cancelUrl),
+      credApi.createCheckout(tierId, successUrl, cancelUrl),
     onError: (err) => toastMutationError("Checkout", err),
   });
 }
 
 export function usePricingTiers() {
-  const getToken = useTokenGetter();
+  const { user } = useAuth();
   return useQuery({
     queryKey: ["credits", "tiers"],
-    queryFn: () => credApi.getPricingTiers(getToken()),
-    enabled: !!getToken(),
+    queryFn: () => credApi.getPricingTiers(),
+    enabled: !!user,
     staleTime: 5 * 60 * 1000,
   });
 }
 
 export function useCreditTransactions(page = 0, pageSize = 20) {
-  const getToken = useTokenGetter();
+  const { user } = useAuth();
   return useQuery({
     queryKey: ["credits", "transactions", page, pageSize],
-    queryFn: () => credApi.getTransactions(getToken(), page, pageSize),
-    enabled: !!getToken(),
+    queryFn: () => credApi.getTransactions(page, pageSize),
+    enabled: !!user,
   });
 }
 
 export function useSyncCredUser() {
-  const getToken = useTokenGetter();
   return useMutation({
-    mutationFn: () => credApi.syncUser(getToken()),
+    mutationFn: () => credApi.syncUser(),
     onError: (err) => toastMutationError("Credit account sync", err),
     retry: 3,
   });
