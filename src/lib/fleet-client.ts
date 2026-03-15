@@ -96,7 +96,7 @@ export async function setTags(deviceId: string, tags: Record<string, string>): P
 }
 
 export async function setConfigOverrides(deviceId: string, config: Record<string, unknown>): Promise<DeviceResponse> {
-  const result = await supabase.from("devices").update({ config_overrides: config }).eq("id", deviceId).select().single();
+  const result = await supabase.from("devices").update({ config_overrides: config as any }).eq("id", deviceId).select().single();
   return mapDevice(assertOk(result));
 }
 
