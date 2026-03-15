@@ -3,7 +3,7 @@ export function Footer() {
     <footer className="py-8 px-4 border-t border-foreground/[0.06]">
       <div className="container max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="font-mono text-xs text-muted-foreground">
-          Copyright AW3 Technology, Inc.
+          © 2026 AW3 Technology, Inc. Apache 2.0 License.
         </div>
         <div className="flex items-center gap-6 font-mono text-xs text-muted-foreground">
           <a href="https://github.com/openeye-ai" className="hover:text-foreground transition-colors">GitHub</a>
