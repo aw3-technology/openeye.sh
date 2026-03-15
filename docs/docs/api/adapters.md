@@ -39,14 +39,18 @@ class ModelAdapter(ABC):
 
 ## Built-in Adapters
 
-| Adapter | Module | Models |
-|---------|--------|--------|
-| `yolov8` | `openeye_ai.adapters.yolov8` | YOLOv8 (ultralytics) |
-| `depth_anything` | `openeye_ai.adapters.depth_anything` | Depth Anything V2 |
-| `grounding_dino` | `openeye_ai.adapters.grounding_dino` | Grounding DINO |
-| `yolov8:onnx` | `openeye_ai.adapters.yolov8_onnx` | YOLOv8 ONNX |
-| `onnx_generic` | `openeye_ai.adapters.onnx_runtime` | Generic ONNX |
-| `yolov8:tensorrt` | `openeye_ai.adapters.tensorrt_runtime` | YOLOv8 TensorRT |
+| Adapter | Module | Task |
+|---------|--------|------|
+| `yolov8` | `openeye_ai.adapters.yolov8` | Object detection (Ultralytics YOLOv8) |
+| `yolo26` | `openeye_ai.adapters.yolo26` | Object detection (YOLOv26) |
+| `depth_anything` | `openeye_ai.adapters.depth_anything` | Monocular depth estimation (Depth Anything V2) |
+| `grounding_dino` | `openeye_ai.adapters.grounding_dino` | Open-vocabulary detection (Grounding DINO) |
+| `rfdetr` | `openeye_ai.adapters.rfdetr` | Object detection (RF-DETR) |
+| `sam2` | `openeye_ai.adapters.sam2` | Segmentation (Segment Anything 2) |
+| `smolvla` | `openeye_ai.adapters.smolvla` | Vision-language-action (SmoLVLA) |
+| `yolov8:onnx` | `openeye_ai.adapters.yolov8_onnx` | YOLOv8 via ONNX Runtime |
+| `onnx_generic` | `openeye_ai.adapters.onnx_runtime` | Generic ONNX Runtime |
+| `yolov8:tensorrt` | `openeye_ai.adapters.tensorrt_runtime` | YOLOv8 via TensorRT |
 
 ## Lifecycle
 
@@ -56,5 +60,11 @@ class ModelAdapter(ABC):
 4. Return dict must include `inference_ms` and either `objects` or `depth_map`
 
 ## Custom Adapters
+
+Register custom adapters via the CLI:
+
+```bash
+openeye register-adapter
+```
 
 See the [Custom Adapter Tutorial](../tutorials/custom-adapter.md) for building your own.

@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { DashboardSidebar } from "./DashboardSidebar";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { CreditBalanceBadge } from "./CreditBalanceBadge";
+import { ThemeToggle } from "./ThemeToggle";
 import { useSyncCredUser } from "@/hooks/useCredits";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -28,6 +29,7 @@ export function DashboardLayout() {
         <header className="flex h-12 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <div className="flex-1" />
+          <ThemeToggle />
           <CreditBalanceBadge />
           <ConnectionStatus />
         </header>

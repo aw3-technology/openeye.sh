@@ -23,7 +23,7 @@ Consider the workflow for deploying perception on a fleet of warehouse robots. W
 
 ```bash
 for robot in $(cat fleet.txt); do
-  ssh $robot "openeye watch --reason --halt-on hazard --stream grpc://controller:50051"
+  ssh $robot "openeye watch --reason --halt-on hazard --stream ws://controller:8000/ws/perception"
 done
 ```
 
@@ -76,7 +76,7 @@ Fair question. Sometimes you genuinely need to see what the robot sees. We handl
 
 1. **Terminal visualization**: `openeye watch` renders a live text representation of the scene in your terminal. Colored object labels, spatial positions, hazard indicators — all in a terminal UI that works over SSH.
 
-2. **Streaming output**: `openeye stream` pushes structured data over gRPC or REST. You can build any visualization you want on top of this — a web dashboard, a mobile app, a VR overlay. The perception engine doesn't need to know or care about the frontend.
+2. **Streaming output**: `openeye serve` pushes structured data over WebSocket endpoints (`/ws`, `/ws/perception`, `/ws/vlm`, `/ws/agentic`). You can build any visualization you want on top of this — a web dashboard, a mobile app, a VR overlay. The perception engine doesn't need to know or care about the frontend.
 
 We didn't skip visualization. We decoupled it from the perception engine, because they have different requirements and different release cycles.
 

@@ -192,6 +192,19 @@ export function useAdvanceDeployment() {
   });
 }
 
+export function usePauseDeployment() {
+  const client = useFleetClient();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => requireClient(client).pauseDeployment(id),
+    onError: (err) => toastMutationError("Deployment pause", err),
+    onSettled: (_, __, id) => {
+      qc.invalidateQueries({ queryKey: ["fleet", "deployment", id] });
+      qc.invalidateQueries({ queryKey: ["fleet", "deployments"] });
+    },
+  });
+}
+
 export function useRollbackDeployment() {
   const client = useFleetClient();
   const qc = useQueryClient();
@@ -226,6 +239,63 @@ export function useCreateGroup() {
   });
 }
 
+export function useFleetGroup(groupId: string) {
+  const client = useFleetClient();
+  return useQuery({
+    queryKey: ["fleet", "group", groupId],
+    queryFn: () => client!.getGroup(groupId),
+    enabled: !!client && !!groupId,
+  });
+}
+
+export function useGroupMembers(groupId: string) {
+  const client = useFleetClient();
+  return useQuery({
+    queryKey: ["fleet", "group", groupId, "members"],
+    queryFn: () => client!.listGroupMembers(groupId),
+    enabled: !!client && !!groupId,
+    refetchInterval: 15_000,
+  });
+}
+
+export function useDeleteGroup() {
+  const client = useFleetClient();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (groupId: string) => requireClient(client).deleteGroup(groupId),
+    onError: (err) => toastMutationError("Group deletion", err),
+    onSettled: () => qc.invalidateQueries({ queryKey: ["fleet", "groups"] }),
+  });
+}
+
+export function useAddGroupMember() {
+  const client = useFleetClient();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ groupId, deviceId }: { groupId: string; deviceId: string }) =>
+      requireClient(client).addGroupMember(groupId, deviceId),
+    onError: (err) => toastMutationError("Add member", err),
+    onSettled: (_, __, { groupId }) => {
+      qc.invalidateQueries({ queryKey: ["fleet", "group", groupId, "members"] });
+      qc.invalidateQueries({ queryKey: ["fleet", "groups"] });
+    },
+  });
+}
+
+export function useRemoveGroupMember() {
+  const client = useFleetClient();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ groupId, deviceId }: { groupId: string; deviceId: string }) =>
+      requireClient(client).removeGroupMember(groupId, deviceId),
+    onError: (err) => toastMutationError("Remove member", err),
+    onSettled: (_, __, { groupId }) => {
+      qc.invalidateQueries({ queryKey: ["fleet", "group", groupId, "members"] });
+      qc.invalidateQueries({ queryKey: ["fleet", "groups"] });
+    },
+  });
+}
+
 export function useSetScalingPolicy() {
   const client = useFleetClient();
   const qc = useQueryClient();
@@ -233,7 +303,10 @@ export function useSetScalingPolicy() {
     mutationFn: ({ groupId, policy }: { groupId: string; policy: AutoScalingPolicy }) =>
       requireClient(client).setScalingPolicy(groupId, policy),
     onError: (err) => toastMutationError("Scaling policy update", err),
-    onSettled: () => qc.invalidateQueries({ queryKey: ["fleet", "groups"] }),
+    onSettled: (_, __, { groupId }) => {
+      qc.invalidateQueries({ queryKey: ["fleet", "groups"] });
+      qc.invalidateQueries({ queryKey: ["fleet", "group", groupId] });
+    },
   });
 }
 
@@ -254,6 +327,16 @@ export function useCreateMaintenanceWindow() {
   return useMutation({
     mutationFn: (req: MaintenanceWindowCreateRequest) => requireClient(client).createMaintenanceWindow(req),
     onError: (err) => toastMutationError("Maintenance window creation", err),
+    onSettled: () => qc.invalidateQueries({ queryKey: ["fleet", "maintenance"] }),
+  });
+}
+
+export function useDeleteMaintenanceWindow() {
+  const client = useFleetClient();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => requireClient(client).deleteMaintenanceWindow(id),
+    onError: (err) => toastMutationError("Maintenance window deletion", err),
     onSettled: () => qc.invalidateQueries({ queryKey: ["fleet", "maintenance"] }),
   });
 }

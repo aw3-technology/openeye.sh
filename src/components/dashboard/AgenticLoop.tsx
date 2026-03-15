@@ -21,11 +21,16 @@ import {
   Send,
   RotateCcw,
   Activity,
+  Wifi,
+  WifiOff,
+  Shield,
+  Sparkles,
+  Layers,
 } from "lucide-react";
 
 // --- Types for agentic loop data ---
 
-interface AgenticDetection {
+export interface AgenticDetection {
   track_id: string;
   label: string;
   confidence: number;
@@ -119,9 +124,13 @@ interface AgenticLoopProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   /** External control: whether the camera is streaming */
   isStreaming: boolean;
+  /** Callback with latest detections for overlay rendering */
+  onDetections?: (detections: AgenticDetection[]) => void;
+  /** Callback when agent running state changes */
+  onRunningChange?: (running: boolean) => void;
 }
 
-export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
+export function AgenticLoop({ videoRef, isStreaming, onDetections, onRunningChange }: AgenticLoopProps) {
   const { serverUrl } = useOpenEyeConnection();
 
   // State
@@ -158,6 +167,9 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
       if (frame.type === "agentic_frame") {
         setLatestFrame(frame);
         setTotalFrames(frame.memory?.frame_count ?? 0);
+
+        // Push detections to parent for overlay
+        onDetections?.(frame.detections ?? []);
 
         // Track FPS
         const now = performance.now();
@@ -199,7 +211,8 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
     wsRef.current = null;
     setConnected(false);
     setRunning(false);
-  }, []);
+    onRunningChange?.(false);
+  }, [onRunningChange]);
 
   // Start sending frames
   const startLoop = useCallback(() => {
@@ -229,7 +242,8 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
 
     intervalRef.current = setInterval(sendFrame, 150); // ~7 Hz for agentic (balanced)
     setRunning(true);
-  }, [videoRef]);
+    onRunningChange?.(true);
+  }, [videoRef, onRunningChange]);
 
   // Stop the loop
   const stopLoop = useCallback(() => {
@@ -238,7 +252,8 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
       intervalRef.current = null;
     }
     setRunning(false);
-  }, []);
+    onRunningChange?.(false);
+  }, [onRunningChange]);
 
   // Set goal
   const handleSetGoal = useCallback(() => {
@@ -275,6 +290,8 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
 
   const detectionCount = latestFrame?.detections?.length ?? 0;
   const hasSafetyAlerts = (latestFrame?.safety_alerts?.length ?? 0) > 0;
+  const hasChangeAlerts = (latestFrame?.change_alerts?.length ?? 0) > 0;
+  const hasSafetyZones = (latestFrame?.safety_zones?.length ?? 0) > 0;
 
   return (
     <div className="space-y-4">
@@ -331,8 +348,28 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex gap-2">
+            {/* Action buttons + connection status */}
+            <div className="flex items-center gap-3">
+              {/* Connection indicator */}
+              <div className="flex items-center gap-1.5 text-[10px] font-mono">
+                {connected ? (
+                  <>
+                    <Wifi className="h-3 w-3 text-terminal-green" />
+                    <span className="text-terminal-green">Connected</span>
+                  </>
+                ) : running ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin text-terminal-amber" />
+                    <span className="text-terminal-amber">Connecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">Idle</span>
+                  </>
+                )}
+              </div>
+
               {!running ? (
                 <Button
                   onClick={() => {
@@ -376,7 +413,7 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
       </Card>
 
       {/* --- Status HUD --- */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatusCard
           icon={<Activity className="h-4 w-4" />}
           label="FPS"
@@ -405,11 +442,29 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
           value={running ? `${detectionCount}` : "--"}
           color={hasSafetyAlerts ? "terminal-red" : "terminal-green"}
         />
+        <StatusCard
+          icon={<Layers className="h-4 w-4" />}
+          label="Frames"
+          value={running ? `${totalFrames}` : "--"}
+          color="terminal-green"
+        />
+        <StatusCard
+          icon={<Clock className="h-4 w-4" />}
+          label="Total"
+          value={latestFrame ? `${latestFrame.latency.total_ms.toFixed(0)}ms` : "--"}
+          color={
+            latestFrame && latestFrame.latency.total_ms < 200
+              ? "terminal-green"
+              : latestFrame && latestFrame.latency.total_ms < 500
+              ? "terminal-amber"
+              : "terminal-red"
+          }
+        />
       </div>
 
       {/* --- Main Content Grid --- */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Left: Action Plan + VLM Reasoning */}
+        {/* Left: Action Plan + VLM Reasoning + Safety */}
         <div className="space-y-4">
           {/* Action Plan */}
           <Card className="border-terminal-green/20">
@@ -518,6 +573,83 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
             </CardContent>
           </Card>
 
+          {/* Live Detections */}
+          <Card className="border-terminal-green/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-mono flex items-center gap-2 text-terminal-green">
+                <Eye className="h-4 w-4" />
+                LIVE DETECTIONS
+                {detectionCount > 0 && (
+                  <Badge variant="outline" className="ml-auto text-[10px] border-terminal-green/30">
+                    {detectionCount} detected
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {latestFrame?.detections && latestFrame.detections.length > 0 ? (
+                <ScrollArea className="max-h-48">
+                  <div className="space-y-1">
+                    {latestFrame.detections.map((det) => {
+                      const conf = det.confidence * 100;
+                      const isManipulable = det.is_manipulable;
+                      return (
+                        <div
+                          key={det.track_id}
+                          className={`flex items-center justify-between py-1.5 px-2 rounded-md font-mono text-xs ${
+                            isManipulable
+                              ? "bg-terminal-amber/5 border border-terminal-amber/10"
+                              : "bg-foreground/5 border border-foreground/5"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                isManipulable ? "bg-terminal-amber" : "bg-terminal-green"
+                              }`}
+                            />
+                            <span className={isManipulable ? "text-terminal-amber" : ""}>
+                              {det.label}
+                            </span>
+                            {isManipulable && (
+                              <span className="text-[9px] bg-terminal-amber/20 text-terminal-amber px-1 py-0.5 rounded uppercase">
+                                graspable
+                              </span>
+                            )}
+                            <span className="text-[9px] text-muted-foreground">
+                              #{det.track_id}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-1.5 bg-foreground/10 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${
+                                  conf > 80
+                                    ? "bg-terminal-green"
+                                    : conf > 50
+                                    ? "bg-terminal-amber"
+                                    : "bg-red-400"
+                                }`}
+                                style={{ width: `${conf}%` }}
+                              />
+                            </div>
+                            <span className="tabular-nums text-muted-foreground w-12 text-right">
+                              {conf.toFixed(0)}%
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              ) : (
+                <p className="text-xs text-muted-foreground font-mono py-4 text-center">
+                  {running ? "Scanning for objects..." : "Start agent to see detections"}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Safety Alerts */}
           <AnimatePresence>
             {hasSafetyAlerts && (
@@ -531,6 +663,9 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
                     <CardTitle className="text-sm font-mono flex items-center gap-2 text-terminal-red">
                       <AlertTriangle className="h-4 w-4" />
                       SAFETY ALERTS
+                      <Badge variant="destructive" className="ml-auto text-[10px]">
+                        {latestFrame?.safety_alerts.length}
+                      </Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -538,16 +673,30 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
                       {latestFrame?.safety_alerts.map((alert, i) => (
                         <div
                           key={`${alert.zone}-${alert.message}`}
-                          className="flex items-center gap-2 text-xs font-mono"
+                          className={`flex items-center gap-2 text-xs font-mono p-2 rounded-md ${
+                            alert.halt_recommended
+                              ? "bg-terminal-red/10 border border-terminal-red/20"
+                              : "bg-terminal-amber/5 border border-terminal-amber/10"
+                          }`}
                         >
-                          {alert.halt_recommended ? (
-                            <AlertTriangle className="h-3 w-3 text-terminal-red shrink-0" />
-                          ) : (
-                            <AlertTriangle className="h-3 w-3 text-terminal-amber shrink-0" />
-                          )}
-                          <span className={alert.halt_recommended ? "text-terminal-red" : "text-terminal-amber"}>
-                            {alert.message}
-                          </span>
+                          <AlertTriangle
+                            className={`h-3 w-3 shrink-0 ${
+                              alert.halt_recommended ? "text-terminal-red animate-pulse" : "text-terminal-amber"
+                            }`}
+                          />
+                          <div className="flex-1">
+                            <span className={alert.halt_recommended ? "text-terminal-red" : "text-terminal-amber"}>
+                              {alert.message}
+                            </span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[9px] text-muted-foreground">zone: {alert.zone}</span>
+                              {alert.halt_recommended && (
+                                <Badge variant="destructive" className="text-[9px] h-4">
+                                  HALT RECOMMENDED
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -556,9 +705,55 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Safety Zones */}
+          <AnimatePresence>
+            {hasSafetyZones && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 8 }}
+              >
+                <Card className="border-blue-500/20">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-mono flex items-center gap-2 text-blue-400">
+                      <Shield className="h-4 w-4" />
+                      SAFETY ZONES
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-1.5">
+                      {latestFrame?.safety_zones.map((zone) => {
+                        const zoneColor =
+                          zone.distance_m < 0.5
+                            ? "terminal-red"
+                            : zone.distance_m < 1.5
+                            ? "terminal-amber"
+                            : "terminal-green";
+                        return (
+                          <div
+                            key={zone.zone}
+                            className="flex items-center justify-between py-1.5 px-2 rounded-md bg-muted/30 font-mono text-xs"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full bg-${zoneColor}`} />
+                              <span>{zone.zone}</span>
+                            </div>
+                            <span className={`tabular-nums font-semibold text-${zoneColor}`}>
+                              {zone.distance_m.toFixed(1)}m
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Right: Memory + Timeline */}
+        {/* Right: Scene + Memory + Timeline + Change Alerts */}
         <div className="space-y-4">
           {/* Scene Description */}
           {latestFrame?.scene_description && (
@@ -570,10 +765,51 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-muted-foreground">{latestFrame.scene_description}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{latestFrame.scene_description}</p>
               </CardContent>
             </Card>
           )}
+
+          {/* Change Alerts */}
+          <AnimatePresence>
+            {hasChangeAlerts && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <Card className="border-purple-500/20 bg-purple-500/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-mono flex items-center gap-2 text-purple-400">
+                      <Sparkles className="h-4 w-4" />
+                      SCENE CHANGES
+                      <Badge variant="outline" className="ml-auto text-[10px] border-purple-500/30 text-purple-400">
+                        {latestFrame?.change_alerts.length} changes
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-1.5">
+                      {latestFrame?.change_alerts.map((change, i) => (
+                        <div
+                          key={`${change.change_type}-${i}`}
+                          className="flex items-start gap-2 text-xs font-mono p-1.5 rounded bg-purple-500/5"
+                        >
+                          <Badge
+                            variant="outline"
+                            className="text-[9px] uppercase tracking-wider border-purple-500/30 text-purple-400 shrink-0"
+                          >
+                            {change.change_type.replace(/_/g, " ")}
+                          </Badge>
+                          <span className="text-muted-foreground line-clamp-2">{change.description}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Object Memory */}
           <Card className="border-terminal-green/20">
@@ -602,10 +838,11 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
                           <div className="flex items-center gap-2">
                             <CheckCircle2 className="h-3 w-3 text-terminal-green shrink-0" />
                             <span>{info.label}</span>
+                            <span className="text-[9px] text-muted-foreground">#{trackId}</span>
                           </div>
                           <div className="flex items-center gap-3 text-muted-foreground">
                             <span>{info.frames_seen}f</span>
-                            <span>{info.seconds_tracked}s</span>
+                            <span>{info.seconds_tracked.toFixed(1)}s</span>
                           </div>
                         </div>
                       )
@@ -620,12 +857,17 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
             </CardContent>
           </Card>
 
-          {/* Timeline */}
+          {/* Observation Timeline */}
           <Card className="border-terminal-green/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-mono flex items-center gap-2 text-terminal-green">
                 <Clock className="h-4 w-4" />
                 OBSERVATION TIMELINE
+                {latestFrame?.memory?.timeline && latestFrame.memory.timeline.length > 0 && (
+                  <Badge variant="outline" className="ml-auto text-[10px] border-terminal-green/30">
+                    {latestFrame.memory.timeline.length} events
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -689,6 +931,9 @@ export function AgenticLoop({ videoRef, isStreaming }: AgenticLoopProps) {
                 <CardTitle className="text-sm font-mono flex items-center gap-2 text-terminal-amber">
                   <Brain className="h-4 w-4" />
                   REASONING HISTORY
+                  <Badge variant="outline" className="ml-auto text-[10px] border-terminal-amber/30">
+                    {vlmHistory.length} calls
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>

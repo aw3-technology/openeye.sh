@@ -17,7 +17,7 @@ export function ArchitectureSection() {
             <div className="space-y-3 font-mono text-sm text-muted-foreground">
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rotate-45 bg-oe-blue" />
-                Model-agnostic: YOLOv8, GroundingDINO, SAM2, Depth-Anything, SmolVLA
+                Model-agnostic: YOLO26, YOLOv8, RF-DETR, DINO, SAM 2, Depth Anything, SmolVLA
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rotate-45 bg-oe-blue" />
@@ -25,7 +25,7 @@ export function ArchitectureSection() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rotate-45 bg-oe-green" />
-                Agent-ready: OpenClaw skills, shared visual context bus
+                Agent-ready: Unitree G1, agentic loop, shared visual context
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rotate-45 bg-oe-red" />

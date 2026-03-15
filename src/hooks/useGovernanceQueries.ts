@@ -36,6 +36,16 @@ export function useGovernancePolicies() {
   });
 }
 
+export function useAvailablePolicies() {
+  const client = useGovernanceClient();
+  return useQuery({
+    queryKey: ["governance", "availablePolicies"],
+    queryFn: () => client!.listAvailablePolicies(),
+    enabled: !!client,
+    refetchInterval: 10_000,
+  });
+}
+
 export function useGovernancePresets() {
   const client = useGovernanceClient();
   return useQuery({

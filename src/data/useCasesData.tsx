@@ -1,19 +1,19 @@
 import {
-  Factory,
-  Home,
   Bot,
-  Users,
-  Package,
-  Truck,
-  ScanLine,
-  Baby,
-  Dog,
-  AlertTriangle,
-  Flame,
-  Brain,
-  Workflow,
+  Bug,
+  Monitor,
+  ShieldCheck,
   Cog,
   Eye,
+  Brain,
+  Workflow,
+  ScanLine,
+  MousePointer,
+  LayoutGrid,
+  Layers,
+  Users,
+  AlertTriangle,
+  Package,
 } from "lucide-react";
 
 export interface UseCase {
@@ -31,135 +31,134 @@ export interface UseCase {
 
 export const useCases: UseCase[] = [
   {
-    id: "warehouse",
-    icon: <Factory className="w-5 h-5" />,
-    overline: "Industrial & Warehouse",
+    id: "robotics",
+    icon: <Bot className="w-5 h-5" />,
+    overline: "Robotics",
     overlineColor: "text-terminal-amber",
-    title: "Safety layer for warehouse robotics.",
+    title: "Perception layer for any robot.",
     subtitle:
-      "Monitor autonomous mobile robots, robotic arms, and human workers sharing the same floor — in real time.",
+      "Give robots real-time visual understanding — from warehouse floors to family kitchens.",
     description:
-      "Warehouses are high-throughput, high-risk environments where robots and humans constantly cross paths. OpenEye provides a continuous visual safety layer that detects zone violations, monitors workspace state, and can halt operations when hazards are detected.",
+      "Robots operating in human environments need continuous spatial awareness. OpenEye provides a dual-layer perception pipeline — fast YOLO detection for real-time geometry and VLM reasoning for context-dependent understanding — so robots can see, reason, and act safely around people and objects.",
     scenarios: [
       {
-        icon: <Users className="w-4 h-4" />,
-        label: "Human-robot zone enforcement",
+        icon: <ShieldCheck className="w-4 h-4" />,
+        label: "Safety zone enforcement",
         detail:
-          "Detect when workers enter robotic arm reach zones. Send halt signals to connected robot controllers.",
+          "Define danger and caution zones around robotic arms or AMRs. OpenEye monitors boundaries and can trigger halt signals when humans enter restricted areas.",
+      },
+      {
+        icon: <Users className="w-4 h-4" />,
+        label: "Human-robot coexistence",
+        detail:
+          "Real-time detection and tracking of people, pets, and obstacles in shared workspaces. Continuous spatial awareness for safer navigation.",
+      },
+      {
+        icon: <AlertTriangle className="w-4 h-4" />,
+        label: "Hazard identification",
+        detail:
+          "VLM-powered scene reasoning detects context-dependent risks — objects near edges, unexpected workspace changes, and environmental hazards.",
       },
       {
         icon: <Package className="w-4 h-4" />,
-        label: "Workspace monitoring",
+        label: "Scene graph for planning",
         detail:
-          "VLM-powered analysis of workspace state — detect unexpected changes, misplaced objects, and potential hazards.",
-      },
-      {
-        icon: <Truck className="w-4 h-4" />,
-        label: "Object tracking",
-        detail:
-          "Track objects in real time with consistent IDs across frames for spatial awareness.",
-      },
-      {
-        icon: <ScanLine className="w-4 h-4" />,
-        label: "Safety zone monitoring",
-        detail:
-          "Define danger and caution zones. OpenEye monitors zone boundaries and flags violations.",
+          "Structured scene graphs with object positions, spatial relationships, and persistent IDs across frames — feeding directly into robot planners.",
       },
     ],
     terminalCommand:
       "$ openeye watch --safety --danger-m 0.5 --caution-m 1.5",
     stats: [
       { value: "Real-time", label: "Detection" },
-      { value: "YOLOv8", label: "Fast layer" },
+      { value: "YOLO+VLM", label: "Dual layer" },
       { value: "24/7", label: "Monitoring" },
     ],
   },
   {
-    id: "home",
-    icon: <Home className="w-5 h-5" />,
-    overline: "Home Robotics",
-    overlineColor: "text-terminal-green",
-    title: "Safe robots in human spaces.",
+    id: "app-debugging",
+    icon: <Bug className="w-5 h-5" />,
+    overline: "Application Debugging",
+    overlineColor: "text-red-400",
+    title: "See what your application sees.",
     subtitle:
-      "Home robots operate around children, pets, and fragile objects. OpenEye helps them navigate with awareness.",
+      "Use structured visual perception to debug UIs, detect visual regressions, and validate application state.",
     description:
-      "The home environment is unpredictable — a toddler runs into the room, a cat jumps on the counter, a glass sits near the table edge. OpenEye gives home robots continuous spatial awareness and safety reasoning so they can operate around families more safely.",
+      "Modern applications are visual — but most debugging tools are blind. OpenEye's perception pipeline can analyze screenshots and screen recordings to detect UI anomalies, verify layout correctness, and generate structured descriptions of what's on screen. Integrate it into CI pipelines or use it interactively during development.",
     scenarios: [
       {
-        icon: <Baby className="w-4 h-4" />,
-        label: "Person detection",
+        icon: <ScanLine className="w-4 h-4" />,
+        label: "Visual regression detection",
         detail:
-          "Real-time detection of people in a robot's workspace. Can trigger slow-down or stop via connected controllers.",
+          "Feed screenshots through OpenEye's detection pipeline to identify UI elements that shifted, disappeared, or rendered incorrectly between builds.",
       },
       {
-        icon: <Dog className="w-4 h-4" />,
-        label: "Pet awareness",
+        icon: <LayoutGrid className="w-4 h-4" />,
+        label: "Layout validation",
         detail:
-          "Detects and tracks pets in real time using object detection models.",
-      },
-      {
-        icon: <AlertTriangle className="w-4 h-4" />,
-        label: "Hazard identification",
-        detail:
-          "Spots objects near edges, scene changes, and other context-dependent risks using VLM reasoning.",
-      },
-      {
-        icon: <Flame className="w-4 h-4" />,
-        label: "Scene understanding",
-        detail:
-          "Scene graph generation with spatial relationships between detected objects for contextual awareness.",
-      },
-    ],
-    terminalCommand:
-      "$ openeye watch --models yolov8,depth-anything --safety",
-    stats: [
-      { value: "Depth", label: "3D estimation" },
-      { value: "VLM", label: "Context reasoning" },
-      { value: "Local", label: "All on-device" },
-    ],
-  },
-  {
-    id: "agents",
-    icon: <Bot className="w-5 h-5" />,
-    overline: "Autonomous Agents",
-    overlineColor: "text-blue-400",
-    title: "Perception API for agent frameworks.",
-    subtitle:
-      "Give any LLM-based agent structured visual understanding of the physical world via CLI or REST API.",
-    description:
-      "Autonomous agents built on LangChain, CrewAI, or custom frameworks lack native perception. OpenEye provides a perception layer that converts camera feeds into structured JSON with objects, spatial relationships, and scene descriptions — the format agents need to reason and act.",
-    scenarios: [
-      {
-        icon: <Brain className="w-4 h-4" />,
-        label: "Scene graph as agent context",
-        detail:
-          "Feed structured JSON scene descriptions directly into agent prompts. Objects, positions, relationships — all typed.",
-      },
-      {
-        icon: <Workflow className="w-4 h-4" />,
-        label: "Action planning from perception",
-        detail:
-          'Structured perception output enables agents to plan actions grounded in what OpenEye actually sees.',
-      },
-      {
-        icon: <Cog className="w-4 h-4" />,
-        label: "REST API integration",
-        detail:
-          "Expose OpenEye as a REST API via `openeye serve`. Agents call perception on demand via HTTP.",
+          "Get structured JSON output describing every detected element's position and spatial relationships. Assert layout constraints programmatically.",
       },
       {
         icon: <Eye className="w-4 h-4" />,
-        label: "Scene memory",
+        label: "VLM-powered UI analysis",
         detail:
-          "Scene graph tracking with object persistence across frames for consistent spatial reasoning.",
+          "Ask natural language questions about your application's visual state — \"Is the modal centered?\" \"Are all cards the same height?\" — and get structured answers.",
+      },
+      {
+        icon: <Workflow className="w-4 h-4" />,
+        label: "CI/CD integration",
+        detail:
+          "Run OpenEye as part of your test pipeline via CLI or REST API. Capture screenshots, analyze them, and fail builds on visual anomalies.",
       },
     ],
     terminalCommand:
-      "$ openeye serve yolov8 --port 8000",
+      "$ openeye run screenshot.png --model yolov8 --format json",
     stats: [
       { value: "JSON", label: "Structured output" },
+      { value: "CI/CD", label: "Pipeline-ready" },
+      { value: "VLM", label: "Natural language" },
+    ],
+  },
+  {
+    id: "desktop-agents",
+    icon: <Monitor className="w-5 h-5" />,
+    overline: "Desktop Agents",
+    overlineColor: "text-blue-400",
+    title: "Eyes for computer-use agents.",
+    subtitle:
+      "Give desktop automation agents structured visual understanding of screens, windows, and UI elements.",
+    description:
+      "Computer-use agents need to see and understand desktop environments to click buttons, fill forms, and navigate applications. OpenEye converts screen captures into structured perception data — detected elements, spatial relationships, and natural language scene descriptions — so agents can reason about what's on screen and plan their next action.",
+    scenarios: [
+      {
+        icon: <MousePointer className="w-4 h-4" />,
+        label: "UI element detection",
+        detail:
+          "Detect buttons, inputs, menus, and other interactive elements with bounding boxes. Agents know exactly where to click.",
+      },
+      {
+        icon: <Brain className="w-4 h-4" />,
+        label: "Screen understanding",
+        detail:
+          "VLM-powered scene descriptions turn complex desktop states into natural language context that LLM agents can reason over.",
+      },
+      {
+        icon: <Layers className="w-4 h-4" />,
+        label: "Multi-window awareness",
+        detail:
+          "Track elements across overlapping windows and desktop regions. Scene graphs maintain spatial relationships between UI components.",
+      },
+      {
+        icon: <Cog className="w-4 h-4" />,
+        label: "REST API for agent loops",
+        detail:
+          "Expose perception as a REST API via `openeye serve`. Agents call for screen analysis on demand — screenshot in, structured JSON out.",
+      },
+    ],
+    terminalCommand: "$ openeye serve yolov8 --port 8000",
+    stats: [
       { value: "REST", label: "API server" },
-      { value: "Any", label: "LLM framework" },
+      { value: "JSON", label: "Structured output" },
+      { value: "Any", label: "Agent framework" },
     ],
   },
 ];

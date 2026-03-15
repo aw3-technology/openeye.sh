@@ -532,24 +532,17 @@ const cliCommands: CLICommand[] = [
     output: [
       "Available models:",
       "",
-      "  Name              Task          Status      Size",
-      "  ─────────────────────────────────────────────────",
-      "  yolov8            detection     downloaded  6.2MB",
-      "  depth_anything    depth         downloaded  98MB",
-      "  grounding_dino    detection     available   340MB",
-      "  sam2              segmentation  available   2.4GB",
+      "  Name              Task            Status      Size",
+      "  ─────────────────────────────────────────────────────",
+      "  yolov8            detection       downloaded  6.2MB",
+      "  yolo26            detection       downloaded  5.0MB",
+      "  rfdetr            detection       downloaded  39MB",
+      "  grounding_dino    grounding       downloaded  694MB",
+      "  depth_anything    depth           downloaded  97MB",
+      "  sam2              segmentation    downloaded  38MB",
+      "  smolvla           vla             available   500MB",
       "",
-      "2 downloaded, 2 available. Use 'openeye pull <name>' to download.",
-    ],
-  },
-  {
-    input: "openeye pull grounding_dino",
-    output: [
-      "[REGISTRY] Resolving grounding_dino...",
-      "[DOWNLOAD] Downloading IDEA-Research/grounding-dino-base...",
-      "[DOWNLOAD] ████████████████████ 340MB / 340MB (12.4 MB/s)",
-      "[REGISTRY] Verifying checksum... ✓",
-      "[REGISTRY] ✓ grounding_dino ready at ~/.openeye/models/grounding_dino",
+      "6 downloaded, 1 available. Use 'openeye pull <name>' to download.",
     ],
   },
   {
@@ -572,6 +565,64 @@ const cliCommands: CLICommand[] = [
     ],
   },
   {
+    input: "openeye watch --models yolov8 --safety",
+    output: [
+      "[OPENEYE] Loading model: yolov8...",
+      "[WATCH] Camera initialized (USB /dev/video0)",
+      "[SAFETY] Guardian active — danger: 0.5m, caution: 1.5m",
+      "",
+      " Model    Label    Conf   Zone       Dist   Latency",
+      " ────────────────────────────────────────────────────",
+      " yolov8   cup      91.3%  SAFE       2.1m   18ms",
+      " yolov8   person   97.2%  CAUTION    1.2m   18ms",
+      " yolov8   hand     94.1%  DANGER     0.3m   18ms",
+      "",
+      "[SAFETY] HALT — human hand in danger zone (0.3m)",
+      "[WATCH] FPS: 30 | Latency: 18ms | Objects: 3",
+    ],
+  },
+  {
+    input: "openeye serve yolov8 --port 8000 --demo",
+    output: [
+      "[SERVER] Loading yolov8...",
+      "[SERVER] Model loaded in 1.2s",
+      "[SERVER] Starting FastAPI server...",
+      "",
+      "  ┌─────────────────────────────────────────────┐",
+      "  │  OpenEye Inference Server v0.1.0             │",
+      "  │                                               │",
+      "  │  Dashboard:   http://localhost:8000/           │",
+      "  │  REST API:    http://localhost:8000/predict    │",
+      "  │  WebSocket:   ws://localhost:8000/ws           │",
+      "  │  Perception:  ws://localhost:8000/ws/perception│",
+      "  │  VLM:         ws://localhost:8000/ws/vlm       │",
+      "  │  Agentic:     ws://localhost:8000/ws/agentic   │",
+      "  │  Metrics:     http://localhost:8000/metrics    │",
+      "  └─────────────────────────────────────────────┘",
+      "",
+      "[SERVER] Ready. Listening on port 8000...",
+    ],
+  },
+  {
+    input: "openeye g1-demo --control-mode dry_run",
+    output: [
+      "[OPENEYE] Loading yolov8 for safety detection...",
+      "[G1-DEMO] Unitree G1 connector: DRY_RUN mode",
+      "[SAFETY] Guardian active — 3-zone monitoring",
+      "",
+      "         ╭─────── SAFE (>1.5m) ───────╮",
+      "         │  ╭── CAUTION (<1.5m) ──╮   │",
+      "         │  │  ╭─ DANGER ──╮      │   │",
+      "         │  │  │  [ROBOT]   │      │   │",
+      "         │  │  ╰────────────╯      │   │",
+      "         │  ╰──────────────────────╯   │",
+      "         ╰─────────────────────────────╯",
+      "",
+      "[14:32:09] Person — DANGER zone (0.3m) → HALTED",
+      "[14:32:13] Zone clear → Robot RESUMED",
+    ],
+  },
+  {
     input: "openeye bench yolov8 --runs 20",
     output: [
       "[BENCH] Running 20 iterations on yolov8...",
@@ -588,25 +639,6 @@ const cliCommands: CLICommand[] = [
       "  FPS:       54.3",
       "  ──────────────────────",
       "  ✓ Benchmark complete",
-    ],
-  },
-  {
-    input: "openeye serve yolov8 --port 8000",
-    output: [
-      "[SERVER] Loading yolov8...",
-      "[SERVER] Model loaded in 1.2s",
-      "[SERVER] Starting FastAPI server...",
-      "",
-      "  ┌──────────────────────────────────────┐",
-      "  │  OpenEye Inference Server v0.1.0      │",
-      "  │                                        │",
-      "  │  REST:  http://localhost:8000/predict   │",
-      "  │  WS:    ws://localhost:8000/ws          │",
-      "  │  Docs:  http://localhost:8000/docs      │",
-      "  │  Model: yolov8                          │",
-      "  └──────────────────────────────────────┘",
-      "",
-      "[SERVER] Ready. Listening on port 8000...",
     ],
   },
 ];
@@ -642,13 +674,17 @@ function InteractiveCLI() {
   }, [visibleLines]);
 
   const getLineColor = (line: string) => {
+    if (line.includes("HALT") || line.includes("DANGER") || line.includes("HALTED")) return "text-oe-red";
+    if (line.includes("CAUTION") || line.includes("RESUMED") || line.includes("clear")) return "text-primary";
     if (line.startsWith("[REGISTRY]") && line.includes("✓")) return "text-oe-green";
     if (line.startsWith("[DOWNLOAD]") && line.includes("████")) return "text-primary";
-    if (line.startsWith("[VISION]") || line.startsWith("[BENCH]") || line.startsWith("[SCENE]")) return "text-oe-green";
-    if (line.startsWith("[OPENEYE]") || line.startsWith("[SERVER]") || line.startsWith("[REGISTRY]") || line.startsWith("[DOWNLOAD]")) return "text-muted-foreground";
+    if (line.startsWith("[VISION]") || line.startsWith("[BENCH]") || line.startsWith("[SCENE]") || line.startsWith("[SAFETY]") || line.startsWith("[WATCH]")) return "text-oe-green";
+    if (line.startsWith("[OPENEYE]") || line.startsWith("[SERVER]") || line.startsWith("[G1-DEMO]") || line.startsWith("[REGISTRY]") || line.startsWith("[DOWNLOAD]")) return "text-muted-foreground";
     if (line.startsWith("  ✓") || line.includes("✓")) return "text-oe-green";
     if (line.startsWith("  │") || line.startsWith("  ┌") || line.startsWith("  └")) return "text-primary";
+    if (line.includes("╭") || line.includes("╰") || line.includes("│")) return "text-primary";
     if (line.startsWith("{") || line.startsWith("}") || line.startsWith('  "') || line.startsWith("  ]")) return "text-oe-green";
+    if (line.includes("SAFE")) return "text-oe-green";
     return "text-foreground";
   };
 

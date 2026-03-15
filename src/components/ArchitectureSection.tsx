@@ -22,15 +22,15 @@ export function ArchitectureSection() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full bg-terminal-green" />
-                Model-agnostic: YOLOv8, Grounding DINO, SAM2, Depth Anything
+                Model-agnostic: YOLO26, YOLOv8, RF-DETR, DINO, SAM 2, Depth Anything
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full bg-terminal-green" />
-                Adapter-ready: 7 adapters + ONNX/TensorRT runtimes
+                Adapter-ready: 8 adapters + ONNX/TensorRT runtimes
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full bg-terminal-amber" />
-                REST + gRPC endpoints for any downstream consumer
+                REST + WebSocket endpoints for any downstream consumer
               </div>
             </div>
           </div>

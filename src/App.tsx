@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/hooks/useTheme";
 import { OpenEyeConnectionProvider } from "@/hooks/useOpenEyeConnection";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardErrorBoundary } from "@/components/DashboardErrorBoundary";
@@ -27,16 +28,12 @@ import Overview from "./pages/dashboard/Overview.tsx";
 import Inference from "./pages/dashboard/Inference.tsx";
 import LiveStream from "./pages/dashboard/LiveStream.tsx";
 import History from "./pages/dashboard/History.tsx";
-import ModelSettings from "./pages/dashboard/ModelSettings.tsx";
-import ModelRegistry from "./pages/dashboard/ModelRegistry.tsx";
-import BenchmarkPage from "./pages/dashboard/Benchmark.tsx";
+import ModelsHub from "./pages/dashboard/ModelsHub.tsx";
+import SettingsHub from "./pages/dashboard/SettingsHub.tsx";
 import Metrics from "./pages/dashboard/Metrics.tsx";
 import Export from "./pages/dashboard/Export.tsx";
-import ApiKeys from "./pages/dashboard/ApiKeys.tsx";
-import ConfigEditor from "./pages/dashboard/ConfigEditor.tsx";
 import SceneGraphPage from "./pages/dashboard/SceneGraph.tsx";
 import MLOps from "./pages/dashboard/MLOps.tsx";
-import Credits from "./pages/dashboard/Credits.tsx";
 import AgentLoop from "./pages/dashboard/AgentLoop.tsx";
 import MemoryPage from "./pages/dashboard/Memory.tsx";
 import FleetDashboard from "./pages/dashboard/fleet/FleetDashboard.tsx";
@@ -49,6 +46,7 @@ import FleetAlerts from "./pages/dashboard/fleet/FleetAlerts.tsx";
 import Demo from "./pages/dashboard/Demo.tsx";
 import AgenticDemo from "./pages/dashboard/AgenticDemo.tsx";
 import Governance from "./pages/dashboard/Governance.tsx";
+import Profile from "./pages/dashboard/Profile.tsx";
 import Presentation from "./pages/Presentation.tsx";
 import LiveDemo from "./pages/LiveDemo.tsx";
 
@@ -56,6 +54,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -96,16 +95,16 @@ const App = () => (
               <Route path="inference" element={<Inference />} />
               <Route path="live" element={<LiveStream />} />
               <Route path="history" element={<History />} />
-              <Route path="settings" element={<ModelSettings />} />
-              <Route path="models" element={<ModelRegistry />} />
-              <Route path="benchmark" element={<BenchmarkPage />} />
+              <Route path="models" element={<ModelsHub />} />
+              <Route path="models/settings" element={<ModelsHub />} />
+              <Route path="models/benchmark" element={<ModelsHub />} />
               <Route path="metrics" element={<Metrics />} />
               <Route path="scene-graph" element={<SceneGraphPage />} />
               <Route path="export" element={<Export />} />
-              <Route path="api-keys" element={<ApiKeys />} />
-              <Route path="config" element={<ConfigEditor />} />
+              <Route path="settings" element={<SettingsHub />} />
+              <Route path="settings/api-keys" element={<SettingsHub />} />
+              <Route path="settings/credits" element={<SettingsHub />} />
               <Route path="mlops" element={<MLOps />} />
-              <Route path="credits" element={<Credits />} />
               <Route path="agent" element={<AgentLoop />} />
               <Route path="memory" element={<MemoryPage />} />
               <Route path="agentic" element={<AgenticDemo />} />
@@ -117,6 +116,7 @@ const App = () => (
               <Route path="fleet/maintenance" element={<MaintenancePage />} />
               <Route path="fleet/alerts" element={<FleetAlerts />} />
               <Route path="governance" element={<Governance />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Route>
 
@@ -126,6 +126,7 @@ const App = () => (
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

@@ -37,6 +37,18 @@ export const docsManifest = [
     ],
   },
   {
+    label: "Agent API",
+    sections: ["agent-api"],
+  },
+  {
+    label: "Governance API",
+    sections: ["governance-api"],
+  },
+  {
+    label: "MLOps API",
+    sections: ["mlops-api"],
+  },
+  {
     label: "Hosted API",
     sections: [
       "hosted-authentication",

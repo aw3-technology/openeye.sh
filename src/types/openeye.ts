@@ -68,6 +68,11 @@ export interface RuntimeConfig {
   vlm_model?: string;
   system_prompts?: Record<string, string>;
   hertz?: number;
+  confidence_threshold?: number;
+  danger_m?: number;
+  caution_m?: number;
+  iou_threshold?: number;
+  lighting_robustness?: boolean;
   [key: string]: unknown;
 }
 

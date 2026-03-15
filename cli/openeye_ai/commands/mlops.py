@@ -582,3 +582,386 @@ def mlops_feedback(
     except ValueError as e:
         rprint(f"[yellow]{e}[/yellow]")
         raise typer.Exit(code=1)
+
+
+# ── Approve / Reject Promotion ────────────────────────────────────────
+
+
+@mlops_app.command("approve")
+def mlops_approve(
+    model_key: str = typer.Argument(help="Model key"),
+    version: str = typer.Argument(help="Model version"),
+    approver: str = typer.Option("cli-user", "--approver", help="Approver name"),
+) -> None:
+    """Approve a pending model promotion."""
+    from openeye_ai.mlops.lifecycle import approve_promotion
+
+    try:
+        record = approve_promotion(model_key, version, approver)
+        rprint(f"[green]Promotion approved:[/green] {record.from_stage.value} -> {record.to_stage.value}")
+        rprint(f"  Approved by: {record.approver}")
+    except (KeyError, ValueError) as e:
+        rprint(f"[red]{e}[/red]")
+        raise typer.Exit(code=1)
+
+
+@mlops_app.command("reject")
+def mlops_reject(
+    model_key: str = typer.Argument(help="Model key"),
+    version: str = typer.Argument(help="Model version"),
+    approver: str = typer.Option("cli-user", "--approver", help="Reviewer name"),
+    reason: str = typer.Option("", "--reason", "-r", help="Rejection reason"),
+) -> None:
+    """Reject a pending model promotion."""
+    from openeye_ai.mlops.lifecycle import reject_promotion
+
+    try:
+        record = reject_promotion(model_key, version, approver, reason)
+        rprint(f"[yellow]Promotion rejected:[/yellow] {record.from_stage.value} -> {record.to_stage.value}")
+        if record.reason:
+            rprint(f"  Reason: {record.reason}")
+    except (KeyError, ValueError) as e:
+        rprint(f"[red]{e}[/red]")
+        raise typer.Exit(code=1)
+
+
+# ── Pipeline Management ───────────────────────────────────────────────
+
+
+@mlops_app.command("pipeline-create")
+def mlops_pipeline_create(
+    name: str = typer.Option(..., "--name", "-n", help="Pipeline name"),
+    model_key: str = typer.Option(..., "--model", "-m", help="Model key"),
+    training_script: str = typer.Option(..., "--script", help="Training script path"),
+    dataset_path: str = typer.Option("", "--dataset", "-d", help="Dataset path"),
+    schedule: Optional[str] = typer.Option(None, "--schedule", help="Cron schedule"),
+) -> None:
+    """Create a retraining pipeline."""
+    from openeye_ai.mlops.retraining import create_pipeline
+    from openeye_ai.mlops.schemas import RetrainingPipelineConfig
+
+    config = RetrainingPipelineConfig(
+        name=name,
+        model_key=model_key,
+        training_script=training_script,
+        dataset_path=dataset_path,
+        schedule_cron=schedule,
+        training_args={},
+        validation_tests=[],
+    )
+    pipeline = create_pipeline(config)
+    rprint(f"[green]Pipeline created:[/green] {pipeline.name}")
+    rprint(f"  Model: {pipeline.model_key} | Script: {pipeline.training_script}")
+
+
+@mlops_app.command("pipelines")
+def mlops_pipelines(
+    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+) -> None:
+    """List retraining pipelines."""
+    from openeye_ai.mlops.retraining import list_pipelines
+
+    pipelines = list_pipelines(model_key)
+    if not pipelines:
+        rprint("[dim]No retraining pipelines found.[/dim]")
+        return
+
+    table = Table(title="Retraining Pipelines")
+    table.add_column("Name", style="cyan")
+    table.add_column("Model")
+    table.add_column("Trigger")
+    table.add_column("Script")
+    table.add_column("Schedule")
+
+    for p in pipelines:
+        table.add_row(
+            p.name,
+            p.model_key,
+            p.trigger.value if hasattr(p.trigger, "value") else str(p.trigger),
+            p.training_script,
+            p.schedule_cron or "—",
+        )
+    console.print(table)
+
+
+@mlops_app.command("runs")
+def mlops_runs(
+    pipeline: Optional[str] = typer.Option(None, "--pipeline", "-p", help="Filter by pipeline name"),
+    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+) -> None:
+    """List retraining runs."""
+    from openeye_ai.mlops.retraining import list_runs
+
+    runs = list_runs(pipeline, model_key)
+    if not runs:
+        rprint("[dim]No retraining runs found.[/dim]")
+        return
+
+    table = Table(title="Retraining Runs")
+    table.add_column("ID", style="cyan", max_width=12)
+    table.add_column("Pipeline")
+    table.add_column("Model")
+    table.add_column("Status", style="magenta")
+    table.add_column("Triggered By")
+    table.add_column("New Version")
+    table.add_column("Started")
+
+    for r in runs:
+        status_style = {"completed": "green", "running": "yellow", "failed": "red"}.get(r.status.value, "")
+        table.add_row(
+            r.id[:12],
+            r.pipeline_name,
+            r.model_key,
+            f"[{status_style}]{r.status.value}[/{status_style}]" if status_style else r.status.value,
+            r.triggered_by,
+            r.new_version or "—",
+            r.started_at or "—",
+        )
+    console.print(table)
+
+
+@mlops_app.command("run-status")
+def mlops_run_status(
+    run_id: str = typer.Argument(help="Retraining run ID"),
+) -> None:
+    """Show details of a specific retraining run."""
+    from openeye_ai.mlops.retraining import get_run
+
+    try:
+        r = get_run(run_id)
+    except KeyError as e:
+        rprint(f"[red]{e}[/red]")
+        raise typer.Exit(code=1)
+
+    rprint(f"[bold]Run:[/bold] {r.id}")
+    rprint(f"  Pipeline: {r.pipeline_name} | Model: {r.model_key}")
+    rprint(f"  Status: {r.status.value} | Triggered by: {r.triggered_by}")
+    if r.new_version:
+        rprint(f"  New version: {r.new_version}")
+    if r.metrics:
+        rprint(f"  Accuracy: {r.metrics.accuracy:.1%}" if r.metrics.accuracy else "")
+    if r.logs:
+        rprint("[dim]Recent logs:[/dim]")
+        for log in r.logs[-5:]:
+            rprint(f"  [dim]{log[:200]}[/dim]")
+
+
+# ── Validation Test Management ────────────────────────────────────────
+
+
+@mlops_app.command("validation-create")
+def mlops_validation_create(
+    name: str = typer.Option(..., "--name", "-n", help="Test name"),
+    model_key: str = typer.Option(..., "--model", "-m", help="Model key"),
+    dataset: str = typer.Option(..., "--dataset", "-d", help="Test dataset path"),
+    conditions: str = typer.Option(..., "--conditions", "-c", help="Comma-separated conditions, e.g. 'accuracy > 0.95,latency_ms < 50'"),
+    description: str = typer.Option("", "--desc", help="Test description"),
+) -> None:
+    """Create a validation test definition."""
+    from openeye_ai.mlops.validation import create_validation_test
+
+    condition_list = [c.strip() for c in conditions.split(",")]
+    try:
+        test = create_validation_test(
+            name=name,
+            model_key=model_key,
+            test_dataset=dataset,
+            conditions=condition_list,
+            description=description,
+        )
+        rprint(f"[green]Validation test created:[/green] {test.id}")
+        rprint(f"  Name: {test.name} | Conditions: {len(condition_list)}")
+    except (ValueError, KeyError) as e:
+        rprint(f"[red]{e}[/red]")
+        raise typer.Exit(code=1)
+
+
+@mlops_app.command("validations")
+def mlops_validations(
+    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+) -> None:
+    """List validation test definitions."""
+    from openeye_ai.mlops.validation import list_validation_tests
+
+    tests = list_validation_tests(model_key)
+    if not tests:
+        rprint("[dim]No validation tests found.[/dim]")
+        return
+
+    table = Table(title="Validation Tests")
+    table.add_column("ID", style="cyan", max_width=12)
+    table.add_column("Name", style="bold")
+    table.add_column("Model")
+    table.add_column("Dataset")
+    table.add_column("Conditions")
+    table.add_column("Created")
+
+    for t in tests:
+        table.add_row(
+            t.id[:12],
+            t.name,
+            t.model_key,
+            t.test_dataset,
+            str(len(t.conditions)),
+            t.created_at[:10],
+        )
+    console.print(table)
+
+
+@mlops_app.command("validation-runs")
+def mlops_validation_runs(
+    test_id: Optional[str] = typer.Option(None, "--test", "-t", help="Filter by test ID"),
+    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+) -> None:
+    """List validation test runs."""
+    from openeye_ai.mlops.validation import list_validation_runs
+
+    runs = list_validation_runs(test_id, model_key)
+    if not runs:
+        rprint("[dim]No validation runs found.[/dim]")
+        return
+
+    table = Table(title="Validation Runs")
+    table.add_column("Test ID", max_width=12)
+    table.add_column("Model")
+    table.add_column("Version")
+    table.add_column("Passed")
+    table.add_column("Duration", justify="right")
+    table.add_column("Run At")
+
+    for r in runs:
+        passed_str = "[green]PASS[/green]" if r.passed else "[red]FAIL[/red]"
+        table.add_row(
+            r.test_id[:12],
+            r.model_key,
+            r.model_version,
+            passed_str,
+            f"{r.run_duration_seconds:.1f}s",
+            r.run_at[:16] if r.run_at else "—",
+        )
+    console.print(table)
+
+
+# ── Exports List ──────────────────────────────────────────────────────
+
+
+@mlops_app.command("exports")
+def mlops_exports(
+    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+) -> None:
+    """List previous model exports."""
+    from openeye_ai.mlops.export import list_exports
+
+    exports = list_exports(model_key)
+    if not exports:
+        rprint("[dim]No exports found.[/dim]")
+        return
+
+    table = Table(title="Model Exports")
+    table.add_column("Model", style="cyan")
+    table.add_column("Version")
+    table.add_column("Format")
+    table.add_column("Target", style="magenta")
+    table.add_column("Size", justify="right")
+    table.add_column("Quantized")
+    table.add_column("Duration", justify="right")
+    table.add_column("Output Path")
+
+    for e in exports:
+        table.add_row(
+            e.model_key,
+            e.model_version,
+            e.source_format.value,
+            e.target_format.value,
+            f"{e.output_size_mb:.1f} MB",
+            "[green]Yes[/green]" if e.quantized else "No",
+            f"{e.export_duration_seconds:.1f}s",
+            e.output_path,
+        )
+    console.print(table)
+
+
+# ── Annotations List ──────────────────────────────────────────────────
+
+
+@mlops_app.command("annotations")
+def mlops_annotations(
+    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    label: Optional[str] = typer.Option(None, "--label", "-l", help="Filter by annotation type"),
+    unfed_only: bool = typer.Option(False, "--unfed", help="Show only unfed annotations"),
+) -> None:
+    """List inference failure annotations."""
+    from openeye_ai.mlops.feedback import list_annotations
+
+    annotation_label = None
+    if label:
+        from openeye_ai.mlops.schemas import AnnotationLabel
+        try:
+            annotation_label = AnnotationLabel(label)
+        except ValueError:
+            rprint(f"[red]Invalid label '{label}'. Use: false_positive, false_negative, misclassification, wrong_bbox, low_confidence[/red]")
+            raise typer.Exit(code=1)
+
+    annotations = list_annotations(model_key, annotation_label, unfed_only)
+    if not annotations:
+        rprint("[dim]No annotations found.[/dim]")
+        return
+
+    table = Table(title="Failure Annotations")
+    table.add_column("ID", style="cyan", max_width=12)
+    table.add_column("Model")
+    table.add_column("Version")
+    table.add_column("Type", style="magenta")
+    table.add_column("Predicted")
+    table.add_column("Correct", style="green")
+    table.add_column("Fed")
+    table.add_column("Annotator")
+
+    for a in annotations:
+        table.add_row(
+            a.id[:12],
+            a.model_key,
+            a.model_version,
+            a.annotation_label.value if hasattr(a.annotation_label, "value") else str(a.annotation_label),
+            a.predicted_label or "—",
+            a.correct_label,
+            "[green]Yes[/green]" if a.fed_back else "[dim]No[/dim]",
+            a.annotator,
+        )
+    console.print(table)
+
+
+# ── Feedback Batches List ─────────────────────────────────────────────
+
+
+@mlops_app.command("feedback-batches")
+def mlops_feedback_batches(
+    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+) -> None:
+    """List feedback batch history."""
+    from openeye_ai.mlops.feedback import list_feedback_batches
+
+    batches = list_feedback_batches(model_key)
+    if not batches:
+        rprint("[dim]No feedback batches found.[/dim]")
+        return
+
+    table = Table(title="Feedback Batches")
+    table.add_column("ID", style="cyan", max_width=12)
+    table.add_column("Model")
+    table.add_column("Annotations", justify="right")
+    table.add_column("Status", style="magenta")
+    table.add_column("Output")
+    table.add_column("Created")
+
+    for b in batches:
+        status_style = {"completed": "green", "running": "yellow", "failed": "red"}.get(b.status.value, "")
+        table.add_row(
+            b.id[:12],
+            b.model_key,
+            str(b.total_annotations),
+            f"[{status_style}]{b.status.value}[/{status_style}]" if status_style else b.status.value,
+            b.output_dataset_path,
+            b.created_at[:10] if b.created_at else "—",
+        )
+    console.print(table)

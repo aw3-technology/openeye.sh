@@ -37,7 +37,7 @@ export function SafetyGuardianSection() {
           <div className="space-y-2">
             <div className="font-mono text-xs uppercase tracking-widest text-terminal-green">Fast Layer</div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              YOLOv8 runs every frame for real-time detection. Pure geometry — is a hand inside the danger zone? Low-latency halt with no LLM overhead.
+              YOLO26 or YOLOv8 runs every frame for real-time detection. Pure geometry — is a hand inside the danger zone? Low-latency halt with no LLM overhead.
             </p>
           </div>
           <div className="space-y-2">

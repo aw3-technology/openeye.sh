@@ -90,3 +90,24 @@ app.add_typer(mlops_app, name="mlops")
 from openeye_ai.commands.governance import govern_app
 
 app.add_typer(govern_app, name="govern")
+
+# ── Agent subcommands ────────────────────────────────────────────────
+
+from openeye_ai.commands.agent_cli import agent_app
+
+app.add_typer(agent_app, name="agent")
+
+# ── Hosted API subcommands ───────────────────────────────────────────
+
+from openeye_ai.commands.api_cli import api_app
+
+app.add_typer(api_app, name="api")
+
+# ── Server utility commands ──────────────────────────────────────────
+
+from openeye_ai.commands.server_cli import health, nebius_stats, server_config_get, server_config_set
+
+app.command("health")(health)
+app.command("nebius-stats")(nebius_stats)
+app.command("server-config-get")(server_config_get)
+app.command("server-config-set")(server_config_set)
