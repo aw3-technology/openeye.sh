@@ -1,12 +1,11 @@
-import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
-
 export function ArchitectureSection() {
   return (
     <section id="architecture" className="py-[15vh] px-4">
       <div className="container max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           <div>
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+              <span className="w-2 h-2 rotate-45 bg-oe-blue" />
               Architecture
             </div>
             <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
@@ -17,19 +16,19 @@ export function ArchitectureSection() {
             </p>
             <div className="space-y-3 font-mono text-sm text-muted-foreground">
               <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full bg-terminal-green" />
+                <span className="w-2 h-2 rotate-45 bg-oe-blue" />
                 Model-agnostic: YOLOv8, GroundingDINO, SAM2, Depth-Anything, SmolVLA
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full bg-terminal-green" />
+                <span className="w-2 h-2 rotate-45 bg-oe-blue" />
                 Hardware-agnostic: USB, RTSP, video files, simulated feeds
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full bg-terminal-green" />
+                <span className="w-2 h-2 rotate-45 bg-oe-green" />
                 Agent-ready: OpenClaw skills, shared visual context bus
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full bg-terminal-amber" />
+                <span className="w-2 h-2 rotate-45 bg-oe-red" />
                 Safety-first: anomaly detection, workspace monitoring, agent halt
               </div>
             </div>
@@ -40,3 +39,5 @@ export function ArchitectureSection() {
     </section>
   );
 }
+
+import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";

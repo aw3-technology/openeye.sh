@@ -12,14 +12,14 @@ export function CTASection() {
           Pull any vision model. Run it on any camera. Connect it to any robot. Start building with OpenEye today.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
-          <div className="font-mono text-sm bg-terminal-bg text-terminal-green px-4 py-2.5 rounded-inner border border-foreground/5">
+          <div className="font-mono text-sm bg-card text-oe-green px-4 py-2.5 rounded-inner border border-foreground/[0.06]">
             pip install openeye-ai
           </div>
           <a
             href="https://github.com/openeye-ai"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-sm bg-foreground text-background px-4 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98]"
+            className="font-mono text-sm bg-primary text-primary-foreground px-4 py-2.5 rounded-inner hover:bg-primary/90 transition-colors active:scale-[0.98]"
           >
             Star on GitHub →
           </a>

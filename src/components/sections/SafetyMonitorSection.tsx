@@ -6,8 +6,8 @@ const safetyTerminalLines = [
   { text: "[SAFETY] Monitoring workspace... baseline captured", color: "muted" as const },
   { text: "[SAFETY] ✓ Scene stable — 4 objects, 0 anomalies", color: "green" as const },
   { text: "", color: "default" as const },
-  { text: "[ANOMALY] ⚠ Human hand detected in robot workspace", color: "amber" as const },
-  { text: "[SAFETY] → Sending HALT to task agent via OpenClaw", color: "amber" as const },
+  { text: "[ANOMALY] ⚠ Human hand detected in robot workspace", color: "red" as const },
+  { text: "[SAFETY] → Sending HALT to task agent via OpenClaw", color: "red" as const },
   { text: "[AGENT] Task agent paused. Waiting for clearance...", color: "muted" as const },
   { text: "", color: "default" as const },
   { text: "[SAFETY] ✓ Hand withdrawn. Workspace clear.", color: "green" as const },
@@ -18,7 +18,8 @@ export function SafetyMonitorSection() {
   return (
     <section className="py-[15vh] px-4 bg-card">
       <div className="container max-w-6xl mx-auto">
-        <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+          <span className="w-2 h-2 rotate-45 bg-oe-red" />
           Safety Monitor
         </div>
         <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">

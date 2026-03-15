@@ -15,8 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Geist Sans", "system-ui", "sans-serif"],
-        mono: ["Geist Mono", "ui-monospace", "monospace"],
+        display: ["Inter", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -59,10 +59,17 @@ export default {
           amber: "hsl(var(--terminal-amber))",
           red: "hsl(var(--terminal-red))",
           muted: "hsl(var(--terminal-muted))",
+          blue: "hsl(var(--terminal-blue))",
         },
         vision: {
           glow: "hsl(var(--vision-glow))",
           border: "hsl(var(--vision-border))",
+        },
+        oe: {
+          blue: "hsl(var(--oe-blue))",
+          red: "hsl(var(--oe-red))",
+          black: "hsl(var(--oe-black))",
+          green: "hsl(var(--oe-green))",
         },
       },
       borderRadius: {
