@@ -73,7 +73,7 @@ describe("Navbar", () => {
 
     expect(html).toContain("Docs");
     expect(html).toContain("Pricing");
-    expect(html).toContain("Blog");
+    expect(html).toContain("Resources");
     expect(html).toContain("GitHub");
   });
 
