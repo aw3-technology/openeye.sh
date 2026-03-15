@@ -812,14 +812,13 @@ function CTASlide() {
 
       <div className="flex-1 flex flex-col items-center justify-center px-20 relative z-10">
         <motion.div
-          className="flex items-center gap-5 mb-10"
+          className="mb-10"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <PulsingDot color="bg-oe-blue" delay={0} />
-          <PulsingDot color="bg-oe-red" delay={0.3} />
-          <PulsingDot color="bg-foreground" delay={0.6} />
+          <img src={logoVerticalDark} alt="OpenEye" className="h-48 logo-dark" />
+          <img src={logoVertical} alt="OpenEye" className="h-48 logo-light" />
         </motion.div>
         <motion.h2
           className="text-[80px] font-semibold font-display leading-[1.05] text-center mb-10"
