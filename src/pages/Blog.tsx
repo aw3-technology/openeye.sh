@@ -96,6 +96,7 @@ export default function Blog() {
                   <span>{featured.readTime}</span>
                 </div>
               </div>
+              </div>
             </Link>
           </motion.div>
         </div>
