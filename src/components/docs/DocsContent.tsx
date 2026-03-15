@@ -26,10 +26,10 @@ function CopyButton({ text }: { text: string }) {
 
 function CodeBlock({ block }: { block: DocBlock }) {
   return (
-    <div className="bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden">
+    <div className="bg-card rounded-outer border overflow-hidden">
       {block.filename && (
-        <div className="flex items-center justify-between px-4 py-2 border-b border-foreground/5">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-terminal-muted">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             {block.filename}
           </span>
           <CopyButton text={block.content || ""} />
