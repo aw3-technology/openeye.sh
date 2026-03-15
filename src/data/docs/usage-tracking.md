@@ -2,21 +2,24 @@
 title: Usage Tracking
 ---
 
-Track your usage programmatically with the /v1/usage endpoint or visually on the Dashboard.
+### Server Logs
 
-### API Usage Endpoint
+When running `openeye serve`, the server logs each inference request with timing information to stdout.
+
+### Health Endpoint
+
+Check server status:
 
 ```bash
-curl "https://api.openeye.ai/v1/usage?days=30" \
-  -H "X-API-Key: oe_live_abc123"
+curl http://localhost:8000/health
 ```
 
-### Dashboard Analytics
+### CLI Benchmarks
 
-- Real-time credit balance display
-- Daily and weekly usage charts
-- Per-endpoint breakdown
-- Per-key usage tracking
-- Export usage data as CSV
+Use `openeye bench` to measure inference performance:
 
-> [!info] Usage logs are retained for 90 days. Export data from the Dashboard if you need longer retention.
+```bash
+openeye bench yolov8 --runs 20 --warmup 5
+```
+
+Reports mean, median, and p95 latency with FPS.

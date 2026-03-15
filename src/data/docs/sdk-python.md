@@ -2,16 +2,14 @@
 title: Python
 ---
 
-### Object Detection (requests)
+### Object Detection (self-hosted)
 
 ```python
 import requests
 
 resp = requests.post(
-    "https://api.openeye.ai/v1/detect",
-    headers={"X-API-Key": "oe_live_abc123"},
+    "http://localhost:8000/predict",
     files={"file": open("photo.jpg", "rb")},
-    data={"confidence": 0.3},
 )
 resp.raise_for_status()
 data = resp.json()
@@ -29,8 +27,7 @@ import asyncio
 async def detect(image_path: str):
     async with httpx.AsyncClient() as client:
         resp = await client.post(
-            "https://api.openeye.ai/v1/detect",
-            headers={"X-API-Key": "oe_live_abc123"},
+            "http://localhost:8000/predict",
             files={"file": open(image_path, "rb")},
         )
         resp.raise_for_status()
@@ -40,17 +37,13 @@ result = asyncio.run(detect("photo.jpg"))
 print(f'Found {len(result["objects"])} objects')
 ```
 
-### WebSocket Streaming (websockets)
+### WebSocket Streaming
 
 ```python
 import asyncio, base64, json, websockets
 
 async def stream():
-    async with websockets.connect("wss://api.openeye.ai/v1/stream") as ws:
-        await ws.send(json.dumps({"api_key": "oe_live_abc123"}))
-        auth = json.loads(await ws.recv())
-        print(auth)  # {"status": "authenticated"}
-
+    async with websockets.connect("ws://localhost:8000/ws") as ws:
         with open("frame.jpg", "rb") as f:
             await ws.send(base64.b64encode(f.read()).decode())
         print(json.loads(await ws.recv()))

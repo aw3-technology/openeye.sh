@@ -11,18 +11,9 @@ import json
 import websockets
 
 async def stream_camera():
-    uri = "wss://api.openeye.ai/v1/stream"
+    uri = "ws://localhost:8000/ws"
     async with websockets.connect(uri) as ws:
-        # Authenticate
-        await ws.send(json.dumps({"api_key": "oe_live_abc123"}))
-        auth = json.loads(await ws.recv())
-        assert auth["status"] == "authenticated"
-
-        # Configure
-        await ws.send(json.dumps({"model": "yolov8", "confidence": 0.3}))
-        await ws.recv()  # configured ack
-
-        # Send frames
+        # Send a frame
         with open("frame.jpg", "rb") as f:
             frame_b64 = base64.b64encode(f.read()).decode()
         await ws.send(frame_b64)
@@ -35,18 +26,15 @@ asyncio.run(stream_camera())
 ### JavaScript (Browser)
 
 ```javascript
-const ws = new WebSocket("wss://api.openeye.ai/v1/stream");
+const ws = new WebSocket("ws://localhost:8000/ws");
 
 ws.onopen = () => {
-  ws.send(JSON.stringify({ api_key: "oe_live_abc123" }));
+  console.log("Connected — send base64 frames");
 };
 
 ws.onmessage = (event) => {
   const msg = JSON.parse(event.data);
-  if (msg.status === "authenticated") {
-    // Send config then frames
-    ws.send(JSON.stringify({ model: "yolov8" }));
-  } else if (msg.objects) {
+  if (msg.objects) {
     console.log("Detected:", msg.objects.length, "objects");
   }
 };
