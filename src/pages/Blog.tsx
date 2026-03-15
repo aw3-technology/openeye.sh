@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { blogPosts, formatDate } from "@/data/blogPosts";
 import { categoryColors } from "@/data/categoryColors";
+import { blogHeroImages } from "@/data/blogHeroImages";
 
 export default function Blog() {
   useEffect(() => {
