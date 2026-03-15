@@ -1,10 +1,12 @@
 import logoVertical from "@/assets/openeye-logo-vertical.png";
+import logoVerticalDark from "@/assets/openeye-logo-vertical-dark.png";
 
 export function FinalCTA() {
   return (
     <section className="py-[15vh] px-4 border-t border-foreground/[0.06]">
       <div className="container max-w-6xl mx-auto text-center">
-        <img src={logoVertical} alt="OpenEye" className="h-24 mx-auto mb-8" />
+        <img src={logoVerticalDark} alt="OpenEye" className="h-24 mx-auto mb-8 logo-dark" />
+        <img src={logoVertical} alt="OpenEye" className="h-24 mx-auto mb-8 logo-light" />
         <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
           The perception layer is open.
         </h2>
