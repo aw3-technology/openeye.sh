@@ -1,17 +1,15 @@
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { blogPosts, formatDate } from "@/data/blogPosts";
 import { categoryColors } from "@/data/categoryColors";
 import { blogHeroImages } from "@/data/blogHeroImages";
+import { ease } from "@/lib/motion";
 
 export default function Blog() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.title = "Blog | OpenEye";
-  }, []);
+  usePageMeta("Blog");
 
   if (blogPosts.length === 0) {
     return (
@@ -37,7 +35,7 @@ export default function Blog() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: 0.3, ease }}
           >
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
               Blog
@@ -58,7 +56,7 @@ export default function Blog() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: 0.3, delay: 0.1, ease }}
           >
             <Link
               to={`/blog/${featured.slug}`}
@@ -114,7 +112,7 @@ export default function Blog() {
                 transition={{
                   duration: 0.3,
                   delay: Math.min(0.15 + i * 0.04, 0.5),
-                  ease: [0.2, 0.8, 0.2, 1],
+                  ease,
                 }}
               >
                 <Link

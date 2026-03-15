@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { pricingTiers, pricingFaq, type PricingPlanTier } from "@/data/pricingData";
@@ -86,10 +86,7 @@ function PricingCard({ tier }: { tier: PricingPlanTier }) {
 }
 
 export default function Pricing() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.title = "Pricing | OpenEye";
-  }, []);
+  usePageMeta("Pricing");
 
   return (
     <div className="min-h-screen bg-background">

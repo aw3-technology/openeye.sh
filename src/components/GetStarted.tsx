@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ease } from "@/lib/motion";
 
 const steps = [
   {
@@ -35,7 +36,7 @@ export function GetStarted() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ duration: 0.3, ease }}
         >
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
             Getting Started
@@ -55,7 +56,7 @@ export function GetStarted() {
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.05, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+              transition={{ delay: i * 0.05, duration: 0.2, ease }}
               className="bg-background border border-foreground/[0.06] rounded-outer p-5"
             >
               <div className="flex items-start gap-4">
@@ -81,7 +82,7 @@ export function GetStarted() {
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.2, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ delay: 0.2, duration: 0.2, ease }}
           className="mt-8 border border-terminal-amber/20 rounded-outer p-5 bg-terminal-amber/[0.03]"
         >
           <div className="flex items-start gap-4">
@@ -100,11 +101,35 @@ export function GetStarted() {
           </div>
         </motion.div>
 
+        {/* Docker alternative */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.25, duration: 0.2, ease }}
+          className="mt-4 border border-foreground/[0.06] rounded-outer p-5 bg-background"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-inner bg-terminal-green/10 border border-terminal-green/20 flex items-center justify-center flex-shrink-0">
+              <span className="font-mono text-sm text-terminal-green font-medium">D</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-display text-base font-medium mb-2">Prefer Docker?</h3>
+              <div className="font-mono text-xs sm:text-sm bg-secondary text-oe-green px-3 py-2 rounded-inner border mb-3 overflow-x-auto whitespace-nowrap">
+                $ docker run -p 8000:8000 ghcr.io/openeye-ai/openeye serve yolov8
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                One command. Pre-built image with model weights, health checks, and GPU support. Fits into any CI/CD pipeline or DevOps workflow.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.3, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ delay: 0.3, duration: 0.2, ease }}
           className="mt-10 text-center"
         >
           <div className="inline-flex flex-wrap gap-3">

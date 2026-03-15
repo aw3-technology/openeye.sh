@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { ease } from "@/lib/motion";
 
-const ease = [0.2, 0.8, 0.2, 1] as const;
 
 export function CtaSection() {
   return (
@@ -31,7 +31,7 @@ export function CtaSection() {
               pip install openeye-ai
             </div>
             <a
-              href="https://github.com/openeye-ai"
+              href="https://github.com/aw3-technology/openeye.sh"
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-sm text-muted-foreground px-4 py-2.5 rounded-inner border border-foreground/[0.06] hover:text-foreground hover:border-foreground/10 transition-colors active:scale-[0.98]"

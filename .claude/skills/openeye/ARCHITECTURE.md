@@ -75,8 +75,11 @@ Base class: `Sensor[ConfigType, RawType]`
 
 | Plugin | Type String | Purpose |
 |--------|-------------|---------|
-| `VLMOpenAI` | `VLMOpenAI` | Cloud vision via OpenAI GPT-4o-mini |
+| `VLMOpenAI` | `VLMOpenAI` | Cloud vision via OpenAI GPT-4o |
+| `VLMNebius` | `VLMNebius` | Nebius Token Factory VLM |
 | `VLMGemini` | `VLMGemini` | Google Gemini vision |
+| `VLMAnthropic` | `VLMAnthropic` | Anthropic Claude vision |
+| `VLMOpenRouter` | `VLMOpenRouter` | OpenRouter API (multi-provider) |
 | `VLMLocalYOLO` | `VLMLocalYOLO` | Local YOLO v8 detection |
 | `VLMVideoFile` | `VLMVideoFile` | Video file input |
 | `PerceptionPipeline` | `PerceptionPipeline` | Unified perception output |
@@ -94,6 +97,8 @@ Base class: `ActionConnector[ConfigType, OutputType]`
 | Plugin | Name | Purpose |
 |--------|------|---------|
 | `log_action` | `log` | Log to console |
+| `robot_control` | `robot_control` | Robot control interface + Solo connector |
+| `safety_search` | `safety_search` | Safety-aware search (Tavily integration) |
 
 Key methods:
 - `async connect(output_interface)` — Execute action

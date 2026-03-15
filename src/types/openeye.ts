@@ -223,6 +223,118 @@ export interface VLMReasoning {
   latency_ms: number;
 }
 
+// --- Visual Debugger types ---
+
+export interface UIIssue {
+  type: string; // layout|accessibility|typography|visual|responsive|state
+  severity: string; // critical|warning|info
+  description: string;
+  bbox: BBox;
+  suggestion: string;
+  wcag_criterion?: string | null;
+}
+
+export interface DebugAnalysis {
+  issues: UIIssue[];
+  summary: string;
+  overall_score: number;
+  categories: Record<string, number>;
+  analysis_ms: number;
+  model: string;
+}
+
+export interface DiffChange {
+  type: string; // regression|intentional|ambiguous
+  severity: string;
+  description: string;
+  bbox: BBox;
+  suggestion: string;
+}
+
+export interface DiffResult {
+  changes: DiffChange[];
+  regression_detected: boolean;
+  summary: string;
+  pixel_diff_pct: number;
+  ssim: number;
+  analysis_ms: number;
+  model: string;
+}
+
+// --- Desktop Vision types ---
+
+export type UIElementType =
+  | "button"
+  | "input"
+  | "menu"
+  | "menu_item"
+  | "tab"
+  | "link"
+  | "checkbox"
+  | "radio"
+  | "dropdown"
+  | "icon"
+  | "text"
+  | "image"
+  | "window"
+  | "toolbar"
+  | "scrollbar"
+  | "dialog"
+  | "tooltip"
+  | "other";
+
+export type UIElementState =
+  | "enabled"
+  | "disabled"
+  | "focused"
+  | "selected"
+  | "hovered"
+  | "checked"
+  | "unchecked"
+  | "expanded"
+  | "collapsed";
+
+export interface UIElement {
+  type: UIElementType;
+  text: string;
+  bbox_pct: BBox;
+  state: UIElementState;
+  confidence: number;
+}
+
+export interface DesktopActiveWindow {
+  title: string;
+  application: string;
+}
+
+export interface DesktopTextRegion {
+  region_name: string;
+  text: string;
+  bbox_pct?: BBox | null;
+}
+
+export interface DesktopPerceptionResult {
+  type: "desktop_frame" | "desktop_find";
+  frame_id: number;
+  detections: DetectedObject[];
+  active_window: DesktopActiveWindow;
+  ui_elements: UIElement[];
+  text_regions: DesktopTextRegion[];
+  focused_element: UIElement | null;
+  layout_description: string;
+  latency: {
+    detection_ms: number;
+    vlm_ms: number;
+    total_ms: number;
+  };
+  // Find-specific fields
+  found?: boolean;
+  query?: string;
+  alternatives?: UIElement[];
+}
+
+// --- Recording types ---
+
 export interface RecordedFrame {
   timestamp: number;
   frame_base64: string;

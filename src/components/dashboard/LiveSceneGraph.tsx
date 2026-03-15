@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import type { DetectedObject } from "@/types/openeye";
+import { ease } from "@/lib/motion";
 
 interface Node {
   label: string;
@@ -52,7 +53,7 @@ function TreeNode({ node, depth = 0, index = 0 }: { node: Node; depth?: number; 
     <motion.div
       initial={{ opacity: 0, x: -6 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.03, duration: 0.15, ease: [0.2, 0.8, 0.2, 1] }}
+      transition={{ delay: index * 0.03, duration: 0.15, ease }}
       className="font-mono text-sm"
       style={{ paddingLeft: depth * 20 }}
     >

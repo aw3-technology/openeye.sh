@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { Github, Linkedin } from "lucide-react";
 import { team } from "@/data/aboutData";
+import { ease } from "@/lib/motion";
 
-const ease = [0.2, 0.8, 0.2, 1] as const;
 
 export function TeamSection() {
   return (
@@ -82,7 +82,7 @@ export function TeamSection() {
 
           {/* Contributor CTA Card */}
           <motion.a
-            href="https://github.com/openeye-ai"
+            href="https://github.com/aw3-technology/openeye.sh"
             target="_blank"
             rel="noopener noreferrer"
             initial={{ opacity: 0, y: 16 }}

@@ -1,7 +1,8 @@
-import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { ease } from "@/lib/motion";
 
 const channels = [
   {
@@ -16,7 +17,7 @@ const channels = [
     label: "GitHub Discussions",
     description:
       "Long-form conversations, RFCs, and feature requests. The best place for async technical discussion.",
-    href: "https://github.com/openeye-ai/openeye/discussions",
+    href: "https://github.com/aw3-technology/openeye.sh/discussions",
     cta: "Open Discussions",
     mono: "github.com/.../discussions",
   },
@@ -52,10 +53,7 @@ const contributeSteps = [
 ];
 
 export default function Community() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.title = "Community | OpenEye";
-  }, []);
+  usePageMeta("Community");
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,7 +65,7 @@ export default function Community() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: 0.3, ease }}
           >
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
               Community
@@ -100,7 +98,7 @@ export default function Community() {
                 transition={{
                   duration: 0.3,
                   delay: 0.1 + i * 0.05,
-                  ease: [0.2, 0.8, 0.2, 1],
+                  ease,
                 }}
               >
                 <div className="border border-foreground/[0.06] rounded-outer p-6 h-full bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-colors flex flex-col">
@@ -129,7 +127,7 @@ export default function Community() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: 0.3, delay: 0.2, ease }}
           >
             <div className="border border-foreground/[0.06] rounded-outer p-8 md:p-12 bg-foreground/[0.02]">
               <div className="font-mono text-[10px] uppercase tracking-widest text-terminal-green mb-4">
@@ -190,7 +188,7 @@ export default function Community() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.25, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: 0.3, delay: 0.25, ease }}
           >
             <div className="border border-foreground/[0.06] rounded-outer p-8 md:p-12 bg-foreground/[0.02]">
               <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-4">
@@ -203,7 +201,7 @@ export default function Community() {
                 We welcome contributions of all sizes — from typo fixes to major
                 features. Check out the{" "}
                 <a
-                  href="https://github.com/openeye-ai/openeye/blob/main/CONTRIBUTING.md"
+                  href="https://github.com/aw3-technology/openeye.sh/blob/main/CONTRIBUTING.md"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-foreground hover:text-terminal-green transition-colors underline underline-offset-4 decoration-foreground/20 rounded-sm focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
@@ -239,11 +237,11 @@ export default function Community() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: 0.3, delay: 0.3, ease }}
             className="text-center"
           >
             <a
-              href="https://github.com/openeye-ai/openeye"
+              href="https://github.com/aw3-technology/openeye.sh"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-foreground text-background px-6 py-3 rounded-inner font-mono text-xs uppercase tracking-widest hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"

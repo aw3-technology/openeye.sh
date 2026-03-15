@@ -1,4 +1,4 @@
-import { OpenEyeStreamProvider, useOpenEyeStream } from "@/hooks/useOpenEyeStream";
+import { useOpenEyeStream } from "@/hooks/useOpenEyeStream";
 import { LiveCameraFeed } from "@/components/dashboard/LiveCameraFeed";
 import { AgenticLoop } from "@/components/dashboard/AgenticLoop";
 import { Button } from "@/components/ui/button";
@@ -80,9 +80,5 @@ function AgenticDemoInner() {
 }
 
 export default function AgenticDemo() {
-  return (
-    <OpenEyeStreamProvider>
-      <AgenticDemoInner />
-    </OpenEyeStreamProvider>
-  );
+  return <AgenticDemoInner />;
 }

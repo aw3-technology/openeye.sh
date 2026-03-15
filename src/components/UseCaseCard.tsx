@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { UseCase } from "@/data/useCasesData";
+import { ease } from "@/lib/motion";
 
-const ease = [0.2, 0.8, 0.2, 1] as const;
 
 interface UseCaseSectionProps {
   uc: UseCase;

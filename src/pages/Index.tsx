@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { TechEcosystem } from "@/components/TechEcosystem";
@@ -17,9 +17,7 @@ import { BuiltWithSection } from "@/components/BuiltWithSection";
 import { FinalCTA } from "@/components/FinalCTA";
 
 export default function Index() {
-  useEffect(() => {
-    document.title = "OpenEye | Open-Source Perception Engine";
-  }, []);
+  usePageMeta("OpenEye | Open-Source Perception Engine", [], false);
 
   return (
     <div className="min-h-screen bg-background">

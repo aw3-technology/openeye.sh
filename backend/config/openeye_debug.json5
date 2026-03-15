@@ -1,0 +1,54 @@
+{
+  // OpenEye Visual Debugger config — UI analysis via VLM
+  version: "v1.0.0",
+
+  default_mode: "debug",
+  allow_manual_switching: false,
+  mode_memory_enabled: false,
+
+  api_key: "${NEBIUS_API_KEY}",
+  system_governance: "",
+
+  cortex_llm: {
+    type: "NebiusLLM",
+    config: {
+      agent_name: "OpenEye-Debug",
+      history_length: 5,
+      model: "Qwen/Qwen3-VL-72B",
+    },
+  },
+
+  modes: {
+    debug: {
+      display_name: "Visual Debugger",
+      description: "UI screenshot analysis, live watch, and visual regression diffing via VLM",
+      system_prompt_base: "You are OpenEye Visual Debugger, a UI/UX analysis engine. Analyze application screenshots for layout issues, accessibility problems, visual regressions, and state errors. Return structured JSON with issues, severity, and fix suggestions.",
+      // 0.2 Hz = 1 frame every 5 seconds (for live watch mode)
+      hertz: 0.2,
+
+      agent_inputs: [
+        {
+          type: "VLMNebius",
+          config: {
+            base_url: "https://api.tokenfactory.nebius.com/v1/",
+            model: "Qwen/Qwen3-VL-72B",
+            // No camera — frames come from screenshots or browser capture
+            camera_index: -1,
+          },
+        },
+      ],
+
+      simulators: [],
+
+      agent_actions: [
+        {
+          name: "report_issue",
+          llm_label: "report",
+          connector: "log",
+        },
+      ],
+    },
+  },
+
+  transition_rules: [],
+}

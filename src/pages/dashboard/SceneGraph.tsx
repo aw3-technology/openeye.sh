@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { OpenEyeStreamProvider, useOpenEyeStream } from "@/hooks/useOpenEyeStream";
+import { useOpenEyeStream } from "@/hooks/useOpenEyeStream";
 import { LiveSceneGraph } from "@/components/dashboard/LiveSceneGraph";
 import { useInferenceHistory } from "@/hooks/useOpenEyeQueries";
 import { Button } from "@/components/ui/button";
@@ -100,9 +100,5 @@ function SceneGraphInner() {
 }
 
 export default function SceneGraphPage() {
-  return (
-    <OpenEyeStreamProvider>
-      <SceneGraphInner />
-    </OpenEyeStreamProvider>
-  );
+  return <SceneGraphInner />;
 }

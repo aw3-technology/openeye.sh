@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EcosystemCard } from "@/components/EcosystemCard";
+import { ease } from "@/lib/motion";
 
 interface Project {
   name: string;
@@ -15,6 +16,7 @@ const categories = [
   "Real-Time Detection",
   "Segmentation",
   "VLMs",
+  "Agentic Reasoning",
   "Detection Frameworks",
   "3D Vision",
   "Annotation & Labeling",
@@ -37,11 +39,19 @@ const projects: Project[] = [
   { name: "Mask2Former", creator: "Meta AI", description: "Unified architecture for panoptic, instance, and semantic segmentation", category: "Segmentation" },
 
   // VLMs
-  { name: "Qwen2.5-VL", creator: "Alibaba Qwen", description: "Multimodal vision-language model with native visual grounding", category: "VLMs" },
+  { name: "Qwen2.5-VL", creator: "Alibaba Qwen", description: "Multimodal vision-language model with native visual grounding and dynamic resolution", category: "VLMs", integrated: true },
   { name: "LLaVA-NeXT", creator: "UW / Microsoft", description: "Improved visual instruction tuning with dynamic high-res support", category: "VLMs" },
-  { name: "InternVL 2.5", creator: "Shanghai AI Lab", description: "Open-source multimodal model with strong visual reasoning", category: "VLMs" },
+  { name: "InternVL 2.5", creator: "Shanghai AI Lab", description: "Open-source multimodal model with strong visual understanding", category: "VLMs" },
   { name: "CogVLM2", creator: "Tsinghua / Zhipu", description: "Visual expert architecture for deep image understanding", category: "VLMs" },
   { name: "Phi-3 Vision", creator: "Microsoft", description: "Compact multimodal model optimized for on-device inference", category: "VLMs" },
+  { name: "Llama 3.2 Vision", creator: "Meta AI", description: "Multimodal model with on-device and server variants for vision-language reasoning", category: "VLMs", integrated: true },
+  { name: "Pixtral 12B", creator: "Mistral AI", description: "Natively multimodal model with variable-resolution image encoding via OpenRouter", category: "VLMs", integrated: true },
+  { name: "DeepSeek-VL2", creator: "DeepSeek", description: "Mixture-of-experts vision-language model with strong reasoning via OpenRouter", category: "VLMs", integrated: true },
+
+  // Agentic Reasoning
+  { name: "GLM-4", creator: "Zhipu AI", description: "Agent-optimized language model with long-context multi-step planning", category: "Agentic Reasoning", integrated: true },
+  { name: "Llama 3.1 70B", creator: "Meta AI", description: "Open-weight model with 128K context for long-context reasoning and task planning", category: "Agentic Reasoning", integrated: true },
+  { name: "Nemotron 70B", creator: "NVIDIA", description: "Instruction-tuned model optimized for agentic reasoning and tool use", category: "Agentic Reasoning", integrated: true },
 
   // Detection Frameworks
   { name: "Grounding DINO", creator: "IDEA Research", description: "Open-set object detection with language-guided text prompts", category: "Detection Frameworks", integrated: true },
@@ -88,7 +98,7 @@ export function TechEcosystem() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ duration: 0.3, ease }}
         >
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
             Technology Ecosystem
@@ -165,7 +175,7 @@ export function TechEcosystem() {
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.2, delay: 0.1, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ duration: 0.2, delay: 0.1, ease }}
           className="mt-12 flex flex-wrap justify-center gap-8 font-mono text-sm text-muted-foreground"
         >
           <div className="flex items-center gap-2">

@@ -1,19 +1,16 @@
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ShieldCheck, Zap, Eye, Cog } from "lucide-react";
 import { useCases } from "@/data/useCasesData";
 import { UseCaseSection } from "@/components/UseCaseCard";
+import { ease } from "@/lib/motion";
 
-const ease = [0.2, 0.8, 0.2, 1] as const;
 
 export default function UseCases() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.title = "Use Cases | OpenEye";
-  }, []);
+  usePageMeta("Use Cases");
 
   return (
     <div className="min-h-screen bg-background">
@@ -168,7 +165,7 @@ export default function UseCases() {
                 pip install openeye-ai
               </div>
               <a
-                href="https://github.com/openeye-ai"
+                href="https://github.com/aw3-technology/openeye.sh"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono text-sm text-muted-foreground px-4 py-2.5 rounded-inner border border-foreground/[0.06] hover:text-foreground hover:border-foreground/10 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"

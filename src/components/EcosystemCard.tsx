@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ease } from "@/lib/motion";
 
 interface EcosystemCardProps {
   name: string;
@@ -13,7 +14,7 @@ export function EcosystemCard({ name, creator, description, integrated }: Ecosys
       initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+      transition={{ duration: 0.2, ease }}
       className="bg-card border rounded-inner p-3 flex flex-col gap-1"
     >
       <div className="flex items-center gap-2 min-w-0">

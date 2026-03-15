@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { ease } from "@/lib/motion";
 
 type Language = "python" | "http" | "ros";
 
@@ -44,6 +45,12 @@ openeye serve yolov8 --port 8000
 curl -X POST http://localhost:8000/predict \\
   -F "file=@workspace.jpg" | jq
 
+# Self-host today — same API, your hardware:
+openeye serve yolov8 --port 8000
+
+curl -X POST http://localhost:8000/predict \\
+  -F "file=@workspace.jpg" | jq
+
 # Response:
 # {
 #   "model": "yolov8",
@@ -51,6 +58,7 @@ curl -X POST http://localhost:8000/predict \\
 #     { "label": "cup", "confidence": 0.94,
 #       "bbox": { "x1": 0.46, "y1": 0.52, "x2": 0.50, "y2": 0.63 } }
 #   ],
+#   "image": { "width": 1280, "height": 720 },
 #   "inference_ms": 14.2
 # }
 
@@ -148,7 +156,7 @@ export function CodeExamples() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ duration: 0.3, ease }}
         >
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
             Integrations

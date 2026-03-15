@@ -1,14 +1,16 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
 const NotFound = () => {
   const location = useLocation();
 
+  usePageMeta("404", [location.pathname], false);
+
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-    document.title = "404 | OpenEye";
   }, [location.pathname]);
 
   return (

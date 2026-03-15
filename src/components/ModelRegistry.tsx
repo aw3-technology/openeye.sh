@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ease } from "@/lib/motion";
 
 interface Model {
   name: string;
@@ -43,7 +44,7 @@ export function ModelRegistry() {
             initial={{ opacity: 0, x: -6 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: i * 0.05, duration: 0.15, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ delay: i * 0.05, duration: 0.15, ease }}
             className="flex items-center justify-between font-mono text-sm py-1.5"
           >
             <div className="flex items-center gap-3">

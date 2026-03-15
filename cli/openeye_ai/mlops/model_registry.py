@@ -9,7 +9,7 @@ from __future__ import annotations
 import hashlib
 import shutil
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import logging
 
@@ -29,7 +29,6 @@ logger = logging.getLogger(__name__)
 
 _ENTERPRISE_REGISTRY_PATH = OPENEYE_HOME / "registry.yaml"
 
-
 def _load_enterprise_registry() -> dict[str, Any]:
     """Load the enterprise registry YAML with error recovery."""
     data = safe_load_yaml(
@@ -42,11 +41,9 @@ def _load_enterprise_registry() -> dict[str, Any]:
         data["models"] = {}
     return data
 
-
 def _save_enterprise_registry(data: dict[str, Any]) -> None:
     """Persist the enterprise registry atomically."""
     atomic_save_yaml(_ENTERPRISE_REGISTRY_PATH, data)
-
 
 def _compute_checksum(file_path: Path) -> str:
     """Compute SHA-256 checksum of a file."""
@@ -55,7 +52,6 @@ def _compute_checksum(file_path: Path) -> str:
         for chunk in iter(lambda: f.read(8192), b""):
             sha.update(chunk)
     return sha.hexdigest()
-
 
 def list_registered_models() -> list[ModelRegistryEntry]:
     """List all models in the enterprise registry.
@@ -74,7 +70,6 @@ def list_registered_models() -> list[ModelRegistryEntry]:
             logger.warning("Skipping corrupt registry entry '%s': %s", key, e)
     return entries
 
-
 def get_registered_model(key: str) -> ModelRegistryEntry:
     """Get a single model from the enterprise registry."""
     data = _load_enterprise_registry()
@@ -83,7 +78,6 @@ def get_registered_model(key: str) -> ModelRegistryEntry:
         raise KeyError(f"Model '{key}' not in enterprise registry. Available: {available}")
     raw = data["models"][key]
     return ModelRegistryEntry(key=key, **raw)
-
 
 def upload_and_register(request: ModelUploadRequest) -> ModelVersion:
     """Upload a custom model file and register it (story 181).
@@ -151,7 +145,6 @@ def upload_and_register(request: ModelUploadRequest) -> ModelVersion:
 
     return version
 
-
 def add_version(
     model_key: str,
     *,
@@ -161,8 +154,8 @@ def add_version(
     author: str = "",
     changelog: str = "",
     training_dataset: str = "",
-    training_metrics: Optional[dict[str, Any]] = None,
-    hyperparameters: Optional[dict[str, Any]] = None,
+    training_metrics: dict[str, Any] | None = None,
+    hyperparameters: dict[str, Any] | None = None,
     code_commit: str = "",
 ) -> ModelVersion:
     """Add a new version to an existing model (story 182).
@@ -216,7 +209,6 @@ def add_version(
 
     return new_version
 
-
 def get_version(model_key: str, version: str) -> ModelVersion:
     """Get a specific version of a model."""
     entry = get_registered_model(model_key)
@@ -225,7 +217,6 @@ def get_version(model_key: str, version: str) -> ModelVersion:
             return v
     available = [v.version for v in entry.versions]
     raise KeyError(f"Version '{version}' not found. Available: {available}")
-
 
 def list_versions(model_key: str) -> list[ModelVersion]:
     """List all versions of a model."""

@@ -13,23 +13,37 @@ pip install openeye-ai
 
 ## Optional Dependencies
 
-Install extras for specific model backends:
+Install extras for specific model backends and features:
 
 ```bash
-# YOLO object detection
-pip install "openeye-ai[yolo]"
+# Object detection
+pip install "openeye-ai[yolo]"         # YOLOv8 (ultralytics)
+pip install "openeye-ai[grounding]"    # Grounding DINO (open-vocabulary)
+pip install "openeye-ai[rfdetr]"       # RF-DETR detection
 
-# Depth estimation
-pip install "openeye-ai[depth]"
+# Depth & segmentation
+pip install "openeye-ai[depth]"        # Depth Anything V2
+pip install "openeye-ai[sam]"          # Segment Anything 2
 
-# Grounding DINO (open-vocabulary detection)
-pip install "openeye-ai[grounding]"
+# Robotics
+pip install "openeye-ai[smolvla]"      # SmolVLA (lerobot)
+pip install "openeye-ai[robotics]"     # gRPC + MQTT for robot integration
 
-# Everything
+# Model runtimes
+pip install "openeye-ai[onnx]"         # ONNX Runtime (CPU)
+pip install "openeye-ai[onnx-gpu]"     # ONNX Runtime (GPU)
+pip install "openeye-ai[tensorrt]"     # TensorRT
+
+# Camera & desktop
+pip install "openeye-ai[camera]"       # OpenCV for camera
+pip install "openeye-ai[desktop]"      # Screen capture (mss)
+
+# Tools
+pip install "openeye-ai[mcp]"          # MCP server for desktop vision
+pip install "openeye-ai[debug]"        # Debugging tools (playwright, scikit-image)
+
+# Everything (YOLO + depth + grounding + OpenCV)
 pip install "openeye-ai[all]"
-
-# Camera support (OpenCV)
-pip install "openeye-ai[camera]"
 ```
 
 ## Platform Notes

@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Optional
 
 from openeye_ai.config import MODELS_DIR, OPENEYE_HOME
 
@@ -16,14 +15,11 @@ from .schemas import ExportFormat, ExportRequest, ExportResult, ModelFormat
 
 _EXPORTS_PATH = OPENEYE_HOME / "model_exports.yaml"
 
-
 def _load_exports() -> list[dict]:
     return safe_load_yaml_list(_EXPORTS_PATH)
 
-
 def _save_exports(exports: list[dict]) -> None:
     atomic_save_yaml(_EXPORTS_PATH, exports)
-
 
 def _detect_source_format(model_path: Path) -> ModelFormat:
     """Detect the model format from the file extension."""
@@ -41,7 +37,6 @@ def _detect_source_format(model_path: Path) -> ModelFormat:
     if fmt is None:
         raise ValueError(f"Unrecognized model file extension '{ext}'. Supported: {list(mapping.keys())}")
     return fmt
-
 
 def _find_model_file(model_key: str, model_version: str) -> Path:
     """Find the model file for a given key and version."""
@@ -65,13 +60,12 @@ def _find_model_file(model_key: str, model_version: str) -> Path:
 
     raise FileNotFoundError(f"No model file found for {model_key} v{model_version}")
 
-
 def export_to_onnx(
     model_path: Path,
     output_path: Path,
     *,
     opset_version: int = 17,
-    input_shape: Optional[list[int]] = None,
+    input_shape: list[int] | None = None,
     quantize: bool = False,
 ) -> Path:
     """Export a PyTorch/SafeTensors model to ONNX format."""
@@ -121,12 +115,11 @@ def export_to_onnx(
 
     return output_path
 
-
 def export_to_tensorrt(
     model_path: Path,
     output_path: Path,
     *,
-    input_shape: Optional[list[int]] = None,
+    input_shape: list[int] | None = None,
     fp16: bool = True,
 ) -> Path:
     """Export an ONNX model to TensorRT engine."""
@@ -166,12 +159,11 @@ def export_to_tensorrt(
 
     return output_path
 
-
 def export_to_coreml(
     model_path: Path,
     output_path: Path,
     *,
-    input_shape: Optional[list[int]] = None,
+    input_shape: list[int] | None = None,
 ) -> Path:
     """Export a model to CoreML format for Apple devices."""
     import coremltools as ct
@@ -194,7 +186,6 @@ def export_to_coreml(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     model.save(str(output_path))
     return output_path
-
 
 def export_model(request: ExportRequest) -> ExportResult:
     """Export a model to the requested format (story 190)."""
@@ -265,8 +256,7 @@ def export_model(request: ExportRequest) -> ExportResult:
 
     return result
 
-
-def list_exports(model_key: Optional[str] = None) -> list[ExportResult]:
+def list_exports(model_key: str | None = None) -> list[ExportResult]:
     """List model exports."""
     exports = _load_exports()
     result = [ExportResult(**e) for e in exports]

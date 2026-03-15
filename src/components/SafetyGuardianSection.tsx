@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { SafetyDemo } from "@/components/SafetyDemo";
+import { ease } from "@/lib/motion";
 
 export function SafetyGuardianSection() {
   return (
@@ -9,7 +10,7 @@ export function SafetyGuardianSection() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ duration: 0.3, ease }}
         >
           <div className="font-mono text-xs uppercase tracking-widest text-terminal-red mb-4">
             Use Case — Safety Guardian
@@ -31,7 +32,7 @@ export function SafetyGuardianSection() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3, delay: 0.1, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ duration: 0.3, delay: 0.1, ease }}
           className="mt-12 grid sm:grid-cols-3 gap-6"
         >
           <div className="space-y-2">
@@ -49,7 +50,7 @@ export function SafetyGuardianSection() {
           <div className="space-y-2">
             <div className="font-mono text-xs uppercase tracking-widest text-terminal-red">Halt Protocol</div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              When danger is detected, OpenEye sends a halt signal to the connected robot controller. Operations resume only when the workspace is confirmed clear.
+              When danger is detected, OpenEye broadcasts a safety halt to connected robot controllers. Operations resume only when the workspace is confirmed clear.
             </p>
           </div>
         </motion.div>
