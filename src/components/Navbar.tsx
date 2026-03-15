@@ -186,7 +186,7 @@ export function Navbar() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-            className="md:hidden overflow-hidden border-t border-foreground/[0.06] bg-background/95 backdrop-blur-sm"
+            className="lg:hidden overflow-hidden border-t border-foreground/[0.06] bg-background/95 backdrop-blur-sm"
           >
             <div className="px-4 py-4 space-y-1 font-mono text-sm">
               {publicNavItems.map((item) =>
