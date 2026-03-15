@@ -24,22 +24,22 @@ export function VisionFrame() {
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-      className="relative border border-foreground/10 rounded-outer overflow-hidden bg-foreground"
-      style={{ outline: "4px solid hsl(var(--vision-glow))" }}
+      className="relative border border-primary/20 rounded-outer overflow-hidden"
+      style={{ outline: "2px solid hsl(var(--oe-blue) / 0.15)" }}
     >
       {/* Simulated camera feed */}
-      <div className="relative aspect-video bg-gradient-to-br from-foreground via-foreground/95 to-foreground/90">
+      <div className="relative aspect-video bg-secondary">
         {/* Grid overlay */}
         <div className="absolute inset-0 opacity-10"
           style={{
-            backgroundImage: `linear-gradient(hsl(var(--terminal-green)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--terminal-green)) 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(hsl(var(--oe-blue)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--oe-blue)) 1px, transparent 1px)`,
             backgroundSize: "40px 40px",
           }}
         />
 
         {/* Scan line */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="w-full h-px bg-terminal-green/30 animate-scan-line" />
+          <div className="w-full h-px bg-primary/30 animate-scan-line" />
         </div>
 
         {/* Bounding boxes */}
@@ -61,37 +61,40 @@ export function VisionFrame() {
             <div
               className={`w-full h-full border-[0.5px] ${
                 obj.hazard
-                  ? "border-terminal-amber bg-terminal-amber/10"
-                  : "border-terminal-green bg-terminal-green/10"
+                  ? "border-oe-red bg-oe-red/10"
+                  : "border-oe-blue bg-oe-blue/10"
               }`}
             />
             <span
               className={`absolute -top-5 left-0 text-[10px] font-mono px-1.5 py-0.5 tabular-nums ${
                 obj.hazard
-                  ? "bg-terminal-amber text-foreground"
-                  : "bg-terminal-green text-primary-foreground"
+                  ? "bg-oe-red text-primary-foreground"
+                  : "bg-oe-blue text-primary-foreground"
               }`}
             >
               {obj.name} [{obj.confidence.toFixed(1)}%]
             </span>
             {/* Corner markers */}
-            <div className={`absolute top-0 left-0 w-2 h-2 border-t border-l ${obj.hazard ? "border-terminal-amber" : "border-terminal-green"}`} />
-            <div className={`absolute top-0 right-0 w-2 h-2 border-t border-r ${obj.hazard ? "border-terminal-amber" : "border-terminal-green"}`} />
-            <div className={`absolute bottom-0 left-0 w-2 h-2 border-b border-l ${obj.hazard ? "border-terminal-amber" : "border-terminal-green"}`} />
-            <div className={`absolute bottom-0 right-0 w-2 h-2 border-b border-r ${obj.hazard ? "border-terminal-amber" : "border-terminal-green"}`} />
+            <div className={`absolute top-0 left-0 w-2 h-2 border-t border-l ${obj.hazard ? "border-oe-red" : "border-oe-blue"}`} />
+            <div className={`absolute top-0 right-0 w-2 h-2 border-t border-r ${obj.hazard ? "border-oe-red" : "border-oe-blue"}`} />
+            <div className={`absolute bottom-0 left-0 w-2 h-2 border-b border-l ${obj.hazard ? "border-oe-red" : "border-oe-blue"}`} />
+            <div className={`absolute bottom-0 right-0 w-2 h-2 border-b border-r ${obj.hazard ? "border-oe-red" : "border-oe-blue"}`} />
           </motion.div>
         ))}
 
         {/* HUD overlay */}
-        <div className="absolute top-3 left-3 font-mono text-[10px] text-terminal-green/70 space-y-0.5">
-          <div>OPENEYE v0.1.0</div>
+        <div className="absolute top-3 left-3 font-mono text-[10px] text-primary/70 space-y-0.5">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rotate-45 bg-oe-blue" />
+            OPENEYE v0.1.0
+          </div>
           <div className="tabular-nums">FPS: 30 | RES: 1920×1080</div>
           <div className="tabular-nums">OBJECTS: {objects.length} | HAZARDS: {objects.filter(o => o.hazard).length}</div>
         </div>
 
-        <div className="absolute bottom-3 right-3 font-mono text-[10px] text-terminal-green/70">
+        <div className="absolute bottom-3 right-3 font-mono text-[10px] text-oe-green/70">
           <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-terminal-green animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-oe-green animate-pulse" />
             LIVE
           </div>
         </div>
@@ -103,12 +106,12 @@ export function VisionFrame() {
             y1="46%"
             x2="24%"
             y2="46%"
-            stroke="hsl(var(--terminal-amber))"
+            stroke="hsl(var(--oe-red))"
             strokeWidth="0.5"
             strokeDasharray="4 4"
             opacity="0.6"
           />
-          <text x="36%" y="44%" fill="hsl(var(--terminal-amber))" fontSize="8" fontFamily="Geist Mono, monospace" opacity="0.8">
+          <text x="36%" y="44%" fill="hsl(var(--oe-red))" fontSize="8" fontFamily="JetBrains Mono, monospace" opacity="0.8">
             2cm — HAZARD
           </text>
         </svg>

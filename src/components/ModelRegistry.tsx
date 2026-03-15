@@ -16,16 +16,23 @@ const models: Model[] = [
 ];
 
 const statusStyles = {
-  running: "bg-terminal-green/20 text-terminal-green",
-  ready: "bg-terminal-amber/20 text-terminal-amber",
-  available: "bg-terminal-muted/20 text-terminal-muted",
+  running: "bg-oe-green/15 text-oe-green",
+  ready: "bg-primary/15 text-primary",
+  available: "bg-muted-foreground/15 text-muted-foreground",
+};
+
+const statusDiamond = {
+  running: "bg-oe-green",
+  ready: "bg-oe-blue",
+  available: "bg-muted-foreground",
 };
 
 export function ModelRegistry() {
   return (
-    <div className="bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/5">
-        <span className="font-mono text-xs text-terminal-muted uppercase tracking-widest">
+    <div className="bg-card rounded-outer border border-foreground/[0.06] overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-foreground/[0.06]">
+        <span className="w-2 h-2 rotate-45 bg-oe-blue" />
+        <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
           Model Registry — openeye list
         </span>
       </div>
@@ -40,11 +47,12 @@ export function ModelRegistry() {
             className="flex items-center justify-between font-mono text-sm py-1.5"
           >
             <div className="flex items-center gap-3">
-              <span className="text-terminal-green">{model.name}</span>
-              <span className="text-terminal-muted text-xs">{model.task}</span>
+              <span className={`w-1.5 h-1.5 rotate-45 ${statusDiamond[model.status]}`} />
+              <span className="text-foreground">{model.name}</span>
+              <span className="text-muted-foreground text-xs">{model.task}</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-terminal-muted text-xs tabular-nums">{model.size}</span>
+              <span className="text-muted-foreground text-xs tabular-nums">{model.size}</span>
               <span className={`text-[10px] px-1.5 py-0.5 rounded-inner uppercase tracking-wider ${statusStyles[model.status]}`}>
                 {model.status}
               </span>

@@ -48,7 +48,7 @@ export function Navbar() {
             ) : (
               <button
                 onClick={() => navigate("/login")}
-                className="bg-foreground text-background px-4 py-2 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98]"
+                className="bg-primary text-primary-foreground px-4 py-2 rounded-inner hover:bg-primary/90 transition-colors active:scale-[0.98]"
               >
                 Sign In
               </button>
