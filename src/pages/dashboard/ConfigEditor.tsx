@@ -141,8 +141,14 @@ export default function ConfigEditor() {
   }
 
   // Group model options by provider
-  const vlmByProvider = Object.groupBy(vlmModelOptions, (m) => m.provider);
-  const cortexByProvider = Object.groupBy(cortexLlmOptions, (m) => m.provider);
+  const vlmByProvider: Record<string, typeof vlmModelOptions> = {};
+  for (const m of vlmModelOptions) {
+    (vlmByProvider[m.provider] ??= []).push(m);
+  }
+  const cortexByProvider: Record<string, typeof cortexLlmOptions> = {};
+  for (const m of cortexLlmOptions) {
+    (cortexByProvider[m.provider] ??= []).push(m);
+  }
 
   return (
     <div className="space-y-6">
@@ -183,7 +189,7 @@ export default function ConfigEditor() {
                     {Object.entries(vlmByProvider).map(([provider, models]) => (
                       <SelectGroup key={provider}>
                         <SelectLabel>{provider}</SelectLabel>
-                        {models!.map((m) => (
+                        {models.map((m) => (
                           <SelectItem key={m.id} value={m.id}>
                             {m.label}
                             {m.free && <span className="ml-1.5 text-xs text-terminal-green">free</span>}
@@ -211,7 +217,7 @@ export default function ConfigEditor() {
                     {Object.entries(cortexByProvider).map(([provider, models]) => (
                       <SelectGroup key={provider}>
                         <SelectLabel>{provider}</SelectLabel>
-                        {models!.map((m) => (
+                        {models.map((m) => (
                           <SelectItem key={m.id} value={m.id}>
                             {m.label}
                             {m.free && <span className="ml-1.5 text-xs text-terminal-green">free</span>}

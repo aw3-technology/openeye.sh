@@ -32,6 +32,7 @@ describe("Navbar", () => {
       session: null,
       loading: false,
       signOut: vi.fn(),
+      tokenError: null,
     });
 
     renderNavbar();
@@ -49,6 +50,7 @@ describe("Navbar", () => {
       session: {} as unknown as ReturnType<typeof useAuth>["session"],
       loading: false,
       signOut: vi.fn(),
+      tokenError: null,
     });
 
     renderNavbar();
@@ -63,6 +65,7 @@ describe("Navbar", () => {
       session: null,
       loading: false,
       signOut: vi.fn(),
+      tokenError: null,
     });
 
     const { container } = renderNavbar();
@@ -82,6 +85,7 @@ describe("Navbar", () => {
       session: null,
       loading: true,
       signOut: vi.fn(),
+      tokenError: null,
     });
 
     const { container } = renderNavbar();
@@ -99,6 +103,7 @@ describe("Navbar", () => {
       session: {} as unknown as ReturnType<typeof useAuth>["session"],
       loading: false,
       signOut: vi.fn(),
+      tokenError: null,
     });
 
     renderNavbar();
