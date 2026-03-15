@@ -4,6 +4,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const CRED_API_BASE = "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -16,7 +18,7 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Authenticate the caller
+  // Authenticate the caller (Supabase JWT)
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return json({ error: "Unauthorized" }, 401);
@@ -25,18 +27,23 @@ Deno.serve(async (req) => {
   const CRED_API_KEY = Deno.env.get("CRED_API_KEY");
   if (!CRED_API_KEY) return json({ error: "CRED_API_KEY not configured" }, 500);
 
-  const CRED_PROJECT_ID = Deno.env.get("CRED_PROJECT_ID");
-  if (!CRED_PROJECT_ID) return json({ error: "CRED_PROJECT_ID not configured" }, 500);
-
-  const CRED_API_URL = "https://cred.diy";
-
   // Extract the sub-path from the request URL
   const url = new URL(req.url);
   const path = url.pathname.replace(/^\/cred-proxy\/?/, "");
   const search = url.search;
 
-  // Forward to Cred API
-  const targetUrl = `${CRED_API_URL}/projects/${CRED_PROJECT_ID}/${path}${search}`;
+  // Route checkout to the separate hosted-checkout function,
+  // everything else goes to credits-api
+  let targetUrl: string;
+  if (path === "checkout" || path.startsWith("checkout/")) {
+    const checkoutPath = path.replace(/^checkout\/?/, "");
+    targetUrl = `${CRED_API_BASE}/hosted-checkout${checkoutPath ? `/${checkoutPath}` : ""}${search}`;
+  } else if (path === "presale-checkout" || path.startsWith("presale-checkout/")) {
+    const presalePath = path.replace(/^presale-checkout\/?/, "");
+    targetUrl = `${CRED_API_BASE}/presale-checkout${presalePath ? `/${presalePath}` : ""}${search}`;
+  } else {
+    targetUrl = `${CRED_API_BASE}/credits-api/${path}${search}`;
+  }
 
   try {
     const body = req.method !== "GET" && req.method !== "HEAD"
@@ -49,7 +56,7 @@ Deno.serve(async (req) => {
       method: req.method,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${CRED_API_KEY}`,
+        "x-api-key": CRED_API_KEY,
         "x-user-token": authHeader.replace("Bearer ", ""),
       },
       body,
