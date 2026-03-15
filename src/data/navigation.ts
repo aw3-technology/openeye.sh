@@ -36,7 +36,12 @@ export interface NavDropdown {
   items: NavLink[];
 }
 
-export type NavItem = NavLink | NavDropdown;
+export interface DashboardNavItem {
+  label: string;
+  icon: LucideIcon;
+  path: string;
+}
+
 
 export function isDropdown(item: NavItem): item is NavDropdown {
   return "items" in item;
