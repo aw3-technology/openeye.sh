@@ -119,12 +119,12 @@
     --oe-black: 0 0% 12%;
     --oe-green: 153 80% 35%;
 
-    --terminal-bg: 0 0% 6%;
-    --terminal-fg: 0 0% 75%;
-    --terminal-green: 153 100% 40%;
-    --terminal-amber: 199 58% 45%;
-    --terminal-red: 0 72% 50%;
-    --terminal-muted: 0 0% 40%;
+    --terminal-bg: 210 20% 97%;
+    --terminal-fg: 0 0% 30%;
+    --terminal-green: 153 80% 30%;
+    --terminal-amber: 199 58% 40%;
+    --terminal-red: 0 72% 45%;
+    --terminal-muted: 0 0% 50%;
     --terminal-blue: 199 58% 40%;
 
     --vision-glow: 199 58% 40% / 0.1;
