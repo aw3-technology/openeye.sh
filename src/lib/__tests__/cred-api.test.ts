@@ -38,9 +38,9 @@ describe("credApi (edge function proxy)", () => {
   });
 
   it("deduct sends amount and description", async () => {
-    globalThis.fetch = mockFetchOk({ balance: 90, user_id: "u1", project_id: "p1" });
+    globalThis.fetch = mockFetchOk({ user_id: "u1", balances: [{ credit_type_id: "ct1", balance: 90 }] });
     const result = await credApi.deduct(10, "test deduction");
-    expect(result.balance).toBe(90);
+    expect(result.balances[0].balance).toBe(90);
   });
 
   it("syncUser calls sync-user endpoint", async () => {
