@@ -576,10 +576,10 @@ export default function ModelSettings() {
                 <Label>Device</Label>
                 <Select
                   value={inference.device}
-                  onValueChange={(v) =>
-                    setInference((prev: typeof inference) => ({
+                  onValueChange={(v: string) =>
+                    setInference((prev) => ({
                       ...prev,
-                      device: v,
+                      device: v as typeof prev.device,
                     }))
                   }
                 >
