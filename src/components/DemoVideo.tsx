@@ -123,8 +123,8 @@ export function DemoVideo() {
         >
           <div className="grid lg:grid-cols-5 gap-4">
             {/* Vision feed */}
-            <div className="lg:col-span-3 relative aspect-video bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden shadow-lg">
-              <div className="absolute inset-0 bg-terminal-bg">
+            <div className="lg:col-span-3 relative aspect-video bg-card rounded-outer border overflow-hidden shadow-lg">
+              <div className="absolute inset-0 bg-card">
                 {/* Grid overlay */}
                 <div
                   className="absolute inset-0 opacity-5"
