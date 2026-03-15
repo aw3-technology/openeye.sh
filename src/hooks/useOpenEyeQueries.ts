@@ -67,12 +67,12 @@ export function useApiKeys() {
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
-        .from("api_keys")
+        .from("api_keys" as any)
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as ApiKeyRow[];
+      return (data || []) as unknown as ApiKeyRow[];
     },
     enabled: !!user,
   });
