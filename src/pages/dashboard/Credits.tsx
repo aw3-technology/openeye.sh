@@ -33,6 +33,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { PricingTier } from "@/types/credits";
+import { getTotalBalance } from "@/types/credits";
 
 function PricingTierCard({
   tier,
