@@ -130,7 +130,7 @@ export default function Overview() {
         {isCloudDeployment && (
           <MetricCard
             label="Credits"
-            value={creditData?.balance ?? "—"}
+            value={creditData ? getTotalBalance(creditData) : "—"}
             icon={Coins}
             color="bg-yellow-500/15 text-yellow-500"
           />
