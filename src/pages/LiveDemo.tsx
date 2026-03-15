@@ -16,6 +16,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+// Demo scene images
+import safetyWorkspaceImg from "@/assets/demo/safety-workspace.jpg";
+import sceneWorkshopImg from "@/assets/demo/scene-workshop.jpg";
+import sceneKitchenImg from "@/assets/demo/scene-kitchen.jpg";
+import sceneWarehouseImg from "@/assets/demo/scene-warehouse.jpg";
+
 // ─── Types ────────────────────────────────────────────────────────────────
 
 interface DetectedObject {
