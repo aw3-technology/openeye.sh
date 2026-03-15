@@ -89,6 +89,8 @@ const App = () => (
               <Route path="live" element={<LiveStream />} />
               <Route path="history" element={<History />} />
               <Route path="settings" element={<ModelSettings />} />
+              <Route path="models" element={<ModelRegistry />} />
+              <Route path="benchmark" element={<BenchmarkPage />} />
               <Route path="metrics" element={<Metrics />} />
               <Route path="scene-graph" element={<SceneGraphPage />} />
               <Route path="export" element={<Export />} />
