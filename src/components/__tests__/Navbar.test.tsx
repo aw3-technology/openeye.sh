@@ -50,6 +50,7 @@ describe("Navbar", () => {
       session: {} as unknown as ReturnType<typeof useAuth>["session"],
       loading: false,
       signOut: vi.fn(),
+      tokenError: null,
     });
 
     renderNavbar();
