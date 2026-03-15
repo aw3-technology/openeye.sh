@@ -6,11 +6,13 @@ import type { InferenceHistoryRow, ApiKeyRow, DeviceRow } from "@/types/openeye"
 
 export function useHealth() {
   const { client, serverUrl } = useOpenEyeConnection();
+  const isDefaultLocalhost = serverUrl === "http://localhost:8000" && typeof window !== "undefined" && window.location.hostname !== "localhost";
   return useQuery({
     queryKey: ["openeye", "health", serverUrl],
     queryFn: () => client.health(),
     refetchInterval: 5000,
     retry: false,
+    enabled: !isDefaultLocalhost,
   });
 }
 
