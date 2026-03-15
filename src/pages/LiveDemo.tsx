@@ -403,12 +403,12 @@ function DetectionPlayground() {
         {/* Detection viewport */}
         <div className="lg:col-span-2">
           <div className="relative aspect-video bg-card border rounded-xl overflow-hidden">
-            {/* Placeholder scene */}
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary via-card to-secondary flex items-center justify-center">
-              <div className="font-mono text-muted-foreground text-sm">
-                {sample.name} scene — {sample.objects.length} ground truth objects
-              </div>
-            </div>
+            {/* Scene image */}
+            <img
+              src={sample.image}
+              alt={`${sample.name} scene`}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
 
             {/* Detection boxes */}
             <AnimatePresence>
