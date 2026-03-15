@@ -122,7 +122,7 @@ export function DemoFeed() {
               : isHazard
               ? "bg-terminal-amber"
               : "bg-terminal-green";
-            const labelText = isHuman ? "text-white" : isHazard ? "text-foreground" : "text-primary-foreground";
+            const labelText = isHuman ? "text-primary-foreground" : isHazard ? "text-primary-foreground" : "text-primary-foreground";
 
             return (
               <motion.div
