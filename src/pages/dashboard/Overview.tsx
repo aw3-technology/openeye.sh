@@ -129,7 +129,7 @@ export default function Overview() {
         />
         <MetricCard
           label="Credits"
-          value={creditData?.balance ?? "—"}
+          value={getTotalBalance(creditData) ?? "—"}
           icon={Coins}
           color="bg-yellow-500/15 text-yellow-500"
         />
