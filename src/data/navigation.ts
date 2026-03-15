@@ -42,6 +42,7 @@ export interface DashboardNavItem {
   path: string;
 }
 
+export type NavItem = NavLink | NavDropdown;
 
 export function isDropdown(item: NavItem): item is NavDropdown {
   return "items" in item;
