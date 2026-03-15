@@ -47,6 +47,7 @@ import FleetAlerts from "./pages/dashboard/fleet/FleetAlerts.tsx";
 import Demo from "./pages/dashboard/Demo.tsx";
 import AgenticDemo from "./pages/dashboard/AgenticDemo.tsx";
 import Governance from "./pages/dashboard/Governance.tsx";
+import Presentation from "./pages/Presentation.tsx";
 
 const queryClient = new QueryClient();
 
