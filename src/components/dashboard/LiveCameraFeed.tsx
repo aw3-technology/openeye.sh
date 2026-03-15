@@ -19,10 +19,10 @@ function getPersonSafetyZone(obj: DetectedObject): SafetyZoneInfo | null {
   if (obj.bbox.h > 0.6) {
     return {
       level: "DANGER",
-      color: "text-red-400",
-      borderColor: "border-red-500",
-      bgColor: "bg-red-500/15",
-      textColor: "bg-red-500 text-white",
+      color: "text-terminal-red",
+      borderColor: "border-terminal-red",
+      bgColor: "bg-terminal-red/15",
+      textColor: "bg-terminal-red text-primary-foreground",
     };
   }
   if (obj.bbox.h > 0.3) {
