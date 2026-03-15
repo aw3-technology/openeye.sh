@@ -100,25 +100,25 @@ export default function UseCases() {
                 icon: <ShieldCheck className="w-5 h-5 text-terminal-green" aria-hidden="true" />,
                 label: "Safety-first architecture",
                 detail:
-                  "Dual-layer detection — fast YOLO geometry for instant halt, smart VLM reasoning for context-dependent risks.",
+                  "Dual-layer detection — fast YOLO geometry for real-time halt, VLM reasoning for context-dependent risks.",
               },
               {
                 icon: <Zap className="w-5 h-5 text-terminal-amber" aria-hidden="true" />,
                 label: "Real-time performance",
                 detail:
-                  "30fps detection pipeline with sub-100ms halt latency. No cloud round-trips for safety-critical decisions.",
+                  "Real-time detection pipeline with low-latency halt capability. All inference runs locally — no cloud round-trips.",
               },
               {
                 icon: <Eye className="w-5 h-5 text-terminal-green" aria-hidden="true" />,
                 label: "Model-agnostic",
                 detail:
-                  "Swap YOLO, SAM, CLIP, or any VLM without code changes. Use the right model for the right environment.",
+                  "Swap YOLO, Grounding DINO, Depth Anything, or any custom model without code changes via the adapter system.",
               },
               {
                 icon: <Cog className="w-5 h-5 text-muted-foreground" aria-hidden="true" />,
                 label: "Hardware-agnostic",
                 detail:
-                  "Works with USB cameras, RTSP streams, video files, and any robot controller via adapters.",
+                  "Works with USB cameras, RTSP streams, and video files. CPU, CUDA, and Apple Silicon MPS supported.",
               },
             ].map((cap, i) => (
               <motion.div
