@@ -100,7 +100,7 @@ export function Footer() {
         </div>
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-foreground/[0.06]">
           <div className="font-mono text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} OpenEye. Apache 2.0 License.
+            &copy; {new Date().getFullYear()} AW3 Technology, Inc. Apache 2.0 License.
           </div>
           <div className="flex items-center gap-6 font-mono text-xs text-muted-foreground">
             <a

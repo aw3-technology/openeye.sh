@@ -124,7 +124,7 @@ export function DemoVideo() {
           <div className="grid lg:grid-cols-5 gap-4">
             {/* Vision feed */}
             <div className="lg:col-span-3 relative aspect-video bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden shadow-lg">
-              <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground/95 to-foreground/90">
+              <div className="absolute inset-0 bg-terminal-bg">
                 {/* Grid overlay */}
                 <div
                   className="absolute inset-0 opacity-5"
@@ -149,10 +149,10 @@ export function DemoVideo() {
                     }`}
                   />
                   <span
-                    className={`absolute -top-5 left-0 text-[10px] font-mono px-1.5 py-0.5 transition-colors duration-300 ${
+                    className={`absolute -top-5 left-0 text-[10px] font-mono px-1.5 py-0.5 text-primary-foreground transition-colors duration-300 ${
                       isPlaying && visibleLines >= 14 && visibleLines < 21
-                        ? "bg-terminal-red/80 text-foreground"
-                        : "bg-terminal-green/80 text-foreground"
+                        ? "bg-terminal-red/80"
+                        : "bg-terminal-green/80"
                     }`}
                   >
                     {isPlaying && visibleLines >= 14 && visibleLines < 21
@@ -180,7 +180,7 @@ export function DemoVideo() {
                     className="absolute top-[35%] left-[5%] w-[14%] h-[20%]"
                   >
                     <div className="w-full h-full border-2 border-terminal-red/70 bg-terminal-red/15 rounded-sm animate-pulse" />
-                    <span className="absolute -top-5 left-0 text-[10px] font-mono px-1.5 py-0.5 bg-terminal-red/80 text-foreground">
+                    <span className="absolute -top-5 left-0 text-[10px] font-mono px-1.5 py-0.5 bg-terminal-red/80 text-primary-foreground">
                       HUMAN_HAND
                     </span>
                   </motion.div>
@@ -227,7 +227,7 @@ export function DemoVideo() {
               {/* Play button */}
               {!isPlaying && (
                 <button
-                  className="absolute inset-0 flex items-center justify-center bg-foreground/20 hover:bg-foreground/30 focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors cursor-pointer"
+                  className="absolute inset-0 flex items-center justify-center bg-terminal-bg/50 hover:bg-terminal-bg/60 focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors cursor-pointer"
                   onClick={() => setIsPlaying(true)}
                   aria-label="Play demo animation"
                 >
@@ -237,7 +237,7 @@ export function DemoVideo() {
                     whileTap={{ scale: 0.95 }}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="ml-1" aria-hidden="true">
-                      <path d="M8 5v14l11-7z" fill="hsl(var(--foreground))" />
+                      <path d="M8 5v14l11-7z" fill="hsl(0, 0%, 7%)" />
                     </svg>
                   </motion.div>
                 </button>

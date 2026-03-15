@@ -122,7 +122,7 @@ export function DemoFeed() {
               : isHazard
               ? "bg-terminal-amber"
               : "bg-terminal-green";
-            const labelText = isHuman ? "text-white" : isHazard ? "text-foreground" : "text-primary-foreground";
+            const labelText = isHuman ? "text-primary-foreground" : isHazard ? "text-primary-foreground" : "text-primary-foreground";
 
             return (
               <motion.div
@@ -185,7 +185,7 @@ export function DemoFeed() {
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.15 }}
             >
-              <div className="bg-terminal-red/90 text-white font-mono text-xs sm:text-sm md:text-base px-4 sm:px-6 py-2 sm:py-3 rounded-inner backdrop-blur-sm">
+              <div className="bg-terminal-red/90 text-primary-foreground font-mono text-xs sm:text-sm md:text-base px-4 sm:px-6 py-2 sm:py-3 rounded-inner backdrop-blur-sm">
                 HUMAN DETECTED — OPERATIONS HALTED
               </div>
             </motion.div>
