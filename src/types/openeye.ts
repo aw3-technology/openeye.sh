@@ -126,6 +126,11 @@ export interface BBox2D {
   y1: number;
   x2: number;
   y2: number;
+  /** Convenience aliases matching BBox (normalized 0-1) */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 export interface GraspPoint {

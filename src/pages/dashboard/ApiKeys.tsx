@@ -70,7 +70,7 @@ export default function ApiKeys() {
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase
-      .from("api_keys")
+      .from("api_keys" as any)
       .delete()
       .eq("id", id);
     if (error) {
