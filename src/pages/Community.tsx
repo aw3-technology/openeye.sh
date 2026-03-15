@@ -243,7 +243,7 @@ export default function Community() {
             className="text-center"
           >
             <a
-              href="https://github.com/openeye-ai/openeye"
+              href="https://github.com/aw3-technology/openeye.sh"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-foreground text-background px-6 py-3 rounded-inner font-mono text-xs uppercase tracking-widest hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
