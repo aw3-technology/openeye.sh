@@ -163,7 +163,7 @@ export async function createDeployment(req: DeploymentCreateRequest): Promise<De
     target_group_id: req.target_group_id || null,
     bandwidth_limit_mbps: req.bandwidth_limit_mbps || null,
   };
-  const result = await supabase.from("deployments").insert(row).select().single();
+  const result = await supabase.from("deployments").insert(row as any).select().single();
   return mapDeployment(assertOk(result));
 }
 
