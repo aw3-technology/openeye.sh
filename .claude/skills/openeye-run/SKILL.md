@@ -99,7 +99,7 @@ Columns: Metric, Value. Rows: mean, p50, p95, p99, throughput (fps).
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `Model 'x' not found` | Model not downloaded | `openeye pull x` |
-| `No adapter found for 'x'` | Missing extra dependency | `pip install openeye-ai[yolo]` (check model table) |
+| `No adapter found for 'x'` | Missing extra dependency | `pip install openeye-sh[yolo]` (check model table) |
 | `Connection refused :8000` | Server not running | `openeye serve <model>` |
 | `CUDA out of memory` | GPU memory exhausted | Try `--device cpu` or a smaller model |
 | `FileNotFoundError: <image>` | Bad image path | Verify file exists with `ls` |

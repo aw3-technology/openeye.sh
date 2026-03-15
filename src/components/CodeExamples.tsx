@@ -68,7 +68,7 @@ curl http://localhost:8000/nebius/stats      # VLM usage stats`,
   ros: {
     description: "ROS 2 integration is on the roadmap. Subscribe to OpenEye topics for real-time perception in your robot stack.",
     code: `# ROS 2 adapter — coming soon
-# Track progress: github.com/openeye-ai/openeye/issues
+# Track progress: github.com/openeye-sh/openeye/issues
 
 import rclpy
 from rclpy.node import Node

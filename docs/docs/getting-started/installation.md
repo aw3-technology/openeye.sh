@@ -8,7 +8,7 @@
 ## Install from PyPI
 
 ```bash
-pip install openeye-ai
+pip install openeye-sh
 ```
 
 ## Optional Dependencies
@@ -17,19 +17,19 @@ Install extras for specific model backends:
 
 ```bash
 # YOLO object detection
-pip install "openeye-ai[yolo]"
+pip install "openeye-sh[yolo]"
 
 # Depth estimation
-pip install "openeye-ai[depth]"
+pip install "openeye-sh[depth]"
 
 # Grounding DINO (open-vocabulary detection)
-pip install "openeye-ai[grounding]"
+pip install "openeye-sh[grounding]"
 
 # Everything
-pip install "openeye-ai[all]"
+pip install "openeye-sh[all]"
 
 # Camera support (OpenCV)
-pip install "openeye-ai[camera]"
+pip install "openeye-sh[camera]"
 ```
 
 ## Platform Notes

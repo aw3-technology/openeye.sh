@@ -100,13 +100,13 @@ openeye mlops batch custom v1.0.0 ./images ./output --batch-size 32
 
 | Model | Task | Adapter | Extras |
 |-------|------|---------|--------|
-| `yolov8` | detection | `yolov8` | `pip install openeye-ai[yolo]` |
-| `depth_anything` | depth | `depth_anything` | `pip install openeye-ai[depth]` |
-| `grounding_dino` | detection (open-vocab) | `grounding_dino` | `pip install openeye-ai[grounding]` |
-| ONNX models | varies | `onnx_generic` / `yolov8:onnx` | `pip install openeye-ai[onnx]` |
-| TensorRT models | varies | `tensorrt_generic` / `yolov8:tensorrt` | `pip install openeye-ai[tensorrt]` |
+| `yolov8` | detection | `yolov8` | `pip install openeye-sh[yolo]` |
+| `depth_anything` | depth | `depth_anything` | `pip install openeye-sh[depth]` |
+| `grounding_dino` | detection (open-vocab) | `grounding_dino` | `pip install openeye-sh[grounding]` |
+| ONNX models | varies | `onnx_generic` / `yolov8:onnx` | `pip install openeye-sh[onnx]` |
+| TensorRT models | varies | `tensorrt_generic` / `yolov8:tensorrt` | `pip install openeye-sh[tensorrt]` |
 
-Install all extras: `pip install openeye-ai[all]`
+Install all extras: `pip install openeye-sh[all]`
 
 ## Creating a Custom Adapter
 
@@ -167,8 +167,8 @@ cd backend && python -m uvicorn src.fleet.app:app --port 8001
 
 | Error | Fix |
 |-------|-----|
-| `ImportError: ultralytics` | `pip install openeye-ai[yolo]` |
-| `ImportError: onnxruntime` | `pip install openeye-ai[onnx]` |
+| `ImportError: ultralytics` | `pip install openeye-sh[yolo]` |
+| `ImportError: onnxruntime` | `pip install openeye-sh[onnx]` |
 | `Model 'x' not found` | Run `openeye list` to see available models, then `openeye pull x` |
 | `Connection refused :8000` | Start server with `openeye serve <model>` |
 | `Connection refused :8001` | Start fleet control plane or set `OPENEYE_FLEET_URL` |

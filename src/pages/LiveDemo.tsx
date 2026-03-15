@@ -1320,7 +1320,7 @@ export default function LiveDemo() {
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <div className="font-mono text-sm bg-secondary text-oe-green px-5 py-2.5 rounded-lg border select-all cursor-text">
-                  pip install openeye-ai
+                  pip install openeye-sh
                 </div>
                 <a
                   href="/docs"

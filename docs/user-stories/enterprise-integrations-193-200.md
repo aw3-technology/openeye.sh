@@ -19,7 +19,7 @@
 - [ ] Message batching is configurable: `--batch-size 100 --batch-linger-ms 500` for throughput optimization
 - [ ] `--sink-filter` allows publishing only specific event types: `--sink-filter "person_detected,vehicle_detected,hazard"`
 - [ ] Dead letter queue support: `--dlq-topic openeye-dlq` for messages that fail to publish after retries
-- [ ] Sink dependencies are optional: `pip install openeye-ai[kafka]` installs `confluent-kafka`; `pip install openeye-ai[kinesis]` installs `boto3`
+- [ ] Sink dependencies are optional: `pip install openeye-sh[kafka]` installs `confluent-kafka`; `pip install openeye-sh[kinesis]` installs `boto3`
 
 ### Edge Cases
 
@@ -66,7 +66,7 @@
 - [ ] Alarm integration: `--vms-alarm` creates alarms in the VMS when specific detections occur (e.g., `--alarm-on "person" --alarm-zone "restricted"`)
 - [ ] VMS authentication supports OAuth2, Basic Auth, and API key methods
 - [ ] Camera PTZ control: `openeye ptz --input milestone://... --track person` auto-tracks detected objects using PTZ commands via the VMS API
-- [ ] VMS dependencies are optional: `pip install openeye-ai[vms]`
+- [ ] VMS dependencies are optional: `pip install openeye-sh[vms]`
 
 ### Edge Cases
 
@@ -194,7 +194,7 @@ endpoints:
 - [ ] BigQuery authentication: service account JSON (`--bq-credentials`), application default credentials, or workload identity
 - [ ] Databricks authentication: PAT (`--databricks-token`), OAuth, or Azure AD
 - [ ] Partitioning: Snowflake tables are clustered by `timestamp`; BigQuery tables are partitioned by `DATE(timestamp)`; Databricks tables use liquid clustering on `timestamp`
-- [ ] Data lake dependencies are optional: `pip install openeye-ai[snowflake]`, `[bigquery]`, `[databricks]`
+- [ ] Data lake dependencies are optional: `pip install openeye-sh[snowflake]`, `[bigquery]`, `[databricks]`
 
 ### Edge Cases
 
@@ -339,7 +339,7 @@ resource "openeye_webhook" "intrusion_alert" {
 - [ ] Jira authentication: API token (`--jira-token`), OAuth 2.0, or PAT
 - [ ] ServiceNow authentication: username/password, OAuth 2.0, or API key
 - [ ] Ticket creation is rate-limited: `--max-tickets-per-hour 50` (default: 100) to prevent ticket storms
-- [ ] Ticketing dependencies are optional: `pip install openeye-ai[jira]` installs `jira`; `pip install openeye-ai[servicenow]` installs `pysnow`
+- [ ] Ticketing dependencies are optional: `pip install openeye-sh[jira]` installs `jira`; `pip install openeye-sh[servicenow]` installs `pysnow`
 
 ### Edge Cases
 
@@ -417,7 +417,7 @@ resource "openeye_webhook" "intrusion_alert" {
 - Azure Key Vault uses `azure-keyvault-secrets` with `azure-identity`
 - Secret resolution lives in `cli/openeye_ai/secrets/` with `vault.py`, `aws.py`, `gcp.py`, `azure.py`
 - All providers implement a `SecretsProvider` interface: `get_secret(path, field) -> str`, `refresh()`, `close()`
-- Dependencies are optional: `pip install openeye-ai[vault]`, `[aws-secrets]`, `[gcp-secrets]`, `[azure-secrets]`
+- Dependencies are optional: `pip install openeye-sh[vault]`, `[aws-secrets]`, `[gcp-secrets]`, `[azure-secrets]`
 
 ---
 
@@ -433,7 +433,7 @@ resource "openeye_webhook" "intrusion_alert" {
 - [ ] SDK clients are auto-generated from the OpenAPI spec using `openapi-generator`:
   - **Python**: `pip install openeye-sdk` — typed client with Pydantic models
   - **TypeScript**: `npm install @openeye/sdk` — typed client with TypeScript interfaces
-  - **Go**: `go get github.com/openeye-ai/openeye-go` — idiomatic Go client with struct types
+  - **Go**: `go get github.com/openeye-sh/openeye-go` — idiomatic Go client with struct types
   - **Java**: `com.openeye:openeye-sdk` on Maven Central — Java client with POJO models
 - [ ] Each SDK provides: `predict(image)`, `stream()`, `health()`, `models()`, `createWebhook()`, `listCameras()` methods
 - [ ] SDKs support all authentication methods: API key (header), OAuth2 client credentials, and mTLS
@@ -455,7 +455,7 @@ resource "openeye_webhook" "intrusion_alert" {
 - [ ] TypeScript SDK in browser: `predict()` uses `fetch` with `FormData` for file upload. Streaming uses `EventSource` for SSE — WebSocket is not used in browser mode (firewall-friendly)
 - [ ] Go SDK connection pooling: uses `http.Client` with configurable `MaxIdleConns` (default: 10) and `IdleConnTimeout` (default: 90s) for efficient connection reuse
 - [ ] Java SDK thread safety: the client is thread-safe. Internal connection pool is managed by OkHttp with configurable pool size
-- [ ] Python SDK vs Python client (story 85): the SDK (`openeye-sdk`) is a thin, auto-generated REST client with no `openeye-ai` dependency. The client (`openeye-ai.Client`) is a high-level wrapper that includes local model support. Both can be used independently
+- [ ] Python SDK vs Python client (story 85): the SDK (`openeye-sdk`) is a thin, auto-generated REST client with no `openeye-sh` dependency. The client (`openeye-sh.Client`) is a high-level wrapper that includes local model support. Both can be used independently
 - [ ] API versioning: the OpenAPI spec is versioned at `/v1/openapi.json`. Future `/v2/` prefix is supported without breaking v1 clients
 - [ ] Custom fields in webhooks/zones/cameras: the OpenAPI spec uses `additionalProperties` for extensible objects. SDKs expose these as `Map<String, Object>` (Java), `Record<string, unknown>` (TS), `map[string]interface{}` (Go), `Dict[str, Any]` (Python)
 - [ ] Spec validation: CI runs `openapi-spec-validator` on every commit that changes an endpoint — invalid specs block the PR
@@ -502,7 +502,7 @@ package main
 import (
     "context"
     "fmt"
-    openeye "github.com/openeye-ai/openeye-go"
+    openeye "github.com/openeye-sh/openeye-go"
 )
 
 func main() {

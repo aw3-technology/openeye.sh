@@ -5,7 +5,7 @@ set -euo pipefail
 echo "=== OpenEye Health Check ==="
 
 if ! command -v openeye &>/dev/null; then
-  echo "ERROR: openeye not found. Install with: pip install openeye-ai[all]"
+  echo "ERROR: openeye not found. Install with: pip install openeye-sh[all]"
   exit 1
 fi
 

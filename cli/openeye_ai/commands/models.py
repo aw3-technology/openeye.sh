@@ -133,7 +133,7 @@ def _pull_single(
         extra = _EXTRAS.get(model, model)
         rprint(
             f"[red]Missing dependencies for '{model}': {e.name or e}[/red]\n"
-            f"Install with: [bold]pip install openeye-ai\\[{extra}][/bold]"
+            f"Install with: [bold]pip install openeye-sh\\[{extra}][/bold]"
         )
         return False
     except Exception as e:
