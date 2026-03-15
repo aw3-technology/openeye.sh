@@ -45,11 +45,11 @@ function PricingTierCard({
   loading: boolean;
 }) {
   return (
-    <Card className={tier.popular ? "border-primary" : ""}>
+    <Card className={tier.is_popular ? "border-primary" : ""}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-base">
           {tier.name}
-          {tier.popular && (
+          {tier.is_popular && (
             <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
               Popular
             </span>
