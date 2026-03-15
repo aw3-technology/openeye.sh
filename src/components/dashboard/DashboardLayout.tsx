@@ -6,7 +6,6 @@ import { ConnectionStatus } from "./ConnectionStatus";
 import { CreditBalanceBadge } from "./CreditBalanceBadge";
 import { useSyncCredUser } from "@/hooks/useCredits";
 import { useAuth } from "@/hooks/useAuth";
-import { OpenEyeStreamProvider } from "@/hooks/useOpenEyeStream";
 
 export function DashboardLayout() {
   const { user } = useAuth();
@@ -23,21 +22,19 @@ export function DashboardLayout() {
   }, [user?.id]);
 
   return (
-    <OpenEyeStreamProvider>
-      <SidebarProvider>
-        <DashboardSidebar />
-        <SidebarInset>
-          <header className="flex h-12 items-center gap-2 border-b px-4">
-            <SidebarTrigger />
-            <div className="flex-1" />
-            <CreditBalanceBadge />
-            <ConnectionStatus />
-          </header>
-          <div className="flex-1 overflow-auto p-4 md:p-6">
-            <Outlet />
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-    </OpenEyeStreamProvider>
+    <SidebarProvider>
+      <DashboardSidebar />
+      <SidebarInset>
+        <header className="flex h-12 items-center gap-2 border-b px-4">
+          <SidebarTrigger />
+          <div className="flex-1" />
+          <CreditBalanceBadge />
+          <ConnectionStatus />
+        </header>
+        <div className="flex-1 overflow-auto p-4 md:p-6">
+          <Outlet />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

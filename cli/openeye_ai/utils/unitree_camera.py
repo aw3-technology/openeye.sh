@@ -14,15 +14,18 @@ from __future__ import annotations
 import logging
 import time
 from enum import Enum
+from typing import Optional
 
 from PIL import Image
 
 logger = logging.getLogger(__name__)
 
+
 class G1Transport(str, Enum):
     USB = "usb"
     RTSP = "rtsp"
     SDK = "sdk"
+
 
 class G1Camera:
     """Camera source for the Unitree G1 robot.
@@ -45,7 +48,7 @@ class G1Camera:
     def __init__(
         self,
         host: str = "192.168.123.161",
-        transport: G1Transport | None = None,
+        transport: Optional[G1Transport] = None,
         device_index: int = 0,
         rtsp_port: int = 8554,
         max_fps: float = 15.0,
@@ -59,7 +62,7 @@ class G1Camera:
         self._last_frame_time = 0.0
         self._cap = None
         self._sdk_client = None
-        self._transport: G1Transport | None = None
+        self._transport: Optional[G1Transport] = None
         self._reconnect_attempts = reconnect_attempts
         self._consecutive_failures = 0
         self._max_consecutive_failures = 60  # ~1s at 60Hz read attempts
@@ -129,7 +132,7 @@ class G1Camera:
             raise RuntimeError(f"Cannot open RTSP stream: {self.rtsp_url}")
         self._cap = cap
 
-    def read_pil(self) -> Image.Image | None:
+    def read_pil(self) -> Optional[Image.Image]:
         """Read a frame and return as PIL RGB Image, or None on failure.
 
         Respects max_fps throttling. Attempts reconnection on sustained failure.
@@ -154,13 +157,13 @@ class G1Camera:
         self._last_frame_time = time.monotonic()
         return frame
 
-    def _read_raw(self) -> Image.Image | None:
+    def _read_raw(self) -> Optional[Image.Image]:
         """Read a raw frame from the active transport."""
         if self._transport == G1Transport.SDK:
             return self._read_sdk()
         return self._read_cv2()
 
-    def _read_sdk(self) -> Image.Image | None:
+    def _read_sdk(self) -> Optional[Image.Image]:
         """Read frame from Unitree SDK2 video channel."""
         try:
             frame_data = self._sdk_client.get_image_sample()
@@ -175,7 +178,7 @@ class G1Camera:
             logger.debug("SDK frame read failed: %s", e)
             return None
 
-    def _read_cv2(self) -> Image.Image | None:
+    def _read_cv2(self) -> Optional[Image.Image]:
         """Read frame from OpenCV VideoCapture (USB or RTSP)."""
         import cv2
 

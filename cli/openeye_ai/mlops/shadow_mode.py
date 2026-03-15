@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -22,11 +22,14 @@ from .schemas import (
 
 _SHADOW_PATH = OPENEYE_HOME / "shadow_deployments.yaml"
 
+
 def _load_deployments() -> list[dict]:
     return safe_load_yaml_list(_SHADOW_PATH)
 
+
 def _save_deployments(deployments: list[dict]) -> None:
     atomic_save_yaml(_SHADOW_PATH, deployments)
+
 
 def create_shadow_deployment(config: ShadowDeploymentConfig) -> ShadowDeployment:
     """Create and start a new shadow mode deployment."""
@@ -45,6 +48,7 @@ def create_shadow_deployment(config: ShadowDeploymentConfig) -> ShadowDeployment
     _save_deployments(deployments)
     return deployment
 
+
 def get_shadow_deployment(deployment_id: str) -> ShadowDeployment:
     """Get a shadow deployment by ID."""
     deployments = _load_deployments()
@@ -53,13 +57,15 @@ def get_shadow_deployment(deployment_id: str) -> ShadowDeployment:
             return ShadowDeployment(**d)
     raise KeyError(f"Shadow deployment '{deployment_id}' not found.")
 
-def list_shadow_deployments(model_key: str | None = None) -> list[ShadowDeployment]:
+
+def list_shadow_deployments(model_key: Optional[str] = None) -> list[ShadowDeployment]:
     """List shadow deployments."""
     deployments = _load_deployments()
     result = [ShadowDeployment(**d) for d in deployments]
     if model_key:
         result = [r for r in result if r.config.model_key == model_key]
     return result
+
 
 def run_shadow_inference(
     deployment_id: str,
@@ -136,6 +142,7 @@ def run_shadow_inference(
 
     # Only return production result
     return prod_result
+
 
 def complete_shadow_deployment(deployment_id: str) -> ShadowDeployment:
     """Manually complete a shadow deployment."""

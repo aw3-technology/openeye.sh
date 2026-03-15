@@ -1,12 +1,11 @@
+import { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { usePageMeta } from "@/hooks/usePageMeta";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getBlogPost, formatDate } from "@/data/blogPosts";
 import { categoryColors } from "@/data/categoryColors";
 import { blogHeroImages } from "@/data/blogHeroImages";
-import { ease } from "@/lib/motion";
 
 function renderMarkdown(content: string) {
   const blocks: React.ReactNode[] = [];
@@ -192,7 +191,12 @@ export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const post = slug ? getBlogPost(slug) : undefined;
 
-  usePageMeta(post ? `${post.title} | OpenEye Blog` : "OpenEye Blog", [slug, post]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (post) {
+      document.title = `${post.title} | OpenEye Blog`;
+    }
+  }, [slug, post]);
 
   if (!post) {
     return <Navigate to="/blog" replace />;
@@ -207,7 +211,7 @@ export default function BlogPost() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease }}
+            transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
           >
             {/* Back link */}
             <Link

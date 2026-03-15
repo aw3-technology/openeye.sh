@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import type { Model } from "@/data/models";
-import { ease } from "@/lib/motion";
+import type { Model } from "@/data/modelsData";
 
+const ease = [0.2, 0.8, 0.2, 1] as const;
 
 interface ModelCardProps {
   model: Model;

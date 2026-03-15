@@ -7,7 +7,7 @@ category: "Architecture"
 readTime: "7 min read"
 ---
 
-In 2024, the best open-source detection model was YOLOv8. In 2025, it was YOLO-NAS. In 2026, YOLO26 and Grounding DINO have pushed the frontier further. Each generation brings meaningful improvements — better accuracy, faster inference, new capabilities like open-vocabulary detection.
+In 2024, the best open-source detection model was YOLOv8. In 2025, it was YOLO-NAS. In 2026, YOLO26 and Grounding DINO 1.5 have pushed the frontier further. Each generation brings meaningful improvements — better accuracy, faster inference, new capabilities like open-vocabulary detection.
 
 If your robot's perception pipeline is hardcoded to a specific model, you're stuck with whatever was state-of-the-art when you deployed. Upgrading means rewriting integration code, revalidating safety systems, and retesting everything.
 
@@ -59,8 +59,8 @@ Because the adapter normalizes the output, everything downstream — the scene g
 The Vision Language Model space is evolving even faster than object detection. New models with better reasoning, faster inference, and specialized capabilities launch monthly. OpenEye supports swapping VLMs with the same ease:
 
 ```bash
-# Use Qwen2.5-VL through OpenRouter
-openeye watch --reason --vlm openrouter/qwen2.5-vl
+# Use Qwen3-VL through OpenRouter
+openeye watch --reason --vlm openrouter/qwen3-vl
 
 # Use a local model through Ollama
 openeye watch --reason --vlm ollama/llava

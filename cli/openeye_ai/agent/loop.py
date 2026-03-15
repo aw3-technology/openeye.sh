@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from openeye_ai.memory.store import ObservationMemoryStore
 from openeye_ai.schema import (
@@ -15,6 +15,7 @@ from openeye_ai.schema import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 def _diff_detections(
     prev: list[DetectedObject], curr: list[DetectedObject]
@@ -40,12 +41,14 @@ def _diff_detections(
     sig = min(1.0, (len(appeared) + len(disappeared)) * 0.25)
     return desc, sig
 
+
 def _build_scene_summary(detections: list[DetectedObject]) -> str:
     """Build a simple scene summary from detections."""
     if not detections:
         return "Empty scene — no objects detected."
     labels = [f"{d.label}({d.confidence:.0%})" for d in detections]
     return f"{len(detections)} objects — {', '.join(labels)}"
+
 
 def _build_llm_prompt(
     goal: str,
@@ -80,6 +83,7 @@ PLAN:
 3. <step 3>
 PLAN_CHANGED: <yes or no>"""
 
+
 def _parse_llm_response(response: str) -> AgentReasoning:
     """Parse structured LLM response into AgentReasoning."""
     thought = ""
@@ -107,6 +111,7 @@ def _parse_llm_response(response: str) -> AgentReasoning:
         plan_changed=plan_changed,
     )
 
+
 class AgentLoop:
     """Continuous perception → reasoning → action loop."""
 
@@ -117,8 +122,8 @@ class AgentLoop:
         *,
         hz: float = 1.0,
         goal: str = "monitor the scene",
-        memory_store: ObservationMemoryStore | None = None,
-        llm_call: Callable[[str], str] | None = None,
+        memory_store: Optional[ObservationMemoryStore] = None,
+        llm_call: Optional[Callable[[str], str]] = None,
         memory_recall_count: int = 5,
     ) -> None:
         self.adapters = adapters

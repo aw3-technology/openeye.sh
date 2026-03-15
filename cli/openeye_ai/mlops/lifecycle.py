@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from typing import Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -34,17 +35,21 @@ DEFAULT_GATES: list[ApprovalGate] = [
     ),
 ]
 
+
 def _load_promotions() -> list[dict]:
     return safe_load_yaml_list(_PROMOTIONS_PATH)
 
+
 def _save_promotions(records: list[dict]) -> None:
     atomic_save_yaml(_PROMOTIONS_PATH, records)
+
 
 _VALID_TRANSITIONS = {
     ModelStage.DEV: [ModelStage.STAGING],
     ModelStage.STAGING: [ModelStage.PRODUCTION],
     ModelStage.PRODUCTION: [ModelStage.ARCHIVED],
 }
+
 
 def request_promotion(request: PromotionRequest) -> PromotionRecord:
     """Request to promote a model version to a new stage.
@@ -86,6 +91,7 @@ def request_promotion(request: PromotionRequest) -> PromotionRecord:
 
     return record
 
+
 def approve_promotion(
     model_key: str, version: str, approver: str
 ) -> PromotionRecord:
@@ -108,6 +114,7 @@ def approve_promotion(
             return rec
 
     raise KeyError(f"No pending promotion for {model_key} v{version}")
+
 
 def reject_promotion(
     model_key: str, version: str, approver: str, reason: str = ""
@@ -132,13 +139,15 @@ def reject_promotion(
 
     raise KeyError(f"No pending promotion for {model_key} v{version}")
 
-def list_promotions(model_key: str | None = None) -> list[PromotionRecord]:
+
+def list_promotions(model_key: Optional[str] = None) -> list[PromotionRecord]:
     """List promotion records, optionally filtered by model key."""
     records = _load_promotions()
     result = [PromotionRecord(**r) for r in records]
     if model_key:
         result = [r for r in result if r.model_key == model_key]
     return result
+
 
 def _apply_promotion(record: PromotionRecord) -> None:
     """Update the model version's stage in the registry.
@@ -159,11 +168,13 @@ def _apply_promotion(record: PromotionRecord) -> None:
 
     raise KeyError(f"Version '{record.version}' not found for model '{record.model_key}' during promotion.")
 
-def _find_gate(from_stage: ModelStage, to_stage: ModelStage) -> ApprovalGate | None:
+
+def _find_gate(from_stage: ModelStage, to_stage: ModelStage) -> Optional[ApprovalGate]:
     for gate in DEFAULT_GATES:
         if gate.from_stage == from_stage and gate.to_stage == to_stage:
             return gate
     return None
+
 
 import re
 
@@ -177,6 +188,7 @@ _GATE_OPS = {
     "==": lambda a, b: a == b,
     "!=": lambda a, b: a != b,
 }
+
 
 def _evaluate_gate_condition(condition: str, version) -> bool:
     """Evaluate gate conditions against model metrics.

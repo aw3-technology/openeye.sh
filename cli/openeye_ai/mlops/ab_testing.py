@@ -11,7 +11,7 @@ import statistics
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -20,11 +20,14 @@ from .schemas import ABTestConfig, ABTestMetrics, ABTestResult, ABTestStatus
 
 _AB_TESTS_PATH = OPENEYE_HOME / "ab_tests.yaml"
 
+
 def _load_tests() -> list[dict]:
     return safe_load_yaml_list(_AB_TESTS_PATH)
 
+
 def _save_tests(tests: list[dict]) -> None:
     atomic_save_yaml(_AB_TESTS_PATH, tests)
+
 
 def create_ab_test(config: ABTestConfig) -> ABTestResult:
     """Create and start a new A/B test."""
@@ -41,6 +44,7 @@ def create_ab_test(config: ABTestConfig) -> ABTestResult:
     _save_tests(tests)
     return test
 
+
 def get_ab_test(test_id: str) -> ABTestResult:
     """Get an A/B test by ID."""
     tests = _load_tests()
@@ -49,13 +53,15 @@ def get_ab_test(test_id: str) -> ABTestResult:
             return ABTestResult(**raw)
     raise KeyError(f"A/B test '{test_id}' not found.")
 
-def list_ab_tests(model_key: str | None = None) -> list[ABTestResult]:
+
+def list_ab_tests(model_key: Optional[str] = None) -> list[ABTestResult]:
     """List all A/B tests, optionally filtered by model."""
     tests = _load_tests()
     results = [ABTestResult(**t) for t in tests]
     if model_key:
         results = [r for r in results if r.config.model_key == model_key]
     return results
+
 
 def route_request(test_id: str) -> str:
     """Route an inference request to version A or B based on traffic split.
@@ -70,13 +76,14 @@ def route_request(test_id: str) -> str:
         return test.config.version_b
     return test.config.version_a
 
+
 def record_result(
     test_id: str,
     version: str,
     latency_ms: float,
-    accuracy: float | None = None,
+    accuracy: Optional[float] = None,
     error: bool = False,
-    custom_metrics: dict[str, float] | None = None,
+    custom_metrics: Optional[dict[str, float]] = None,
 ) -> ABTestResult:
     """Record a single inference result for an A/B test."""
     tests = _load_tests()
@@ -134,6 +141,7 @@ def record_result(
 
     raise KeyError(f"A/B test '{test_id}' not found.")
 
+
 def complete_ab_test(test_id: str) -> ABTestResult:
     """Manually complete an A/B test and determine the winner."""
     tests = _load_tests()
@@ -147,6 +155,7 @@ def complete_ab_test(test_id: str) -> ABTestResult:
             _save_tests(tests)
             return test
     raise KeyError(f"A/B test '{test_id}' not found.")
+
 
 def _determine_winner(test: ABTestResult) -> None:
     """Determine the winner based on accuracy (primary) and latency (secondary)."""

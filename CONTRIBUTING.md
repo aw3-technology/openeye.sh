@@ -12,12 +12,10 @@ Thanks for your interest in contributing to OpenEye! This guide will help you ge
 
 ```
 perceptify-the-world/
-├── cli/              # openeye-ai CLI & inference server (Python/Typer)
-├── backend/          # Perception engine runtime & fleet control plane (Python)
-├── src/              # React frontend dashboard (TypeScript/Vite)
-├── integrations/     # ROS 2 bridge, OpenClaw integration
+├── cli/              # openeye-ai CLI & inference server (Python)
+├── backend/          # Perception engine runtime (Python)
+├── src/              # React frontend (TypeScript)
 ├── docs/             # MkDocs documentation site
-├── scripts/          # Build and code generation scripts
 └── .github/          # CI workflows
 ```
 

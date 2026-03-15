@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { values } from "@/data/aboutData";
-import { ease } from "@/lib/motion";
 
+const ease = [0.2, 0.8, 0.2, 1] as const;
 
 export function ValuesSection() {
   return (

@@ -6,7 +6,7 @@ Compare model performance across hardware targets (Jetson vs A100 vs CPU).
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import Any, Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -15,11 +15,14 @@ from .schemas import BenchmarkMatrixResult, HardwareBenchmarkEntry, HardwareTarg
 
 _BENCHMARKS_PATH = OPENEYE_HOME / "benchmark_results.yaml"
 
+
 def _load_benchmarks() -> list[dict]:
     return safe_load_yaml_list(_BENCHMARKS_PATH)
 
+
 def _save_benchmarks(benchmarks: list[dict]) -> None:
     atomic_save_yaml(_BENCHMARKS_PATH, benchmarks)
+
 
 def _detect_available_hardware() -> list[HardwareTarget]:
     """Detect which hardware targets are available on this machine."""
@@ -50,6 +53,7 @@ def _detect_available_hardware() -> list[HardwareTarget]:
         pass
 
     return available
+
 
 def run_benchmark_on_hardware(
     adapter,
@@ -104,12 +108,13 @@ def run_benchmark_on_hardware(
         memory_mb=round(memory_mb, 1),
     )
 
+
 def run_benchmark_matrix(
     adapter,
     model_key: str,
     model_version: str,
     *,
-    targets: list[HardwareTarget] | None = None,
+    targets: Optional[list[HardwareTarget]] = None,
     runs_per_target: int = 100,
     width: int = 640,
     height: int = 480,
@@ -147,8 +152,9 @@ def run_benchmark_matrix(
 
     return result
 
+
 def get_benchmark_results(
-    model_key: str, model_version: str | None = None
+    model_key: str, model_version: Optional[str] = None
 ) -> list[BenchmarkMatrixResult]:
     """Get stored benchmark results for a model."""
     benchmarks = _load_benchmarks()

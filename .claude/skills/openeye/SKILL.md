@@ -14,34 +14,15 @@ OpenEye is a full-stack vision AI platform. The CLI (`openeye`) lets you pull, r
 ```
 cli/                          # Python CLI + inference server (Typer)
   openeye_ai/
-    cli.py                    # Main CLI entry point
+    cli.py                    # Main CLI commands (1344 lines)
     fleet_cli.py              # Fleet management commands
     registry.py               # Model registry & adapter resolution
     config.py                 # User config (~/.openeye/config.yaml)
     schema.py                 # Pydantic output schemas
     models.yaml               # Bundled model registry
-    adapters/                 # Model adapters (yolov8, yolo26, depth_anything, grounding_dino, rfdetr, sam2, smolvla, onnx, tensorrt)
-    commands/                 # CLI command modules
-      inference/              # run, serve, watch, bench
-      mlops/                  # MLOps subcommands
-      models.py               # list, pull, remove, add-model, register-adapter
-      config.py               # config get/set/reset
-      demo.py                 # g1-demo
-      governance.py           # govern subcommands
-      desktop.py              # desktop subcommands
-      debug.py                # debug subcommands
-      robotics.py             # robotics subcommands
+    adapters/                 # Model adapters (base.py, yolov8.py, depth_anything.py, etc.)
     mlops/                    # Model lifecycle (A/B testing, export, retraining, etc.)
-    server/                   # FastAPI server
-      app.py                  # App factory
-      routes/                 # health, predict, perception, vlm, agentic, debug, desktop
-      state.py                # Shared server state
-      metrics.py              # Prometheus metrics
-      rate_limit.py           # slowapi rate limiting
-    mcp/                      # MCP server for desktop vision tools
-    desktop/                  # Desktop capture utilities
-    debug/                    # Debugging tools
-    robotics/                 # Robotics integration
+    server/                   # FastAPI server (app.py, metrics.py, queue.py, rate_limit.py)
     utils/                    # Benchmark, camera, download, hardware, visualization
   tests/
   pyproject.toml              # Entry point: openeye = "openeye_ai.cli:app"
@@ -52,26 +33,21 @@ backend/                      # Perception runtime + fleet control plane
     perception/               # Perception pipeline (detection, depth, tracking, scene graph)
     perception_grpc/          # gRPC streaming service (port 50051)
     fleet/                    # Fleet control plane (FastAPI, port 8001)
-    governance/               # Policy engine (PII filter, rate limiter, zone policy, etc.)
     runtime/                  # Mode system, cortex loop, mode manager
-    inputs/                   # Sensor plugins (VLM providers: Nebius, OpenAI, Gemini, Anthropic, OpenRouter, local YOLO)
-    actions/                  # Action plugins (log, robot control, safety search)
+    inputs/                   # Sensor plugins (VLM, YOLO, video)
+    actions/                  # Action plugins
     llm/                      # LLM plugins (OpenAI, Nebius, OpenRouter)
     simulators/               # Simulator plugins
-    fuser/                    # Prompt assembly + knowledge base (FAISS)
+    fuser/                    # Prompt assembly
   config/                     # JSON5 config files + schemas
-
-integrations/                 # External integrations
-  ros2/                       # ROS 2 perception bridge node
-  openclaw/                   # OpenClaw robot integration
 
 src/                          # React frontend (Vite + TypeScript)
   hooks/                      # React hooks (useOpenEyeConnection, useOpenEyeStream, useFleetQueries, etc.)
   lib/                        # Client libraries (openeye-client.ts, openeye-ws.ts, fleet-client.ts, cred-api.ts)
-  types/                      # TypeScript types (openeye.ts, fleet.ts, credits.ts, mlops.ts, agentic.ts)
-  components/dashboard/       # Dashboard components (LiveCameraFeed, DetectionCanvas, AgenticLoop, etc.)
+  types/                      # TypeScript types (openeye.ts, fleet.ts, credits.ts, mlops.ts)
+  components/dashboard/       # Dashboard components (LiveCameraFeed, DetectionCanvas, etc.)
   components/fleet/           # Fleet components (DeviceTable, DeploymentWizard, etc.)
-  pages/dashboard/            # Dashboard pages (Inference, LiveStream, History, AgenticDemo, Debug, DesktopVision, etc.)
+  pages/dashboard/            # Dashboard pages (Inference, LiveStream, History, etc.)
   pages/dashboard/fleet/      # Fleet pages (FleetDashboard, Deployments, etc.)
 ```
 
@@ -88,10 +64,6 @@ openeye run grounding_dino img.png -p "find the red car"  # Open-vocab detection
 openeye bench yolov8 --runs 20           # Benchmark inference speed
 openeye remove yolov8                     # Delete downloaded weights
 openeye serve yolov8                      # Start REST/WS server on :8000
-openeye watch                             # Live camera detections
-
-# Demos
-openeye g1-demo                           # G1 Safety Guardian demo (dry-run)
 
 # Configuration
 openeye config set default_model yolov8
@@ -109,13 +81,6 @@ openeye mlops promote custom v1.0.0 production
 openeye mlops ab-test custom --a v1.0.0 --b v2.0.0 --split 0.5
 openeye mlops export custom v1.0.0 onnx --quantize
 openeye mlops batch custom v1.0.0 ./images ./output --batch-size 32
-
-# Governance, Desktop, Debug, Robotics, MCP
-openeye govern ...                        # Policy management
-openeye desktop ...                       # Desktop capture & analysis
-openeye debug ...                         # Debugging tools
-openeye robotics ...                      # Robotics integration
-openeye mcp                               # Start MCP server (stdio transport)
 ```
 
 ## Environment Variables
@@ -125,11 +90,9 @@ openeye mcp                               # Start MCP server (stdio transport)
 | `OPENEYE_FLEET_URL` | `http://localhost:8001` | Fleet control plane URL |
 | `OPENEYE_TOKEN` | `""` | Bearer token for fleet API |
 | `OPENEYE_DEVICE_API_KEY` | — | API key for device agent auth |
-| `NEBIUS_API_KEY` | — | Nebius Token Factory for VLM reasoning |
-| `OPENAI_API_KEY` | — | OpenAI VLM perception mode |
-| `GOOGLE_API_KEY` | — | Gemini VLM |
+| `OPENAI_API_KEY` | — | Required for VLM perception mode |
+| `GOOGLE_API_KEY` | — | Optional: Gemini VLM |
 | `CAMERA_INDEX` | `0` | Default camera device index |
-| `CORS_ORIGINS` | `http://localhost:5173,http://localhost:3000` | Allowed CORS origins |
 | `VITE_SUPABASE_URL` | — | Supabase project URL (frontend) |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | — | Supabase anon key (frontend) |
 
@@ -138,12 +101,8 @@ openeye mcp                               # Start MCP server (stdio transport)
 | Model | Task | Adapter | Extras |
 |-------|------|---------|--------|
 | `yolov8` | detection | `yolov8` | `pip install openeye-ai[yolo]` |
-| `yolo26` | detection | `yolo26` | `pip install openeye-ai[yolo]` |
 | `depth_anything` | depth | `depth_anything` | `pip install openeye-ai[depth]` |
 | `grounding_dino` | detection (open-vocab) | `grounding_dino` | `pip install openeye-ai[grounding]` |
-| `rfdetr` | detection | `rfdetr` | `pip install openeye-ai[rfdetr]` |
-| `sam2` | segmentation | `sam2` | `pip install openeye-ai[sam]` |
-| `smolvla` | vision-language-action | `smolvla` | `pip install openeye-ai[smolvla]` |
 | ONNX models | varies | `onnx_generic` / `yolov8:onnx` | `pip install openeye-ai[onnx]` |
 | TensorRT models | varies | `tensorrt_generic` / `yolov8:tensorrt` | `pip install openeye-ai[tensorrt]` |
 
@@ -176,20 +135,12 @@ Register it: `openeye register-adapter my-model ./my_adapter.py --task detection
 
 ## Server API (when running `openeye serve`)
 
-- `GET /health` — Health check with model status and uptime
+- `GET /health` — `{"status": "ok", "model": "<name>"}`
 - `POST /predict` — Multipart file upload, returns `PredictionResult` JSON
 - `GET /config` / `PUT /config` — Get/set runtime configuration
 - `GET /metrics` — Prometheus-style inference metrics
 - `GET /queue/status` — Request queue depth and status
-- `GET /nebius/stats` — VLM usage statistics (latency, token counts)
 - `WS /ws` — WebSocket for real-time streaming (send base64 frames, receive predictions)
-- `WS /ws/perception` — Full perception pipeline (detection + scene graph)
-- `WS /ws/vlm` — VLM reasoning endpoint (Nebius/OpenRouter/custom)
-- `WS /ws/agentic` — Agentic loop (detect + reason + plan, with memory tracking)
-- `WS /ws/desktop` — Desktop capture and analysis
-- `WS /ws/debug` — Debug inspection endpoint
-- MLOps API routes (model registry, A/B testing, lifecycle management)
-- Governance API routes (policy enforcement, loaded if available)
 
 ## Build & Run Commands
 

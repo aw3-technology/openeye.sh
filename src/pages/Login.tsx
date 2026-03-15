@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import logoVertical from "@/assets/openeye-logo-vertical.png";
-import { ease } from "@/lib/motion";
 
 type AuthMode = "sign_in" | "sign_up";
 
@@ -62,7 +61,7 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease }}
+        transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
         className="w-full max-w-sm"
       >
         <div className="text-center mb-8">

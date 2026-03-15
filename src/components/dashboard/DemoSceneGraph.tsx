@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { usePerceptionStream } from "@/hooks/usePerceptionStream";
 import type { SceneGraphNode, SpatialRelationship } from "@/types/openeye";
-import { ease } from "@/lib/motion";
 
 interface TreeNodeData {
   id: string;
@@ -93,7 +92,7 @@ function TreeNodeView({
       initial={{ opacity: 0, x: -6 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -6 }}
-      transition={{ delay: index * 0.02, duration: 0.15, ease }}
+      transition={{ delay: index * 0.02, duration: 0.15, ease: [0.2, 0.8, 0.2, 1] }}
       className="font-mono text-sm"
       style={{ paddingLeft: depth * 20 }}
     >

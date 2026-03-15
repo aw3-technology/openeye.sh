@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { ease } from "@/lib/motion";
 
 interface DetectedObject {
   name: string;
@@ -24,7 +23,7 @@ export function VisionFrame() {
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.3, ease }}
+      transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
       className="relative border border-primary/20 rounded-outer overflow-hidden"
       style={{ outline: "2px solid hsl(var(--oe-blue) / 0.15)" }}
     >
@@ -50,7 +49,7 @@ export function VisionFrame() {
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3 + i * 0.1, duration: 0.2, ease }}
+            transition={{ delay: 0.3 + i * 0.1, duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
             className="absolute"
             style={{
               left: `${obj.x}%`,

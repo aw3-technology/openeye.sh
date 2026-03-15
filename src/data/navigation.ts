@@ -24,8 +24,6 @@ import {
   Shield,
   Cpu,
   Gauge,
-  Bug,
-  Monitor,
 } from "lucide-react";
 
 export interface NavLink {
@@ -68,7 +66,6 @@ export const publicNavItems: NavItem[] = [
 export const dashboardNavItems: DashboardNavItem[] = [
   { label: "Live Demo", icon: Tv2, path: "/dashboard/demo" },
   { label: "Agentic Loop", icon: Crosshair, path: "/dashboard/agentic" },
-  { label: "Desktop Vision", icon: Monitor, path: "/dashboard/desktop" },
   { label: "Overview", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Inference", icon: ImagePlus, path: "/dashboard/inference" },
   { label: "Live Stream", icon: Video, path: "/dashboard/live" },
@@ -86,7 +83,6 @@ export const dashboardNavItems: DashboardNavItem[] = [
   { label: "Agent Loop", icon: Bot, path: "/dashboard/agent" },
   { label: "Memory", icon: Brain, path: "/dashboard/memory" },
   { label: "Governance", icon: Shield, path: "/dashboard/governance" },
-  { label: "Visual Debugger", icon: Bug, path: "/dashboard/debug" },
 ];
 
 /** Dashboard sidebar — fleet management section */
@@ -98,4 +94,4 @@ export const fleetNavItems: DashboardNavItem[] = [
   { label: "Alerts", icon: Bell, path: "/dashboard/fleet/alerts" },
 ];
 
-export const GITHUB_URL = "https://github.com/aw3-technology/openeye.sh";
+export const GITHUB_URL = "https://github.com/openeye-ai";

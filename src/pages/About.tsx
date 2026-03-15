@@ -1,4 +1,4 @@
-import { usePageMeta } from "@/hooks/usePageMeta";
+import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/about/HeroSection";
@@ -9,7 +9,10 @@ import { TimelineSection } from "@/components/about/TimelineSection";
 import { CtaSection } from "@/components/about/CtaSection";
 
 export default function About() {
-  usePageMeta("About");
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.title = "About | OpenEye";
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">

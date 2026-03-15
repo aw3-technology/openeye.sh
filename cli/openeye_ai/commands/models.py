@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
+from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -21,7 +22,9 @@ from openeye_ai.registry import (
     load_registry,
 )
 
+
 # ── list ──────────────────────────────────────────────────────────────
+
 
 def list_models() -> None:
     """Show available and downloaded models."""
@@ -67,7 +70,9 @@ def list_models() -> None:
         )
     console.print(table)
 
+
 # ── pull ──────────────────────────────────────────────────────────────
+
 
 def _pull_single(
     model: str,
@@ -150,10 +155,11 @@ def _pull_single(
     rprint(f"[green]Successfully pulled {display_name}.[/green]")
     return True
 
+
 def pull(
-    model: str | None = typer.Argument(None, help="Model name to download (e.g. yolov8)"),
+    model: Optional[str] = typer.Argument(None, help="Model name to download (e.g. yolov8)"),
     all_models: bool = typer.Option(False, "--all", help="Pull all models in the registry"),
-    variant: str | None = typer.Option(None, "--variant", help="Pull a specific variant"),
+    variant: Optional[str] = typer.Option(None, "--variant", help="Pull a specific variant"),
     quantized: bool = typer.Option(False, "--quantized", help="Pull the quantized variant (shortcut for --variant quantized)"),
     force: bool = typer.Option(False, "--force", help="Force re-download even if already pulled"),
 ) -> None:
@@ -186,7 +192,9 @@ def pull(
     if not _pull_single(model, variant=effective_variant, force=force):
         raise typer.Exit(code=1)
 
+
 # ── remove ────────────────────────────────────────────────────────────
+
 
 def remove(model: str = typer.Argument(help="Model name to remove")) -> None:
     """Delete downloaded model weights from ~/.openeye/models/."""
@@ -217,16 +225,18 @@ def remove(model: str = typer.Argument(help="Model name to remove")) -> None:
         raise typer.Exit(code=1)
     rprint(f"[green]Removed '{model}' ({size_mb:.1f} MB freed).[/green]")
 
+
 # ── add-model ─────────────────────────────────────────────────────────
+
 
 def add_model(
     key: str = typer.Argument(help="Registry key (e.g. my-model)"),
     name: str = typer.Option(..., "--name", help="Display name"),
     task: str = typer.Option(..., "--task", help="Task type (detection, depth, segmentation, classification, embedding)"),
     adapter: str = typer.Option(..., "--adapter", help="Adapter key or path to .py file"),
-    hf_repo: str | None = typer.Option(None, "--hf-repo", help="HuggingFace repo ID"),
-    filename: str | None = typer.Option(None, "--filename", help="Model filename"),
-    size_mb: float | None = typer.Option(None, "--size-mb", help="Model size in MB"),
+    hf_repo: Optional[str] = typer.Option(None, "--hf-repo", help="HuggingFace repo ID"),
+    filename: Optional[str] = typer.Option(None, "--filename", help="Model filename"),
+    size_mb: Optional[float] = typer.Option(None, "--size-mb", help="Model size in MB"),
     description: str = typer.Option("", "--description", help="Model description"),
 ) -> None:
     """Add a new model to the registry."""
@@ -251,7 +261,9 @@ def add_model(
 
     rprint(f"[green]Added '{key}' to registry.[/green]")
 
+
 # ── register-adapter ──────────────────────────────────────────────────
+
 
 def register_adapter(
     key: str = typer.Argument(help="Registry key for the model (e.g. my-custom-model)"),
@@ -285,7 +297,9 @@ def register_adapter(
 
     rprint(f"[green]Registered custom adapter '{key}' from {adapter_file}[/green]")
 
+
 # ── update-registry ───────────────────────────────────────────────────
+
 
 def update_registry() -> None:
     """Fetch the remote registry and merge new models."""

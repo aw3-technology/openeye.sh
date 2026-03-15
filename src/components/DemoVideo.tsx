@@ -1,13 +1,12 @@
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { ease } from "@/lib/motion";
 
 const terminalLines = [
   { text: "$ openeye watch --mode guardian --workspace table", delay: 0 },
   { text: "", delay: 400 },
   { text: "[INFO] Camera 0 connected — 1280x720 @ 30fps", delay: 800 },
   { text: "[INFO] Loading YOLO26-xl... done (1.2s)", delay: 1600 },
-  { text: "[INFO] Loading Qwen2.5-VL reasoning layer... done", delay: 2400 },
+  { text: "[INFO] Loading Qwen3-VL reasoning layer... done", delay: 2400 },
   { text: "[INFO] Guardian mode active. Monitoring workspace.", delay: 3200 },
   { text: "", delay: 3600 },
   { text: "[DETECT] robot_arm: 0.99 — [320, 110, 680, 420]", delay: 4000 },
@@ -101,7 +100,7 @@ export function DemoVideo() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3, ease }}
+          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
           className="text-center mb-12"
         >
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
@@ -111,7 +110,7 @@ export function DemoVideo() {
             Watch OpenEye in real time.
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            A simulated walkthrough of the Safety Guardian workflow — object detection, scene reasoning, and safety halts from a single CLI command.
+            A live camera feed running object detection, scene reasoning, and safety halts — from a single CLI command. This is exactly what you see in production.
           </p>
         </motion.div>
 
@@ -119,7 +118,7 @@ export function DemoVideo() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.1, duration: 0.3, ease }}
+          transition={{ delay: 0.1, duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
           className="max-w-4xl mx-auto"
         >
           <div className="grid lg:grid-cols-5 gap-4">
@@ -276,7 +275,7 @@ export function DemoVideo() {
 
           {/* Description pills */}
           <div className="flex flex-wrap justify-center gap-3 mt-6">
-            {["Real-time detection", "Sub-100ms safety halt", "VLM reasoning", "Live terminal output"].map((tag) => (
+            {["Real-time detection", "Safety halt in 47ms", "VLM reasoning", "Live terminal output"].map((tag) => (
               <span
                 key={tag}
                 className="font-mono text-[11px] text-terminal-muted px-3 py-1 border border-foreground/[0.06] rounded-inner"

@@ -294,97 +294,17 @@ openeye mlops feedback MODEL_KEY OUTPUT
 
 ---
 
-## Governance Subcommands
-
-```
-openeye govern ...    # Policy management and enforcement
-```
-
----
-
-## Desktop Subcommands
-
-```
-openeye desktop ...   # Desktop capture and analysis
-```
-
-Requires: `pip install openeye-ai[desktop]`
-
----
-
-## Debug Subcommands
-
-```
-openeye debug ...     # Debugging and inspection tools
-```
-
-Requires: `pip install openeye-ai[debug]`
-
----
-
-## Robotics Subcommands
-
-```
-openeye robotics ...  # Robotics integration commands
-```
-
-Requires: `pip install openeye-ai[robotics]`
-
----
-
-## MCP Server
-
-```
-openeye mcp [OPTIONS]
-
-Options:
-  --monitor/-m INT     Monitor index (default: 1 = primary)
-  --vlm-model TEXT     VLM model to use
-```
-
-Start the OpenEye MCP server (stdio transport) for desktop vision tools.
-
-Requires: `pip install openeye-ai[mcp]`
-
----
-
-## G1 Safety Guardian Demo
-
-```
-openeye g1-demo [OPTIONS]
-
-Options:
-  --transport TEXT       webcam|usb|rtsp|sdk|auto (default: webcam)
-  --host TEXT            G1 IP address (default: 192.168.123.161)
-  --control-mode TEXT    sdk|http|dry_run (default: dry_run)
-  --model TEXT           Detection model (default: yolov8)
-  --danger-m FLOAT       Danger zone metres (default: 0.5)
-  --caution-m FLOAT      Caution zone metres (default: 1.5)
-  --clear-duration FLOAT Seconds before resume (default: 2.0)
-  --max-fps FLOAT        Camera frame rate cap (default: 15.0)
-  -c, --camera INT       USB device index (default: 0)
-```
-
----
-
 ## Pip Install Extras
 
 ```bash
-pip install openeye-ai[yolo]        # YOLOv8/YOLO26 (ultralytics>=8.2)
+pip install openeye-ai[yolo]        # YOLOv8 (ultralytics>=8.2)
 pip install openeye-ai[depth]       # Depth Anything (transformers, torch, accelerate)
 pip install openeye-ai[grounding]   # Grounding DINO (transformers, torch, accelerate)
-pip install openeye-ai[rfdetr]      # RF-DETR detection (rfdetr>=1.0)
-pip install openeye-ai[sam]         # Segment Anything 2 (segment-anything-2, torch)
-pip install openeye-ai[smolvla]     # SmolVLA (lerobot, torch)
 pip install openeye-ai[onnx]        # ONNX Runtime (onnxruntime>=1.17)
 pip install openeye-ai[onnx-gpu]    # ONNX with GPU (onnxruntime-gpu>=1.17)
 pip install openeye-ai[tensorrt]    # TensorRT (tensorrt>=10.0)
 pip install openeye-ai[camera]      # Live camera (opencv-python>=4.9)
-pip install openeye-ai[desktop]     # Screen capture (mss>=9.0)
-pip install openeye-ai[mcp]         # MCP server (mcp[cli], mss)
-pip install openeye-ai[debug]       # Debugging (playwright, scikit-image, mss)
-pip install openeye-ai[robotics]    # Robotics (grpcio, paho-mqtt)
-pip install openeye-ai[all]         # YOLO + depth + grounding + OpenCV
+pip install openeye-ai[all]         # Everything
 ```
 
 ## File Paths
@@ -395,11 +315,8 @@ pip install openeye-ai[all]         # YOLO + depth + grounding + OpenCV
 | `~/.openeye/models/` | Downloaded model weights |
 | `~/.openeye/config.yaml` | User configuration |
 | `cli/openeye_ai/models.yaml` | Bundled model registry |
-| `cli/openeye_ai/cli.py` | Main CLI entry point |
-| `cli/openeye_ai/fleet_cli.py` | Fleet CLI commands |
+| `cli/openeye_ai/cli.py` | Main CLI (1344 lines) |
+| `cli/openeye_ai/fleet_cli.py` | Fleet CLI (395 lines) |
 | `cli/openeye_ai/registry.py` | Model registry & adapter resolution |
 | `cli/openeye_ai/adapters/base.py` | ModelAdapter ABC |
 | `cli/openeye_ai/server/app.py` | FastAPI inference server |
-| `cli/openeye_ai/server/routes/` | Server route modules (health, predict, perception, vlm, agentic, debug, desktop) |
-| `cli/openeye_ai/commands/` | CLI command modules |
-| `cli/openeye_ai/mcp/` | MCP server implementation |

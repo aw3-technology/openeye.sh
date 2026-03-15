@@ -42,6 +42,6 @@ export const commands: Command[] = [
 export const valueProps: ValueProp[] = [
   { label: "Safety-first", description: "Real-time human detection and robot halt" },
   { label: "Model-agnostic", description: "YOLOv8, SAM2, Grounding DINO, Depth Anything, and more" },
-  { label: "Self-host + Docker", description: "Full on-prem deployment or one-command Docker" },
+  { label: "Self-hosted", description: "All inference runs locally — your data never leaves your network" },
   { label: "Open source", description: "Apache 2.0 — inspect, modify, deploy freely" },
 ];
