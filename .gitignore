@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 # Python / CLI
+.venv/
 cli/.venv/
 cli/*.egg-info/
 cli/openeye_ai/*.egg-info/
@@ -38,6 +39,7 @@ dist/
 
 # Python backend
 backend/.venv/
+.env
 backend/.env
 backend/config/memory/
 backend/dump/

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
+import sceneWorkshop from "@/assets/demo/scene-workshop.jpg";
 
 const terminalLines = [
   { text: "$ openeye watch --mode guardian --workspace table", delay: 0 },
@@ -125,6 +126,13 @@ export function DemoVideo() {
             {/* Vision feed */}
             <div className="lg:col-span-3 relative aspect-video bg-card rounded-outer border overflow-hidden shadow-lg">
               <div className="absolute inset-0 bg-card">
+                {/* Background image */}
+                <img
+                  src={sceneWorkshop}
+                  alt="Workshop scene"
+                  className="absolute inset-0 w-full h-full object-cover opacity-30"
+                />
+
                 {/* Grid overlay */}
                 <div
                   className="absolute inset-0 opacity-5"

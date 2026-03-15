@@ -44,6 +44,8 @@ nav:
       - Architecture: backend/architecture.md
       - Configuration: backend/configuration.md
   - Tutorials:
+      - Interactive Demo: tutorials/demo.md
+      - G1 Safety Demo: tutorials/g1-demo.md
       - Custom Adapter: tutorials/custom-adapter.md
       - Docker Deployment: tutorials/docker.md
 

@@ -6,8 +6,12 @@ export const docsManifest = [
       "cli-pull",
       "cli-run",
       "cli-serve",
+      "cli-watch",
+      "cli-bench",
       "cli-list",
       "cli-config",
+      "cli-agent",
+      "cli-api",
     ],
   },
   {
@@ -17,6 +21,10 @@ export const docsManifest = [
       "perception-pipeline",
       "plugin-system",
     ],
+  },
+  {
+    label: "VLM via OpenRouter",
+    sections: ["vlm-openrouter"],
   },
   {
     label: "Configuration",

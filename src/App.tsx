@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { OpenEyeConnectionProvider } from "@/hooks/useOpenEyeConnection";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardErrorBoundary } from "@/components/DashboardErrorBoundary";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -49,6 +50,7 @@ import Governance from "./pages/dashboard/Governance.tsx";
 import Profile from "./pages/dashboard/Profile.tsx";
 import Presentation from "./pages/Presentation.tsx";
 import LiveDemo from "./pages/LiveDemo.tsx";
+import HackathonDemo from "./pages/HackathonDemo.tsx";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +61,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -75,6 +78,7 @@ const App = () => (
             <Route path="/architecture" element={<Architecture />} />
             <Route path="/presentation" element={<Presentation />} />
             <Route path="/demo" element={<LiveDemo />} />
+            <Route path="/hackathon" element={<HackathonDemo />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
 

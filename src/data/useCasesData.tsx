@@ -15,6 +15,9 @@ import {
   AlertTriangle,
   Package,
 } from "lucide-react";
+import safetyWorkspace from "@/assets/demo/safety-workspace.jpg";
+import sceneKitchen from "@/assets/demo/scene-kitchen.jpg";
+import sceneWarehouse from "@/assets/demo/scene-warehouse.jpg";
 
 export interface UseCase {
   id: string;
@@ -24,6 +27,7 @@ export interface UseCase {
   title: string;
   subtitle: string;
   description: string;
+  image: string;
   scenarios: { icon: React.ReactNode; label: string; detail: string }[];
   terminalCommand: string;
   stats: { value: string; label: string }[];
@@ -40,6 +44,7 @@ export const useCases: UseCase[] = [
       "Give robots real-time visual understanding — from warehouse floors to family kitchens.",
     description:
       "Robots operating in human environments need continuous spatial awareness. OpenEye provides a dual-layer perception pipeline — fast YOLO detection for real-time geometry and VLM reasoning for context-dependent understanding — so robots can see, reason, and act safely around people and objects.",
+    image: safetyWorkspace,
     scenarios: [
       {
         icon: <ShieldCheck className="w-4 h-4" />,
@@ -84,6 +89,7 @@ export const useCases: UseCase[] = [
       "Use structured visual perception to debug UIs, detect visual regressions, and validate application state.",
     description:
       "Modern applications are visual — but most debugging tools are blind. OpenEye's perception pipeline can analyze screenshots and screen recordings to detect UI anomalies, verify layout correctness, and generate structured descriptions of what's on screen. Integrate it into CI pipelines or use it interactively during development.",
+    image: sceneKitchen,
     scenarios: [
       {
         icon: <ScanLine className="w-4 h-4" />,
@@ -128,6 +134,7 @@ export const useCases: UseCase[] = [
       "Give desktop automation agents structured visual understanding of screens, windows, and UI elements.",
     description:
       "Computer-use agents need to see and understand desktop environments to click buttons, fill forms, and navigate applications. OpenEye converts screen captures into structured perception data — detected elements, spatial relationships, and natural language scene descriptions — so agents can reason about what's on screen and plan their next action.",
+    image: sceneWarehouse,
     scenarios: [
       {
         icon: <MousePointer className="w-4 h-4" />,

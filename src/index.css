@@ -189,6 +189,34 @@
   }
 }
 
+/* Hackathon demo animations */
+@keyframes hackathon-glow {
+  0%, 100% { box-shadow: 0 0 4px hsl(217 91% 60% / 0.3); }
+  50% { box-shadow: 0 0 12px hsl(217 91% 60% / 0.6); }
+}
+
+@keyframes hackathon-danger-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 2px transparent; }
+  50% { box-shadow: inset 0 0 0 2px hsl(0 72% 50% / 0.5); }
+}
+
+@keyframes phase-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-hackathon-glow {
+  animation: hackathon-glow 2s ease-in-out infinite;
+}
+
+.animate-hackathon-danger-pulse {
+  animation: hackathon-danger-pulse 1s ease-in-out infinite;
+}
+
+.animate-phase-pulse {
+  animation: phase-pulse 1.5s ease-in-out infinite;
+}
+
 /* Logo theme switching */
 .logo-light { display: none; }
 .logo-dark { display: block; }

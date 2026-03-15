@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
 import { useDevices, useInferenceHistory } from "@/hooks/useOpenEyeQueries";
 import { useCreditBalance } from "@/hooks/useCredits";
-import { getTotalBalance } from "@/types/credits";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { ServerUrlDialog } from "@/components/dashboard/ServerUrlDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,7 +55,7 @@ const quickActions = [
 ] as const;
 
 export default function Overview() {
-  const { isConnected, healthData, serverUrl, client } = useOpenEyeConnection();
+  const { isConnected, healthData, serverUrl, client, isCloudDeployment } = useOpenEyeConnection();
   const { data: devices = [] } = useDevices();
   const { data: creditData } = useCreditBalance();
   const { data: historyData } = useInferenceHistory(0, 5);
@@ -102,13 +101,13 @@ export default function Overview() {
       </div>
 
       {/* Top metrics */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className={`grid gap-4 sm:grid-cols-2 ${isCloudDeployment ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
         <MetricCard
           label="Server"
           value={isConnected ? "Connected" : "Offline"}
           icon={isConnected ? Wifi : WifiOff}
           color={isConnected ? "bg-green-500/15 text-green-500" : "bg-red-500/15 text-red-500"}
-          description={serverUrl}
+          description={serverUrl || "Not configured"}
         />
         <MetricCard
           label="Active Model"
@@ -128,12 +127,14 @@ export default function Overview() {
           icon={MonitorSmartphone}
           color="bg-purple-500/15 text-purple-500"
         />
-        <MetricCard
-          label="Credits"
-          value={getTotalBalance(creditData) ?? "—"}
-          icon={Coins}
-          color="bg-yellow-500/15 text-yellow-500"
-        />
+        {isCloudDeployment && (
+          <MetricCard
+            label="Credits"
+            value={creditData?.balance ?? "—"}
+            icon={Coins}
+            color="bg-yellow-500/15 text-yellow-500"
+          />
+        )}
       </div>
 
       {/* Quick actions */}

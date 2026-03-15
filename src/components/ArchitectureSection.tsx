@@ -22,11 +22,11 @@ export function ArchitectureSection() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full bg-terminal-green" />
-                Model-agnostic: YOLO26, YOLOv8, RF-DETR, DINO, SAM 2, Depth Anything
+                Model-agnostic: YOLOv8, YOLO26, RF-DETR, DINO, SAM 2, Depth Anything, SmolVLA
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full bg-terminal-green" />
-                Adapter-ready: 8 adapters + ONNX/TensorRT runtimes
+                Adapter-ready: 7 models + ONNX/TensorRT runtimes
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full bg-terminal-amber" />

@@ -45,6 +45,7 @@ rfdetr = ["rfdetr>=1.0"]
 smolvla = ["lerobot>=0.1", "torch>=2.0"]
 all = ["openeye-ai[yolo,depth,grounding]", "opencv-python>=4.9"]
 camera = ["opencv-python>=4.9"]
+mcp = ["mcp[cli]>=1.2.0"]
 
 [dependency-groups]
 dev = [
@@ -56,6 +57,7 @@ dev = [
 
 [project.scripts]
 openeye = "openeye_ai.cli:app"
+openeye-mcp = "openeye_ai.mcp.server:main"
 
 [project.urls]
 Homepage = "https://perceptify.dev"

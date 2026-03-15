@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { OpenEyeClient, getStoredServerUrl, setStoredServerUrl } from "@/lib/openeye-client";
+import { isCloudDeployment as checkCloudDeployment } from "@/lib/deployment-env";
 import type { HealthResponse } from "@/types/openeye";
 
 /** Interval between health check polls (ms) */
@@ -12,6 +13,7 @@ interface OpenEyeConnectionContextValue {
   client: OpenEyeClient;
   isConnected: boolean;
   healthData: HealthResponse | null;
+  isCloudDeployment: boolean;
 }
 
 const OpenEyeConnectionContext = createContext<OpenEyeConnectionContextValue | null>(null);
@@ -33,6 +35,8 @@ export function OpenEyeConnectionProvider({ children }: { children: ReactNode })
     setHealthData(null);
     queryClient.clear();
   }, [queryClient]);
+
+  const isCloud = useMemo(() => checkCloudDeployment(), []);
 
   // Skip health polling when using default localhost URL on a deployed (non-localhost) origin
   const isDefaultLocalhost = serverUrl === "http://localhost:8000" && typeof window !== "undefined" && window.location.hostname !== "localhost";
@@ -67,11 +71,11 @@ export function OpenEyeConnectionProvider({ children }: { children: ReactNode })
       cancelled = true;
       clearInterval(id);
     };
-  }, [client]);
+  }, [client, serverUrl]);
 
   return (
     <OpenEyeConnectionContext.Provider
-      value={{ serverUrl, setServerUrl, client, isConnected, healthData }}
+      value={{ serverUrl, setServerUrl, client, isConnected, healthData, isCloudDeployment: isCloud }}
     >
       {children}
     </OpenEyeConnectionContext.Provider>

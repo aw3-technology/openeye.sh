@@ -14,6 +14,7 @@ import { CLICommandsSection } from "@/components/CLICommandsSection";
 import { ProductionDashboardSection } from "@/components/ProductionDashboardSection";
 import { DeployAnywhereSection } from "@/components/DeployAnywhereSection";
 import { BuiltWithSection } from "@/components/BuiltWithSection";
+import { UseCasesSection } from "@/components/UseCasesSection";
 import { FinalCTA } from "@/components/FinalCTA";
 
 export default function Index() {
@@ -33,6 +34,7 @@ export default function Index() {
       <CodeExamples />
       <CLICommandsSection />
       <DemoVideo />
+      <UseCasesSection />
       <ProductionDashboardSection />
       <GetStarted />
       <DeployAnywhereSection />

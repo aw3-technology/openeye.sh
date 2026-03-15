@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { usePredict, useSaveInference, useInferenceHistory } from "@/hooks/useOpenEyeQueries";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
 import { useCreditBalance, useDeductCredits, useRefundCredits } from "@/hooks/useCredits";
-import { INFERENCE_CREDIT_COST, getTotalBalance } from "@/types/credits";
-import { isCloudUrl } from "@/lib/openeye-client";
+import { INFERENCE_CREDIT_COST } from "@/types/credits";
+import { isCredSystemConfigured } from "@/lib/deployment-env";
 import { FileDropzone } from "@/components/dashboard/FileDropzone";
 import { DetectionCanvas } from "@/components/dashboard/DetectionCanvas";
 import { InsufficientCreditsDialog } from "@/components/dashboard/InsufficientCreditsDialog";
@@ -42,8 +42,8 @@ export default function Inference() {
   const [prompt, setPrompt] = useState("");
   const [showCreditsDialog, setShowCreditsDialog] = useState(false);
   const [lastFile, setLastFile] = useState<File | null>(null);
-  const { serverUrl, isConnected, healthData } = useOpenEyeConnection();
-  const isCloud = isCloudUrl(serverUrl);
+  const { serverUrl, isConnected, healthData, isCloudDeployment } = useOpenEyeConnection();
+  const isCloud = isCloudDeployment && isCredSystemConfigured();
   const predict = usePredict();
   const saveInference = useSaveInference();
   const creditBalance = useCreditBalance();
@@ -138,7 +138,7 @@ export default function Inference() {
 
   const handleFile = (file: File) => {
     if (isCloud) {
-      const balance = getTotalBalance(creditBalance.data);
+      const balance = creditBalance.data?.balance ?? 0;
       if (balance < INFERENCE_CREDIT_COST) {
         setShowCreditsDialog(true);
         return;
@@ -225,7 +225,7 @@ export default function Inference() {
         {isCloud && (
           <MetricCard
             label="Credits"
-            value={getTotalBalance(creditBalance.data) ?? "—"}
+            value={creditBalance.data?.balance ?? "—"}
             icon={Coins}
             color="bg-yellow-500/15 text-yellow-500"
           />
@@ -261,7 +261,7 @@ export default function Inference() {
       <InsufficientCreditsDialog
         open={showCreditsDialog}
         onOpenChange={setShowCreditsDialog}
-        balance={getTotalBalance(creditBalance.data)}
+        balance={creditBalance.data?.balance ?? 0}
       />
 
       {/* ---- Loading State ---- */}

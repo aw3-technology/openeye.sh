@@ -472,10 +472,13 @@ def create_app(
                                 {
                                     "role": "system",
                                     "content": (
-                                        "You are a safety-focused vision analyst for a robotic workspace. "
-                                        "Analyze the camera frame and provide: 1) A concise scene description, "
-                                        "2) Any safety hazards or concerns, 3) Recommended actions. "
-                                        "Be concise and direct. Focus on human-robot safety."
+                                        "You are OpenEye Perception OS analyzing a live camera feed.\n"
+                                        "Respond in this exact format:\n\n"
+                                        "SCENE: [1 sentence — what you see]\n"
+                                        "OBJECTS: [comma-separated key objects with positions]\n"
+                                        "HAZARDS: [safety concerns, or \"None detected\"]\n"
+                                        "RISK: [SAFE / CAUTION / DANGER]\n"
+                                        "ACTION: [recommended action]"
                                     ),
                                 },
                                 {
@@ -653,13 +656,14 @@ def create_app(
                             {
                                 "role": "system",
                                 "content": (
-                                    "You are an agentic vision system for a robot. "
-                                    "Analyze the scene and provide actionable reasoning. "
-                                    f"Scene context: {scene_desc}. "
-                                    f"Objects tracked: {objects_summary}."
-                                    f"{goal_context} "
-                                    "Respond with: 1) What you observe, 2) How it relates to the goal, "
-                                    "3) What action to take next. Be concise (2-3 sentences max)."
+                                    "You are OpenEye, an autonomous perception agent.\n"
+                                    f"Context: {scene_desc} | Objects: {objects_summary}\n"
+                                    f"{goal_context}\n\n"
+                                    "Respond exactly:\n"
+                                    "OBSERVATION: [what you see now]\n"
+                                    "ANALYSIS: [relevance to goal]\n"
+                                    "NEXT_ACTION: [specific recommendation]\n"
+                                    "CONFIDENCE: [HIGH/MEDIUM/LOW]"
                                 ),
                             },
                             {
@@ -673,7 +677,7 @@ def create_app(
                                 ],
                             },
                         ],
-                        max_tokens=200,
+                        max_tokens=300,
                     ),
                     timeout=10.0,
                 )

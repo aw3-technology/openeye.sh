@@ -14,6 +14,10 @@ import logoHorizontal from "@/assets/openeye-logo-horizontal.png";
 import logoHorizontalDark from "@/assets/openeye-logo-horizontal-dark.png";
 import logoVertical from "@/assets/openeye-logo-vertical.png";
 import logoVerticalDark from "@/assets/openeye-logo-vertical-dark.png";
+import safetyWorkspace from "@/assets/demo/safety-workspace.jpg";
+import sceneWorkshop from "@/assets/demo/scene-workshop.jpg";
+import sceneKitchen from "@/assets/demo/scene-kitchen.jpg";
+import sceneWarehouse from "@/assets/demo/scene-warehouse.jpg";
 
 // ─── Slide Data ───────────────────────────────────────────────────────────
 
@@ -566,23 +570,30 @@ function SafetySlide() {
             ))}
           </div>
         </div>
-        <div className="w-[700px] flex items-center justify-center">
+        <div className="w-[700px] flex flex-col items-center justify-center gap-6">
+          {/* Camera feed preview */}
           <motion.div
-            className="w-full bg-card/80 border border-border/60 rounded-xl p-8 font-mono text-lg leading-loose space-y-1.5 relative overflow-hidden backdrop-blur-sm"
+            className="w-full aspect-video rounded-xl overflow-hidden border border-border/60 relative"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.15 }}
+          >
+            <img src={safetyWorkspace} alt="Safety workspace" className="absolute inset-0 w-full h-full object-cover opacity-50" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+            <div className="absolute top-3 left-3 font-mono text-xs text-oe-green/70">OPENEYE GUARDIAN — LIVE</div>
+            <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+              <motion.span className="w-1.5 h-1.5 rounded-full bg-oe-green" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }} />
+              <span className="font-mono text-xs text-oe-green/70">MONITORING</span>
+            </div>
+          </motion.div>
+
+          {/* Terminal output */}
+          <motion.div
+            className="w-full bg-card/80 border border-border/60 rounded-xl p-6 font-mono text-base leading-loose space-y-1 relative overflow-hidden backdrop-blur-sm"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            {/* Blinking status light */}
-            <div className="absolute top-4 right-4 flex items-center gap-2">
-              <motion.span
-                className="w-2 h-2 rounded-full bg-oe-green"
-                animate={{ opacity: [1, 0.3, 1] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-              />
-              <span className="text-xs text-muted-foreground">LIVE</span>
-            </div>
-
             {terminalLines.map((line, i) => (
               <motion.div
                 key={i}
@@ -933,12 +944,33 @@ function DeploySlide() {
 
 function UseCasesSlide() {
   const cases = [
-    { icon: "🤖", title: "Robot Safety Monitor", desc: "Real-time workspace monitoring with automatic halt on human intrusion." },
-    { icon: "🏭", title: "Industrial QA", desc: "Detect defects, track assembly progress, ensure quality standards." },
-    { icon: "🏠", title: "Smart Home Robotics", desc: "Help domestic robots understand and navigate home environments." },
-    { icon: "🌾", title: "Agriculture", desc: "Crop monitoring, livestock tracking, autonomous harvesting guidance." },
-    { icon: "🔬", title: "Research & Education", desc: "Rapid prototyping for vision-based robotics research." },
-    { icon: "🏗️", title: "Construction Safety", desc: "PPE detection, zone monitoring, hazard identification on job sites." },
+    {
+      overline: "Robotics",
+      overlineColor: "text-terminal-amber",
+      title: "Perception layer for any robot.",
+      desc: "Dual-layer perception — fast YOLO detection for real-time geometry and VLM reasoning for context-dependent understanding — so robots can see, reason, and act safely.",
+      scenarios: ["Safety zone enforcement", "Human-robot coexistence", "Hazard identification", "Scene graph for planning"],
+      cmd: "openeye watch --safety --danger-m 0.5",
+      image: safetyWorkspace,
+    },
+    {
+      overline: "App Debugging",
+      overlineColor: "text-red-400",
+      title: "See what your application sees.",
+      desc: "Analyze screenshots and screen recordings to detect UI anomalies, verify layout correctness, and generate structured descriptions of what's on screen.",
+      scenarios: ["Visual regression detection", "Layout validation", "VLM-powered UI analysis", "CI/CD integration"],
+      cmd: "openeye run screenshot.png --format json",
+      image: sceneKitchen,
+    },
+    {
+      overline: "Desktop Agents",
+      overlineColor: "text-blue-400",
+      title: "Eyes for computer-use agents.",
+      desc: "Convert screen captures into structured perception data — detected elements, spatial relationships, and scene descriptions — so agents can reason and plan.",
+      scenarios: ["UI element detection", "Screen understanding", "Multi-window awareness", "REST API for agent loops"],
+      cmd: "openeye serve yolov8 --port 8000",
+      image: sceneWarehouse,
+    },
   ];
 
   return (
@@ -964,19 +996,36 @@ function UseCasesSlide() {
         >
           Built for the <span className="bg-gradient-to-r from-primary to-oe-blue bg-clip-text text-transparent">physical world.</span>
         </motion.h2>
-        <div className="grid grid-cols-3 gap-5 flex-1">
+        <div className="grid grid-cols-3 gap-6 flex-1">
           {cases.map((c, i) => (
             <motion.div
               key={c.title}
-              className="bg-card/50 border border-border/40 rounded-xl p-7 flex flex-col backdrop-blur-sm relative overflow-hidden group"
+              className="bg-card/50 border border-border/40 rounded-xl p-8 flex flex-col backdrop-blur-sm relative overflow-hidden group"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.15 + i * 0.08 }}
+              transition={{ delay: 0.15 + i * 0.12 }}
             >
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="text-[44px] mb-3">{c.icon}</div>
-              <div className="text-[26px] font-semibold mb-2">{c.title}</div>
-              <p className="text-lg text-muted-foreground leading-relaxed flex-1">{c.desc}</p>
+              <img src={c.image} alt={c.overline} className="absolute inset-0 w-full h-full object-cover opacity-15" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+              <div className={`font-mono text-sm uppercase tracking-widest ${c.overlineColor} mb-4 relative`}>{c.overline}</div>
+              <div className="text-[28px] font-semibold mb-3 leading-tight relative">{c.title}</div>
+              <p className="text-lg text-muted-foreground leading-relaxed mb-6 relative">{c.desc}</p>
+              <div className="space-y-2 mb-6 flex-1">
+                {c.scenarios.map((s, j) => (
+                  <motion.div
+                    key={s}
+                    className="font-mono text-base text-muted-foreground/80 flex items-center gap-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 + i * 0.12 + j * 0.05 }}
+                  >
+                    <span className="text-oe-green/60">▸</span> {s}
+                  </motion.div>
+                ))}
+              </div>
+              <div className="font-mono text-base bg-secondary/60 text-oe-green px-4 py-3 rounded-lg border border-border/40">
+                $ {c.cmd}
+              </div>
             </motion.div>
           ))}
         </div>

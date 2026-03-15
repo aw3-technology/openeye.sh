@@ -2,7 +2,7 @@
 name: openeye
 description: Get context-aware help with the OpenEye vision AI platform — CLI, server, fleet management, adapters, and frontend.
 argument-hint: "<question about OpenEye>"
-allowed-tools: Read, Glob, Grep, WebSearch, WebFetch, Agent
+allowed-tools: Bash, Read, Glob, Grep, WebSearch, WebFetch, Agent
 ---
 
 # OpenEye — Ollama for Vision AI
@@ -174,6 +174,46 @@ cd backend && python -m uvicorn src.fleet.app:app --port 8001
 | `Connection refused :8001` | Start fleet control plane or set `OPENEYE_FLEET_URL` |
 | `401 Unauthorized (fleet)` | Set `OPENEYE_TOKEN` env var |
 | `Camera not found` | Check `CAMERA_INDEX` or pass `--camera` to `openeye watch` |
+
+## Running CLI Commands
+
+The CLI virtual environment is at `cli/.venv`. Always use the full venv path to run commands:
+
+```bash
+cli/.venv/bin/openeye <command> [args...]
+```
+
+### Common Workflows
+
+```bash
+# Pull a model then run inference
+cli/.venv/bin/openeye pull yolov8
+cli/.venv/bin/openeye run yolov8 photo.jpg
+
+# Start the server and verify it's healthy
+cli/.venv/bin/openeye serve yolov8 &
+curl -s http://localhost:8000/health | python3 -m json.tool
+
+# Benchmark a model
+cli/.venv/bin/openeye bench yolov8 --runs 20
+
+# List available models (shows download status)
+cli/.venv/bin/openeye list
+```
+
+### Output Formats
+
+- `openeye run` outputs JSON by default (`PredictionResult` schema). Use `--pretty` for human-readable output.
+- `openeye list` outputs a Rich table to stderr, machine-readable data to stdout.
+- `openeye bench` outputs a Rich table with latency percentiles.
+- `openeye serve` runs in the foreground; use `&` or a background task to keep it running.
+
+### Safety Guidelines
+
+- Never run `openeye remove` without user confirmation — it permanently deletes model weights.
+- Don't bind `openeye serve` to privileged ports (< 1024) without explicit request.
+- Large model pulls (`depth_anything`, `grounding_dino`) can take several minutes and use significant disk space — warn the user.
+- Always check `openeye list` before attempting to run a model that may not be downloaded.
 
 ## Detailed References
 

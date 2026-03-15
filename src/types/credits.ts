@@ -1,16 +1,13 @@
 export interface CreditBalance {
+  balance: number;
   user_id: string;
-  balances: {
-    credit_type_id: string;
-    credit_type_name: string;
-    credit_type_symbol: string;
-    balance: number;
-  }[];
+  project_id: string;
 }
 
 export interface CreditTransaction {
   id: string;
   user_id: string;
+  project_id: string;
   amount: number;
   type: "purchase" | "deduction" | "refund" | "bonus";
   description: string;
@@ -20,13 +17,9 @@ export interface CreditTransaction {
 export interface PricingTier {
   id: string;
   name: string;
-  description?: string;
   credits: number;
-  price: string; // e.g. "9.99"
-  currency: string;
-  billing_type: string;
-  is_active: boolean;
-  is_popular: boolean;
+  price_cents: number;
+  popular?: boolean;
 }
 
 export interface CheckoutSession {
@@ -35,9 +28,3 @@ export interface CheckoutSession {
 }
 
 export const INFERENCE_CREDIT_COST = 1;
-
-/** Sum all balances from the Cred API response into a single number */
-export function getTotalBalance(data: CreditBalance | undefined | null): number {
-  if (!data?.balances?.length) return 0;
-  return data.balances.reduce((sum, b) => sum + b.balance, 0);
-}
