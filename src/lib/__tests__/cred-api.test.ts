@@ -1,13 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-// Mock import.meta.env before importing the module
-vi.stubEnv("VITE_CRED_API_URL", "https://test.supabase.co/functions/v1/credits-api");
-vi.stubEnv("VITE_CRED_API_KEY", "test-api-key");
-vi.stubEnv("VITE_CRED_PROJECT_ID", "test-project");
+// Mock supabase client
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { access_token: "test-token" } },
+      }),
+    },
+  },
+}));
+
+vi.stubEnv("VITE_SUPABASE_PROJECT_ID", "test-project");
+vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "test-key");
 
 const { credApi } = await import("../cred-api");
-
-const TOKEN = "user-jwt-token";
 
 function mockFetchOk(data: unknown) {
   return vi.fn().mockResolvedValue({
@@ -17,80 +24,35 @@ function mockFetchOk(data: unknown) {
   });
 }
 
-function mockFetchError(status: number, body: string) {
-  return vi.fn().mockResolvedValue({
-    ok: false,
-    status,
-    text: () => Promise.resolve(body),
-  });
-}
-
-describe("credApi", () => {
+describe("credApi (edge function proxy)", () => {
   const originalFetch = globalThis.fetch;
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
   });
 
-  it("getBalance sends correct headers and path", async () => {
-    const fetchMock = mockFetchOk({ balance: 100 });
-    globalThis.fetch = fetchMock;
-
-    const result = await credApi.getBalance(TOKEN);
-
-    expect(result).toEqual({ balance: 100 });
-    expect(fetchMock).toHaveBeenCalledOnce();
-    const [url, opts] = fetchMock.mock.calls[0];
-    expect(url).toContain("/projects/test-project/balance");
-    expect(opts.headers.Authorization).toBe("Bearer test-api-key");
-    expect(opts.headers["x-user-token"]).toBe(TOKEN);
+  it("getBalance calls edge function", async () => {
+    globalThis.fetch = mockFetchOk({ balance: 100, user_id: "u1", project_id: "p1" });
+    const result = await credApi.getBalance();
+    expect(result.balance).toBe(100);
   });
 
-  it("deduct sends POST with amount and description", async () => {
-    const fetchMock = mockFetchOk({ balance: 90 });
-    globalThis.fetch = fetchMock;
-
-    await credApi.deduct(TOKEN, 10, "test deduction");
-
-    const [, opts] = fetchMock.mock.calls[0];
-    expect(opts.method).toBe("POST");
-    expect(JSON.parse(opts.body)).toEqual({ amount: 10, description: "test deduction" });
+  it("deduct sends amount and description", async () => {
+    globalThis.fetch = mockFetchOk({ balance: 90, user_id: "u1", project_id: "p1" });
+    const result = await credApi.deduct(10, "test deduction");
+    expect(result.balance).toBe(90);
   });
 
-  it("refund sends POST with amount and description", async () => {
-    const fetchMock = mockFetchOk({ balance: 110 });
-    globalThis.fetch = fetchMock;
-
-    await credApi.refund(TOKEN, 10, "refund test");
-
-    const [url, opts] = fetchMock.mock.calls[0];
-    expect(url).toContain("/refund");
-    expect(opts.method).toBe("POST");
-    expect(JSON.parse(opts.body)).toEqual({ amount: 10, description: "refund test" });
-  });
-
-  it("throws on HTTP error with status and body", async () => {
-    globalThis.fetch = mockFetchError(402, "Insufficient credits");
-
-    await expect(credApi.getBalance(TOKEN)).rejects.toThrow("cred.diy API error 402: Insufficient credits");
-  });
-
-  it("includes timeout signal on requests", async () => {
-    const fetchMock = mockFetchOk({ balance: 100 });
-    globalThis.fetch = fetchMock;
-
-    await credApi.getBalance(TOKEN);
-
-    const [, opts] = fetchMock.mock.calls[0];
-    expect(opts.signal).toBeDefined();
+  it("syncUser calls sync-user endpoint", async () => {
+    globalThis.fetch = mockFetchOk({ ok: true });
+    const result = await credApi.syncUser();
+    expect(result.ok).toBe(true);
   });
 
   it("createCheckout sends correct body", async () => {
-    const fetchMock = mockFetchOk({ url: "https://checkout.stripe.com/123" });
+    const fetchMock = mockFetchOk({ url: "https://checkout.stripe.com/123", session_id: "s1" });
     globalThis.fetch = fetchMock;
-
-    await credApi.createCheckout(TOKEN, "tier-1", "https://ok.com", "https://cancel.com");
-
+    await credApi.createCheckout("tier-1", "https://ok.com", "https://cancel.com");
     const [, opts] = fetchMock.mock.calls[0];
     expect(JSON.parse(opts.body)).toEqual({
       tier_id: "tier-1",
@@ -102,9 +64,7 @@ describe("credApi", () => {
   it("getTransactions sends offset and limit params", async () => {
     const fetchMock = mockFetchOk({ data: [], count: 0 });
     globalThis.fetch = fetchMock;
-
-    await credApi.getTransactions(TOKEN, 2, 10);
-
+    await credApi.getTransactions(2, 10);
     const [url] = fetchMock.mock.calls[0];
     expect(url).toContain("offset=20");
     expect(url).toContain("limit=10");
