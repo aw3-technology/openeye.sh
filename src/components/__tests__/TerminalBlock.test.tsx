@@ -36,8 +36,8 @@ describe("TerminalBlock", () => {
     const { container } = render(
       <TerminalBlock lines={[]} animate={false} />
     );
-    // Chrome dots should still render
-    expect(container.querySelectorAll(".rounded-full").length).toBe(3);
+    // Chrome diamond dots should still render
+    expect(container.querySelectorAll(".rotate-45").length).toBe(3);
   });
 
   it("renders single line", () => {
