@@ -31,13 +31,13 @@ export function useInferenceHistory(page = 0, pageSize = 20) {
       const from = page * pageSize;
       const to = from + pageSize - 1;
       const { data, count, error } = await supabase
-        .from("inference_history")
+        .from("inference_history" as any)
         .select("*", { count: "exact" })
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .range(from, to);
       if (error) throw error;
-      return { data: (data || []) as InferenceHistoryRow[], count: count || 0 };
+      return { data: (data || []) as unknown as InferenceHistoryRow[], count: count || 0 };
     },
     enabled: !!user,
   });
