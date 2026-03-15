@@ -142,7 +142,7 @@ export function CameraFeed({
                 style={{ width: `${HAND_SIZE.w}%`, height: `${HAND_SIZE.h}%` }}
               >
                 <div className="w-full h-full border-[1.5px] border-terminal-red bg-terminal-red/15 animate-pulse" />
-                <span className="absolute -top-4 left-0 text-[9px] font-mono px-1 py-0.5 bg-terminal-red text-white whitespace-nowrap leading-none">
+                <span className="absolute -top-4 left-0 text-[9px] font-mono px-1 py-0.5 bg-terminal-red text-primary-foreground whitespace-nowrap leading-none">
                   HUMAN_HAND [97.3%]
                 </span>
                 <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t-2 border-l-2 border-terminal-red" />
