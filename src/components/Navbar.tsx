@@ -13,7 +13,7 @@ export function Navbar() {
           <img src={logoHorizontal} alt="OpenEye" className="h-6" />
         </a>
         <div className="hidden md:flex items-center gap-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          <a href="#demo" className="hover:text-foreground transition-colors">Demo</a>
+          <a href="#demo" className="hover:text-foreground transition-colors">Models</a>
           <a href="#architecture" className="hover:text-foreground transition-colors">Architecture</a>
           <a href="#cli" className="hover:text-foreground transition-colors">CLI</a>
           <a

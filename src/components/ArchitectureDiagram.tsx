@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 
 const layers = [
-  { label: "Camera Feed", sub: "USB / RTSP / Video File", color: "terminal-fg" },
-  { label: "Vision Engine", sub: "YOLOv8 · GroundingDINO · SAM", color: "terminal-green" },
-  { label: "Scene Understanding", sub: "Objects · Spatial Map · Hazards", color: "terminal-green" },
-  { label: "LLM Reasoning", sub: "OpenRouter · Nebius Token Factory", color: "terminal-amber" },
-  { label: "Action Planner", sub: "Structured Task Decomposition", color: "terminal-fg" },
-  { label: "Robot Adapter", sub: "Solo CLI · OpenClaw · Simulation", color: "terminal-green" },
+  { label: "Model Registry", sub: "openeye pull — YOLOv8 · GroundingDINO · SAM2 · SmolVLA", color: "terminal-green" },
+  { label: "Unified Runtime", sub: "Weights · Dependencies · Inference Engine", color: "terminal-green" },
+  { label: "Camera Adapter", sub: "USB · RTSP · Video Files · Simulated Feeds", color: "terminal-fg" },
+  { label: "Structured Output", sub: "JSON Scene Graph · Detections · Depth Maps · Actions", color: "terminal-green" },
+  { label: "Safety Monitor", sub: "Anomaly Detection · Workspace Baseline · Agent Halt", color: "terminal-amber" },
+  { label: "Agent Bus", sub: "OpenClaw Skills · REST API · Robot Adapters", color: "terminal-green" },
 ];
 
 export function ArchitectureDiagram() {
