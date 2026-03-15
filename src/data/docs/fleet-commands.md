@@ -4,7 +4,7 @@ title: Commands & Heartbeats
 
 ### Heartbeat Protocol
 
-Edge devices send heartbeats every 15 seconds via POST /heartbeats. The server responds with any pending commands. If 4 consecutive heartbeats are missed (>60s), the device is marked offline.
+Edge devices send heartbeats every 15 seconds via `POST /heartbeats`. The server responds with any pending commands. If 4 consecutive heartbeats are missed (>60s), the device is marked offline.
 
 ```json
 // Device sends:
@@ -53,15 +53,8 @@ Commands are queued for devices and delivered via the heartbeat response. Availa
 | decommission | Gracefully decommission device |
 | collect_logs | Request device logs upload |
 
-### POST /commands — Queue Command
+### CLI — Queue Command
 
 ```bash
-curl -X POST https://api.openeye.ai/commands \
-  -H "Authorization: Bearer <jwt>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "device_id": "d290f1ee-...",
-    "command_type": "restart",
-    "payload": {}
-  }'
+openeye fleet config <device-id> '{"confidence_threshold": 0.4}'
 ```
