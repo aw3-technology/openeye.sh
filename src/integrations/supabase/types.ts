@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      devices: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          id: string
+          last_seen_at: string | null
+          metadata: Json | null
+          name: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          last_seen_at?: string | null
+          metadata?: Json | null
+          name?: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          last_seen_at?: string | null
+          metadata?: Json | null
+          name?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      inference_history: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          latency_ms: number | null
+          model: string | null
+          prompt: string | null
+          result: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          latency_ms?: number | null
+          model?: string | null
+          prompt?: string | null
+          result?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          latency_ms?: number | null
+          model?: string | null
+          prompt?: string | null
+          result?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
