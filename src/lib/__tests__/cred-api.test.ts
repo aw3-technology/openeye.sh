@@ -32,9 +32,9 @@ describe("credApi (edge function proxy)", () => {
   });
 
   it("getBalance calls edge function", async () => {
-    globalThis.fetch = mockFetchOk({ balance: 100, user_id: "u1", project_id: "p1" });
+    globalThis.fetch = mockFetchOk({ user_id: "u1", balances: [{ credit_type_id: "ct1", balance: 100 }] });
     const result = await credApi.getBalance();
-    expect(result.balance).toBe(100);
+    expect(result.balances[0].balance).toBe(100);
   });
 
   it("deduct sends amount and description", async () => {
