@@ -245,8 +245,8 @@ export function DemoVideo() {
             </div>
 
             {/* Live terminal output */}
-            <div className="lg:col-span-2 bg-terminal-bg rounded-outer border border-foreground/5 overflow-hidden shadow-lg flex flex-col">
-              <div className="flex items-center gap-2 px-3 py-2 border-b border-foreground/5">
+            <div className="lg:col-span-2 bg-card rounded-outer border overflow-hidden shadow-lg flex flex-col">
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
                 <div className="w-2.5 h-2.5 rounded-full bg-terminal-red/20 border border-terminal-red/50" />
                 <div className="w-2.5 h-2.5 rounded-full bg-terminal-amber/20 border border-terminal-amber/50" />
                 <div className="w-2.5 h-2.5 rounded-full bg-terminal-green/20 border border-terminal-green/50" />
