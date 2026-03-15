@@ -82,7 +82,7 @@ export function TeamSection() {
 
           {/* Contributor CTA Card */}
           <motion.a
-            href="https://github.com/openeye-ai"
+            href="https://github.com/aw3-technology/openeye.sh"
             target="_blank"
             rel="noopener noreferrer"
             initial={{ opacity: 0, y: 16 }}

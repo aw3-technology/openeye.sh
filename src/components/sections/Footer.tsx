@@ -6,7 +6,7 @@ export function Footer() {
           © 2026 AW3 Technology, Inc. Apache 2.0 License.
         </div>
         <div className="flex items-center gap-6 font-mono text-xs text-muted-foreground">
-          <a href="https://github.com/openeye-ai" className="hover:text-foreground transition-colors">GitHub</a>
+          <a href="https://github.com/aw3-technology/openeye.sh" className="hover:text-foreground transition-colors">GitHub</a>
           <span>openeye.sh</span>
           <span>Nebius.Build Hackathon — SF 2026</span>
         </div>
