@@ -84,7 +84,7 @@ export function VLMReasoningPanel() {
             key={`hist-${i}`}
             initial={{ opacity: 0.5 }}
             animate={{ opacity: 0.3 - i * 0.1 }}
-            className="text-terminal-muted border-t border-foreground/5 pt-2"
+            className="text-muted-foreground border-t border-border pt-2"
           >
             <span className="text-[10px] tabular-nums">
               [{(vlm.latency_ms / 1000).toFixed(1)}s]

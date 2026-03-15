@@ -92,7 +92,7 @@ export function SafetyPanel() {
         transition={{ duration: 0.15 }}
       >
         <div className="px-4 py-3 flex items-center justify-between">
-          <span className="font-mono text-xs uppercase tracking-widest text-terminal-muted">
+          <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
             Safety Status
           </span>
           <motion.div

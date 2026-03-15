@@ -45,7 +45,7 @@ export function DemoFeed() {
       }}
       transition={{ duration: 0.15 }}
     >
-      <div className="relative aspect-video bg-gradient-to-br from-foreground via-foreground/95 to-foreground/90">
+      <div className="relative aspect-video bg-terminal-bg">
         {/* Video element for live mode */}
         <video
           ref={videoRef as React.RefObject<HTMLVideoElement>}
