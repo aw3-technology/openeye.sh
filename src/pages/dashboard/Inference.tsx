@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { usePredict, useSaveInference, useInferenceHistory } from "@/hooks/useOpenEyeQueries";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
-import { useCreditBalance, useDeductCredits, useRefundCredits } from "@/hooks/useCredits";
-import { INFERENCE_CREDIT_COST } from "@/types/credits";
+import { useCreditBalance, useDeductCredits, useIssueCredits } from "@/hooks/useCredits";
+import { INFERENCE_CREDIT_COST, getTotalBalance } from "@/types/credits";
 import { isCredSystemConfigured } from "@/lib/deployment-env";
 import { FileDropzone } from "@/components/dashboard/FileDropzone";
 import { DetectionCanvas } from "@/components/dashboard/DetectionCanvas";
@@ -48,7 +48,7 @@ export default function Inference() {
   const saveInference = useSaveInference();
   const creditBalance = useCreditBalance();
   const deductCredits = useDeductCredits();
-  const refundCredits = useRefundCredits();
+  const refundCredits = useIssueCredits();
   const { data: historyData } = useInferenceHistory(0, 1);
   const prevUrlRef = useRef<string | null>(null);
 
@@ -138,7 +138,7 @@ export default function Inference() {
 
   const handleFile = (file: File) => {
     if (isCloud) {
-      const balance = creditBalance.data?.balance ?? 0;
+      const balance = getTotalBalance(creditBalance.data);
       if (balance < INFERENCE_CREDIT_COST) {
         setShowCreditsDialog(true);
         return;
@@ -225,7 +225,7 @@ export default function Inference() {
         {isCloud && (
           <MetricCard
             label="Credits"
-            value={creditBalance.data?.balance ?? "—"}
+            value={creditBalance.data ? getTotalBalance(creditBalance.data) : "—"}
             icon={Coins}
             color="bg-yellow-500/15 text-yellow-500"
           />
@@ -261,7 +261,7 @@ export default function Inference() {
       <InsufficientCreditsDialog
         open={showCreditsDialog}
         onOpenChange={setShowCreditsDialog}
-        balance={creditBalance.data?.balance ?? 0}
+        balance={getTotalBalance(creditBalance.data)}
       />
 
       {/* ---- Loading State ---- */}

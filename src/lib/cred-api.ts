@@ -60,43 +60,66 @@ async function request<T>(
 }
 
 export const credApi = {
-  syncUser() {
-    return request<{ ok: boolean }>("sync-user", { method: "POST" });
-  },
-
-  getBalance() {
-    return request<CreditBalance>("balance");
-  },
-
-  deduct(amount: number, description: string) {
-    return request<CreditBalance>("deduct", {
+  /** Create or get user in Cred (POST /users) */
+  syncUser(email?: string, name?: string) {
+    return request<{ user: unknown; created: boolean }>("users", {
       method: "POST",
-      body: JSON.stringify({ amount, description }),
+      body: JSON.stringify({
+        email,
+        name,
+      }),
     });
   },
 
-  refund(amount: number, description: string) {
-    return request<CreditBalance>("refund", {
+  /** GET /balance?user_id=... or ?email=... */
+  getBalance(email?: string) {
+    const param = email ? `email=${encodeURIComponent(email)}` : "";
+    return request<CreditBalance>(`balance${param ? `?${param}` : ""}`);
+  },
+
+  /** POST /deduct */
+  deduct(amount: number, description: string, creditTypeId?: string) {
+    return request<{ success: boolean; new_balance: number }>("deduct", {
       method: "POST",
-      body: JSON.stringify({ amount, description }),
+      body: JSON.stringify({
+        amount,
+        reason: description,
+        ...(creditTypeId ? { credit_type_id: creditTypeId } : {}),
+      }),
     });
   },
 
-  createCheckout(tierId: string, successUrl: string, cancelUrl: string) {
+  /** POST /issue (refund / add credits) */
+  issue(amount: number, description: string, creditTypeId?: string) {
+    return request<{ success: boolean; new_balance: number }>("issue", {
+      method: "POST",
+      body: JSON.stringify({
+        amount,
+        reason: description,
+        ...(creditTypeId ? { credit_type_id: creditTypeId } : {}),
+      }),
+    });
+  },
+
+  /** POST /checkout → routed to hosted-checkout by proxy */
+  createCheckout(tierId: string, successUrl: string, cancelUrl: string, userEmail?: string) {
     return request<CheckoutSession>("checkout", {
       method: "POST",
       body: JSON.stringify({
-        tier_id: tierId,
+        pricing_tier_id: tierId,
+        user_email: userEmail,
         success_url: successUrl,
         cancel_url: cancelUrl,
       }),
     });
   },
 
+  /** GET /pricing-tiers */
   getPricingTiers() {
-    return request<PricingTier[]>("tiers");
+    return request<{ pricing_tiers: PricingTier[] }>("pricing-tiers");
   },
 
+  /** GET /transactions */
   getTransactions(page = 0, pageSize = 20) {
     return request<{ data: CreditTransaction[]; count: number }>(
       `transactions?offset=${page * pageSize}&limit=${pageSize}`,
