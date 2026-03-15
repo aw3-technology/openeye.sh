@@ -69,6 +69,10 @@ export const docsManifest = [
     sections: ["sdk-python", "sdk-javascript", "sdk-curl"],
   },
   {
+    label: "Claude Skill",
+    sections: ["claude-skill"],
+  },
+  {
     label: "Credits & Billing",
     sections: ["credits-system", "usage-tracking"],
   },
