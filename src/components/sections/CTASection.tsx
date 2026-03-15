@@ -16,7 +16,7 @@ export function CTASection() {
             pip install openeye-ai
           </div>
           <a
-            href="https://github.com/openeye-ai"
+            href="https://github.com/aw3-technology/openeye.sh"
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono text-sm bg-primary text-primary-foreground px-4 py-2.5 rounded-inner hover:bg-primary/90 transition-colors active:scale-[0.98]"
