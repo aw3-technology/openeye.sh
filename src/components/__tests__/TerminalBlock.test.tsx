@@ -26,8 +26,8 @@ describe("TerminalBlock", () => {
     const { container } = render(
       <TerminalBlock lines={lines} animate={false} />
     );
-    // Should still render the terminal chrome dots
-    expect(container.querySelectorAll(".rounded-full").length).toBe(3);
+    // Should still render the terminal chrome diamond dots
+    expect(container.querySelectorAll(".rotate-45").length).toBe(3);
   });
 
   // ── Edge cases ─────────────────────────────────────────────────
