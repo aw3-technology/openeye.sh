@@ -22,6 +22,8 @@ import {
   Tv2,
   Crosshair,
   Shield,
+  Cpu,
+  Gauge,
 } from "lucide-react";
 
 export interface NavLink {
