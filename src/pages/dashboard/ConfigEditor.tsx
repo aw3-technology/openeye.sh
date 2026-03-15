@@ -217,7 +217,7 @@ export default function ConfigEditor() {
                     {Object.entries(cortexByProvider).map(([provider, models]) => (
                       <SelectGroup key={provider}>
                         <SelectLabel>{provider}</SelectLabel>
-                        {models!.map((m) => (
+                        {models.map((m) => (
                           <SelectItem key={m.id} value={m.id}>
                             {m.label}
                             {m.free && <span className="ml-1.5 text-xs text-terminal-green">free</span>}
