@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
   const CRED_PROJECT_ID = Deno.env.get("CRED_PROJECT_ID");
   if (!CRED_PROJECT_ID) return json({ error: "CRED_PROJECT_ID not configured" }, 500);
 
-  const CRED_API_URL = Deno.env.get("CRED_API_URL") || "https://cred.diy";
+  const CRED_API_URL = "https://cred.diy";
 
   // Extract the sub-path from the request URL
   const url = new URL(req.url);
