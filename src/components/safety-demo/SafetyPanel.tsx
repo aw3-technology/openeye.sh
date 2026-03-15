@@ -98,7 +98,7 @@ export function SafetyPanel({ currentState, logs, cycleId }: SafetyPanelProps) {
             key={stat.label}
             className="bg-card rounded-inner border px-3 py-2 text-center"
           >
-            <div className="font-mono text-[10px] text-terminal-muted uppercase tracking-wider">
+            <div className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
               {stat.label}
             </div>
             <div className="font-mono text-sm text-terminal-green tabular-nums">
