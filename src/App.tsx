@@ -26,6 +26,8 @@ import Inference from "./pages/dashboard/Inference.tsx";
 import LiveStream from "./pages/dashboard/LiveStream.tsx";
 import History from "./pages/dashboard/History.tsx";
 import ModelSettings from "./pages/dashboard/ModelSettings.tsx";
+import ModelRegistry from "./pages/dashboard/ModelRegistry.tsx";
+import BenchmarkPage from "./pages/dashboard/Benchmark.tsx";
 import Metrics from "./pages/dashboard/Metrics.tsx";
 import Export from "./pages/dashboard/Export.tsx";
 import ApiKeys from "./pages/dashboard/ApiKeys.tsx";
@@ -87,6 +89,8 @@ const App = () => (
               <Route path="live" element={<LiveStream />} />
               <Route path="history" element={<History />} />
               <Route path="settings" element={<ModelSettings />} />
+              <Route path="models" element={<ModelRegistry />} />
+              <Route path="benchmark" element={<BenchmarkPage />} />
               <Route path="metrics" element={<Metrics />} />
               <Route path="scene-graph" element={<SceneGraphPage />} />
               <Route path="export" element={<Export />} />
