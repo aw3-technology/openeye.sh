@@ -33,6 +33,8 @@ describe("Navbar", () => {
       loading: false,
       signOut: vi.fn(),
       tokenError: null,
+      isDemo: false,
+      signInAsDemo: vi.fn(),
     });
 
     renderNavbar();
@@ -51,6 +53,8 @@ describe("Navbar", () => {
       loading: false,
       signOut: vi.fn(),
       tokenError: null,
+      isDemo: false,
+      signInAsDemo: vi.fn(),
     });
 
     renderNavbar();
@@ -66,6 +70,8 @@ describe("Navbar", () => {
       loading: false,
       signOut: vi.fn(),
       tokenError: null,
+      isDemo: false,
+      signInAsDemo: vi.fn(),
     });
 
     const { container } = renderNavbar();
@@ -86,6 +92,8 @@ describe("Navbar", () => {
       loading: true,
       signOut: vi.fn(),
       tokenError: null,
+      isDemo: false,
+      signInAsDemo: vi.fn(),
     });
 
     const { container } = renderNavbar();
@@ -104,6 +112,8 @@ describe("Navbar", () => {
       loading: false,
       signOut: vi.fn(),
       tokenError: null,
+      isDemo: false,
+      signInAsDemo: vi.fn(),
     });
 
     renderNavbar();
