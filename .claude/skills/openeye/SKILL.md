@@ -100,13 +100,13 @@ openeye mlops batch custom v1.0.0 ./images ./output --batch-size 32
 
 | Model | Task | Adapter | Extras |
 |-------|------|---------|--------|
-| `yolov8` | detection | `yolov8` | `pip install openeye-sh[yolo]` |
-| `depth_anything` | depth | `depth_anything` | `pip install openeye-sh[depth]` |
-| `grounding_dino` | detection (open-vocab) | `grounding_dino` | `pip install openeye-sh[grounding]` |
-| ONNX models | varies | `onnx_generic` / `yolov8:onnx` | `pip install openeye-sh[onnx]` |
-| TensorRT models | varies | `tensorrt_generic` / `yolov8:tensorrt` | `pip install openeye-sh[tensorrt]` |
+| `yolov8` | detection | `yolov8` | `pipx install "openeye-sh[yolo]"` |
+| `depth_anything` | depth | `depth_anything` | `pipx install "openeye-sh[depth]"` |
+| `grounding_dino` | detection (open-vocab) | `grounding_dino` | `pipx install "openeye-sh[grounding]"` |
+| ONNX models | varies | `onnx_generic` / `yolov8:onnx` | `pipx install "openeye-sh[onnx]"` |
+| TensorRT models | varies | `tensorrt_generic` / `yolov8:tensorrt` | `pipx install "openeye-sh[tensorrt]"` |
 
-Install all extras: `pip install openeye-sh[all]`
+Install all extras: `pipx install "openeye-sh[all]"`
 
 ## Creating a Custom Adapter
 
@@ -152,7 +152,7 @@ npm run test                        # Vitest tests
 npm run lint                        # ESLint
 
 # CLI
-cd cli && pip install -e ".[all]"   # Install CLI with all extras
+pipx install -e "./cli[all]"       # Install CLI with all extras
 pytest                              # Run CLI tests
 
 # Backend runtime
@@ -167,8 +167,8 @@ cd backend && python -m uvicorn src.fleet.app:app --port 8001
 
 | Error | Fix |
 |-------|-----|
-| `ImportError: ultralytics` | `pip install openeye-sh[yolo]` |
-| `ImportError: onnxruntime` | `pip install openeye-sh[onnx]` |
+| `ImportError: ultralytics` | `pipx install "openeye-sh[yolo]"` |
+| `ImportError: onnxruntime` | `pipx install "openeye-sh[onnx]"` |
 | `Model 'x' not found` | Run `openeye list` to see available models, then `openeye pull x` |
 | `Connection refused :8000` | Start server with `openeye serve <model>` |
 | `Connection refused :8001` | Start fleet control plane or set `OPENEYE_FLEET_URL` |
@@ -177,28 +177,28 @@ cd backend && python -m uvicorn src.fleet.app:app --port 8001
 
 ## Running CLI Commands
 
-The CLI virtual environment is at `cli/.venv`. Always use the full venv path to run commands:
+The CLI is installed globally via pipx. Run commands directly:
 
 ```bash
-cli/.venv/bin/openeye <command> [args...]
+openeye <command> [args...]
 ```
 
 ### Common Workflows
 
 ```bash
 # Pull a model then run inference
-cli/.venv/bin/openeye pull yolov8
-cli/.venv/bin/openeye run yolov8 photo.jpg
+openeye pull yolov8
+openeye run yolov8 photo.jpg
 
 # Start the server and verify it's healthy
-cli/.venv/bin/openeye serve yolov8 &
+openeye serve yolov8 &
 curl -s http://localhost:8000/health | python3 -m json.tool
 
 # Benchmark a model
-cli/.venv/bin/openeye bench yolov8 --runs 20
+openeye bench yolov8 --runs 20
 
 # List available models (shows download status)
-cli/.venv/bin/openeye list
+openeye list
 ```
 
 ### Output Formats

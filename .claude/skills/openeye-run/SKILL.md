@@ -7,23 +7,21 @@ allowed-tools: Bash, Read
 
 # OpenEye CLI Operator
 
-Execute OpenEye CLI commands using the virtual environment at `cli/.venv`.
+Execute OpenEye CLI commands. The CLI is installed globally via pipx.
 
 ## Binary Path
 
 ```bash
-OPENEYE=cli/.venv/bin/openeye
+openeye <command> [args...]
 ```
-
-Always use this path. Never rely on a global `openeye` install.
 
 ## Workflow Chains
 
 ### Pull → Run → Interpret
 
 ```bash
-cli/.venv/bin/openeye pull <model>
-cli/.venv/bin/openeye run <model> <image> 2>/dev/null
+openeye pull <model>
+openeye run <model> <image> 2>/dev/null
 ```
 
 Parse the JSON output (`PredictionResult`), summarize detections for the user.
@@ -31,8 +29,8 @@ Parse the JSON output (`PredictionResult`), summarize detections for the user.
 ### Benchmark a Model
 
 ```bash
-cli/.venv/bin/openeye pull <model>
-cli/.venv/bin/openeye bench <model> --runs 20
+openeye pull <model>
+openeye bench <model> --runs 20
 ```
 
 Report mean/p50/p95/p99 latency and throughput.
@@ -40,7 +38,7 @@ Report mean/p50/p95/p99 latency and throughput.
 ### Serve + Health Check
 
 ```bash
-cli/.venv/bin/openeye serve <model> --port 8000 &
+openeye serve <model> --port 8000 &
 sleep 3
 curl -sf http://localhost:8000/health
 ```
@@ -50,8 +48,8 @@ Confirm the server is healthy before telling the user it's ready.
 ### Compare Models
 
 ```bash
-cli/.venv/bin/openeye run yolov8 image.jpg 2>/dev/null > /tmp/result_a.json
-cli/.venv/bin/openeye run grounding_dino image.jpg -p "find objects" 2>/dev/null > /tmp/result_b.json
+openeye run yolov8 image.jpg 2>/dev/null > /tmp/result_a.json
+openeye run grounding_dino image.jpg -p "find objects" 2>/dev/null > /tmp/result_b.json
 ```
 
 Compare detection counts, classes, and confidence scores side by side.
@@ -99,7 +97,7 @@ Columns: Metric, Value. Rows: mean, p50, p95, p99, throughput (fps).
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `Model 'x' not found` | Model not downloaded | `openeye pull x` |
-| `No adapter found for 'x'` | Missing extra dependency | `pip install openeye-sh[yolo]` (check model table) |
+| `No adapter found for 'x'` | Missing extra dependency | `pipx install "openeye-sh[yolo]"` (check model table) |
 | `Connection refused :8000` | Server not running | `openeye serve <model>` |
 | `CUDA out of memory` | GPU memory exhausted | Try `--device cpu` or a smaller model |
 | `FileNotFoundError: <image>` | Bad image path | Verify file exists with `ls` |

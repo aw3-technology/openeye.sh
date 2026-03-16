@@ -11,7 +11,7 @@ A Claude Skill is a structured knowledge file that teaches Claude about a specif
 ## Prerequisites
 
 - **Claude Code** (CLI) or **Claude Desktop** with MCP support
-- **OpenEye CLI** installed (`pip install openeye-sh`)
+- **OpenEye CLI** installed (`pipx install openeye-sh`)
 - A terminal or development environment
 
 ## Setup — Claude Code

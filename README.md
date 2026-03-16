@@ -23,13 +23,13 @@ OpenEye is a CLI-first perception engine that turns raw video into structured wo
 ## Quick Install
 
 ```bash
-pip install openeye-sh
+pipx install openeye-sh
 ```
 
 With YOLO support:
 
 ```bash
-pip install "openeye-sh[yolo]"
+pipx install "openeye-sh[yolo]"
 ```
 
 ## Quick Start
@@ -64,14 +64,11 @@ An interactive walkthrough that runs real OpenEye commands against sample images
 ### Setup
 
 ```bash
-# Create a virtual environment with Python 3.12
-python3.12 -m venv .venv
-
 # Install the CLI with YOLO and camera support
-.venv/bin/pip install -e "./cli[yolo,camera]"
+pipx install -e "./cli[yolo,camera]"
 
 # Pull the YOLOv8 model (6 MB)
-.venv/bin/openeye pull yolov8
+openeye pull yolov8
 ```
 
 ### Run the Demo
