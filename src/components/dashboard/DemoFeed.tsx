@@ -104,7 +104,7 @@ export function DemoFeed() {
 
         {/* Detection bounding boxes */}
         <AnimatePresence>
-          {isActive && latestFrame?.objects.map((obj) => {
+          {isActive && latestFrame?.objects?.map((obj) => {
             const isHuman = obj.label.toLowerCase() === "person";
             const isHazard = isHuman || obj.label.toLowerCase().includes("knife");
             const borderColor = isHuman
