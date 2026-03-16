@@ -40,9 +40,14 @@ export interface CheckoutSession {
   purchase_id?: string;
 }
 
-/** Helper to sum all balances into a single number */
+/** Helper to get the balance for the configured credit type, or sum all if not configured */
 export function getTotalBalance(bal: CreditBalance | undefined | null): number {
   if (!bal?.balances) return 0;
+  const creditTypeId = import.meta.env.VITE_CRED_CREDIT_TYPE_ID;
+  if (creditTypeId) {
+    const entry = bal.balances.find((b) => b.credit_type_id === creditTypeId);
+    return entry?.balance ?? 0;
+  }
   return bal.balances.reduce((sum, b) => sum + b.balance, 0);
 }
 
