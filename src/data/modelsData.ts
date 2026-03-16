@@ -226,7 +226,7 @@ export const benchmarks: BenchmarkRow[] = [
   {
     model: "YOLOv8n",
     task: "Detection",
-    speed: "~3 ms",
+    speed: "~1.5 ms",
     accuracy: "37.3 mAP",
     size: "6 MB",
     backend: "ONNX / TRT",
