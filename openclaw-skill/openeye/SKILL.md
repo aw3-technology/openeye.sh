@@ -7,7 +7,7 @@ description: Run computer vision inference, manage models, serve perception APIs
 
 OpenEye is an open-source CLI perception engine for robots and autonomous agents. It wraps vision models (YOLO, Depth Anything, Grounding DINO) behind a unified interface with tracking, 3D estimation, safety, and fleet management.
 
-Install: `pip install openeye-sh[all]`
+Install: `pipx install "openeye-sh[all]"`
 Config: `~/.openeye/config.yaml`
 Models: `~/.openeye/models/`
 

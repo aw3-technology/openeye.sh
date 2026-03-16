@@ -5,16 +5,16 @@
 ## Install
 
 ```bash
-pip install openeye-sh
+pipx install openeye-sh
 ```
 
 With extras:
 
 ```bash
-pip install openeye-sh[yolo]        # YOLO object detection
-pip install openeye-sh[depth]       # Monocular depth estimation
-pip install openeye-sh[camera]      # OpenCV camera support
-pip install openeye-sh[all]         # YOLO + depth + grounding + camera
+pipx install "openeye-sh[yolo]"        # YOLO object detection
+pipx install "openeye-sh[depth]"       # Monocular depth estimation
+pipx install "openeye-sh[camera]"      # OpenCV camera support
+pipx install "openeye-sh[all]"         # YOLO + depth + grounding + camera
 ```
 
 ## Quick Start

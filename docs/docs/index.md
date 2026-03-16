@@ -24,13 +24,13 @@ OpenEye is a CLI-first perception engine that turns raw video into structured wo
 ## Quick Install
 
 ```bash
-pip install openeye-sh
+pipx install openeye-sh
 ```
 
 With YOLO support:
 
 ```bash
-pip install "openeye-sh[yolo]"
+pipx install "openeye-sh[yolo]"
 ```
 
 ## Quick Start

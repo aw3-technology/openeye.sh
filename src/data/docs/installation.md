@@ -5,12 +5,12 @@ title: Installation
 ### Requirements
 
 - Python 3.10 or later
-- pip (latest recommended)
+- [pipx](https://pipx.pypa.io/) (recommended)
 
 ### Install from PyPI
 
 ```bash
-pip install openeye-sh
+pipx install openeye-sh
 ```
 
 ### Optional Dependencies
@@ -19,19 +19,19 @@ Install extras for specific model backends:
 
 ```bash
 # YOLO object detection
-pip install "openeye-sh[yolo]"
+pipx install "openeye-sh[yolo]"
 
 # Depth estimation
-pip install "openeye-sh[depth]"
+pipx install "openeye-sh[depth]"
 
 # Grounding DINO (open-vocabulary detection)
-pip install "openeye-sh[grounding]"
+pipx install "openeye-sh[grounding]"
 
 # Everything
-pip install "openeye-sh[all]"
+pipx install "openeye-sh[all]"
 
 # Camera support (OpenCV)
-pip install "openeye-sh[camera]"
+pipx install "openeye-sh[camera]"
 ```
 
 ### Platform Notes
