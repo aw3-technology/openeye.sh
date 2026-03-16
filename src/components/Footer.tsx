@@ -94,7 +94,7 @@ export function Footer() {
               Get Started
             </div>
             <div className="font-mono text-xs sm:text-sm bg-secondary text-oe-green px-3 sm:px-4 py-2.5 rounded-inner border overflow-x-auto whitespace-nowrap scrollbar-hide select-all cursor-text">
-              pip install openeye-sh
+              pipx install openeye-sh
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ const steps = [
   {
     step: "1",
     title: "Install OpenEye",
-    command: "pip install openeye-sh",
+    command: "pipx install openeye-sh",
     description: "Works with Python 3.10+. Installs the CLI, model adapters, and server.",
   },
   {
@@ -115,7 +115,7 @@ export function GetStarted() {
               View Full Documentation
             </a>
             <div className="font-mono text-sm bg-secondary text-oe-green px-5 py-2.5 rounded-inner border">
-              pip install openeye-sh
+              pipx install openeye-sh
             </div>
           </div>
         </motion.div>

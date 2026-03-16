@@ -50,10 +50,19 @@ def warmup_adapter(adapter, name: str, runs: int = _DEMO_WARMUP_RUNS) -> float:
     return mean
 
 
+def _install_hint(extra: str) -> str:
+    """Return install instructions that cover pip, pipx, and zsh quoting."""
+    return (
+        f'Install with: [bold]pip install "openeye-sh\\[{extra}]"[/bold]\n'
+        f'  or (pipx): [bold]pipx install "openeye-sh\\[{extra}]" --force[/bold]\n'
+        f"  [dim](Quotes required in zsh/fish due to bracket expansion)[/dim]"
+    )
+
+
 def dependency_error(model: str, exc: ImportError) -> None:
     extra = _EXTRAS.get(model, model)
     rprint(
         f"[red]Missing dependencies for '{model}': {exc.name or exc}[/red]\n"
-        f"Install with: [bold]pip install openeye-sh\\[{extra}][/bold]"
+        + _install_hint(extra)
     )
     raise typer.Exit(code=1)

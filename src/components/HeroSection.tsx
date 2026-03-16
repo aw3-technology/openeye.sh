@@ -42,7 +42,7 @@ export function HeroSection() {
                 Get Started
               </a>
               <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border select-all cursor-text" role="textbox" aria-label="Install command">
-                pip install openeye-sh
+                pipx install openeye-sh
               </div>
               <a
                 href="https://github.com/aw3-technology/openeye.sh"

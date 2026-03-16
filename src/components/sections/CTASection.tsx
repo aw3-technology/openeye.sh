@@ -13,7 +13,7 @@ export function CTASection() {
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <div className="font-mono text-sm bg-card text-oe-green px-4 py-2.5 rounded-inner border border-foreground/[0.06]">
-            pip install openeye-sh
+            pipx install openeye-sh
           </div>
           <a
             href="https://github.com/aw3-technology/openeye.sh"

@@ -268,9 +268,11 @@ def _open_input_source(camera: int, video: Optional[str]):
         try:
             cam = Camera(camera)
         except ImportError:
+            from openeye_ai._cli_helpers import _install_hint
+
             rprint(
                 "[red]Missing opencv-python.[/red]\n"
-                "Install with: [bold]pip install openeye-sh\\[camera][/bold]"
+                + _install_hint("camera")
             )
             if not video:
                 raise typer.Exit(code=1)
