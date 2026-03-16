@@ -1,4 +1,4 @@
-"""Evaluation commands — benchmarking, batch inference, validation."""
+"""Evaluation commands — model evaluation, benchmarking, validation."""
 
 from __future__ import annotations
 
@@ -13,6 +13,72 @@ from openeye_ai.config import MODELS_DIR
 from openeye_ai.registry import get_adapter, is_downloaded
 
 evaluate_app = typer.Typer()
+
+
+# ── Model Evaluation (precision/recall/mAP) ─────────────────────────
+
+
+@evaluate_app.command("evaluate")
+def mlops_evaluate(
+    model: str = typer.Argument(help="Model name"),
+    dataset: str = typer.Option(..., "--dataset", "-d", help="Path to evaluation dataset (COCO JSON, JSONL, or image dir)"),
+    version: str = typer.Option("latest", "--version", "-v", help="Model version"),
+    iou_threshold: float = typer.Option(0.5, "--iou", help="IoU threshold for mAP calculation"),
+    confidence: float = typer.Option(0.25, "--confidence", "-c", help="Confidence threshold"),
+) -> None:
+    """Evaluate a model and get precision/recall/mAP metrics."""
+    import json
+    from pathlib import Path
+
+    if not is_downloaded(model):
+        rprint(f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]")
+        raise typer.Exit(code=1)
+
+    try:
+        adapter = get_adapter(model)
+    except ImportError as e:
+        dependency_error(model, e)
+
+    model_dir = MODELS_DIR / model
+    with console.status(f"Loading {model}..."):
+        adapter.load(model_dir)
+
+    dataset_path = Path(dataset)
+    if not dataset_path.exists():
+        rprint(f"[red]Dataset not found: {dataset}[/red]")
+        raise typer.Exit(code=1)
+
+    rprint(f"[bold]Evaluating {model} on {dataset}...[/bold]")
+
+    from openeye_ai.mlops.evaluation import evaluate_model
+
+    try:
+        metrics = evaluate_model(
+            adapter, dataset_path,
+            iou_threshold=iou_threshold,
+            confidence_threshold=confidence,
+        )
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
+        rprint(f"[red]Evaluation failed: {e}[/red]")
+        raise typer.Exit(code=1)
+
+    table = Table(title=f"Evaluation Results: {model}")
+    table.add_column("Metric", style="cyan")
+    table.add_column("Value", justify="right", style="green")
+
+    table.add_row("Precision", f"{metrics.precision:.4f}")
+    table.add_row("Recall", f"{metrics.recall:.4f}")
+    table.add_row("F1 Score", f"{metrics.f1:.4f}")
+    table.add_row("mAP@{:.2f}".format(iou_threshold), f"{metrics.mAP:.4f}")
+    table.add_row("Total Images", str(metrics.total_images))
+    table.add_row("Total Predictions", str(metrics.total_predictions))
+    table.add_row("Total Ground Truth", str(metrics.total_ground_truth))
+    if metrics.per_class:
+        table.add_row("", "")
+        for cls_name, cls_ap in metrics.per_class.items():
+            table.add_row(f"  {cls_name} AP", f"{cls_ap:.4f}")
+
+    console.print(table)
 
 
 # ── Benchmark Matrix ──────────────────────────────────────────────────
@@ -62,61 +128,6 @@ def mlops_benchmark(
             f"{entry.memory_mb:.0f}" if entry.memory_mb else "—",
         )
     console.print(table)
-
-
-# ── Batch Inference ───────────────────────────────────────────────────
-
-
-@evaluate_app.command("batch")
-def mlops_batch(
-    model_key: str = typer.Argument(help="Model key"),
-    model_version: str = typer.Argument(help="Model version"),
-    input_path: str = typer.Argument(help="Input dataset path (local dir, s3://, gs://)"),
-    output_path: str = typer.Argument(help="Output path for results"),
-    batch_size: int = typer.Option(32, "--batch-size", help="Batch size"),
-    workers: int = typer.Option(4, "--workers", help="Number of workers"),
-    output_format: str = typer.Option("jsonl", "--format", help="Output format: jsonl, csv"),
-) -> None:
-    """Run batch inference on a dataset."""
-    from openeye_ai.mlops.batch_inference import create_batch_job, run_batch_inference
-    from openeye_ai.mlops.schemas import BatchInferenceConfig, StorageBackend
-
-    backend = StorageBackend.LOCAL
-    if input_path.startswith("s3://"):
-        backend = StorageBackend.S3
-    elif input_path.startswith("gs://"):
-        backend = StorageBackend.GCS
-
-    config = BatchInferenceConfig(
-        name=f"batch-{model_key}-{model_version}",
-        model_key=model_key,
-        model_version=model_version,
-        input_path=input_path,
-        output_path=output_path,
-        storage_backend=backend,
-        batch_size=batch_size,
-        max_workers=workers,
-        output_format=output_format,
-    )
-    job = create_batch_job(config)
-    rprint(f"[green]Batch job created: {job.id}[/green]")
-
-    if not is_downloaded(model_key):
-        rprint(f"[yellow]Model '{model_key}' not downloaded. Job queued but not executed.[/yellow]")
-        return
-
-    try:
-        adapter = get_adapter(model_key)
-        model_dir = MODELS_DIR / model_key
-        with console.status(f"Loading {model_key}..."):
-            adapter.load(model_dir)
-    except (ImportError, Exception) as e:
-        rprint(f"[yellow]Could not load model: {e}. Job queued but not executed.[/yellow]")
-        return
-
-    rprint(f"[bold]Running batch inference...[/bold]")
-    job = run_batch_inference(job.id, adapter)
-    rprint(f"  Status: {job.status.value} | Input: {input_path} -> Output: {job.result_path or output_path}")
 
 
 # ── Validation Tests ──────────────────────────────────────────────────

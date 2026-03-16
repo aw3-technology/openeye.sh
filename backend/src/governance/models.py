@@ -141,6 +141,7 @@ class GovernanceStatus(BaseModel):
     domain: PolicyDomain = PolicyDomain.UNIVERSAL
     total_policies: int = 0
     enabled_policies: int = 0
+    enabled_policy_names: list[str] = Field(default_factory=list)
     total_evaluations: int = 0
     total_violations: int = 0
     total_warnings: int = 0

@@ -231,7 +231,7 @@ def remove(model: str = typer.Argument(help="Model name to remove")) -> None:
 
 def add_model(
     key: str = typer.Argument(help="Registry key (e.g. my-model)"),
-    name: str = typer.Option(..., "--name", help="Display name"),
+    name: Optional[str] = typer.Option(None, "--name", help="Display name (defaults to key)"),
     task: str = typer.Option(..., "--task", help="Task type (detection, depth, segmentation, classification, embedding)"),
     adapter: str = typer.Option(..., "--adapter", help="Adapter key or path to .py file"),
     hf_repo: Optional[str] = typer.Option(None, "--hf-repo", help="HuggingFace repo ID"),
@@ -241,7 +241,7 @@ def add_model(
 ) -> None:
     """Add a new model to the registry."""
     entry: dict = {
-        "name": name,
+        "name": name or key,
         "task": task,
         "adapter": adapter,
         "description": description,

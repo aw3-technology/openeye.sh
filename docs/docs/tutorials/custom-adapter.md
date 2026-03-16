@@ -53,9 +53,33 @@ class Adapter(ModelAdapter):
         # e.g., download_from_hf("my-org/my-model", model_dir)
 ```
 
-## Step 2: Register in models.yaml
+## Step 2: Register via the CLI
 
-Add your model to `cli/openeye_ai/models.yaml`:
+Use `register-adapter` to validate and register your adapter in one step:
+
+```bash
+openeye register-adapter my-model ./my_adapter.py \
+    --name "My Custom Model" \
+    --task detection \
+    --description "My custom detection model"
+```
+
+This validates the adapter file (ensuring it exports an `Adapter` class that subclasses `ModelAdapter`) and adds it to the model registry.
+
+Alternatively, use `add-model` for more control:
+
+```bash
+openeye add-model my-model \
+    --adapter ./my_adapter.py \
+    --task detection \
+    --description "My custom detection model"
+```
+
+When `--name` is omitted it defaults to the registry key (`my-model` above).
+
+### Manual registration (advanced)
+
+You can also add your model directly to `cli/openeye_ai/models.yaml`:
 
 ```yaml
 models:
@@ -78,6 +102,7 @@ The `adapter` field points to your Python file. OpenEye will load it as a custom
 ```bash
 openeye pull my-model
 openeye run my-model image.jpg
+openeye bench my-model
 openeye serve my-model
 ```
 

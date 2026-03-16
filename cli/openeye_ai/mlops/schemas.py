@@ -572,3 +572,19 @@ class FeedbackBatch(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     completed_at: Optional[str] = None
     error: Optional[str] = None
+
+
+# ── Model evaluation metrics ─────────────────────────────────────────
+
+
+class EvaluationMetrics(BaseModel):
+    """Aggregated evaluation metrics (precision/recall/mAP)."""
+
+    precision: float = 0.0
+    recall: float = 0.0
+    f1: float = 0.0
+    mAP: float = 0.0
+    total_images: int = 0
+    total_predictions: int = 0
+    total_ground_truth: int = 0
+    per_class: dict[str, float] = Field(default_factory=dict, description="Per-class AP")

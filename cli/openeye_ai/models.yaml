@@ -114,3 +114,18 @@ models:
     checksum:
       algorithm: sha256
       value: 1f00000000000000000000000000000000000000000000000000000000000000
+  my-model:
+    name: My Model
+    task: detection
+    adapter: yolov8
+    description: ''
+  cool-detector:
+    name: cool-detector
+    task: detection
+    adapter: yolov8
+    description: ''
+  custom-det:
+    name: Custom Det
+    task: detection
+    adapter: /private/var/folders/s7/k_h8pbn95l9b3r0p8kpkq3_40000gn/T/pytest-of-williamschulz/pytest-30/test_register_adapter_success0/my_adapter.py
+    description: ''

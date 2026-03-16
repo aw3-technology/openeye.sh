@@ -66,9 +66,9 @@ def maintenance_list(
 @fleet_app.command("maintenance-update")
 def maintenance_update(
     window_id: str = typer.Argument(..., help="Maintenance window UUID"),
-    name: Optional[str] = typer.Option(None, "--name", "-n"),
-    start: Optional[str] = typer.Option(None, "--start"),
-    end: Optional[str] = typer.Option(None, "--end"),
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="New window name"),
+    start: Optional[str] = typer.Option(None, "--start", help="New start time (ISO 8601)"),
+    end: Optional[str] = typer.Option(None, "--end", help="New end time (ISO 8601)"),
 ) -> None:
     """Update a maintenance window."""
     payload: dict = {}

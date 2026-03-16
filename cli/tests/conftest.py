@@ -78,3 +78,31 @@ def tiny_image_bytes():
     buf = io.BytesIO()
     img.save(buf, format="JPEG")
     return buf.getvalue()
+
+
+class FakeCamera:
+    """Minimal camera stub that returns a 10x10 PIL image."""
+
+    def __init__(self, frames: int | None = None):
+        self._frames = frames
+        self._count = 0
+
+    def read_pil(self) -> Image.Image | None:
+        if self._frames is not None and self._count >= self._frames:
+            return None
+        self._count += 1
+        return Image.new("RGB", (10, 10), color="blue")
+
+
+@pytest.fixture()
+def fake_camera():
+    """Return a FakeCamera that produces unlimited frames."""
+    return FakeCamera()
+
+
+@pytest.fixture()
+def memory_store(tmp_path):
+    """Return an ObservationMemoryStore backed by a temp JSONL file."""
+    from openeye_ai.memory.store import ObservationMemoryStore
+
+    return ObservationMemoryStore(path=tmp_path / "obs.jsonl")

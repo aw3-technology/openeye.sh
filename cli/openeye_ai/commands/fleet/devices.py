@@ -26,8 +26,8 @@ def register(
 
 @fleet_app.command("ls")
 def list_devices(
-    status: Optional[str] = typer.Option(None, "--status", "-s"),
-    device_type: Optional[str] = typer.Option(None, "--type", "-t"),
+    status: Optional[str] = typer.Option(None, "--status", "-s", help="Filter by status: online, offline, error"),
+    device_type: Optional[str] = typer.Option(None, "--type", "-t", help="Filter by type: camera, robot, edge_node, gateway, drone"),
 ) -> None:
     """List all devices."""
     qs = ""
@@ -82,8 +82,8 @@ def restart(
 @fleet_app.command("decommission")
 def decommission(
     device_id: str = typer.Argument(..., help="Device UUID"),
-    reason: str = typer.Option("", "--reason", "-r"),
-    wipe: bool = typer.Option(False, "--wipe"),
+    reason: str = typer.Option("", "--reason", "-r", help="Reason for decommissioning"),
+    wipe: bool = typer.Option(False, "--wipe", help="Wipe device data after decommissioning"),
 ) -> None:
     """Decommission a device."""
     result = _delete(f"/devices/{device_id}", {"reason": reason, "wipe_data": wipe})

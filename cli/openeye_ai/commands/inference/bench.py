@@ -83,15 +83,37 @@ def bench(
         rprint(f"[red]Benchmark failed: {e}[/red]")
         raise typer.Exit(code=1)
 
-    table = Table(title=f"Benchmark: {info['name']}")
+    title = f"Benchmark: {info['name']}"
+    if variant:
+        title += f" ({variant})"
+
+    table = Table(title=title)
     table.add_column("Metric", style="cyan")
     table.add_column("Value", justify="right", style="bold")
+
+    # Latency stats
     table.add_row("Mean", f"{result.mean_ms:.2f} ms")
     table.add_row("Median", f"{result.median_ms:.2f} ms")
+    table.add_row("Std Dev", f"{result.std_ms:.2f} ms")
+    table.add_row("Min", f"{result.min_ms:.2f} ms")
+    table.add_row("Max", f"{result.max_ms:.2f} ms")
     table.add_row("P95", f"{result.p95_ms:.2f} ms")
     table.add_row("FPS", f"{result.fps:.1f}")
+
+    # Run config
+    table.add_section()
     table.add_row("Runs", str(result.runs))
+    table.add_row("Warmup", str(result.warmup))
     table.add_row("Image Size", f"{width}x{height}")
-    if variant:
-        table.add_row("Variant", variant)
+
+    # Hardware info
+    hw = result.hardware
+    if hw:
+        table.add_section()
+        table.add_row("Device", hw.get("device", "unknown"))
+        table.add_row("CPU", hw.get("cpu", "unknown"))
+        if "gpu" in hw:
+            table.add_row("GPU", hw["gpu"])
+        table.add_row("Platform", hw.get("platform", "unknown"))
+
     console.print(table)

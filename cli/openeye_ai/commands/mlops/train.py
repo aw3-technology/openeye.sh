@@ -41,18 +41,21 @@ def mlops_retrain(
 @train_app.command("pipeline-create")
 def mlops_pipeline_create(
     name: str = typer.Option(..., "--name", "-n", help="Pipeline name"),
-    model_key: str = typer.Option(..., "--model", "-m", help="Model key"),
-    training_script: str = typer.Option(..., "--script", help="Training script path"),
+    model_key: str = typer.Option("default", "--model", "-m", help="Model key"),
+    training_script: str = typer.Option("train.py", "--script", help="Training script path"),
     dataset_path: str = typer.Option("", "--dataset", "-d", help="Dataset path"),
-    schedule: Optional[str] = typer.Option(None, "--schedule", help="Cron schedule"),
+    schedule: Optional[str] = typer.Option(None, "--schedule", help="Cron schedule, e.g. '0 2 * * *'"),
 ) -> None:
-    """Create a retraining pipeline."""
+    """Create a retraining pipeline with optional cron schedule."""
     from openeye_ai.mlops.retraining import create_pipeline
-    from openeye_ai.mlops.schemas import RetrainingPipelineConfig
+    from openeye_ai.mlops.schemas import RetrainingPipelineConfig, RetrainingTrigger
+
+    trigger = RetrainingTrigger.SCHEDULED if schedule else RetrainingTrigger.MANUAL
 
     config = RetrainingPipelineConfig(
         name=name,
         model_key=model_key,
+        trigger=trigger,
         training_script=training_script,
         dataset_path=dataset_path,
         schedule_cron=schedule,
@@ -62,6 +65,8 @@ def mlops_pipeline_create(
     pipeline = create_pipeline(config)
     rprint(f"[green]Pipeline created:[/green] {pipeline.name}")
     rprint(f"  Model: {pipeline.model_key} | Script: {pipeline.training_script}")
+    if schedule:
+        rprint(f"  Schedule: {schedule}")
 
 
 @train_app.command("pipelines")
@@ -99,7 +104,7 @@ def mlops_runs(
     pipeline: Optional[str] = typer.Option(None, "--pipeline", "-p", help="Filter by pipeline name"),
     model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
 ) -> None:
-    """List retraining runs."""
+    """List retraining runs with status and metrics."""
     from openeye_ai.mlops.retraining import list_runs
 
     runs = list_runs(pipeline, model_key)
@@ -156,7 +161,89 @@ def mlops_run_status(
             rprint(f"  [dim]{log[:200]}[/dim]")
 
 
-# ── Feedback / Annotations ────────────────────────────────────────────
+# ── Batch Inference (batch-create) ───────────────────────────────────
+
+
+@train_app.command("batch-create")
+def mlops_batch_create(
+    model: str = typer.Option(..., "--model", "-m", help="Model key"),
+    input_path: str = typer.Option(..., "--input", "-i", help="Input dataset path (local dir, s3://, gs://)"),
+    output_path: str = typer.Option("", "--output", "-o", help="Output path for results (default: auto)"),
+    version: str = typer.Option("latest", "--version", "-v", help="Model version (default: latest)"),
+    batch_size: int = typer.Option(32, "--batch-size", help="Batch size"),
+    workers: int = typer.Option(4, "--workers", help="Number of workers"),
+    output_format: str = typer.Option("jsonl", "--format", help="Output format: jsonl, csv"),
+) -> None:
+    """Create a batch inference job on a dataset."""
+    from openeye_ai.mlops.batch_inference import create_batch_job
+    from openeye_ai.mlops.schemas import BatchInferenceConfig, StorageBackend
+
+    backend = StorageBackend.LOCAL
+    if input_path.startswith("s3://"):
+        backend = StorageBackend.S3
+    elif input_path.startswith("gs://"):
+        backend = StorageBackend.GCS
+
+    resolved_output = output_path or f"{input_path.rstrip('/')}_results.{output_format}"
+
+    config = BatchInferenceConfig(
+        name=f"batch-{model}-{version}",
+        model_key=model,
+        model_version=version,
+        input_path=input_path,
+        output_path=resolved_output,
+        storage_backend=backend,
+        batch_size=batch_size,
+        max_workers=workers,
+        output_format=output_format,
+    )
+    job = create_batch_job(config)
+    rprint(f"[green]Batch job created: {job.id}[/green]")
+    rprint(f"  Model: {model} v{version} | Input: {input_path}")
+    rprint(f"  Output: {resolved_output}")
+
+
+# ── Feedback (prediction-level correction) ───────────────────────────
+
+
+@train_app.command("feedback")
+def mlops_feedback(
+    prediction_id: str = typer.Option(..., "--prediction-id", help="Prediction/image ID to correct"),
+    correct: str = typer.Option(..., "--correct", help="Whether the prediction was correct (true/false)"),
+    label: str = typer.Option("", "--label", help="Correct label (required if --correct false)"),
+    model: str = typer.Option("default", "--model", "-m", help="Model key"),
+    version: str = typer.Option("latest", "--version", "-v", help="Model version"),
+    annotator: str = typer.Option("cli-user", "--annotator", help="Annotator name"),
+    notes: str = typer.Option("", "--notes", help="Additional notes"),
+) -> None:
+    """Submit correction data for a prediction."""
+    from openeye_ai.mlops.feedback import annotate_failure
+    from openeye_ai.mlops.schemas import AnnotationLabel
+
+    is_correct = correct.lower() in ("true", "1", "yes")
+
+    if is_correct:
+        rprint(f"[green]Prediction {prediction_id} confirmed correct.[/green]")
+        return
+
+    if not label:
+        rprint("[red]--label is required when --correct is false.[/red]")
+        raise typer.Exit(code=1)
+
+    ann = annotate_failure(
+        model_key=model,
+        model_version=version,
+        image_source=prediction_id,
+        correct_label=label,
+        annotation_label=AnnotationLabel.MISCLASSIFICATION,
+        annotator=annotator,
+        notes=notes,
+    )
+    rprint(f"[green]Feedback recorded: {ann.id}[/green]")
+    rprint(f"  Prediction: {prediction_id} | Correct label: {label}")
+
+
+# ── Annotations (detailed) ───────────────────────────────────────────
 
 
 @train_app.command("annotate")
@@ -197,8 +284,8 @@ def mlops_annotate(
     rprint(f"  {annotation_type}: predicted={predicted or '—'} -> correct={correct_label}")
 
 
-@train_app.command("feedback")
-def mlops_feedback(
+@train_app.command("feedback-generate")
+def mlops_feedback_generate(
     model_key: str = typer.Argument(help="Model key"),
     output: str = typer.Argument(help="Output dataset path for corrections"),
 ) -> None:

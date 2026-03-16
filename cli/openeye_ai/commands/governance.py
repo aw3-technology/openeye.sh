@@ -68,6 +68,12 @@ def _print_status(data: dict):
 
     console.print(table)
 
+    policy_names = data.get("enabled_policy_names", [])
+    if policy_names:
+        rprint("\n[bold]Active policies:[/bold]")
+        for name in policy_names:
+            rprint(f"  • {name}")
+
 
 @govern_app.command("ls")
 def ls():
@@ -108,7 +114,12 @@ def enable(
             rprint(f"[red]Error:[/red] {e}")
             raise typer.Exit(1)
     else:
-        rprint("[yellow]Use --server to enable policies on a running server.[/yellow]")
+        engine = _get_engine()
+        if engine.enable_policy(name):
+            rprint(f"[green]Enabled policy:[/green] {name}")
+        else:
+            rprint(f"[red]Policy not found:[/red] {name}")
+            raise typer.Exit(1)
 
 
 @govern_app.command("disable")
@@ -127,7 +138,12 @@ def disable(
             rprint(f"[red]Error:[/red] {e}")
             raise typer.Exit(1)
     else:
-        rprint("[yellow]Use --server to disable policies on a running server.[/yellow]")
+        engine = _get_engine()
+        if engine.disable_policy(name):
+            rprint(f"[yellow]Disabled policy:[/yellow] {name}")
+        else:
+            rprint(f"[red]Policy not found:[/red] {name}")
+            raise typer.Exit(1)
 
 
 @govern_app.command("presets")
@@ -217,27 +233,13 @@ def validate(
         raise typer.Exit(1)
 
 
-@govern_app.command("audit")
-def audit(
-    server: str = typer.Option("http://localhost:8000", "--server", "-s"),
-    limit: int = typer.Option(20, "--limit", "-n"),
-):
-    """Show recent audit trail from a running server."""
-    import httpx
-
-    try:
-        r = httpx.get(f"{server}/governance/audit", params={"limit": limit}, timeout=5)
-        r.raise_for_status()
-        entries = r.json()
-    except Exception as e:
-        rprint(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
-
+def _print_audit_table(entries: list[dict], title: str = "Governance Audit Trail"):
+    """Shared helper to print audit/violation entries as a Rich table."""
     if not entries:
-        rprint("[dim]No audit entries.[/dim]")
+        rprint(f"[dim]No {title.lower().replace('governance ', '')} found.[/dim]")
         return
 
-    table = Table(title="Governance Audit Trail")
+    table = Table(title=title)
     table.add_column("Time", style="dim")
     table.add_column("Policy", style="cyan")
     table.add_column("Decision")
@@ -260,6 +262,109 @@ def audit(
     console.print(table)
 
 
+@govern_app.command("audit")
+def audit(
+    server: Optional[str] = typer.Option(None, "--server", "-s"),
+    limit: int = typer.Option(20, "--limit", "-n"),
+):
+    """Show recent audit trail."""
+    if server:
+        import httpx
+        try:
+            r = httpx.get(f"{server}/governance/audit", params={"limit": limit}, timeout=5)
+            r.raise_for_status()
+            entries = r.json()
+        except Exception as e:
+            rprint(f"[red]Error:[/red] {e}")
+            raise typer.Exit(1)
+    else:
+        engine = _get_engine()
+        entries = [e.model_dump(mode="json") for e in engine.audit.get_entries(limit=limit)]
+
+    _print_audit_table(entries, title="Governance Audit Trail")
+
+
+_DOMAIN_STARTERS: dict[str, list[dict]] = {
+    "robotics": [
+        {
+            "name": "workspace_boundaries",
+            "type": "zone_policy",
+            "enabled": True,
+            "severity": "critical",
+            "enforcement": "enforce",
+            "config": {
+                "zones": [
+                    {
+                        "name": "danger_zone",
+                        "level": "danger",
+                        "shape": "circle",
+                        "center": [0, 0, 0],
+                        "radius_m": 0.5,
+                        "on_violation": "halt",
+                    }
+                ]
+            },
+        },
+        {
+            "name": "dangerous_objects",
+            "type": "object_restriction",
+            "enabled": True,
+            "severity": "high",
+            "enforcement": "enforce",
+            "config": {
+                "deny_labels": ["knife", "scissors"],
+                "deny_patterns": ["sharp", "weapon"],
+                "on_violation": "deny",
+            },
+        },
+        {
+            "name": "action_safety",
+            "type": "action_filter",
+            "enabled": True,
+            "severity": "high",
+            "enforcement": "enforce",
+            "config": {"deny_patterns": ["throw", "launch"]},
+        },
+    ],
+    "desktop_agent": [
+        {
+            "name": "pii_protection",
+            "type": "pii_filter",
+            "enabled": True,
+            "severity": "high",
+            "enforcement": "enforce",
+            "config": {
+                "redact_patterns": [
+                    {"type": "email", "action": "redact"},
+                    {"type": "ssn", "action": "block_and_alert"},
+                ],
+            },
+        },
+        {
+            "name": "interaction_limits",
+            "type": "interaction_boundary",
+            "enabled": True,
+            "severity": "medium",
+            "enforcement": "enforce",
+            "config": {
+                "denied_apps": [],
+                "read_only_apps": ["banking"],
+            },
+        },
+    ],
+    "universal": [
+        {
+            "name": "action_safety",
+            "type": "action_filter",
+            "enabled": True,
+            "severity": "high",
+            "enforcement": "enforce",
+            "config": {"deny_patterns": ["throw", "launch"]},
+        },
+    ],
+}
+
+
 @govern_app.command("init")
 def init(
     domain: str = typer.Option("robotics", "--domain", "-d", help="Domain: robotics | desktop_agent | universal"),
@@ -268,40 +373,14 @@ def init(
     """Generate a starter YAML governance config."""
     import yaml
 
+    policies = _DOMAIN_STARTERS.get(domain, _DOMAIN_STARTERS["universal"])
+
     config = {
         "version": "1.0",
         "name": "my-governance-config",
         "domain": domain,
         "extends": [],
-        "policies": [
-            {
-                "name": "workspace_boundaries",
-                "type": "zone_policy",
-                "enabled": True,
-                "severity": "critical",
-                "enforcement": "enforce",
-                "config": {
-                    "zones": [
-                        {
-                            "name": "danger_zone",
-                            "level": "danger",
-                            "shape": "circle",
-                            "center": [0, 0, 0],
-                            "radius_m": 0.5,
-                            "on_violation": "halt",
-                        }
-                    ]
-                },
-            },
-            {
-                "name": "action_safety",
-                "type": "action_filter",
-                "enabled": True,
-                "severity": "high",
-                "enforcement": "enforce",
-                "config": {"deny_patterns": ["throw", "launch"]},
-            },
-        ],
+        "policies": policies,
         "settings": {
             "log_all_decisions": True,
             "fail_open": False,
@@ -319,40 +398,21 @@ def init(
 
 @govern_app.command("violations")
 def violations(
-    server: str = typer.Option("http://localhost:8000", "--server", "-s"),
+    server: Optional[str] = typer.Option(None, "--server", "-s"),
     limit: int = typer.Option(20, "--limit", "-n"),
 ):
     """Show governance violations (filtered from audit trail)."""
-    import httpx
+    if server:
+        import httpx
+        try:
+            r = httpx.get(f"{server}/governance/violations", params={"limit": limit}, timeout=5)
+            r.raise_for_status()
+            entries = r.json()
+        except Exception as e:
+            rprint(f"[red]Error:[/red] {e}")
+            raise typer.Exit(1)
+    else:
+        engine = _get_engine()
+        entries = [e.model_dump(mode="json") for e in engine.audit.get_violations(limit=limit)]
 
-    try:
-        r = httpx.get(f"{server}/governance/violations", params={"limit": limit}, timeout=5)
-        r.raise_for_status()
-        entries = r.json()
-    except Exception as e:
-        rprint(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
-
-    if not entries:
-        rprint("[dim]No violations found.[/dim]")
-        return
-
-    table = Table(title="Governance Violations")
-    table.add_column("Time", style="dim")
-    table.add_column("Policy", style="cyan")
-    table.add_column("Decision")
-    table.add_column("Severity", style="red")
-    table.add_column("Reason")
-
-    for entry in entries:
-        decision = entry.get("decision", "")
-        color = {"deny": "red", "warn": "yellow"}.get(decision, "red")
-        table.add_row(
-            str(entry.get("timestamp", "")),
-            entry.get("policy_name", ""),
-            f"[{color}]{decision}[/{color}]",
-            entry.get("severity", ""),
-            entry.get("reason", ""),
-        )
-
-    console.print(table)
+    _print_audit_table(entries, title="Governance Violations")

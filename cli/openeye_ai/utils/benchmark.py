@@ -20,6 +20,7 @@ class BenchmarkResult:
     warmup: int
     image_size: tuple[int, int]
     times_ms: list[float] = field(default_factory=list)
+    hardware: dict[str, str] = field(default_factory=dict)
 
     @property
     def mean_ms(self) -> float:
@@ -28,6 +29,20 @@ class BenchmarkResult:
     @property
     def median_ms(self) -> float:
         return statistics.median(self.times_ms) if self.times_ms else 0.0
+
+    @property
+    def std_ms(self) -> float:
+        if len(self.times_ms) < 2:
+            return 0.0
+        return statistics.stdev(self.times_ms)
+
+    @property
+    def min_ms(self) -> float:
+        return min(self.times_ms) if self.times_ms else 0.0
+
+    @property
+    def max_ms(self) -> float:
+        return max(self.times_ms) if self.times_ms else 0.0
 
     @property
     def p95_ms(self) -> float:
@@ -61,6 +76,8 @@ def run_benchmark(
     if width <= 0 or height <= 0:
         raise ValueError("width and height must be positive integers")
 
+    from openeye_ai.utils.hardware import get_hardware_summary
+
     import numpy as np
     from PIL import Image
 
@@ -87,4 +104,5 @@ def run_benchmark(
         warmup=warmup,
         image_size=(width, height),
         times_ms=times,
+        hardware=get_hardware_summary(),
     )

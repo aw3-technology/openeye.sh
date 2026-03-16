@@ -14,7 +14,7 @@ from ._helpers import _delete, _get, _post, _put, err_console, fleet_app
 @fleet_app.command("group-create")
 def group_create(
     name: str = typer.Argument(..., help="Group name"),
-    description: str = typer.Option("", "--desc", "-d"),
+    description: str = typer.Option("", "--desc", "-d", help="Group description"),
 ) -> None:
     """Create a device group."""
     result = _post("/groups", {"name": name, "description": description})

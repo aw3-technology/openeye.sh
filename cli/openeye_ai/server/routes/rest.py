@@ -40,8 +40,14 @@ async def health(request: Request):
     return {
         "status": "ok",
         "model": state.model_name,
+        "model_display_name": state.model_info.get("name", state.model_name),
+        "task": state.model_info.get("task", "unknown"),
         "model_loaded": state.adapter._loaded if hasattr(state.adapter, "_loaded") else True,
         "uptime_seconds": round(time.time() - state.start_time, 1),
+        "queue": {
+            "active": state.inference_queue.active_count,
+            "queued": state.inference_queue.queue_size,
+        },
     }
 
 
@@ -108,9 +114,24 @@ async def metrics():
 @router.get("/queue/status")
 async def queue_status(request: Request):
     state = get_state(request)
+    active = state.inference_queue.active_count
+    queued = state.inference_queue.queue_size
+    max_size = state.inference_queue.max_queue_size
+    capacity_pct = round((queued / max_size) * 100, 1) if max_size else 0.0
+    if active == 0 and queued == 0:
+        status = "idle"
+    elif queued >= max_size:
+        status = "overloaded"
+    elif capacity_pct > 50:
+        status = "busy"
+    else:
+        status = "processing"
     return {
-        "active": state.inference_queue.active_count,
-        "queued": state.inference_queue.queue_size,
+        "status": status,
+        "active": active,
+        "queued": queued,
+        "max_queue_size": max_size,
+        "capacity_percent": capacity_pct,
     }
 
 
@@ -120,6 +141,9 @@ async def nebius_stats_endpoint(request: Request):
     state = get_state(request)
     stats = dict(nebius_stats)
     stats["uptime_seconds"] = round(time.time() - state.start_time, 1)
+    # Estimate cost based on token usage (rough per-1K-token pricing)
+    tokens = stats.get("total_tokens_estimated", 0)
+    stats["estimated_cost_usd"] = round(tokens * 0.0002, 4)  # ~$0.20 per 1K tokens
     return JSONResponse(stats)
 
 
