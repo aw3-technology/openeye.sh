@@ -135,7 +135,7 @@ def test_predict_adapter_exception():
         files={"file": ("test.jpg", buf.getvalue(), "image/jpeg")},
     )
     assert resp.status_code == 500
-    assert "GPU out of memory" in resp.json()["error"]
+    assert "Inference failed" in resp.json()["error"]
 
 
 # ── Config endpoints ─────────────────────────────────────────────────

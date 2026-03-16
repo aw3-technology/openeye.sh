@@ -76,7 +76,7 @@ app.add_typer(config_app, name="config")
 
 # ── Fleet subcommands ─────────────────────────────────────────────────
 
-from openeye_ai.fleet_cli import fleet_app
+from openeye_ai.commands.fleet import fleet_app
 
 app.add_typer(fleet_app, name="fleet")
 

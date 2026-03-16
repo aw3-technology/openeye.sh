@@ -1,41 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import {
-  Loader2,
-  Save,
-  RefreshCw,
-  RotateCcw,
-  Plus,
-  Trash2,
-  ShieldAlert,
-  Brain,
-  Settings2,
-  FileCode,
-} from "lucide-react";
+import { Loader2, Save, RefreshCw, RotateCcw, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import type { RuntimeConfig } from "@/types/openeye";
 import { vlmModelOptions, cortexLlmOptions } from "@/data/modelOptions";
-
-const NONE_VALUE = "__none__";
+import { RuntimeConfigPanel } from "@/components/dashboard/config-editor/RuntimeConfigPanel";
+import { SystemPromptsPanel } from "@/components/dashboard/config-editor/SystemPromptsPanel";
+import { RawJsonPanel } from "@/components/dashboard/config-editor/RawJsonPanel";
 
 const DEFAULTS: Required<
   Pick<
@@ -73,7 +48,6 @@ export default function ConfigEditor() {
 
   // Form fields — system prompts
   const [systemPrompts, setSystemPrompts] = useState<Array<{ key: string; value: string }>>([]);
-  const [newPromptKey, setNewPromptKey] = useState("");
 
   const dirty = useRef(false);
 
@@ -241,16 +215,12 @@ export default function ConfigEditor() {
     toast("Safety & detection values reset to defaults");
   };
 
-  // System prompt helpers
-  const addPrompt = () => {
-    const key = newPromptKey.trim();
-    if (!key) return;
+  const addPrompt = (key: string) => {
     if (systemPrompts.some((p) => p.key === key)) {
       toast.error(`Prompt key "${key}" already exists`);
       return;
     }
     setSystemPrompts((prev) => [...prev, { key, value: "" }]);
-    setNewPromptKey("");
   };
 
   const removePrompt = (idx: number) => {
@@ -286,15 +256,15 @@ export default function ConfigEditor() {
     );
   }
 
-  // Group model options by provider
-  const vlmByProvider: Record<string, typeof vlmModelOptions> = {};
-  for (const m of vlmModelOptions) {
-    (vlmByProvider[m.provider] ??= []).push(m);
-  }
-  const cortexByProvider: Record<string, typeof cortexLlmOptions> = {};
-  for (const m of cortexLlmOptions) {
-    (cortexByProvider[m.provider] ??= []).push(m);
-  }
+  const saveButton = (
+    <div className="flex items-center gap-3">
+      <Button onClick={saveForm} disabled={saving} className="gap-2">
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        Save Configuration
+      </Button>
+      <span className="text-xs text-muted-foreground">Changes are hot-reloaded on the server.</span>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -327,315 +297,50 @@ export default function ConfigEditor() {
           <TabsTrigger value="raw">Raw JSON</TabsTrigger>
         </TabsList>
 
-        {/* ─── Form Tab ─── */}
         <TabsContent value="form" className="mt-4 space-y-4">
-          {/* Core Runtime Config */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Settings2 className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-base">Runtime Configuration</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="modes">Modes (comma-separated)</Label>
-                <Input
-                  id="modes"
-                  value={modes}
-                  onChange={(e) => setModes(e.target.value)}
-                  placeholder="e.g. detect, segment, depth"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Perception pipeline modes. Common values: detect, segment, depth, vla.
-                </p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>VLM Model</Label>
-                  <Select value={vlmModel || NONE_VALUE} onValueChange={(v) => setVlmModel(v === NONE_VALUE ? "" : v)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select VLM model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={NONE_VALUE}>
-                        <span className="text-muted-foreground">Default (env)</span>
-                      </SelectItem>
-                      {Object.entries(vlmByProvider).map(([provider, models]) => (
-                        <SelectGroup key={provider}>
-                          <SelectLabel>{provider}</SelectLabel>
-                          {models.map((m) => (
-                            <SelectItem key={m.id} value={m.id}>
-                              {m.label}
-                              {m.free && <span className="ml-1.5 text-xs text-terminal-green">free</span>}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">Vision-language model for perception.</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Cortex LLM</Label>
-                  <Select
-                    value={cortexLlm || NONE_VALUE}
-                    onValueChange={(v) => setCortexLlm(v === NONE_VALUE ? "" : v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select cortex LLM" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={NONE_VALUE}>
-                        <span className="text-muted-foreground">Default (env)</span>
-                      </SelectItem>
-                      {Object.entries(cortexByProvider).map(([provider, models]) => (
-                        <SelectGroup key={provider}>
-                          <SelectLabel>{provider}</SelectLabel>
-                          {models.map((m) => (
-                            <SelectItem key={m.id} value={m.id}>
-                              {m.label}
-                              {m.free && <span className="ml-1.5 text-xs text-terminal-green">free</span>}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">Reasoning model for the cortex planning layer.</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>Stream Hz</Label>
-                  <span className="text-sm font-mono tabular-nums text-muted-foreground">{hertz} fps</span>
-                </div>
-                <Slider
-                  value={[hertz]}
-                  onValueChange={([v]) => setHertz(v)}
-                  min={1}
-                  max={60}
-                  step={1}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Frame processing rate. Higher values use more compute.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Safety & Detection */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ShieldAlert className="h-4 w-4 text-terminal-amber" />
-                  <CardTitle className="text-base">Safety & Detection</CardTitle>
-                </div>
-                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={resetToDefaults}>
-                  Reset Defaults
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>Confidence Threshold</Label>
-                  <span className="text-sm font-mono tabular-nums text-muted-foreground">
-                    {confidenceThreshold.toFixed(2)}
-                  </span>
-                </div>
-                <Slider
-                  value={[confidenceThreshold]}
-                  onValueChange={([v]) => setConfidenceThreshold(v)}
-                  min={0.05}
-                  max={0.95}
-                  step={0.05}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Minimum detection confidence. Lower = more detections, higher = fewer false positives.
-                </p>
-              </div>
-
-              <Separator />
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label>
-                      <span className="text-red-400">Danger</span> Zone (m)
-                    </Label>
-                    <span className="text-sm font-mono tabular-nums text-red-400">{dangerM.toFixed(1)}m</span>
-                  </div>
-                  <Slider
-                    value={[dangerM]}
-                    onValueChange={([v]) => setDangerM(v)}
-                    min={0.1}
-                    max={2.0}
-                    step={0.1}
-                  />
-                  <p className="text-xs text-muted-foreground">Distance for HALT recommendation.</p>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label>
-                      <span className="text-terminal-amber">Caution</span> Zone (m)
-                    </Label>
-                    <span className="text-sm font-mono tabular-nums text-terminal-amber">{cautionM.toFixed(1)}m</span>
-                  </div>
-                  <Slider
-                    value={[cautionM]}
-                    onValueChange={([v]) => setCautionM(v)}
-                    min={0.5}
-                    max={5.0}
-                    step={0.1}
-                  />
-                  <p className="text-xs text-muted-foreground">Distance for slow-down alerts.</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>IoU Threshold (Tracking)</Label>
-                  <span className="text-sm font-mono tabular-nums text-muted-foreground">
-                    {iouThreshold.toFixed(2)}
-                  </span>
-                </div>
-                <Slider
-                  value={[iouThreshold]}
-                  onValueChange={([v]) => setIouThreshold(v)}
-                  min={0.1}
-                  max={0.9}
-                  step={0.05}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Intersection-over-union threshold for object tracking across frames.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div className="space-y-0.5">
-                  <Label>Lighting Robustness</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Enable adaptive preprocessing for variable lighting conditions.
-                  </p>
-                </div>
-                <Switch checked={lightingRobustness} onCheckedChange={setLightingRobustness} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Save Button */}
-          <div className="flex items-center gap-3">
-            <Button onClick={saveForm} disabled={saving} className="gap-2">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Save Configuration
-            </Button>
-            <span className="text-xs text-muted-foreground">Changes are hot-reloaded on the server.</span>
-          </div>
+          <RuntimeConfigPanel
+            modes={modes}
+            onModesChange={setModes}
+            vlmModel={vlmModel}
+            onVlmModelChange={setVlmModel}
+            cortexLlm={cortexLlm}
+            onCortexLlmChange={setCortexLlm}
+            hertz={hertz}
+            onHertzChange={setHertz}
+            confidenceThreshold={confidenceThreshold}
+            onConfidenceThresholdChange={setConfidenceThreshold}
+            dangerM={dangerM}
+            onDangerMChange={setDangerM}
+            cautionM={cautionM}
+            onCautionMChange={setCautionM}
+            iouThreshold={iouThreshold}
+            onIouThresholdChange={setIouThreshold}
+            lightingRobustness={lightingRobustness}
+            onLightingRobustnessChange={setLightingRobustness}
+            onResetDefaults={resetToDefaults}
+            vlmModelOptions={vlmModelOptions}
+            cortexLlmOptions={cortexLlmOptions}
+          />
+          {saveButton}
         </TabsContent>
 
-        {/* ─── System Prompts Tab ─── */}
         <TabsContent value="prompts" className="mt-4 space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Brain className="h-4 w-4 text-purple-400" />
-                <CardTitle className="text-base">System Prompts</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-xs text-muted-foreground">
-                Named system prompts injected into VLM and cortex reasoning calls. Common keys: base, safety,
-                governance, task.
-              </p>
-
-              {systemPrompts.length === 0 && (
-                <div className="rounded-lg border border-dashed py-6 text-center">
-                  <p className="text-sm text-muted-foreground">No system prompts configured.</p>
-                </div>
-              )}
-
-              {systemPrompts.map((prompt, idx) => (
-                <div key={idx} className="space-y-2 rounded-lg border p-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="font-mono text-xs">{prompt.key}</Label>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-red-400"
-                      onClick={() => removePrompt(idx)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                  <Textarea
-                    value={prompt.value}
-                    onChange={(e) => updatePromptValue(idx, e.target.value)}
-                    className="min-h-[80px] font-mono text-xs"
-                    placeholder={`Enter system prompt for "${prompt.key}"...`}
-                  />
-                </div>
-              ))}
-
-              <Separator />
-
-              <div className="flex items-center gap-2">
-                <Input
-                  value={newPromptKey}
-                  onChange={(e) => setNewPromptKey(e.target.value)}
-                  placeholder="Prompt key (e.g. safety)"
-                  className="max-w-[200px] font-mono text-xs"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") addPrompt();
-                  }}
-                />
-                <Button variant="outline" size="sm" onClick={addPrompt} className="gap-1.5">
-                  <Plus className="h-3.5 w-3.5" />
-                  Add Prompt
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex items-center gap-3">
-            <Button onClick={saveForm} disabled={saving} className="gap-2">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Save Configuration
-            </Button>
-          </div>
+          <SystemPromptsPanel
+            prompts={systemPrompts}
+            onAddPrompt={addPrompt}
+            onRemovePrompt={removePrompt}
+            onUpdatePromptValue={updatePromptValue}
+          />
+          {saveButton}
         </TabsContent>
 
-        {/* ─── Raw JSON Tab ─── */}
         <TabsContent value="raw" className="mt-4 space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <FileCode className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-base">Raw Configuration</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-xs text-muted-foreground">
-                Edit the full configuration JSON directly. Supports arbitrary keys beyond the form fields.
-              </p>
-              <Textarea
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                className="min-h-[400px] font-mono text-xs"
-              />
-              <Button onClick={saveRaw} disabled={saving} className="gap-2">
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                Save
-              </Button>
-            </CardContent>
-          </Card>
+          <RawJsonPanel
+            rawText={rawText}
+            onRawTextChange={setRawText}
+            onSave={saveRaw}
+            saving={saving}
+          />
         </TabsContent>
       </Tabs>
     </div>

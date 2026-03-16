@@ -8,15 +8,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   Table,
   TableBody,
@@ -28,9 +20,7 @@ import {
 import {
   Cpu,
   Download,
-  Search,
   CheckCircle2,
-  Circle,
   Terminal,
   Trash2,
   HardDrive,
@@ -45,7 +35,6 @@ import {
   ArrowRight,
   ExternalLink,
   Clock,
-  Info,
   ChevronRight,
   Gauge,
 } from "lucide-react";
@@ -54,31 +43,15 @@ import {
   modelGroups,
   benchmarks,
   adapterSteps,
-  type Model,
 } from "@/data/modelsData";
 import { vlmModelOptions, cortexLlmOptions } from "@/data/modelOptions";
+import { ModelRegistryFilters } from "@/components/dashboard/model-registry/ModelRegistryFilters";
+import { ModelRegistryTable } from "@/components/dashboard/model-registry/ModelRegistryTable";
+import { ModelDetailPanel } from "@/components/dashboard/model-registry/ModelDetailPanel";
+import type { ModelEntry } from "@/components/dashboard/model-registry/types";
 
-// ── Extended model entries for the registry ─────────────────────────────────
+// ── Registry data helpers ────────────────────────────────────────────────────
 
-interface ModelEntry {
-  key: string;
-  name: string;
-  creator: string;
-  task: string;
-  category: string;
-  categoryColor: string;
-  adapter: string;
-  role: string;
-  description: string;
-  status: "integrated" | "planned";
-  downloaded: boolean;
-  size_mb?: number;
-  performance?: string;
-  provider?: string;
-  extras?: string;
-}
-
-/** Map from modelsData groups into registry entries with known sizes / extras. */
 const MODEL_SIZES: Record<string, { size_mb?: number; extras?: string; adapter: string }> = {
   YOLOv8: { size_mb: 22, extras: "pip install openeye-sh[yolo]", adapter: "yolov8" },
   YOLO26: { size_mb: 5, extras: "pip install openeye-sh[yolo]", adapter: "yolo26" },
@@ -276,195 +249,24 @@ export default function ModelRegistry() {
 
         {/* ── Local Models Tab ─────────────────────────────────────── */}
         <TabsContent value="local" className="space-y-4">
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search models, creators, tasks..."
-                className="pl-9"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {(["all", "integrated", "planned"] as const).map((s) => (
-                <Button
-                  key={s}
-                  variant={statusFilter === s ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter(s)}
-                  className="text-xs capitalize"
-                >
-                  {s === "all" ? "All Status" : s}
-                </Button>
-              ))}
-            </div>
-          </div>
+          <ModelRegistryFilters
+            search={search}
+            onSearchChange={setSearch}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            categoryFilter={categoryFilter}
+            onCategoryFilterChange={setCategoryFilter}
+            categories={categories}
+            categoryIcons={CATEGORY_ICONS}
+          />
 
-          {/* Category chips */}
-          <div className="flex gap-2 flex-wrap">
-            {categories.map((cat) => (
-              <Button
-                key={cat}
-                variant={categoryFilter === cat ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setCategoryFilter(cat)}
-                className="text-xs gap-1.5"
-              >
-                {cat !== "all" && CATEGORY_ICONS[cat]}
-                {cat === "all" ? "All Categories" : cat}
-              </Button>
-            ))}
-          </div>
+          <ModelRegistryTable
+            models={filtered}
+            categoryFilter={categoryFilter}
+            activeModelKey={healthData?.model}
+          />
 
-          {/* Models table */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <HardDrive className="h-4 w-4" />
-                {categoryFilter === "all" ? "All Models" : categoryFilter}
-                <Badge variant="secondary" className="ml-auto text-xs">
-                  {filtered.length} model{filtered.length !== 1 ? "s" : ""}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40px]">Status</TableHead>
-                    <TableHead>Model</TableHead>
-                    <TableHead className="hidden md:table-cell">Creator</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead className="hidden lg:table-cell">Role</TableHead>
-                    <TableHead className="hidden sm:table-cell">Adapter</TableHead>
-                    <TableHead className="text-right hidden sm:table-cell">Size</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((model) => (
-                    <ModelTableRow
-                      key={model.key}
-                      model={model}
-                      isActive={
-                        !!healthData?.model &&
-                        healthData.model
-                          .toLowerCase()
-                          .includes(model.key.replace(/_/g, ""))
-                      }
-                    />
-                  ))}
-                  {filtered.length === 0 && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        className="text-center text-sm text-muted-foreground py-8"
-                      >
-                        No models match your filter.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          {/* Model details accordion */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Info className="h-4 w-4" />
-                Model Details
-              </CardTitle>
-              <CardDescription>
-                Expand a model to see its description, performance, and install
-                command.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="w-full">
-                {filtered.map((model) => (
-                  <AccordionItem key={model.key} value={model.key}>
-                    <AccordionTrigger className="text-sm hover:no-underline">
-                      <div className="flex items-center gap-3 text-left">
-                        <StatusIcon
-                          status={model.status}
-                          downloaded={model.downloaded}
-                        />
-                        <span className="font-medium">{model.name}</span>
-                        <span className="text-xs text-muted-foreground hidden sm:inline">
-                          {model.creator}
-                        </span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-3 pl-7">
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {model.description}
-                        </p>
-
-                        <div className="flex flex-wrap gap-2">
-                          <Badge variant="outline" className="text-xs font-mono">
-                            {model.category}
-                          </Badge>
-                          <Badge
-                            variant={
-                              model.status === "integrated"
-                                ? "default"
-                                : "secondary"
-                            }
-                            className="text-xs"
-                          >
-                            {model.status}
-                          </Badge>
-                          {model.performance && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs text-terminal-green border-terminal-green/30"
-                            >
-                              {model.performance}
-                            </Badge>
-                          )}
-                          {model.provider && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs text-terminal-amber border-terminal-amber/30"
-                            >
-                              {model.provider}
-                            </Badge>
-                          )}
-                          {model.size_mb && (
-                            <Badge variant="outline" className="text-xs font-mono">
-                              {model.size_mb >= 1000
-                                ? `${(model.size_mb / 1000).toFixed(1)} GB`
-                                : `${model.size_mb} MB`}
-                            </Badge>
-                          )}
-                        </div>
-
-                        {model.status === "integrated" && (
-                          <div className="space-y-1.5">
-                            <code className="block text-xs font-mono bg-secondary text-oe-green px-3 py-2 rounded">
-                              $ openeye pull {model.key}
-                            </code>
-                            <code className="block text-xs font-mono bg-secondary text-oe-green px-3 py-2 rounded">
-                              $ openeye run {model.key} image.jpg
-                            </code>
-                            {model.extras && (
-                              <code className="block text-xs font-mono bg-secondary text-muted-foreground px-3 py-2 rounded">
-                                $ {model.extras}
-                              </code>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </CardContent>
-          </Card>
+          <ModelDetailPanel models={filtered} />
         </TabsContent>
 
         {/* ── Cloud VLM / LLM Tab ──────────────────────────────────── */}
@@ -893,72 +695,6 @@ registry.register("yolo26", YOLOAdapter)`}</code>
 }
 
 // ── Sub-components ──────────────────────────────────────────────────────────
-
-function StatusIcon({
-  status,
-  downloaded,
-}: {
-  status: "integrated" | "planned";
-  downloaded: boolean;
-}) {
-  if (downloaded) {
-    return <CheckCircle2 className="h-4 w-4 text-terminal-green" />;
-  }
-  if (status === "integrated") {
-    return <Circle className="h-4 w-4 text-terminal-green/50" />;
-  }
-  return <Clock className="h-4 w-4 text-muted-foreground" />;
-}
-
-function ModelTableRow({
-  model,
-  isActive,
-}: {
-  model: ModelEntry;
-  isActive: boolean;
-}) {
-  return (
-    <TableRow className={isActive ? "bg-terminal-green/5" : undefined}>
-      <TableCell>
-        <StatusIcon status={model.status} downloaded={model.downloaded} />
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{model.name}</span>
-          {isActive && (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-              Active
-            </Badge>
-          )}
-        </div>
-      </TableCell>
-      <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-        {model.creator}
-      </TableCell>
-      <TableCell>
-        <Badge
-          variant="outline"
-          className={`text-[10px] font-mono ${model.categoryColor}`}
-        >
-          {model.category}
-        </Badge>
-      </TableCell>
-      <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
-        {model.role}
-      </TableCell>
-      <TableCell className="hidden sm:table-cell font-mono text-xs text-muted-foreground">
-        {model.adapter}
-      </TableCell>
-      <TableCell className="text-right hidden sm:table-cell font-mono text-sm tabular-nums">
-        {model.size_mb
-          ? model.size_mb >= 1000
-            ? `${(model.size_mb / 1000).toFixed(1)} GB`
-            : `${model.size_mb} MB`
-          : "—"}
-      </TableCell>
-    </TableRow>
-  );
-}
 
 function StatCard({
   icon,
