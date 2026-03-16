@@ -62,7 +62,7 @@ export function SafetyPanel() {
       if (Math.random() < 0.05) {
         newEntries.push({
           id: ++logCounter,
-          message: `Scene clear — ${latestFrame.objects.length} objects, 0 hazards.`,
+          message: `Scene clear — ${latestFrame.objects?.length ?? 0} objects, 0 hazards.`,
           zone: "safe",
           timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
         });

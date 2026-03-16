@@ -124,7 +124,7 @@ export function DemoSceneGraph() {
 
   const sceneGraph = latestFrame?.scene_graph;
   const hazardIds = new Set(
-    latestFrame?.safety_alerts.map((a) => a.human_track_id) || [],
+    latestFrame?.safety_alerts?.map((a) => a.human_track_id) ?? [],
   );
 
   const tree = sceneGraph
