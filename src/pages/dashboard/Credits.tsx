@@ -282,7 +282,7 @@ export default function Credits() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.data?.data.map((tx) => (
+              {transactions.data?.data?.map((tx) => (
                 <TableRow key={tx.id}>
                   <TableCell className="text-xs tabular-nums">
                     {new Date(tx.created_at).toLocaleDateString()}
