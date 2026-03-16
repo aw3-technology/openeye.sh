@@ -198,10 +198,14 @@ def test_remove_not_downloaded(tmp_openeye_home, monkeypatch):
 
 
 def test_run_model_not_downloaded(tmp_openeye_home, monkeypatch):
+    import sys
+    import openeye_ai.commands.inference.run  # noqa: F811
+    run_mod = sys.modules["openeye_ai.commands.inference.run"]
+
     registry = _make_registry()
-    monkeypatch.setattr("openeye_ai.commands.inference.get_model_info", lambda m: registry[m])
-    monkeypatch.setattr("openeye_ai.commands.inference.is_downloaded", lambda m: False)
-    monkeypatch.setattr("openeye_ai.commands.inference.MODELS_DIR", tmp_openeye_home / "models")
+    monkeypatch.setattr(run_mod, "get_model_info", lambda m: registry[m])
+    monkeypatch.setattr(run_mod, "is_downloaded", lambda m: False)
+    monkeypatch.setattr(run_mod, "MODELS_DIR", tmp_openeye_home / "models")
 
     result = runner.invoke(app, ["run", "yolov8", "/tmp/fake.jpg"])
     assert result.exit_code == 1
@@ -209,10 +213,14 @@ def test_run_model_not_downloaded(tmp_openeye_home, monkeypatch):
 
 
 def test_run_missing_image(tmp_openeye_home, monkeypatch):
+    import sys
+    import openeye_ai.commands.inference.run  # noqa: F811
+    run_mod = sys.modules["openeye_ai.commands.inference.run"]
+
     registry = _make_registry()
-    monkeypatch.setattr("openeye_ai.commands.inference.get_model_info", lambda m: registry[m])
-    monkeypatch.setattr("openeye_ai.commands.inference.is_downloaded", lambda m: True)
-    monkeypatch.setattr("openeye_ai.commands.inference.MODELS_DIR", tmp_openeye_home / "models")
+    monkeypatch.setattr(run_mod, "get_model_info", lambda m: registry[m])
+    monkeypatch.setattr(run_mod, "is_downloaded", lambda m: True)
+    monkeypatch.setattr(run_mod, "MODELS_DIR", tmp_openeye_home / "models")
 
     result = runner.invoke(app, ["run", "yolov8", "/tmp/nonexistent_image_abc123.jpg"])
     assert result.exit_code == 1
@@ -220,13 +228,17 @@ def test_run_missing_image(tmp_openeye_home, monkeypatch):
 
 
 def test_run_success(tmp_openeye_home, tmp_path, monkeypatch):
+    import sys
+    import openeye_ai.commands.inference.run  # noqa: F811
+    run_mod = sys.modules["openeye_ai.commands.inference.run"]
+
     registry = _make_registry()
     img_path = _make_jpeg(tmp_path / "test.jpg")
 
-    monkeypatch.setattr("openeye_ai.commands.inference.get_model_info", lambda m: registry[m])
-    monkeypatch.setattr("openeye_ai.commands.inference.is_downloaded", lambda m: True)
-    monkeypatch.setattr("openeye_ai.commands.inference.get_adapter", lambda m, variant=None: _StubAdapter())
-    monkeypatch.setattr("openeye_ai.commands.inference.MODELS_DIR", tmp_openeye_home / "models")
+    monkeypatch.setattr(run_mod, "get_model_info", lambda m: registry[m])
+    monkeypatch.setattr(run_mod, "is_downloaded", lambda m: True)
+    monkeypatch.setattr(run_mod, "get_adapter", lambda m, variant=None: _StubAdapter())
+    monkeypatch.setattr(run_mod, "MODELS_DIR", tmp_openeye_home / "models")
 
     result = runner.invoke(app, ["run", "yolov8", str(img_path)])
     assert result.exit_code == 0
@@ -291,10 +303,14 @@ def test_health_connection_error(tmp_openeye_home, monkeypatch):
 
 
 def test_serve_not_downloaded(tmp_openeye_home, monkeypatch):
+    import sys
+    import openeye_ai.commands.inference.serve  # noqa: F811
+    serve_mod = sys.modules["openeye_ai.commands.inference.serve"]
+
     registry = _make_registry()
-    monkeypatch.setattr("openeye_ai.commands.inference.get_model_info", lambda m: registry[m])
-    monkeypatch.setattr("openeye_ai.commands.inference.is_downloaded", lambda m: False)
-    monkeypatch.setattr("openeye_ai.commands.inference.MODELS_DIR", tmp_openeye_home / "models")
+    monkeypatch.setattr(serve_mod, "get_model_info", lambda m: registry[m])
+    monkeypatch.setattr(serve_mod, "is_downloaded", lambda m: False)
+    monkeypatch.setattr(serve_mod, "MODELS_DIR", tmp_openeye_home / "models")
 
     result = runner.invoke(app, ["serve", "yolov8"])
     assert result.exit_code == 1

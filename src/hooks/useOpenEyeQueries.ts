@@ -25,11 +25,11 @@ export function usePredict() {
 }
 
 export function useInferenceHistory(page = 0, pageSize = 20) {
-  const { user } = useAuth();
+  const { user, isDemo } = useAuth();
   return useQuery({
     queryKey: ["openeye", "inference_history", user?.id, page, pageSize],
     queryFn: async () => {
-      if (!user) return { data: [] as InferenceHistoryRow[], count: 0 };
+      if (!user || isDemo) return { data: [] as InferenceHistoryRow[], count: 0 };
       const from = page * pageSize;
       const to = from + pageSize - 1;
       const { data, count, error } = await supabase
@@ -46,11 +46,11 @@ export function useInferenceHistory(page = 0, pageSize = 20) {
 }
 
 export function useSaveInference() {
-  const { user } = useAuth();
+  const { user, isDemo } = useAuth();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (row: Omit<InferenceHistoryRow, "id" | "user_id" | "created_at">) => {
-      if (!user) throw new Error("Not authenticated");
+      if (!user || isDemo) return;
       const { error } = await supabase
         .from("inference_history" as any)
         .insert({ ...row, user_id: user.id });
@@ -63,11 +63,11 @@ export function useSaveInference() {
 }
 
 export function useApiKeys() {
-  const { user } = useAuth();
+  const { user, isDemo } = useAuth();
   return useQuery({
     queryKey: ["openeye", "api_keys", user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || isDemo) return [];
       const { data, error } = await supabase
         .from("api_keys" as any)
         .select("*")
@@ -81,11 +81,11 @@ export function useApiKeys() {
 }
 
 export function useDevices() {
-  const { user } = useAuth();
+  const { user, isDemo } = useAuth();
   return useQuery({
     queryKey: ["openeye", "devices", user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || isDemo) return [];
       const { data, error } = await supabase
         .from("devices" as any)
         .select("*")

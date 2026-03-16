@@ -18,6 +18,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   tokenError: string | null;
+  isDemo: boolean;
   signOut: () => Promise<void>;
   signInAsDemo: () => void;
 }
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   tokenError: null,
+  isDemo: false,
   signOut: async () => {},
   signInAsDemo: () => {},
 });
@@ -131,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, tokenError, signOut, signInAsDemo }}>
+    <AuthContext.Provider value={{ user, session, loading, tokenError, isDemo: localStorage.getItem(DEMO_USER_KEY) === "true", signOut, signInAsDemo }}>
       {children}
     </AuthContext.Provider>
   );
