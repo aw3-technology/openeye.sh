@@ -92,6 +92,8 @@ describe("Navbar", () => {
       loading: true,
       signOut: vi.fn(),
       tokenError: null,
+      isDemo: false,
+      signInAsDemo: vi.fn(),
     });
 
     const { container } = renderNavbar();
