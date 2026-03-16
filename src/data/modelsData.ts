@@ -216,10 +216,10 @@ export interface BenchmarkRow {
 
 export const benchmarks: BenchmarkRow[] = [
   {
-    model: "YOLO26",
+    model: "YOLO26n",
     task: "Detection",
-    speed: "~2 ms",
-    accuracy: "53.1 mAP",
+    speed: "~1.7 ms",
+    accuracy: "40.9 mAP",
     size: "5 MB",
     backend: "ONNX / TRT",
   },
