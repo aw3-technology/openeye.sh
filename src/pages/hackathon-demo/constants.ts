@@ -1,15 +1,5 @@
 export { type AgenticDetection, type AgenticFrame } from "@/components/dashboard/agentic/types";
-
-export interface NebiusStats {
-  total_calls: number;
-  total_tokens_estimated: number;
-  total_latency_ms: number;
-  avg_latency_ms: number;
-  errors: number;
-  model: string;
-  provider: string;
-  configured: boolean;
-}
+export type { NebiusStats } from "@/lib/openeye-client";
 
 export type Phase = "SEE" | "THINK" | "ACT" | "PROTECT";
 

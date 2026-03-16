@@ -174,13 +174,13 @@ openeye run yolov8 image.jpg
 openeye serve yolov8 --vlm-model "Qwen/Qwen2.5-VL-72B-Instruct"
 
 # Live camera watch with safety monitoring
-openeye watch yolov8 --safety
+openeye watch --models yolov8 --safety
 
 # Check Nebius usage stats
 openeye nebius-stats
 
 # Agentic loop with VLM
-openeye agent --vlm
+openeye agent run --vlm
 
 # G1 Safety Guardian demo (Rich terminal UI)
 openeye g1-demo --demo

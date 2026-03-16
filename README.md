@@ -126,7 +126,7 @@ openeye g1-demo --control-mode dry_run --demo
 openeye agent run
 
 # Edge device fleet management
-openeye fleet status
+openeye fleet ls
 
 # Open-vocabulary detection with text prompts (requires grounding-dino)
 openeye pull grounding-dino
@@ -136,7 +136,7 @@ openeye run grounding-dino photo.jpg --prompt "person. hard hat. forklift."
 ## Project Structure
 
 ```
-perceptify-the-world/
+openeye.sh/
 ├── cli/              # openeye-sh CLI & inference server (Python)
 ├── backend/          # Perception engine runtime (Python)
 ├── src/              # React web frontend (TypeScript)

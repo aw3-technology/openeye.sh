@@ -15,7 +15,7 @@ import { IntelligencePanel } from "./hackathon-demo/IntelligencePanel";
 import { BottomBar } from "./hackathon-demo/BottomBar";
 
 function HackathonDemoInner() {
-  const { serverUrl, isConnected } = useOpenEyeConnection();
+  const { serverUrl, isConnected, client } = useOpenEyeConnection();
   const { isStreaming, startStream, videoRef, latestResult, metrics } =
     useOpenEyeStream();
   const vlm = useVLMStream();
@@ -171,18 +171,28 @@ function HackathonDemoInner() {
 
   // Poll Nebius stats
   useEffect(() => {
+    if (!isConnected) {
+      setNebiusStats(null);
+      return;
+    }
+
+    let cancelled = false;
+
     const fetchStats = async () => {
       try {
-        const resp = await fetch(`${serverUrl}/nebius/stats`);
-        if (resp.ok) setNebiusStats(await resp.json());
+        const stats = await client.nebiusStats();
+        if (!cancelled) setNebiusStats(stats);
       } catch {
-        /* ignore */
+        if (!cancelled) setNebiusStats(null);
       }
     };
     fetchStats();
     const id = setInterval(fetchStats, 5000);
-    return () => clearInterval(id);
-  }, [serverUrl]);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [isConnected, client]);
 
   // Sync goal ref
   useEffect(() => {

@@ -39,11 +39,16 @@ class ModelAdapter(ABC):
 | Adapter | Module | Models |
 |---------|--------|--------|
 | yolov8 | openeye_ai.adapters.yolov8 | YOLOv8 (ultralytics) |
+| yolo26 | openeye_ai.adapters.yolo26 | YOLOv26 |
 | depth_anything | openeye_ai.adapters.depth_anything | Depth Anything V2 |
 | grounding_dino | openeye_ai.adapters.grounding_dino | Grounding DINO |
+| rfdetr | openeye_ai.adapters.rfdetr | RF-DETR |
+| sam2 | openeye_ai.adapters.sam2 | Segment Anything 2 |
+| smolvla | openeye_ai.adapters.smolvla | SmolVLA |
 | yolov8:onnx | openeye_ai.adapters.yolov8_onnx | YOLOv8 ONNX |
 | onnx_generic | openeye_ai.adapters.onnx_runtime | Generic ONNX |
 | yolov8:tensorrt | openeye_ai.adapters.tensorrt_runtime | YOLOv8 TensorRT |
+| tensorrt_generic | openeye_ai.adapters.tensorrt_runtime | Generic TensorRT |
 
 ### Lifecycle
 

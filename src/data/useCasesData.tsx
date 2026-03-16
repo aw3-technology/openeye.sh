@@ -117,7 +117,7 @@ export const useCases: UseCase[] = [
       },
     ],
     terminalCommand:
-      "$ openeye run screenshot.png --model yolov8 --format json",
+      "$ openeye run yolov8 screenshot.png --pretty",
     stats: [
       { value: "JSON", label: "Structured output" },
       { value: "CI/CD", label: "Pipeline-ready" },

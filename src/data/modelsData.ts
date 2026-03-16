@@ -236,7 +236,7 @@ export const benchmarks: BenchmarkRow[] = [
     task: "Detection",
     speed: "~6 ms",
     accuracy: "54.0 mAP",
-    size: "39 MB",
+    size: "120 MB",
     backend: "PyTorch",
   },
   {
@@ -244,7 +244,7 @@ export const benchmarks: BenchmarkRow[] = [
     task: "Grounding",
     speed: "~40 ms",
     accuracy: "Open-vocab",
-    size: "694 MB",
+    size: "341 MB",
     backend: "PyTorch",
   },
   {
@@ -252,7 +252,7 @@ export const benchmarks: BenchmarkRow[] = [
     task: "Segmentation",
     speed: "~50 ms",
     accuracy: "Zero-shot",
-    size: "38 MB",
+    size: "150 MB",
     backend: "PyTorch",
   },
   {
@@ -260,7 +260,7 @@ export const benchmarks: BenchmarkRow[] = [
     task: "Depth",
     speed: "~15 ms",
     accuracy: "SOTA monocular",
-    size: "97 MB",
+    size: "98 MB",
     backend: "PyTorch",
   },
   {

@@ -11,7 +11,7 @@ Thanks for your interest in contributing to OpenEye! This guide will help you ge
 ## Repository Structure
 
 ```
-perceptify-the-world/
+openeye.sh/
 ├── cli/              # openeye-sh CLI & inference server (Python)
 ├── backend/          # Perception engine runtime (Python)
 ├── src/              # React frontend (TypeScript)
