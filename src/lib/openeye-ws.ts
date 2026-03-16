@@ -52,7 +52,18 @@ export class OpenEyeWebSocket {
     }
     this.stopPing();
 
-    const parsed = new URL(this._url);
+    if (!this._url) {
+      this.emitStatus({ connected: false, error: "No server URL configured" });
+      return;
+    }
+
+    let parsed: URL;
+    try {
+      parsed = new URL(this._url);
+    } catch {
+      this.emitStatus({ connected: false, error: `Invalid server URL: ${this._url}` });
+      return;
+    }
     parsed.protocol = parsed.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = parsed.origin + this._path;
     this.ws = new WebSocket(wsUrl);
