@@ -9,7 +9,7 @@
 
 | Requirement | Notes |
 |-------------|-------|
-| Python 3.12+ | With venv |
+| Python 3.12+ | With pipx |
 | Node.js 18+ | For frontend |
 | Webcam | Built-in laptop camera works |
 | Nebius API Key | From [Nebius Console](https://console.nebius.com) |
@@ -30,12 +30,12 @@ EOF
 ### 2. Install & Start Backend
 
 ```bash
-# Install CLI into venv
-.venv/bin/pip install -e cli/
+# Install CLI via pipx
+pipx install -e cli/
 
 # Start server with Nebius VLM + LLM
 source backend/.env && export NEBIUS_API_KEY NEBIUS_BASE_URL && \
-.venv/bin/openeye serve yolov8 --demo \
+openeye serve yolov8 --demo \
   --vlm-model "Qwen/Qwen2.5-VL-72B-Instruct" \
   --cortex-llm "Qwen/Qwen3-235B-A22B-Instruct-2507" \
   --port 8000
@@ -98,7 +98,7 @@ The agentic loop runs continuously:
 
 **Terminal:**
 ```bash
-.venv/bin/openeye nebius-stats
+openeye nebius-stats
 ```
 
 Shows a Rich-formatted table with:
@@ -194,6 +194,6 @@ openeye g1-demo --demo
 | `Model does not exist` | Use `Qwen/Qwen2.5-VL-72B-Instruct` (not `Qwen3-VL-72B`) |
 | `Non-base64 digit found` | VLM WebSocket expects raw base64 string, not JSON wrapper |
 | Wrong base URL | Set `NEBIUS_BASE_URL=https://api.tokenfactory.nebius.com/v1/` |
-| `python-multipart` error | Run `.venv/bin/pip install python-multipart` |
+| `python-multipart` error | Run `pipx inject openeye-sh python-multipart` |
 | Frontend port conflict | Vite auto-increments ports (5173 → 5174 → ...) |
 | Camera not found | Set `CAMERA_INDEX=0` in `.env` or try `1` for external camera |
