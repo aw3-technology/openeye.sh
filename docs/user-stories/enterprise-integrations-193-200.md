@@ -433,7 +433,7 @@ resource "openeye_webhook" "intrusion_alert" {
 - [ ] SDK clients are auto-generated from the OpenAPI spec using `openapi-generator`:
   - **Python**: `pip install openeye-sdk` — typed client with Pydantic models
   - **TypeScript**: `npm install @openeye/sdk` — typed client with TypeScript interfaces
-  - **Go**: `go get github.com/openeye-sh/openeye-go` — idiomatic Go client with struct types
+  - **Go**: `go get github.com/aw3-technology/openeye-go` — idiomatic Go client with struct types
   - **Java**: `com.openeye:openeye-sdk` on Maven Central — Java client with POJO models
 - [ ] Each SDK provides: `predict(image)`, `stream()`, `health()`, `models()`, `createWebhook()`, `listCameras()` methods
 - [ ] SDKs support all authentication methods: API key (header), OAuth2 client credentials, and mTLS
@@ -502,7 +502,7 @@ package main
 import (
     "context"
     "fmt"
-    openeye "github.com/openeye-sh/openeye-go"
+    openeye "github.com/aw3-technology/openeye-go"
 )
 
 func main() {

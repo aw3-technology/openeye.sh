@@ -48,4 +48,4 @@ openeye watch --model yolov8n
 ## Links
 
 - [Homepage](https://perceptify.dev)
-- [Repository](https://github.com/OpenEye/perceptify-the-world)
+- [Repository](https://github.com/aw3-technology/openeye.sh)

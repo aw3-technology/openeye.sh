@@ -50,7 +50,7 @@ openeye list
 ### Development Install
 
 ```bash
-git clone https://github.com/OpenEye/perceptify-the-world.git
-cd perceptify-the-world/cli
+git clone https://github.com/aw3-technology/openeye.sh.git
+cd openeye.sh/cli
 pip install -e ".[all]" --group dev
 ```

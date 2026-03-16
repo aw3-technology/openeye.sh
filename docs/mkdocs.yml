@@ -1,8 +1,8 @@
 site_name: OpenEye Documentation
 site_description: CLI-first perception engine for robots and autonomous agents
 site_url: https://docs.perceptify.dev
-repo_url: https://github.com/OpenEye/perceptify-the-world
-repo_name: OpenEye/perceptify-the-world
+repo_url: https://github.com/aw3-technology/openeye.sh
+repo_name: aw3-technology/openeye.sh
 
 theme:
   name: material
