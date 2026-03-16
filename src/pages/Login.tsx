@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import logoVertical from "@/assets/openeye-logo-vertical.png";
+import logoVerticalDark from "@/assets/openeye-logo-vertical-dark.png";
 
 type AuthMode = "sign_in" | "sign_up";
 
@@ -13,6 +16,15 @@ export default function LoginPage() {
   const [mode, setMode] = useState<AuthMode>("sign_in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { signInAsDemo } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleDemoLogin = () => {
+    signInAsDemo();
+    const from = (location.state as { from?: string })?.from || "/dashboard";
+    navigate(from, { replace: true });
+  };
 
   const handleOAuthSignIn = async (provider: "google" | "apple") => {
     setLoading(provider);
@@ -65,7 +77,8 @@ export default function LoginPage() {
         className="w-full max-w-sm"
       >
         <div className="text-center mb-8">
-          <img src={logoVertical} alt="OpenEye" className="h-20 mx-auto mb-6" />
+          <img src={logoVertical} alt="OpenEye" className="h-20 mx-auto mb-6 logo-light" />
+          <img src={logoVerticalDark} alt="OpenEye" className="h-20 mx-auto mb-6 logo-dark" />
           <h1 className="text-2xl font-semibold font-display mb-2">
             {mode === "sign_in" ? "Sign in to OpenEye" : "Create an account"}
           </h1>
@@ -142,6 +155,27 @@ export default function LoginPage() {
             {loading === "apple" ? "Signing in..." : "Continue with Apple"}
           </button>
         </div>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-foreground/[0.06]" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-3 text-muted-foreground tracking-widest">demo</span>
+          </div>
+        </div>
+
+        <button
+          onClick={handleDemoLogin}
+          disabled={!!loading}
+          className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white rounded-inner px-4 py-3 text-sm font-medium hover:bg-emerald-500 transition-all active:scale-[0.98] disabled:opacity-50"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polygon points="10 8 16 12 10 16 10 8"/>
+          </svg>
+          Continue as Demo User
+        </button>
 
         {error && (
           <p className="mt-4 text-sm text-center text-destructive">{error}</p>
