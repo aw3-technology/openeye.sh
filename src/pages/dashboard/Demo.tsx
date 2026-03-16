@@ -124,7 +124,7 @@ function MetricsBar() {
       {[
         { label: "FPS", value: String(metrics.fps) },
         { label: "Latency", value: `${metrics.latency_ms.toFixed(0)}ms` },
-        { label: "Objects", value: String(latestFrame?.objects.length ?? 0) },
+        { label: "Objects", value: String(latestFrame?.objects?.length ?? 0) },
         {
           label: "Safety",
           value: overallSafetyState.toUpperCase(),
