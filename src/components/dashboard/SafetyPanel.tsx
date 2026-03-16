@@ -48,8 +48,8 @@ export function SafetyPanel() {
 
     const newEntries: LogEntry[] = [];
 
-    if (latestFrame.safety_alerts.length > 0) {
-      for (const alert of latestFrame.safety_alerts) {
+    if ((latestFrame.safety_alerts?.length ?? 0) > 0) {
+      for (const alert of latestFrame.safety_alerts ?? []) {
         newEntries.push({
           id: ++logCounter,
           message: alert.message,
@@ -57,12 +57,12 @@ export function SafetyPanel() {
           timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
         });
       }
-    } else if (latestFrame.objects.length > 0) {
+    } else if ((latestFrame.objects?.length ?? 0) > 0) {
       // Only add "Scene clear" occasionally to avoid spam
       if (Math.random() < 0.05) {
         newEntries.push({
           id: ++logCounter,
-          message: `Scene clear — ${latestFrame.objects.length} objects, 0 hazards.`,
+          message: `Scene clear — ${latestFrame.objects?.length ?? 0} objects, 0 hazards.`,
           zone: "safe",
           timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
         });
