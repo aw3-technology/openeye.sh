@@ -49,7 +49,7 @@ export function SafetyPanel() {
     const newEntries: LogEntry[] = [];
 
     if ((latestFrame.safety_alerts?.length ?? 0) > 0) {
-      for (const alert of latestFrame.safety_alerts) {
+      for (const alert of latestFrame.safety_alerts ?? []) {
         newEntries.push({
           id: ++logCounter,
           message: alert.message,
