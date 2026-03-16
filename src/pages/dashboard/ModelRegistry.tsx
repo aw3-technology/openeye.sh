@@ -405,8 +405,7 @@ export default function ModelRegistry() {
                 Performance Benchmarks
               </CardTitle>
               <CardDescription>
-                Inference speed measured on NVIDIA RTX 4090. Accuracy on standard
-                benchmarks (COCO val for detection, zero-shot for segmentation).
+                Inference speed measured on NVIDIA T4 (TensorRT FP16). Accuracy on COCO val 50-95 for detection, zero-shot for segmentation.
               </CardDescription>
             </CardHeader>
             <CardContent>
