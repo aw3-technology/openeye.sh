@@ -1,9 +1,20 @@
 [
   {
+    "version": "0.5.1",
+    "date": "2026-03-15",
+    "title": "Demo login & dependency fix",
+    "tag": "latest",
+    "description": "Demo-ready auth bypass for hackathon presentations and missing numpy dependency fix.",
+    "changes": [
+      { "type": "added", "text": "Demo login mode — \"Continue as Demo User\" button on the login page bypasses Supabase auth for local demos" },
+      { "type": "added", "text": "Demo session persists across page reloads via `localStorage` and syncs across tabs" },
+      { "type": "fixed", "text": "`openeye serve` crash due to missing `numpy` dependency — added `numpy>=1.24` to core dependencies in `pyproject.toml`" }
+    ]
+  },
+  {
     "version": "0.5.0",
     "date": "2026-03-15",
     "title": "MLOps lifecycle platform",
-    "tag": "latest",
     "description": "Full MLOps pipeline with model registry, A/B testing, retraining, batch inference, and shadow deployments.",
     "changes": [
       { "type": "added", "text": "Model registry with versioned storage, stage management (dev / staging / production / archived), and format support for ONNX, TorchScript, SafeTensors, TensorRT, and CoreML" },
