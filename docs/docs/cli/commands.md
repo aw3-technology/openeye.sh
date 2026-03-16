@@ -177,21 +177,54 @@ openeye fleet agent <device-id>
 
 ### `openeye mlops`
 
-Model lifecycle and operations subcommands.
+Model lifecycle and operations subcommands, organized into deployment, evaluation, and training workflows.
+
+### Deployment & Registry
 
 ```bash
 openeye mlops upload <file> --name <name> --key <key> --format onnx|torchscript|safetensors
 openeye mlops registry
 openeye mlops versions <model-key>
-openeye mlops promote <key> <version> <stage>
-openeye mlops batch <model> [--input-dir <dir>] [--output-dir <dir>]
-openeye mlops compare <model1> <model2> [--dataset <path>]
-openeye mlops feedback <model> [--test-results <path>]
-openeye mlops export <model> [--format onnx|torchscript] [--optimize]
-openeye mlops validate <model> [--dataset <path>]
-openeye mlops lineage <model>
-openeye mlops shadow <model> --prod-model <model>
-openeye mlops retraining <model> [--trigger]
+openeye mlops promote <key> <version> <stage> [--requester <name>] [--reason <text>]
+openeye mlops approve <key> <version> [--approver <name>]
+openeye mlops reject <key> <version> [--approver <name>] [--reason <text>]
+openeye mlops export <key> <version> <format> [--output <path>] [--quantize]
+openeye mlops exports [--model <key>]
+openeye mlops lineage <key> <version>
+```
+
+### A/B Testing & Shadow Mode
+
+```bash
+openeye mlops ab-test <key> --a <version> --b <version> [--split 0.5] [--max-samples <n>]
+openeye mlops ab-status [<key>]
+openeye mlops shadow <key> --prod <version> --shadow <version> [--sample-rate 1.0]
+openeye mlops shadow-status [<key>]
+```
+
+### Evaluation & Validation
+
+```bash
+openeye mlops benchmark <model> [--runs 100] [--width 640] [--height 480]
+openeye mlops batch <key> <version> <input-path> <output-path> [--batch-size 32] [--workers 4]
+openeye mlops validate <model> <version> <test-id>
+openeye mlops validation-create --name <name> --model <key> --dataset <path> --conditions <expr>
+openeye mlops validations [--model <key>]
+openeye mlops validation-runs [--test <id>] [--model <key>]
+```
+
+### Training & Feedback
+
+```bash
+openeye mlops retrain <pipeline-name> [--by <triggerer>]
+openeye mlops pipeline-create --name <name> --model <key> --script <path> [--dataset <path>]
+openeye mlops pipelines [--model <key>]
+openeye mlops runs [--pipeline <name>] [--model <key>]
+openeye mlops run-status <run-id>
+openeye mlops annotate <key> <version> <image> --label <label> [--type misclassification]
+openeye mlops annotations [--model <key>] [--label <type>] [--unfed]
+openeye mlops feedback <key> <output-path>
+openeye mlops feedback-batches [--model <key>]
 ```
 
 ## Agent
@@ -303,6 +336,10 @@ openeye govern disable pii-filter
 openeye govern presets
 openeye govern load safety-strict
 openeye govern load custom-policy.yaml
+openeye govern validate governance.yaml
+openeye govern audit [--server <url>] [--limit 20]
+openeye govern violations [--server <url>] [--limit 20]
+openeye govern init [--domain robotics|desktop_agent|universal] [--output governance.yaml]
 ```
 
 | Subcommand | Description |
@@ -313,6 +350,10 @@ openeye govern load custom-policy.yaml
 | `disable` | Disable a governance policy by name |
 | `presets` | List available governance presets |
 | `load` | Load a preset or custom YAML config |
+| `validate` | Validate a YAML governance config file |
+| `audit` | Show recent audit trail from a running server |
+| `violations` | Show governance violations (deny/warn decisions) |
+| `init` | Generate a starter YAML governance config for a domain |
 
 ## Environment Variables
 

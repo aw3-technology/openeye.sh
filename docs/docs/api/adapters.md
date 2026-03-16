@@ -51,6 +51,7 @@ class ModelAdapter(ABC):
 | `yolov8:onnx` | `openeye_ai.adapters.yolov8_onnx` | YOLOv8 via ONNX Runtime |
 | `onnx_generic` | `openeye_ai.adapters.onnx_runtime` | Generic ONNX Runtime |
 | `yolov8:tensorrt` | `openeye_ai.adapters.tensorrt_runtime` | YOLOv8 via TensorRT |
+| `tensorrt_generic` | `openeye_ai.adapters.tensorrt_runtime` | Generic TensorRT Runtime |
 
 ## Lifecycle
 

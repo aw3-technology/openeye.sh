@@ -24,16 +24,16 @@ pipx install "openeye-sh[all]"         # YOLO + depth + grounding + camera
 openeye list
 
 # Pull a model
-openeye pull yolov8n
+openeye pull yolov8
 
 # Run inference on an image
-openeye run yolov8n image.jpg
+openeye run yolov8 image.jpg
 
 # Start the API server
-openeye serve
+openeye serve yolov8
 
 # Live camera stream with detection
-openeye watch --model yolov8n
+openeye watch --models yolov8
 ```
 
 ## Features

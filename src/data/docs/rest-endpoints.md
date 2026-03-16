@@ -36,6 +36,8 @@ Run inference on an uploaded image. Request: Multipart form with `file` field (J
      "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}}
   ],
   "depth_map": null,
+  "segmentation_masks": null,
+  "vla_action": null,
   "inference_ms": 12.3
 }
 ```
@@ -81,5 +83,6 @@ Nebius Token Factory VLM usage statistics.
 |--------|-------------|
 | 400 | Cannot decode image |
 | 413 | File too large |
+| 429 | Rate limit exceeded (30 requests/minute on /predict) |
 | 500 | Inference failed |
 | 503 | Server busy (queue full) |

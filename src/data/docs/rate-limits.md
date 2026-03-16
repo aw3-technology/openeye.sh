@@ -4,7 +4,7 @@ title: Rate Limits
 
 ### Self-Hosted Server
 
-The self-hosted server (`openeye serve`) does not enforce rate limits by default. You can configure rate limiting in your reverse proxy or load balancer.
+The self-hosted server (`openeye serve`) rate-limits the `POST /predict` endpoint to 30 requests per minute per IP address. When exceeded, a 429 response is returned.
 
 ### Fleet API Rate Limits
 

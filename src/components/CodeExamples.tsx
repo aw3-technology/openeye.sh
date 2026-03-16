@@ -11,29 +11,31 @@ const tabs: { key: Language; label: string; badge?: string }[] = [
 
 const codeSnippets: Record<Language, { code: string; description: string }> = {
   python: {
-    description: "Use the Python SDK to detect objects, estimate depth, and run safety monitoring.",
-    code: `from openeye import OpenEye
-
-eye = OpenEye()
+    description: "Use the adapter registry to load models and run inference programmatically.",
+    code: `from PIL import Image
+from openeye_ai.config import MODELS_DIR
+from openeye_ai.registry import get_adapter
 
 # Run object detection with YOLOv8
-result = eye.run("yolov8", "workspace.jpg")
-for obj in result.objects:
-    print(f"{obj.label}: {obj.confidence:.1%} at {obj.bbox}")
+adapter = get_adapter("yolov8")
+adapter.load(MODELS_DIR / "yolov8")
+
+img = Image.open("workspace.jpg").convert("RGB")
+result = adapter.predict(img)
+for obj in result["objects"]:
+    print(f"{obj['label']}: {obj['confidence']:.1%}")
 
 # Depth estimation
-depth = eye.run("depth-anything", "scene.jpg")
-print(depth.depth_map)   # base64-encoded depth map
+depth_adapter = get_adapter("depth-anything")
+depth_adapter.load(MODELS_DIR / "depth-anything")
+depth = depth_adapter.predict(img)
+print(depth["depth_map"])    # base64-encoded depth map
 
 # Grounded detection with text prompt
-result = eye.run("grounding-dino", "kitchen.jpg",
-                 prompt="find the coffee mug")
-print(result.objects)    # open-vocabulary detections
-
-# Live camera with safety monitoring
-for frame in eye.watch(models=["yolov8"], safety=True):
-    if frame.safety_alerts:
-        print(f"ALERT: {frame.safety_alerts[0].zone_level}")`,
+dino = get_adapter("grounding-dino")
+dino.load(MODELS_DIR / "grounding-dino")
+result = dino.predict_with_prompt(img, "find the coffee mug")
+print(result["objects"])     # open-vocabulary detections`,
   },
   http: {
     description: "Self-host the API on your own infrastructure. REST and WebSocket endpoints built in.",

@@ -1,5 +1,5 @@
 schema_version: 2
-registry_url: https://raw.githubusercontent.com/OpenEye/perceptify-the-world/main/cli/openeye_ai/models.yaml
+registry_url: https://raw.githubusercontent.com/aw3-technology/openeye.sh/main/cli/openeye_ai/models.yaml
 models:
   yolov8:
     name: YOLOv8

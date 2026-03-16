@@ -1,22 +1,17 @@
+import type {
+  VLMReasoning,
+  ActionSuggestion,
+  SafetyAlert,
+  SafetyZone,
+  ChangeAlert,
+} from "@/types/openeye";
+
 export interface AgenticDetection {
   track_id: string;
   label: string;
   confidence: number;
   bbox: { x: number; y: number; w: number; h: number } | { x1: number; y1: number; x2: number; y2: number };
   is_manipulable?: boolean;
-}
-
-export interface AgenticVLMReasoning {
-  description: string;
-  reasoning: string;
-  latency_ms: number;
-}
-
-export interface AgenticActionStep {
-  action: string;
-  target_id?: string | null;
-  reason: string;
-  priority: number;
 }
 
 export interface TimelineEvent {
@@ -45,14 +40,19 @@ export interface AgenticFrame {
   detections: AgenticDetection[];
   scene_graph: Record<string, unknown>;
   scene_description: string;
-  vlm_reasoning: AgenticVLMReasoning | null;
-  action_plan: AgenticActionStep[];
-  safety_zones: Array<{ zone: string; distance_m: number }>;
-  safety_alerts: Array<{ message: string; zone: string; halt_recommended: boolean }>;
-  change_alerts: Array<{ change_type: string; description: string }>;
+  vlm_reasoning: VLMReasoning | null;
+  action_plan: ActionSuggestion[];
+  safety_zones: SafetyZone[];
+  safety_alerts: SafetyAlert[];
+  change_alerts: ChangeAlert[];
   memory: MemorySnapshot;
   latency: AgenticLatency;
 }
+
+/** @deprecated Use VLMReasoning from @/types/openeye */
+export type AgenticVLMReasoning = VLMReasoning;
+/** @deprecated Use ActionSuggestion from @/types/openeye */
+export type AgenticActionStep = ActionSuggestion;
 
 export interface AgenticLoopProps {
   /** Ref to the video element for frame capture */

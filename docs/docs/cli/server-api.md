@@ -39,6 +39,8 @@ Run inference on an uploaded image. Rate-limited.
     {"label": "person", "confidence": 0.95, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}}
   ],
   "depth_map": null,
+  "segmentation_masks": null,
+  "vla_action": null,
   "inference_ms": 12.3
 }
 ```
@@ -47,7 +49,7 @@ Run inference on an uploaded image. Rate-limited.
 
 - `400` — Cannot decode image
 - `413` — File too large
-- `429` — Rate limit exceeded
+- `429` — Rate limit exceeded (30 requests/minute per IP)
 - `500` — Inference failed
 - `503` — Server busy (queue full)
 
@@ -71,10 +73,11 @@ Get VLM (Nebius Token Factory) usage statistics.
   "total_latency_ms": 8400.0,
   "avg_latency_ms": 200.0,
   "errors": 1,
-  "last_call_at": "2026-01-15T10:30:00Z",
+  "last_call_at": 1710500000.0,
   "model": "Qwen/Qwen2.5-VL-72B-Instruct",
   "provider": "Nebius Token Factory",
-  "configured": true
+  "configured": true,
+  "uptime_seconds": 3600.0
 }
 ```
 

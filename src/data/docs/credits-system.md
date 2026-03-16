@@ -11,6 +11,7 @@ title: Credits System
 | POST /v1/detect | YOLOv8 | 1 |
 | POST /v1/depth | Depth Anything V2 | 2 |
 | POST /v1/describe | VLM | 3 |
+| WS /v1/stream (per frame) | YOLOv8 | 1 |
 
 ### Self-Hosted Alternative
 

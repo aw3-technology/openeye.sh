@@ -45,7 +45,7 @@ Normalized bounding box (0-1 range).
 | Field | Type | Description |
 |-------|------|-------------|
 | model | str | Model name |
-| task | str | Task type (detection, depth, segmentation) |
+| task | str | Task type (detection, depth, segmentation, vla) |
 | timestamp | str | ISO 8601 timestamp |
 | image | ImageInfo | Input image info |
 | objects | list[DetectedObject] | Detected objects |
