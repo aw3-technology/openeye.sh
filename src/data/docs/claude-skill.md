@@ -19,8 +19,8 @@ A Claude Skill is a structured knowledge file that teaches Claude about a specif
 ### Step 1: Clone the OpenEye repo
 
 ```bash
-git clone https://github.com/AW3-ai/openeye.git
-cd openeye
+git clone https://github.com/aw3-technology/openeye.sh.git
+cd openeye.sh
 ```
 
 ### Step 2: Start Claude Code

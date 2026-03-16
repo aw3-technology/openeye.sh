@@ -63,7 +63,7 @@ openeye-mcp = "openeye_ai.mcp.server:main"
 
 [project.urls]
 Homepage = "https://perceptify.dev"
-Repository = "https://github.com/OpenEye/perceptify-the-world"
+Repository = "https://github.com/aw3-technology/openeye.sh"
 
 [tool.hatch.build.targets.wheel]
 packages = ["openeye_ai"]
