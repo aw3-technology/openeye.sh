@@ -177,32 +177,11 @@ class TestHardwareSummary:
 # ── bench CLI command ──────────────────────────────────────────────
 
 
+from conftest import StubAdapter, make_test_registry
+
+
 def _make_registry() -> dict[str, dict[str, Any]]:
-    return {
-        "yolov8": {
-            "name": "YOLOv8",
-            "task": "detection",
-            "adapter": "yolo",
-            "hf_repo": "ultralytics/yolov8",
-            "filename": "yolov8n.pt",
-            "size_mb": 25,
-            "hardware": {"cpu": True},
-            "variants": {
-                "quantized": {
-                    "filename": "yolov8n_int8.pt",
-                    "size_mb": 10,
-                }
-            },
-        },
-    }
-
-
-class _StubAdapter:
-    def load(self, model_dir: Path) -> None:
-        pass
-
-    def predict(self, image: Any) -> dict:
-        return {"objects": [], "inference_ms": 5.0}
+    return make_test_registry(variant_style="quantized")
 
 
 def _patch_bench(monkeypatch, tmp_openeye_home, downloaded=True, variant_downloaded=False):
@@ -215,7 +194,7 @@ def _patch_bench(monkeypatch, tmp_openeye_home, downloaded=True, variant_downloa
     monkeypatch.setattr(bench_mod, "get_variant_info", lambda m, v: registry[m])
     monkeypatch.setattr(bench_mod, "is_downloaded", lambda m: downloaded)
     monkeypatch.setattr(bench_mod, "is_variant_downloaded", lambda m, v: variant_downloaded)
-    monkeypatch.setattr(bench_mod, "get_adapter", lambda m, variant=None: _StubAdapter())
+    monkeypatch.setattr(bench_mod, "get_adapter", lambda m, variant=None: StubAdapter(detections=[]))
     monkeypatch.setattr(bench_mod, "MODELS_DIR", tmp_openeye_home / "models")
 
 
