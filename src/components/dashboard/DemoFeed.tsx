@@ -104,7 +104,7 @@ export function DemoFeed() {
 
         {/* Detection bounding boxes */}
         <AnimatePresence>
-          {isActive && latestFrame?.objects.map((obj) => {
+          {isActive && latestFrame?.objects?.map((obj) => {
             const isHuman = obj.label.toLowerCase() === "person";
             const isHazard = isHuman || obj.label.toLowerCase().includes("knife");
             const borderColor = isHuman
@@ -197,7 +197,7 @@ export function DemoFeed() {
           <div className="absolute top-3 left-3 font-mono text-[10px] text-terminal-green/70 space-y-0.5">
             <div>OPENEYE GUARDIAN v0.1.0</div>
             <div className="tabular-nums">
-              FPS: {metrics.fps} | LAT: {metrics.latency_ms.toFixed(0)}ms | OBJ: {latestFrame?.objects.length ?? 0}
+              FPS: {metrics.fps} | LAT: {metrics.latency_ms.toFixed(0)}ms | OBJ: {latestFrame?.objects?.length ?? 0}
             </div>
             <motion.div
               className="tabular-nums"
