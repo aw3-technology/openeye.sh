@@ -57,7 +57,7 @@ export function SafetyPanel() {
           timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
         });
       }
-    } else if (latestFrame.objects.length > 0) {
+    } else if ((latestFrame.objects?.length ?? 0) > 0) {
       // Only add "Scene clear" occasionally to avoid spam
       if (Math.random() < 0.05) {
         newEntries.push({
