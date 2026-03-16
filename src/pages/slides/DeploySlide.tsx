@@ -7,7 +7,7 @@ export function DeploySlide() {
     {
       label: "Self-Hosted",
       desc: "All inference runs locally. No data leaves your premises. Deploy in air-gapped environments.",
-      cmd: "pip install openeye-sh",
+      cmd: "pipx install openeye-sh",
       icon: "🔒",
     },
     {

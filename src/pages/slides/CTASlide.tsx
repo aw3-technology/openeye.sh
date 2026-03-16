@@ -42,7 +42,7 @@ export function CTASlide() {
         >
           <div className="font-mono text-[28px] bg-card/80 text-oe-green px-10 py-5 rounded-xl border border-border/60 inline-block backdrop-blur-sm relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-oe-green/40 to-transparent" />
-            pip install openeye-sh
+            pipx install openeye-sh
           </div>
         </motion.div>
         <motion.div

@@ -53,21 +53,21 @@ import type { ModelEntry } from "@/components/dashboard/model-registry/types";
 // ── Registry data helpers ────────────────────────────────────────────────────
 
 const MODEL_SIZES: Record<string, { size_mb?: number; extras?: string; adapter: string }> = {
-  YOLOv8: { size_mb: 22, extras: "pip install openeye-sh[yolo]", adapter: "yolov8" },
-  YOLO26: { size_mb: 5, extras: "pip install openeye-sh[yolo]", adapter: "yolo26" },
-  "RF-DETR": { size_mb: 39, extras: "pip install openeye-sh[rfdetr]", adapter: "rf_detr" },
+  YOLOv8: { size_mb: 22, extras: "pipx install openeye-sh[yolo]", adapter: "yolov8" },
+  YOLO26: { size_mb: 5, extras: "pipx install openeye-sh[yolo]", adapter: "yolo26" },
+  "RF-DETR": { size_mb: 39, extras: "pipx install openeye-sh[rfdetr]", adapter: "rf_detr" },
   YOLOWorld: { adapter: "yoloworld" },
-  "SAM 2": { size_mb: 38, extras: "pip install openeye-sh[sam]", adapter: "sam2" },
+  "SAM 2": { size_mb: 38, extras: "pipx install openeye-sh[sam]", adapter: "sam2" },
   "Grounded-SAM": { adapter: "grounded_sam" },
   FastSAM: { adapter: "fastsam" },
-  "Qwen2.5-VL": { adapter: "qwen_vl", extras: "pip install openeye-sh[vlm]" },
+  "Qwen2.5-VL": { adapter: "qwen_vl", extras: "pipx install openeye-sh[vlm]" },
   "InternVL 2.5": { adapter: "internvl" },
   "Phi-3 Vision": { adapter: "phi3_vision" },
-  "Grounding DINO": { size_mb: 694, extras: "pip install openeye-sh[grounding]", adapter: "grounding_dino" },
+  "Grounding DINO": { size_mb: 694, extras: "pipx install openeye-sh[grounding]", adapter: "grounding_dino" },
   OWLv2: { adapter: "owlv2" },
-  "Depth Anything V2": { size_mb: 97, extras: "pip install openeye-sh[depth]", adapter: "depth_anything" },
+  "Depth Anything V2": { size_mb: 97, extras: "pipx install openeye-sh[depth]", adapter: "depth_anything" },
   DUSt3R: { adapter: "dust3r" },
-  SmolVLA: { size_mb: 500, extras: "pip install openeye-sh[vla]", adapter: "smolvla" },
+  SmolVLA: { size_mb: 500, extras: "pipx install openeye-sh[vla]", adapter: "smolvla" },
 };
 
 function buildRegistryModels(): ModelEntry[] {
@@ -665,12 +665,12 @@ registry.register("yolo26", YOLOAdapter)`}</code>
             </p>
             <div className="space-y-1">
               {[
-                { cmd: "pip install openeye-sh[yolo]", note: "YOLO + YOLO26" },
-                { cmd: "pip install openeye-sh[grounding]", note: "Grounding DINO" },
-                { cmd: "pip install openeye-sh[sam]", note: "SAM 2 segmentation" },
-                { cmd: "pip install openeye-sh[depth]", note: "Depth Anything V2" },
-                { cmd: "pip install openeye-sh[vla]", note: "SmolVLA actions" },
-                { cmd: "pip install openeye-sh[vlm]", note: "VLM inference" },
+                { cmd: "pipx install openeye-sh[yolo]", note: "YOLO + YOLO26" },
+                { cmd: "pipx install openeye-sh[grounding]", note: "Grounding DINO" },
+                { cmd: "pipx install openeye-sh[sam]", note: "SAM 2 segmentation" },
+                { cmd: "pipx install openeye-sh[depth]", note: "Depth Anything V2" },
+                { cmd: "pipx install openeye-sh[vla]", note: "SmolVLA actions" },
+                { cmd: "pipx install openeye-sh[vlm]", note: "VLM inference" },
               ].map((item) => (
                 <code
                   key={item.cmd}
@@ -683,7 +683,7 @@ registry.register("yolo26", YOLOAdapter)`}</code>
                 </code>
               ))}
               <code className="block text-xs font-mono text-terminal-green">
-                $ pip install openeye-sh[all]{" "}
+                $ pipx install openeye-sh[all]{" "}
                 <span className="text-muted-foreground"># everything</span>
               </code>
             </div>

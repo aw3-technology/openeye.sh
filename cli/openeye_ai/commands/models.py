@@ -10,7 +10,7 @@ import typer
 from rich import print as rprint
 from rich.table import Table
 
-from openeye_ai._cli_helpers import _EXTRAS, console
+from openeye_ai._cli_helpers import _EXTRAS, _install_hint, console
 from openeye_ai.config import MODELS_DIR
 from openeye_ai.registry import (
     add_model_to_registry,
@@ -133,7 +133,7 @@ def _pull_single(
         extra = _EXTRAS.get(model, model)
         rprint(
             f"[red]Missing dependencies for '{model}': {e.name or e}[/red]\n"
-            f"Install with: [bold]pip install openeye-sh\\[{extra}][/bold]"
+            + _install_hint(extra)
         )
         return False
     except Exception as e:
