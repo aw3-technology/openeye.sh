@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useOpenEyeStream } from "@/hooks/useOpenEyeStream";
+import { usePerceptionStream } from "@/hooks/usePerceptionStream";
 import { useVLMStream } from "@/hooks/useVLMStream";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import type { VLMReasoning } from "@/types/openeye";
 
 export function VLMReasoningPanel() {
-  const { videoRef, isStreaming } = useOpenEyeStream();
+  const { videoRef, isStreaming } = usePerceptionStream();
   const { latestReasoning, isActive, isPending, latencyMs, start, stop } = useVLMStream();
   const [displayText, setDisplayText] = useState("");
   const [history, setHistory] = useState<VLMReasoning[]>([]);
