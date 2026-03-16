@@ -37,7 +37,7 @@ export const pricingTiers: PricingPlanTier[] = [
     badge: "Available Now",
     features: [
       { text: "Full CLI toolchain (run, serve, watch, bench)", included: true },
-      { text: "8 model adapters (YOLO, RF-DETR, DINO, SAM 2, Depth, SmolVLA)", included: true },
+      { text: "8 model adapters (YOLO, RF-DETR, DINO, SAM 2, Depth, SmolVLA, Qwen2.5-VL)", included: true },
       { text: "Dual-layer perception (YOLO + VLM reasoning)", included: true },
       { text: "REST & WebSocket API server", included: true },
       { text: "Real-time dashboard with 19+ pages", included: true },
