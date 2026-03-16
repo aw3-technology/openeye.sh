@@ -14,6 +14,8 @@ from typer.testing import CliRunner
 
 from openeye_ai.cli import app
 
+from conftest import StubAdapter, make_test_registry
+
 runner = CliRunner()
 
 
@@ -21,34 +23,7 @@ runner = CliRunner()
 
 
 def _make_registry(downloaded: set[str] | None = None) -> dict[str, dict[str, Any]]:
-    """Return a small fake registry."""
-    return {
-        "yolov8": {
-            "name": "YOLOv8",
-            "task": "detection",
-            "adapter": "yolo",
-            "description": "Object detection",
-            "hf_repo": "ultralytics/yolov8",
-            "filename": "yolov8n.pt",
-            "size_mb": 25,
-            "hardware": {"cpu": True},
-            "variants": {
-                "quantized": {
-                    "filename": "yolov8n_int8.pt",
-                    "size_mb": 10,
-                }
-            },
-        },
-        "depth-anything": {
-            "name": "Depth Anything",
-            "task": "depth",
-            "adapter": "depth_anything",
-            "description": "Monocular depth",
-            "hf_repo": "depth/anything",
-            "filename": "depth.pt",
-            "size_mb": 50,
-        },
-    }
+    return make_test_registry(variant_style="quantized")
 
 
 def _fake_is_downloaded(name: str, downloaded: set[str] | None = None) -> bool:
@@ -61,24 +36,6 @@ def _make_jpeg(path: Path) -> Path:
     img = Image.new("RGB", (10, 10), color="red")
     img.save(path, format="JPEG")
     return path
-
-
-class _StubAdapter:
-    """Minimal adapter stub for CLI tests."""
-
-    def pull(self, model_dir: Path) -> None:
-        model_dir.mkdir(parents=True, exist_ok=True)
-
-    def load(self, model_dir: Path) -> None:
-        pass
-
-    def predict(self, image: Any) -> dict:
-        return {
-            "objects": [
-                {"label": "person", "confidence": 0.9, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}}
-            ],
-            "inference_ms": 5.0,
-        }
 
 
 # ── --version / --help ───────────────────────────────────────────────
@@ -119,7 +76,7 @@ def test_pull_success(tmp_openeye_home, monkeypatch):
     registry = _make_registry()
     monkeypatch.setattr("openeye_ai.commands.models.get_model_info", lambda m: registry[m])
     monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-    monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: _StubAdapter())
+    monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter())
     monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models")
     monkeypatch.setattr(
         "shutil.disk_usage",
@@ -160,7 +117,7 @@ def test_pull_all(tmp_openeye_home, monkeypatch):
     monkeypatch.setattr("openeye_ai.commands.models.load_registry", lambda: registry)
     monkeypatch.setattr("openeye_ai.commands.models.get_model_info", lambda m: registry[m])
     monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-    monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: _StubAdapter())
+    monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter())
     monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models")
     monkeypatch.setattr(
         "shutil.disk_usage",
@@ -237,7 +194,7 @@ def test_run_success(tmp_openeye_home, tmp_path, monkeypatch):
 
     monkeypatch.setattr(run_mod, "get_model_info", lambda m: registry[m])
     monkeypatch.setattr(run_mod, "is_downloaded", lambda m: True)
-    monkeypatch.setattr(run_mod, "get_adapter", lambda m, variant=None: _StubAdapter())
+    monkeypatch.setattr(run_mod, "get_adapter", lambda m, variant=None: StubAdapter())
     monkeypatch.setattr(run_mod, "MODELS_DIR", tmp_openeye_home / "models")
 
     result = runner.invoke(app, ["run", "yolov8", str(img_path)])

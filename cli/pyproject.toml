@@ -72,6 +72,7 @@ packages = ["openeye_ai"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["tests"]
 markers = [
     "integration: marks tests that require real model downloads (deselect with '-m \"not integration\"')",
     "slow: marks tests that take a long time to run",

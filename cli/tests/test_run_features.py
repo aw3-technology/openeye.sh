@@ -15,6 +15,8 @@ from typer.testing import CliRunner
 
 from openeye_ai.cli import app
 
+from conftest import make_test_registry
+
 runner = CliRunner()
 
 
@@ -22,49 +24,7 @@ runner = CliRunner()
 
 
 def _make_registry() -> dict[str, dict[str, Any]]:
-    return {
-        "yolov8": {
-            "name": "YOLOv8",
-            "task": "detection",
-            "adapter": "yolo",
-            "description": "Object detection",
-            "hf_repo": "ultralytics/yolov8",
-            "filename": "yolov8n.pt",
-            "size_mb": 25,
-            "hardware": {"cpu": True},
-            "variants": {
-                "onnx": {"filename": "yolov8n.onnx", "size_mb": 12, "adapter": "yolov8:onnx"},
-                "tensorrt": {"filename": "yolov8n.engine", "size_mb": 15, "adapter": "yolov8:tensorrt"},
-            },
-        },
-        "depth-anything": {
-            "name": "Depth Anything",
-            "task": "depth",
-            "adapter": "depth_anything",
-            "description": "Monocular depth",
-            "hf_repo": "depth/anything",
-            "filename": "depth.pt",
-            "size_mb": 50,
-        },
-        "grounding-dino": {
-            "name": "Grounding DINO",
-            "task": "detection",
-            "adapter": "grounding_dino",
-            "description": "Open-vocab detection",
-            "hf_repo": "grounding/dino",
-            "filename": "gdino.pt",
-            "size_mb": 100,
-        },
-        "sam2": {
-            "name": "SAM2",
-            "task": "segmentation",
-            "adapter": "sam2",
-            "description": "Segmentation",
-            "hf_repo": "sam/sam2",
-            "filename": "sam2.pt",
-            "size_mb": 200,
-        },
-    }
+    return make_test_registry(include_sam2=True, variant_style="format")
 
 
 def _make_jpeg(path: Path) -> Path:

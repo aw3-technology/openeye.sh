@@ -17,86 +17,13 @@ from typer.testing import CliRunner
 
 from openeye_ai.cli import app
 
+from conftest import StubAdapter, make_test_registry
+
 runner = CliRunner()
 
 
-# ── Helpers ──────────────────────────────────────────────────────────
-
-
 def _make_registry(downloaded: set[str] | None = None) -> dict[str, dict[str, Any]]:
-    """Return a small fake registry."""
-    return {
-        "yolov8": {
-            "name": "YOLOv8",
-            "task": "detection",
-            "adapter": "yolov8",
-            "description": "Object detection",
-            "hf_repo": "ultralytics/yolov8",
-            "filename": "yolov8n.pt",
-            "size_mb": 6,
-            "hardware": {"cpu": True},
-            "checksum": {
-                "algorithm": "sha256",
-                "value": "abc123" * 10 + "abcd",  # 64 hex chars
-            },
-            "variants": {
-                "quantized": {
-                    "filename": "yolov8n_int8.onnx",
-                    "size_mb": 3,
-                    "adapter": "yolov8:onnx",
-                    "checksum": {
-                        "algorithm": "sha256",
-                        "value": "def456" * 10 + "defg",
-                    },
-                }
-            },
-        },
-        "depth-anything": {
-            "name": "Depth Anything",
-            "task": "depth",
-            "adapter": "depth_anything",
-            "description": "Monocular depth estimation",
-            "hf_repo": "depth/anything",
-            "filename": "depth.pt",
-            "size_mb": 98,
-            "hardware": {"cpu": True, "cuda": True},
-        },
-        "grounding-dino": {
-            "name": "Grounding DINO",
-            "task": "detection",
-            "adapter": "grounding_dino",
-            "description": "Open-vocab detection",
-            "hf_repo": "grounding/dino",
-            "filename": "grounding.pt",
-            "size_mb": 341,
-        },
-    }
-
-
-class _StubAdapter:
-    """Minimal adapter stub for CLI tests."""
-
-    def pull(self, model_dir: Path) -> None:
-        model_dir.mkdir(parents=True, exist_ok=True)
-
-    def load(self, model_dir: Path) -> None:
-        pass
-
-    def predict(self, image: Any) -> dict:
-        return {
-            "objects": [
-                {"label": "person", "confidence": 0.9, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}}
-            ],
-            "inference_ms": 5.0,
-        }
-
-
-def _patch_disk_space(monkeypatch):
-    """Patch disk_usage to report plenty of free space."""
-    monkeypatch.setattr(
-        "shutil.disk_usage",
-        lambda p: shutil._ntuple_diskusage(100 * 1024**3, 50 * 1024**3, 50 * 1024**3),
-    )
+    return make_test_registry(include_checksum=True, variant_style="quantized")
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -178,14 +105,13 @@ class TestStory2PullWithChecksum:
     """As a developer, I can run openeye pull yolov8 and get a working model
     with verified checksum — no manual downloads."""
 
-    def test_pull_downloads_and_verifies_checksum(self, tmp_openeye_home, monkeypatch):
+    def test_pull_downloads_and_verifies_checksum(self, tmp_openeye_home, monkeypatch, patch_disk_space):
         """Successful pull verifies checksum and creates .pulled marker."""
         registry = _make_registry()
         monkeypatch.setattr("openeye_ai.commands.models.get_model_info", lambda m: registry[m])
         monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: _StubAdapter())
+        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter())
         monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models")
-        _patch_disk_space(monkeypatch)
         monkeypatch.setattr("openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True)
         monkeypatch.setattr("openeye_ai.utils.download.mark_pulled", lambda d: None)
 
@@ -193,14 +119,13 @@ class TestStory2PullWithChecksum:
         assert result.exit_code == 0
         assert "Successfully pulled" in result.output
 
-    def test_pull_fails_on_checksum_mismatch(self, tmp_openeye_home, monkeypatch):
+    def test_pull_fails_on_checksum_mismatch(self, tmp_openeye_home, monkeypatch, patch_disk_space):
         """Pull exits with error when checksum verification fails."""
         registry = _make_registry()
         monkeypatch.setattr("openeye_ai.commands.models.get_model_info", lambda m: registry[m])
         monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: _StubAdapter())
+        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter())
         monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models")
-        _patch_disk_space(monkeypatch)
         monkeypatch.setattr("openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: False)
 
         result = runner.invoke(app, ["pull", "yolov8"])
@@ -228,14 +153,13 @@ class TestStory2PullWithChecksum:
         assert result.exit_code == 0
         assert "already downloaded" in result.output
 
-    def test_pull_force_redownloads(self, tmp_openeye_home, monkeypatch):
+    def test_pull_force_redownloads(self, tmp_openeye_home, monkeypatch, patch_disk_space):
         """--force flag forces re-download even if already present."""
         registry = _make_registry()
         monkeypatch.setattr("openeye_ai.commands.models.get_model_info", lambda m: registry[m])
         monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: True)
-        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: _StubAdapter())
+        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter())
         monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models")
-        _patch_disk_space(monkeypatch)
         monkeypatch.setattr("openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True)
         monkeypatch.setattr("openeye_ai.utils.download.mark_pulled", lambda d: None)
 
@@ -269,23 +193,16 @@ class TestStory3PullAll:
     """As a developer, I can run openeye pull --all and have every model
     downloaded with progress bars and resume on failure."""
 
-    def test_pull_all_downloads_every_model(self, tmp_openeye_home, monkeypatch):
+    def test_pull_all_downloads_every_model(self, tmp_openeye_home, monkeypatch, patch_disk_space):
         """--all flag pulls all models in the registry."""
         registry = _make_registry()
-        pulled = []
-        original_stub = _StubAdapter()
-
-        class TrackingAdapter:
-            def pull(self, model_dir):
-                pulled.append(model_dir.name)
-                model_dir.mkdir(parents=True, exist_ok=True)
+        pulled: list[str] = []
 
         monkeypatch.setattr("openeye_ai.commands.models.load_registry", lambda: registry)
         monkeypatch.setattr("openeye_ai.commands.models.get_model_info", lambda m: registry[m])
         monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: TrackingAdapter())
+        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter(track_pulls=pulled))
         monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models")
-        _patch_disk_space(monkeypatch)
         monkeypatch.setattr("openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True)
         monkeypatch.setattr("openeye_ai.utils.download.mark_pulled", lambda d: None)
 
@@ -294,22 +211,15 @@ class TestStory3PullAll:
         assert "All models pulled" in result.output
         assert len(pulled) == len(registry)
 
-    def test_pull_all_reports_failures(self, tmp_openeye_home, monkeypatch):
+    def test_pull_all_reports_failures(self, tmp_openeye_home, monkeypatch, patch_disk_space):
         """--all reports which models failed but continues with the rest."""
         registry = _make_registry()
-
-        class FailingAdapter:
-            def pull(self, model_dir):
-                if "depth" in str(model_dir):
-                    raise RuntimeError("Download error")
-                model_dir.mkdir(parents=True, exist_ok=True)
 
         monkeypatch.setattr("openeye_ai.commands.models.load_registry", lambda: registry)
         monkeypatch.setattr("openeye_ai.commands.models.get_model_info", lambda m: registry[m])
         monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: FailingAdapter())
+        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter(fail_on="depth"))
         monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models")
-        _patch_disk_space(monkeypatch)
         monkeypatch.setattr("openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True)
         monkeypatch.setattr("openeye_ai.utils.download.mark_pulled", lambda d: None)
 
@@ -317,24 +227,18 @@ class TestStory3PullAll:
         assert result.exit_code == 1
         assert "Failed to pull" in result.output
 
-    def test_pull_all_with_variant_filter(self, tmp_openeye_home, monkeypatch):
+    def test_pull_all_with_variant_filter(self, tmp_openeye_home, monkeypatch, patch_disk_space):
         """--all --variant quantized only pulls models with that variant."""
         registry = _make_registry()
-        pulled_models = []
-
-        class TrackingAdapter:
-            def pull(self, model_dir):
-                pulled_models.append(str(model_dir))
-                model_dir.mkdir(parents=True, exist_ok=True)
+        pulled_models: list[str] = []
 
         monkeypatch.setattr("openeye_ai.commands.models.load_registry", lambda: registry)
         monkeypatch.setattr("openeye_ai.commands.models.get_model_info", lambda m: registry[m])
         monkeypatch.setattr("openeye_ai.commands.models.get_variant_info", lambda m, v: {**registry[m], "_variant": v})
         monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
         monkeypatch.setattr("openeye_ai.commands.models.is_variant_downloaded", lambda m, v: False)
-        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: TrackingAdapter())
+        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter(track_pulls=pulled_models))
         monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models")
-        _patch_disk_space(monkeypatch)
         monkeypatch.setattr("openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True)
         monkeypatch.setattr("openeye_ai.utils.download.mark_pulled", lambda d: None)
 
@@ -344,7 +248,7 @@ class TestStory3PullAll:
         assert len(pulled_models) == 1
         assert "yolov8" in pulled_models[0]
 
-    def test_pull_resume_partial_download(self, tmp_openeye_home, monkeypatch):
+    def test_pull_resume_partial_download(self, tmp_openeye_home, monkeypatch, patch_disk_space):
         """If model dir exists without .pulled marker, shows resume message."""
         registry = _make_registry()
         models_dir = tmp_openeye_home / "models"
@@ -354,9 +258,8 @@ class TestStory3PullAll:
 
         monkeypatch.setattr("openeye_ai.commands.models.get_model_info", lambda m: registry[m])
         monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: _StubAdapter())
+        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter())
         monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", models_dir)
-        _patch_disk_space(monkeypatch)
         monkeypatch.setattr("openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True)
         monkeypatch.setattr("openeye_ai.utils.download.mark_pulled", lambda d: None)
 
@@ -488,7 +391,7 @@ class TestStory5OptionalExtras:
         for model, extra in _EXTRAS.items():
             assert extra in valid_extras, f"Model '{model}' maps to unknown extra '{extra}'"
 
-    def test_missing_dependency_shows_install_hint(self, tmp_openeye_home, monkeypatch):
+    def test_missing_dependency_shows_install_hint(self, tmp_openeye_home, monkeypatch, patch_disk_space):
         """When adapter import fails, error includes pip install hint."""
         registry = _make_registry()
 
@@ -499,7 +402,6 @@ class TestStory5OptionalExtras:
         monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
         monkeypatch.setattr("openeye_ai.commands.models.get_adapter", _fail_import)
         monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models")
-        _patch_disk_space(monkeypatch)
 
         result = runner.invoke(app, ["pull", "yolov8"])
         assert result.exit_code == 1

@@ -13,29 +13,12 @@ from typer.testing import CliRunner
 
 from openeye_ai.cli import app
 
+from conftest import StubAdapter
+
 runner = CliRunner()
 
 # Module path shorthand for patching
 _W = "openeye_ai.commands.inference.watch"
-
-
-# ── Test Helpers ─────────────────────────────────────────────────────
-
-
-class _StubAdapter:
-    """Minimal adapter that returns configurable dummy detections."""
-
-    def __init__(self, detections: list[dict] | None = None, inference_ms: float = 12.5):
-        self._detections = detections or [
-            {"label": "person", "confidence": 0.9, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}},
-        ]
-        self._inference_ms = inference_ms
-
-    def load(self, model_dir: Path) -> None:
-        pass
-
-    def predict(self, image: Any) -> dict:
-        return {"objects": self._detections, "inference_ms": self._inference_ms}
 
 
 class FakeCamera:
@@ -86,7 +69,7 @@ def watch_env():
 
     Yields a dict of mocks/stubs for further assertions.
     """
-    adapters = {"yolov8": _StubAdapter()}
+    adapters = {"yolov8": StubAdapter()}
     cam = FakeCamera(3)
 
     with (
@@ -158,8 +141,8 @@ class TestStory30VideoInput:
 class TestStory31MultiModel:
     def test_multi_model_loads_both(self, watch_env):
         adapters = {
-            "yolov8": _StubAdapter(),
-            "depth-anything": _StubAdapter(detections=[], inference_ms=8.0),
+            "yolov8": StubAdapter(),
+            "depth-anything": StubAdapter(detections=[], inference_ms=8.0),
         }
         with patch(f"{_W}._load_adapters", return_value=adapters):
             result = runner.invoke(app, ["watch", "-m", "yolov8,depth-anything"])
@@ -377,7 +360,7 @@ class TestEdgeCases:
             def release(self):
                 pass
 
-        adapters = {"yolov8": _StubAdapter()}
+        adapters = {"yolov8": StubAdapter()}
         with (
             patch(f"{_W}._load_adapters", return_value=adapters),
             patch(f"{_W}._init_safety_guardian", return_value=(None, None, None, None)),
