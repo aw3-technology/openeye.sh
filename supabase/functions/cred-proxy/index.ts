@@ -125,7 +125,23 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(data || "{}", {
+    // Filter balance response to configured credit type
+    let responseData = data || "{}";
+    if (path === "balance" && res.status === 200 && CRED_CREDIT_TYPE_ID) {
+      try {
+        const parsed = JSON.parse(responseData);
+        if (parsed.balances && Array.isArray(parsed.balances)) {
+          parsed.balances = parsed.balances.filter(
+            (b: { credit_type_id?: string }) => b.credit_type_id === CRED_CREDIT_TYPE_ID
+          );
+          responseData = JSON.stringify(parsed);
+        }
+      } catch {
+        // keep original response
+      }
+    }
+
+    return new Response(responseData, {
       status: res.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
