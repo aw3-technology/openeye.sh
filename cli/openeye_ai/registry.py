@@ -142,9 +142,9 @@ def add_model_to_registry(key: str, entry: dict[str, Any]) -> None:
     if not key or not key.strip():
         raise ValueError("Model key cannot be empty")
 
-    adapter_value = entry.get("adapter", "")
-    is_custom = "/" in adapter_value or adapter_value.endswith(".py")
-    validate_model_entry(entry, allow_custom_adapter=is_custom)
+    # User-added models (via add-model / register-adapter) should not require
+    # hf_repo / filename / size_mb — those are only relevant for built-in entries.
+    validate_model_entry(entry, allow_custom_adapter=True)
 
     data = _load_raw()
     models = data.get("models") or {}

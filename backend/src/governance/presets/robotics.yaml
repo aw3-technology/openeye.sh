@@ -1,0 +1,24 @@
+version: "1.0"
+name: "robotics"
+domain: "robotics"
+extends:
+  - "robotics_safety"
+
+policies:
+  - name: "human-detection-blur"
+    type: "pii_filter"
+    enabled: true
+    severity: "high"
+    enforcement: "enforce"
+    config:
+      redact_patterns:
+        - type: "face"
+          action: "redact"
+      custom_patterns:
+        - "\\bface\\b"
+        - "\\bperson\\b"
+
+settings:
+  log_all_decisions: true
+  fail_open: false
+  evaluation_timeout_ms: 50

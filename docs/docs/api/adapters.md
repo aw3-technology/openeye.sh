@@ -62,10 +62,43 @@ class ModelAdapter(ABC):
 
 ## Custom Adapters
 
-Register custom adapters via the CLI:
+OpenEye supports loading custom adapters from standalone Python files. A custom adapter is a `.py` file that exports an `Adapter` class subclassing `ModelAdapter`.
+
+### `register-adapter`
+
+Validate and register a custom adapter in one command:
 
 ```bash
-openeye register-adapter
+openeye register-adapter my-model ./my_adapter.py \
+    --name "My Model" --task detection
 ```
 
-See the [Custom Adapter Tutorial](../tutorials/custom-adapter.md) for building your own.
+This loads the file, verifies the `Adapter` class, and adds the model to the registry.
+
+### `add-model`
+
+For models that use a built-in or custom adapter:
+
+```bash
+openeye add-model my-model \
+    --adapter ./my_adapter.py --task detection
+```
+
+`--name` defaults to the registry key when omitted. Fields like `--hf-repo`, `--filename`, and `--size-mb` are optional.
+
+### Complete workflow
+
+```bash
+# 1. Write your adapter (see tutorial)
+# 2. Register it
+openeye register-adapter my-model ./my_adapter.py \
+    --name "My Model" --task detection
+
+# 3. Pull, run, benchmark, or serve
+openeye pull my-model
+openeye run my-model image.jpg
+openeye bench my-model
+openeye serve my-model
+```
+
+See the [Custom Adapter Tutorial](../tutorials/custom-adapter.md) for a full walkthrough.

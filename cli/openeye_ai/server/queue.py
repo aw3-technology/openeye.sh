@@ -30,6 +30,10 @@ class InferenceQueue:
     def active_count(self) -> int:
         return self._active_count
 
+    @property
+    def max_queue_size(self) -> int:
+        return self._max_queue_size
+
     async def submit(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Submit a callable for execution with concurrency control.
 

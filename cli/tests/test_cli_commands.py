@@ -302,6 +302,110 @@ def test_health_connection_error(tmp_openeye_home, monkeypatch):
 # ── serve (model not downloaded) ─────────────────────────────────────
 
 
+# ── add-model ────────────────────────────────────────────────────────
+
+
+_VALID_ADAPTER_SRC = """\
+from pathlib import Path
+from typing import Any
+from PIL import Image
+from openeye_ai.adapters.base import ModelAdapter
+
+class Adapter(ModelAdapter):
+    def _do_load(self, model_dir: Path) -> None:
+        pass
+    def _do_predict(self, image: Image.Image) -> dict[str, Any]:
+        return {"objects": [], "inference_ms": 0.1}
+    def pull(self, model_dir: Path) -> None:
+        model_dir.mkdir(parents=True, exist_ok=True)
+"""
+
+
+def test_add_model_success(tmp_openeye_home, monkeypatch, tmp_path):
+    """add-model adds a new entry to the registry."""
+    monkeypatch.setattr(
+        "openeye_ai.commands.models.add_model_to_registry",
+        lambda key, entry: None,
+    )
+    result = runner.invoke(app, [
+        "add-model", "my-model",
+        "--name", "My Model",
+        "--task", "detection",
+        "--adapter", "yolov8",
+    ])
+    assert result.exit_code == 0
+    assert "Added" in result.output
+
+
+def test_add_model_duplicate_key(tmp_openeye_home, monkeypatch):
+    """add-model with duplicate key exits with code 1."""
+
+    def _raise(key, entry):
+        raise ValueError(f"Model '{key}' already exists in registry")
+
+    monkeypatch.setattr("openeye_ai.commands.models.add_model_to_registry", _raise)
+    result = runner.invoke(app, [
+        "add-model", "yolov8",
+        "--name", "Dup",
+        "--task", "detection",
+        "--adapter", "yolov8",
+    ])
+    assert result.exit_code == 1
+    assert "already exists" in result.output
+
+
+def test_add_model_defaults_name_to_key(tmp_openeye_home, monkeypatch):
+    """When --name is omitted, name defaults to the key."""
+    captured: dict = {}
+
+    def _capture(key, entry):
+        captured.update(entry)
+
+    monkeypatch.setattr("openeye_ai.commands.models.add_model_to_registry", _capture)
+    result = runner.invoke(app, [
+        "add-model", "cool-detector",
+        "--task", "detection",
+        "--adapter", "yolov8",
+    ])
+    assert result.exit_code == 0
+    assert captured["name"] == "cool-detector"
+
+
+# ── register-adapter ─────────────────────────────────────────────────
+
+
+def test_register_adapter_success(tmp_openeye_home, monkeypatch, tmp_path):
+    """register-adapter loads the adapter and adds it to the registry."""
+    adapter_file = tmp_path / "my_adapter.py"
+    adapter_file.write_text(_VALID_ADAPTER_SRC)
+
+    monkeypatch.setattr("openeye_ai.commands.models.add_model_to_registry", lambda k, e: None)
+
+    result = runner.invoke(app, [
+        "register-adapter", "custom-det", str(adapter_file),
+        "--name", "Custom Det",
+        "--task", "detection",
+    ])
+    assert result.exit_code == 0
+    assert "Registered" in result.output
+
+
+def test_register_adapter_bad_file(tmp_openeye_home, monkeypatch, tmp_path):
+    """register-adapter with invalid adapter path exits with code 1."""
+    bad_path = tmp_path / "nonexistent.py"
+
+    result = runner.invoke(app, [
+        "register-adapter", "bad", str(bad_path),
+        "--name", "Bad",
+        "--task", "detection",
+    ])
+    assert result.exit_code == 1
+    assert "Failed to load adapter" in result.output
+
+
+# ── serve (model not downloaded) ─────────────────────────────────────
+
+
 def test_serve_not_downloaded(tmp_openeye_home, monkeypatch):
     import sys
     import openeye_ai.commands.inference.serve  # noqa: F811

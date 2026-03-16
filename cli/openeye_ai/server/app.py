@@ -12,6 +12,7 @@ from openeye_ai.server.metrics import MODEL_INFO
 from openeye_ai.server.middleware import setup_middleware
 from openeye_ai.server.queue import InferenceQueue
 from openeye_ai.server.routes.rest import router as rest_router
+from openeye_ai.server.routes.v1 import router as v1_router
 from openeye_ai.server.routes.websockets import router as ws_router
 from openeye_ai.server.state import ServerState
 
@@ -60,6 +61,7 @@ def create_app(
 
     # Mount routers
     app.include_router(rest_router)
+    app.include_router(v1_router)
     app.include_router(ws_router)
 
     # Mount MLOps router

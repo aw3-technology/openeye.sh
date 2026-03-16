@@ -14,7 +14,7 @@ from rich import print as rprint
 from rich.table import Table
 
 from openeye_ai._cli_helpers import console, dependency_error, warmup_adapter
-from openeye_ai.config import MODELS_DIR
+from openeye_ai.config import MODELS_DIR, OPENEYE_HOME
 from openeye_ai.registry import get_adapter, get_model_info, is_downloaded
 
 
@@ -72,6 +72,11 @@ def watch(
     frame_times: collections.deque[float] = collections.deque(maxlen=60)
     dropped = 0
     frame_count = 0
+    session_start = time.perf_counter()
+    total_detections = 0
+    latency_samples: list[float] = []
+    safety_danger_count = 0
+    safety_caution_count = 0
 
     try:
         console.print(Panel(header, border_style="green"))
@@ -91,6 +96,9 @@ def watch(
                 frame_count += 1
 
                 all_rows, all_objects, total_inference_ms = _run_detections(adapters, frame, rich_escape)
+                total_detections += len(all_rows)
+                if total_inference_ms > 0:
+                    latency_samples.append(total_inference_ms)
 
                 now = time.perf_counter()
                 frame_times.append(now)
@@ -146,9 +154,11 @@ def watch(
                 display_parts: list = [stats, layout]
 
                 if guardian is not None and _DetectedObject3D is not None:
-                    safety_panel = _build_safety_panel(
+                    safety_panel, n_danger, n_caution = _build_safety_panel(
                         guardian, all_objects, _DetectedObject3D, _BBox2D, _Position3D, Group,
                     )
+                    safety_danger_count += n_danger
+                    safety_caution_count += n_caution
                     display_parts.append(safety_panel)
 
                 display = Group(*display_parts)
@@ -170,11 +180,14 @@ def watch(
         pass
     finally:
         cam.release()
-        console.print(
-            Panel(
-                f"[dim]Session ended. {frame_count} frames processed.[/dim]",
-                border_style="dim",
-            )
+        _print_session_summary(
+            frame_count=frame_count,
+            session_start=session_start,
+            latency_samples=latency_samples,
+            total_detections=total_detections,
+            safety=safety,
+            safety_danger_count=safety_danger_count,
+            safety_caution_count=safety_caution_count,
         )
 
 
@@ -249,6 +262,18 @@ def _init_safety_guardian(safety: bool, danger_m: float, caution_m: float):
         return None, None, None, None
 
 
+def _find_demo_video() -> Path | None:
+    """Search for a demo video in standard locations."""
+    candidates = [
+        OPENEYE_HOME / "demo.mp4",
+        Path(__file__).resolve().parent.parent / "demos" / "demo.mp4",
+    ]
+    for p in candidates:
+        if p.is_file():
+            return p
+    return None
+
+
 def _open_input_source(camera: int, video: Optional[str]):
     """Open camera or video source. Returns (source, label)."""
     from openeye_ai.utils.camera import Camera, VideoPlayer
@@ -287,8 +312,18 @@ def _open_input_source(camera: int, video: Optional[str]):
                     rprint(f"[red]Cannot open video file: {ve}[/red]")
                     raise typer.Exit(code=1)
             else:
-                rprint("[yellow]Tip: Use --video <path> to use a pre-recorded video file.[/yellow]")
-                raise typer.Exit(code=1)
+                demo_path = _find_demo_video()
+                if demo_path:
+                    try:
+                        cam = VideoPlayer(str(demo_path))
+                        source_label = f"demo: {demo_path.name}"
+                        rprint(f"[green]Falling back to demo video:[/green] {demo_path}")
+                    except (FileNotFoundError, RuntimeError) as de:
+                        rprint(f"[red]Cannot open demo video: {de}[/red]")
+                        raise typer.Exit(code=1)
+                else:
+                    rprint("[yellow]Tip: Place a demo.mp4 in ~/.openeye/ or use --video <path>[/yellow]")
+                    raise typer.Exit(code=1)
 
     if cam is None:
         rprint("[red]No input source available.[/red]")
@@ -400,8 +435,59 @@ def _build_safety_panel(guardian, all_objects, DetectedObject3D, BBox2D, Positio
     else:
         alert_text.append("  Workspace clear", style="dim green")
 
-    return Panel(
+    n_danger = sum(1 for z in zones if z.zone.value == "danger")
+    n_caution = sum(1 for z in zones if z.zone.value == "caution")
+
+    panel = Panel(
         Group(safety_table, alert_text),
         title="[bold]Safety Guardian[/bold]",
         border_style="red" if alerts else "green",
+    )
+    return panel, n_danger, n_caution
+
+
+def _print_session_summary(
+    *,
+    frame_count: int,
+    session_start: float,
+    latency_samples: list[float],
+    total_detections: int,
+    safety: bool,
+    safety_danger_count: int,
+    safety_caution_count: int,
+) -> None:
+    """Print a Rich table summarising the watch session."""
+    from rich.panel import Panel
+
+    runtime = time.perf_counter() - session_start
+    avg_fps = frame_count / runtime if runtime > 0 else 0.0
+    avg_latency = (
+        sum(latency_samples) / len(latency_samples) if latency_samples else 0.0
+    )
+
+    table = Table(
+        show_header=False,
+        border_style="dim",
+        pad_edge=True,
+        expand=False,
+    )
+    table.add_column("Metric", style="dim")
+    table.add_column("Value", style="bold")
+
+    table.add_row("Total frames", str(frame_count))
+    table.add_row("Runtime", f"{runtime:.1f}s")
+    table.add_row("Avg FPS", f"{avg_fps:.1f}")
+    table.add_row("Avg latency", f"{avg_latency:.1f} ms")
+    table.add_row("Total detections", str(total_detections))
+
+    if safety:
+        table.add_row("Danger events", str(safety_danger_count))
+        table.add_row("Caution events", str(safety_caution_count))
+
+    console.print(
+        Panel(
+            table,
+            title="[bold]Session Summary[/bold]",
+            border_style="dim",
+        )
     )

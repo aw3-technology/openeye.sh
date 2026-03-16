@@ -12,6 +12,16 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
+# Register a YAML representer for Python enums so safe_dump handles them.
+import enum  # noqa: E402
+
+
+def _enum_representer(dumper, data):
+    return dumper.represent_str(data.value)
+
+
+yaml.SafeDumper.add_multi_representer(enum.Enum, _enum_representer)
+
 
 def safe_load_yaml(path: Path, *, default: Any = None) -> Any:
     """Load YAML with error recovery.

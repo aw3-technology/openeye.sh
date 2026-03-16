@@ -114,6 +114,42 @@ def _list_gcs_images(input_path: str) -> list[str]:
     return images
 
 
+def _download_s3_image(uri: str):
+    """Download an S3 image to a temp file and return a PIL Image."""
+    import tempfile
+
+    import boto3
+    from PIL import Image
+
+    parts = uri.replace("s3://", "").split("/", 1)
+    bucket = parts[0]
+    key = parts[1]
+
+    s3 = boto3.client("s3")
+    with tempfile.NamedTemporaryFile(suffix=Path(key).suffix) as tmp:
+        s3.download_file(bucket, key, tmp.name)
+        return Image.open(tmp.name).convert("RGB").copy()
+
+
+def _download_gcs_image(uri: str):
+    """Download a GCS image to a temp file and return a PIL Image."""
+    import tempfile
+
+    from google.cloud import storage
+    from PIL import Image
+
+    parts = uri.replace("gs://", "").split("/", 1)
+    bucket_name = parts[0]
+    blob_name = parts[1]
+
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+    with tempfile.NamedTemporaryFile(suffix=Path(blob_name).suffix) as tmp:
+        blob.download_to_filename(tmp.name)
+        return Image.open(tmp.name).convert("RGB").copy()
+
+
 def _write_results_local(results: list[dict], output_path: str, fmt: str) -> str:
     """Write results to local file."""
     out = Path(output_path)
@@ -247,14 +283,12 @@ def run_batch_inference(
             try:
                 if config.storage_backend == StorageBackend.LOCAL:
                     img = Image.open(img_path).convert("RGB")
+                elif config.storage_backend == StorageBackend.S3:
+                    img = _download_s3_image(img_path)
+                elif config.storage_backend == StorageBackend.GCS:
+                    img = _download_gcs_image(img_path)
                 else:
-                    # For cloud storage, download to temp first
-                    import tempfile
-
-                    import httpx
-
-                    # This would need proper cloud SDK download in production
-                    raise NotImplementedError("Cloud image loading requires SDK integration")
+                    raise ValueError(f"Unsupported storage backend: {config.storage_backend}")
 
                 result = adapter.predict(img)
                 return {"source": str(img_path), "status": "ok", **result}

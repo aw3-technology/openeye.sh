@@ -17,8 +17,8 @@ def deploy(
     model_id: str = typer.Option(..., "--model", "-m", help="Model ID"),
     model_version: str = typer.Option(..., "--version", "-v", help="Model version"),
     strategy: str = typer.Option("canary", "--strategy", help="canary|rolling|blue_green|all_at_once"),
-    group_id: Optional[str] = typer.Option(None, "--group", "-g"),
-    model_url: Optional[str] = typer.Option(None, "--url"),
+    group_id: Optional[str] = typer.Option(None, "--group", "-g", help="Target device group ID"),
+    model_url: Optional[str] = typer.Option(None, "--url", help="Direct URL to model weights file"),
 ) -> None:
     """Create a staged model deployment."""
     valid_strategies = {"canary", "rolling", "blue_green", "all_at_once"}
@@ -50,7 +50,7 @@ def rollback(
 
 @fleet_app.command("deployments")
 def list_deployments(
-    status: Optional[str] = typer.Option(None, "--status", "-s"),
+    status: Optional[str] = typer.Option(None, "--status", "-s", help="Filter by status: pending, in_progress, completed, failed, rolled_back"),
 ) -> None:
     """List deployments."""
     qs = f"?status={status}" if status else ""

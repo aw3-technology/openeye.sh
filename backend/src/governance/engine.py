@@ -198,6 +198,7 @@ class GovernanceEngine:
             domain=self._domain,
             total_policies=len(self._configs),
             enabled_policies=len(self._policies),
+            enabled_policy_names=sorted(self._policies.keys()),
             total_evaluations=self.audit.total_evaluations,
             total_violations=self.audit.total_violations,
             total_warnings=self.audit.total_warnings,
