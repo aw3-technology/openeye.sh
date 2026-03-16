@@ -53,6 +53,8 @@ describe("Navbar", () => {
       loading: false,
       signOut: vi.fn(),
       tokenError: null,
+      isDemo: false,
+      signInAsDemo: vi.fn(),
     });
 
     renderNavbar();
