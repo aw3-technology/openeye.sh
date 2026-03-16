@@ -36,6 +36,8 @@ Deno.serve(async (req) => {
   const CRED_API_KEY = Deno.env.get("CRED_API_KEY");
   if (!CRED_API_KEY) return json({ error: "CRED_API_KEY not configured" }, 500);
 
+  const CRED_CREDIT_TYPE_ID = Deno.env.get("CRED_CREDIT_TYPE_ID");
+
   // Decode JWT to extract user identity
   const token = authHeader.replace("Bearer ", "");
   let userId: string;
@@ -123,7 +125,23 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(data || "{}", {
+    // Filter balance response to configured credit type
+    let responseData = data || "{}";
+    if (path === "balance" && res.status === 200 && CRED_CREDIT_TYPE_ID) {
+      try {
+        const parsed = JSON.parse(responseData);
+        if (parsed.balances && Array.isArray(parsed.balances)) {
+          parsed.balances = parsed.balances.filter(
+            (b: { credit_type_id?: string }) => b.credit_type_id === CRED_CREDIT_TYPE_ID
+          );
+          responseData = JSON.stringify(parsed);
+        }
+      } catch {
+        // keep original response
+      }
+    }
+
+    return new Response(responseData, {
       status: res.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
