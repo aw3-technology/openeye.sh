@@ -3,77 +3,16 @@ import { useApiKeys } from "@/hooks/useOpenEyeQueries";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LoadingState } from "@/components/ui/data-states";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Copy, Key, Shield, Trash2, Zap } from "lucide-react";
-import { format } from "date-fns";
+import { Key, Shield, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { toastMutationError } from "@/lib/utils";
+import { sha256, generateKey } from "@/lib/api-key-utils";
+import { CodeBlock } from "@/components/ui/code-block";
+import { KeysTable } from "@/components/dashboard/KeysTable";
 import { CreateKeyDialog } from "@/components/dashboard/CreateKeyDialog";
-
-async function sha256(text: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hash = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hash))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-function generateKey(): string {
-  const prefix = "oe_";
-  const bytes = crypto.getRandomValues(new Uint8Array(24));
-  const hex = Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return prefix + hex;
-}
-
-function CodeBlock({ code, lang = "bash" }: { code: string; lang?: string }) {
-  return (
-    <div className="relative group">
-      <pre className="rounded-md bg-muted/50 border p-4 text-xs font-mono overflow-x-auto whitespace-pre">
-        {code}
-      </pre>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-        aria-label="Copy code"
-        onClick={() => {
-          navigator.clipboard.writeText(code).then(
-            () => toast.success("Copied to clipboard"),
-            () => toast.error("Failed to copy"),
-          );
-        }}
-      >
-        <Copy className="h-3.5 w-3.5" />
-      </Button>
-    </div>
-  );
-}
 
 export default function ApiKeys() {
   const { user } = useAuth();
@@ -123,82 +62,7 @@ export default function ApiKeys() {
       </div>
 
       {/* Keys table */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Your Keys</CardTitle>
-          {keys.length > 0 && (
-            <Badge variant="secondary" className="tabular-nums">
-              {keys.length}
-            </Badge>
-          )}
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <LoadingState />
-          ) : keys.length === 0 ? (
-            <div className="py-8 text-center">
-              <Key className="mx-auto h-8 w-8 text-muted-foreground/50 mb-3" />
-              <p className="text-sm font-medium mb-1">No API keys yet</p>
-              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                Create your first key to authenticate programmatic access to the
-                OpenEye detection and perception APIs.
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Prefix</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Last Used</TableHead>
-                  <TableHead className="w-[50px]" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {keys.map((key) => (
-                  <TableRow key={key.id}>
-                    <TableCell className="text-sm font-medium">{key.name}</TableCell>
-                    <TableCell className="font-mono text-xs">{key.key_prefix}...</TableCell>
-                    <TableCell className="text-xs tabular-nums">
-                      {format(new Date(key.created_at), "yyyy-MM-dd")}
-                    </TableCell>
-                    <TableCell className="text-xs tabular-nums text-muted-foreground">
-                      {key.last_used_at
-                        ? format(new Date(key.last_used_at), "yyyy-MM-dd")
-                        : "Never"}
-                    </TableCell>
-                    <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Delete key ${key.name}`}>
-                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete API Key</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently revoke the key "{key.name}". Any
-                              applications using this key will lose access immediately.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(key.id)}>
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      <KeysTable keys={keys} isLoading={isLoading} onDelete={handleDelete} />
 
       {/* Quick Start */}
       <div>

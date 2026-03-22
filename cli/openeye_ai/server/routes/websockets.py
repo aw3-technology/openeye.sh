@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-import base64
-import io
 import json
 import logging
 import time
@@ -12,13 +9,13 @@ from typing import Any
 
 import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from PIL import Image
 
 from openeye_ai.schema import ImageInfo, PredictionResult
 from openeye_ai.server.agentic_session import AgenticSession
 from openeye_ai.server.metrics import ACTIVE_CONNECTIONS, INFERENCE_LATENCY
 from openeye_ai.server.queue import QueueFullError
-from openeye_ai.server.state import get_state, nebius_stats, normalize_frame_bboxes
+from openeye_ai.server.routes.ws_utils import decode_base64_image, submit_inference
+from openeye_ai.server.state import get_state, normalize_frame_bboxes
 from openeye_ai.vlm import create_async_vlm_client
 
 logger = logging.getLogger(__name__)
@@ -41,13 +38,10 @@ async def websocket_predict(ws: WebSocket):
 
             # Expect base64-encoded image
             try:
-                img_bytes = base64.b64decode(data)
-                img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-            except Exception:
+                img, w, h = await decode_base64_image(data)
+            except ValueError:
                 await ws.send_json({"error": "Invalid image data. Send base64-encoded image."})
                 continue
-
-            w, h = img.size
 
             def run_ws_inference():
                 t0 = time.time()
@@ -55,14 +49,11 @@ async def websocket_predict(ws: WebSocket):
                 INFERENCE_LATENCY.labels(model=state.model_name).observe(time.time() - t0)
                 return data
 
-            try:
-                result_data = await state.inference_queue.submit(run_ws_inference)
-            except QueueFullError:
-                await ws.send_json({"error": "Server busy. Try again later."})
-                continue
-            except Exception as e:
-                logger.error("WS inference failed: %s", e)
-                await ws.send_json({"error": "Inference failed. Please try again."})
+            result_data = await submit_inference(
+                state.inference_queue, run_ws_inference, ws,
+                error_msg="Server busy. Try again later.",
+            )
+            if result_data is None:
                 continue
 
             result = PredictionResult(
@@ -90,13 +81,10 @@ async def websocket_perception(ws: WebSocket):
         while True:
             data = await ws.receive_text()
             try:
-                img_bytes = base64.b64decode(data)
-                img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-            except Exception:
+                img, img_w, img_h = await decode_base64_image(data)
+            except ValueError:
                 await ws.send_json({"error": "Invalid image data."})
                 continue
-
-            img_w, img_h = img.size
 
             if pipeline is None:
                 # Fallback: run basic detection without full pipeline
@@ -105,10 +93,12 @@ async def websocket_perception(ws: WebSocket):
                     result = state.adapter.predict(img)
                     INFERENCE_LATENCY.labels(model=state.model_name).observe(time.time() - t0)
                     return result
-                try:
-                    result_data = await state.inference_queue.submit(run_basic)
-                except (QueueFullError, Exception):
-                    await ws.send_json({"error": "Server busy."})
+
+                result_data = await submit_inference(
+                    state.inference_queue, run_basic, ws,
+                    error_msg="Server busy.",
+                )
+                if result_data is None:
                     continue
                 result = PredictionResult(
                     model=state.model_name, task=state.model_info["task"],
@@ -126,123 +116,16 @@ async def websocket_perception(ws: WebSocket):
                 INFERENCE_LATENCY.labels(model=state.model_name).observe(time.time() - t0)
                 return result
 
-            try:
-                perception_frame = await state.inference_queue.submit(run_pipeline)
-            except QueueFullError:
-                await ws.send_json({"error": "Server busy."})
-                continue
-            except Exception as e:
-                logger.error("Pipeline failed: %s", e)
-                await ws.send_json({"error": "Pipeline failed. Please try again."})
+            perception_frame = await submit_inference(
+                state.inference_queue, run_pipeline, ws,
+                error_msg="Server busy.",
+            )
+            if perception_frame is None:
                 continue
 
             frame_dict = perception_frame.model_dump()
             frame_dict = normalize_frame_bboxes(frame_dict, img_w, img_h)
             await ws.send_json(frame_dict)
-
-    except WebSocketDisconnect:
-        pass
-    finally:
-        ACTIVE_CONNECTIONS.dec()
-
-
-# ------------------------------------------------------------------ #
-#  VLM endpoint (Nebius Token Factory)
-# ------------------------------------------------------------------ #
-
-
-@router.websocket("/ws/vlm")
-async def websocket_vlm(ws: WebSocket):
-    await ws.accept()
-    ACTIVE_CONNECTIONS.inc()
-    state = get_state(ws)
-
-    nebius_key, nebius_base, nebius_model = state.resolve_vlm_model()
-
-    vlm_client, _ = create_async_vlm_client(nebius_key, nebius_base, nebius_model)
-    if vlm_client:
-        nebius_stats["configured"] = True
-        nebius_stats["model"] = nebius_model
-        nebius_stats["provider"] = "OpenRouter" if "openrouter.ai" in nebius_base else "Nebius Token Factory"
-
-    try:
-        while True:
-            data = await ws.receive_text()
-
-            if not vlm_client:
-                await ws.send_json({
-                    "description": "VLM not configured (missing NEBIUS_API_KEY).",
-                    "reasoning": "",
-                    "latency_ms": 0,
-                })
-                continue
-
-            t0 = time.time()
-            try:
-                resp = await asyncio.wait_for(
-                    vlm_client.chat.completions.create(
-                        model=nebius_model,
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": (
-                                    "You are OpenEye Perception OS analyzing a live camera feed.\n"
-                                    "Respond in this exact format:\n\n"
-                                    "SCENE: [1 sentence — what you see]\n"
-                                    "OBJECTS: [comma-separated key objects with positions]\n"
-                                    "HAZARDS: [safety concerns, or \"None detected\"]\n"
-                                    "RISK: [SAFE / CAUTION / DANGER]\n"
-                                    "ACTION: [recommended action]"
-                                ),
-                            },
-                            {
-                                "role": "user",
-                                "content": [
-                                    {
-                                        "type": "image_url",
-                                        "image_url": {"url": f"data:image/jpeg;base64,{data}"},
-                                    },
-                                    {"type": "text", "text": "Analyze this workspace frame for safety."},
-                                ],
-                            },
-                        ],
-                        max_tokens=300,
-                    ),
-                    timeout=10.0,
-                )
-                latency = (time.time() - t0) * 1000
-                content = resp.choices[0].message.content or ""
-                # Track Nebius usage stats
-                nebius_stats["total_calls"] += 1
-                nebius_stats["total_latency_ms"] += latency
-                nebius_stats["avg_latency_ms"] = (
-                    nebius_stats["total_latency_ms"] / nebius_stats["total_calls"]
-                )
-                nebius_stats["total_tokens_estimated"] += max(
-                    getattr(resp.usage, "total_tokens", 0) if resp.usage else 0,
-                    len(content.split()) * 2,  # rough estimate if usage not available
-                )
-                nebius_stats["last_call_at"] = time.time()
-                await ws.send_json({
-                    "description": content,
-                    "reasoning": f"Analyzed by {nebius_model}",
-                    "latency_ms": round(latency, 1),
-                })
-            except asyncio.TimeoutError:
-                nebius_stats["errors"] += 1
-                await ws.send_json({
-                    "description": "VLM reasoning timed out.",
-                    "reasoning": "Timeout after 10s",
-                    "latency_ms": round((time.time() - t0) * 1000, 1),
-                })
-            except Exception as e:
-                nebius_stats["errors"] += 1
-                logger.error("VLM error: %s", e)
-                await ws.send_json({
-                    "description": "VLM reasoning failed.",
-                    "reasoning": "",
-                    "latency_ms": round((time.time() - t0) * 1000, 1),
-                })
 
     except WebSocketDisconnect:
         pass
@@ -324,13 +207,11 @@ async def websocket_agentic(ws: WebSocket):
 
             # Decode frame
             try:
-                img_bytes = base64.b64decode(frame_b64)
-                img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-            except Exception:
+                img, img_w, img_h = await decode_base64_image(frame_b64)
+            except ValueError:
                 await ws.send_json({"error": "Invalid image data."})
                 continue
 
-            img_w, img_h = img.size
             frame_np = np.array(img)
             session.frame_count += 1
             t_start = time.time()

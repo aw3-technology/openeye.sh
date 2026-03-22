@@ -17,6 +17,9 @@ import type {
   RecordedFrame,
 } from "@/types/openeye";
 import { toast } from "sonner";
+import { useRecording, MAX_RECORDING_FRAMES } from "./useRecording";
+import { useReplay, FRAME_INTERVAL_MS } from "./useReplay";
+import { useVLMChannel } from "./useVLMChannel";
 
 type StreamMode = "live" | "replay" | "idle";
 
@@ -42,17 +45,13 @@ interface PerceptionStreamContextValue {
 }
 
 const defaultMetrics: PerformanceMetrics = { fps: 0, latency_ms: 0, frame_count: 0 };
-
 const PerceptionStreamContext = createContext<PerceptionStreamContextValue | null>(null);
-
-const MAX_RECORDING_FRAMES = 1800; // ~3 min at 10Hz
-const VLM_INTERVAL_MS = 2500;
-const FRAME_INTERVAL_MS = 100; // 10Hz
 const STREAM_TIMEOUT_MS = 3000;
 
 export function PerceptionStreamProvider({ children }: { children: ReactNode }) {
   const { serverUrl } = useOpenEyeConnection();
 
+  // --- Central state (single source of truth) ---
   const [isStreaming, setIsStreaming] = useState(false);
   const [latestFrame, setLatestFrame] = useState<PerceptionFrame | null>(null);
   const [latestVLM, setLatestVLM] = useState<VLMReasoning | null>(null);
@@ -63,39 +62,19 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
   const [mode, setMode] = useState<StreamMode>("idle");
   const [isRecording, setIsRecording] = useState(false);
 
+  // --- Refs that stay in the provider (stream orchestration) ---
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const replayCanvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  // WebSocket refs
   const perceptionWsRef = useRef<OpenEyeWebSocket | null>(null);
-  const vlmWsRef = useRef<OpenEyeWebSocket | null>(null);
-
-  // Capture refs
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const frameIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const vlmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-
-  // Metrics refs
   const fpsBuffer = useRef<number[]>([]);
   const frameCount = useRef(0);
-
-  // Recording refs
-  const recordingRef = useRef<RecordedFrame[]>([]);
-  const lastBase64Ref = useRef<string>("");
-  const isRecordingRef = useRef(false);
-  const latestVLMRef = useRef<VLMReasoning | null>(null);
   const isStreamingRef = useRef(false);
-
-  // Replay refs
-  const replayFramesRef = useRef<RecordedFrame[]>([]);
-  const replayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const replayIndexRef = useRef(0);
-
-  // Stream health
   const lastFrameTimeRef = useRef(0);
   const healthCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // --- Derived safety state (stays in provider — orchestrates state) ---
   const deriveSafetyState = useCallback((frame: PerceptionFrame) => {
     let worst: ZoneLevel = "safe";
     let halt = false;
@@ -108,6 +87,14 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
     setHaltActive(halt);
   }, []);
 
+  // --- Sub-hooks ---
+  const recording = useRecording({ setIsRecording });
+  const { isRecordingRef, recordingRef, lastBase64Ref, latestVLMRef } = recording;
+
+  const vlmChannel = useVLMChannel({ setLatestVLM, setVlmLoading, latestVLMRef });
+  const { vlmWsRef, vlmIntervalRef, connectVLM, startVLMInterval } = vlmChannel;
+
+  // stopStream needs to be defined before useReplay so it can be passed in
   const stopStream = useCallback(() => {
     isStreamingRef.current = false;
     setIsStreaming(false);
@@ -121,47 +108,27 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
-  }, []);
+  }, [vlmIntervalRef, vlmWsRef]);
 
-  const switchToReplay = useCallback(() => {
-    if (recordingRef.current.length > 0) {
-      toast.info("Camera lost — switching to replay mode");
-      stopStream();
-      replayFramesRef.current = [...recordingRef.current];
-      setMode("replay");
+  const replay = useReplay({
+    stopStream,
+    deriveSafetyState,
+    setLatestFrame,
+    setLatestVLM,
+    setMode,
+    recordingRef,
+  });
+  const {
+    replayCanvasRef,
+    replayFramesRef,
+    replayIntervalRef,
+    switchToReplay,
+    startReplay,
+    stopReplay,
+    startSimpleReplayInterval,
+  } = replay;
 
-      replayIndexRef.current = 0;
-      replayIntervalRef.current = setInterval(() => {
-        const frames = replayFramesRef.current;
-        if (frames.length === 0) return;
-        const idx = replayIndexRef.current % frames.length;
-        const rf = frames[idx];
-        setLatestFrame(rf.perception);
-        if (rf.vlm) setLatestVLM(rf.vlm);
-        deriveSafetyState(rf.perception);
-
-        // Draw to replay canvas
-        if (replayCanvasRef.current && rf.frame_base64) {
-          const img = new Image();
-          img.onload = () => {
-            const ctx = replayCanvasRef.current?.getContext("2d");
-            if (ctx && replayCanvasRef.current) {
-              replayCanvasRef.current.width = img.width;
-              replayCanvasRef.current.height = img.height;
-              ctx.drawImage(img, 0, 0);
-            }
-          };
-          img.src = `data:image/jpeg;base64,${rf.frame_base64}`;
-        }
-
-        replayIndexRef.current = idx + 1;
-      }, FRAME_INTERVAL_MS);
-    } else {
-      toast.error("Camera lost — no recording available for replay");
-      stopStream();
-    }
-  }, [stopStream, deriveSafetyState]);
-
+  // --- startStream (orchestrates everything) ---
   const startStream = useCallback(async () => {
     stopStream();
 
@@ -174,17 +141,7 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
       if (replayFramesRef.current.length > 0) {
         toast.info("Camera unavailable — starting replay mode");
         setMode("replay");
-        replayIndexRef.current = 0;
-        replayIntervalRef.current = setInterval(() => {
-          const frames = replayFramesRef.current;
-          if (frames.length === 0) return;
-          const idx = replayIndexRef.current % frames.length;
-          const rf = frames[idx];
-          setLatestFrame(rf.perception);
-          if (rf.vlm) setLatestVLM(rf.vlm);
-          deriveSafetyState(rf.perception);
-          replayIndexRef.current = idx + 1;
-        }, FRAME_INTERVAL_MS);
+        startSimpleReplayInterval(replayFramesRef.current);
         return;
       }
       throw new Error(msg);
@@ -193,7 +150,11 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
     streamRef.current = stream;
     if (videoRef.current) {
       videoRef.current.srcObject = stream;
-      try { await videoRef.current.play(); } catch { /* autoplay blocked */ }
+      try {
+        await videoRef.current.play();
+      } catch {
+        /* autoplay blocked */
+      }
     }
 
     // Fast channel: perception
@@ -210,9 +171,10 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
         const now = performance.now();
         fpsBuffer.current.push(now);
         if (fpsBuffer.current.length > 30) fpsBuffer.current.shift();
-        const elapsed = fpsBuffer.current.length > 1
-          ? (now - fpsBuffer.current[0]) / 1000
-          : 1;
+        const elapsed =
+          fpsBuffer.current.length > 1
+            ? (now - fpsBuffer.current[0]) / 1000
+            : 1;
         setMetrics({
           fps: Math.round(fpsBuffer.current.length / elapsed),
           latency_ms: frame.inference_ms,
@@ -237,19 +199,8 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
     percWs.connect();
 
     // Slow channel: VLM
-    const vlmWs = new OpenEyeWebSocket(serverUrl, "/ws/vlm");
-    vlmWsRef.current = vlmWs;
-
-    vlmWs.subscribe((data) => {
-      const vlm = data as VLMReasoning;
-      if (vlm.description !== undefined) {
-        latestVLMRef.current = vlm;
-        setLatestVLM(vlm);
-        setVlmLoading(false);
-      }
-    });
-
-    vlmWs.connect();
+    connectVLM(serverUrl);
+    startVLMInterval(lastBase64Ref);
 
     // Canvas for frame capture
     if (!canvasRef.current) canvasRef.current = document.createElement("canvas");
@@ -276,19 +227,13 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
       }
     }, FRAME_INTERVAL_MS);
 
-    // Slow channel: send frames every 2.5s
-    vlmIntervalRef.current = setInterval(() => {
-      const base64 = lastBase64Ref.current;
-      if (base64 && vlmWs.connected) {
-        setVlmLoading(true);
-        vlmWs.send(base64);
-      }
-    }, VLM_INTERVAL_MS);
-
     // Health check: auto-switch to replay if no frames for 3s
     lastFrameTimeRef.current = performance.now();
     healthCheckRef.current = setInterval(() => {
-      if (performance.now() - lastFrameTimeRef.current > STREAM_TIMEOUT_MS && isStreamingRef.current) {
+      if (
+        performance.now() - lastFrameTimeRef.current > STREAM_TIMEOUT_MS &&
+        isStreamingRef.current
+      ) {
         switchToReplay();
       }
     }, 1000);
@@ -298,72 +243,36 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
     setMode("live");
     fpsBuffer.current = [];
     frameCount.current = 0;
-  }, [serverUrl, stopStream, deriveSafetyState, switchToReplay]);
+  }, [
+    serverUrl,
+    stopStream,
+    deriveSafetyState,
+    switchToReplay,
+    replayFramesRef,
+    startSimpleReplayInterval,
+    isRecordingRef,
+    lastBase64Ref,
+    recordingRef,
+    latestVLMRef,
+    connectVLM,
+    startVLMInterval,
+  ]);
 
-  const startRecording = useCallback(() => {
-    recordingRef.current = [];
-    isRecordingRef.current = true;
-    setIsRecording(true);
-  }, []);
+  // --- loadRecording wrapper (needs replayFramesRef from replay hook) ---
+  const loadRecording = useCallback(
+    (frames: RecordedFrame[]) => {
+      recording.loadRecording(frames, replayFramesRef);
+    },
+    [recording.loadRecording, replayFramesRef],
+  );
 
-  const stopRecording = useCallback(() => {
-    isRecordingRef.current = false;
-    setIsRecording(false);
-  }, []);
-
-  const loadRecording = useCallback((frames: RecordedFrame[]) => {
-    replayFramesRef.current = frames;
-    recordingRef.current = frames;
-  }, []);
-
-  const startReplay = useCallback(() => {
-    stopStream();
-    const frames = replayFramesRef.current.length > 0
-      ? replayFramesRef.current
-      : recordingRef.current;
-    if (frames.length === 0) {
-      toast.error("No recording available");
-      return;
-    }
-    replayFramesRef.current = frames;
-    setMode("replay");
-    replayIndexRef.current = 0;
-
-    replayIntervalRef.current = setInterval(() => {
-      const idx = replayIndexRef.current % replayFramesRef.current.length;
-      const rf = replayFramesRef.current[idx];
-      setLatestFrame(rf.perception);
-      if (rf.vlm) setLatestVLM(rf.vlm);
-      deriveSafetyState(rf.perception);
-
-      if (replayCanvasRef.current && rf.frame_base64) {
-        const img = new Image();
-        img.onload = () => {
-          const ctx = replayCanvasRef.current?.getContext("2d");
-          if (ctx && replayCanvasRef.current) {
-            replayCanvasRef.current.width = img.width;
-            replayCanvasRef.current.height = img.height;
-            ctx.drawImage(img, 0, 0);
-          }
-        };
-        img.src = `data:image/jpeg;base64,${rf.frame_base64}`;
-      }
-
-      replayIndexRef.current = idx + 1;
-    }, FRAME_INTERVAL_MS);
-  }, [stopStream, deriveSafetyState]);
-
-  const stopReplay = useCallback(() => {
-    if (replayIntervalRef.current) clearInterval(replayIntervalRef.current);
-    setMode("idle");
-  }, []);
-
+  // --- Cleanup ---
   useEffect(() => {
     return () => {
       stopStream();
       if (replayIntervalRef.current) clearInterval(replayIntervalRef.current);
     };
-  }, [stopStream]);
+  }, [stopStream, replayIntervalRef]);
 
   return (
     <PerceptionStreamContext.Provider
@@ -379,8 +288,8 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
         isRecording,
         startStream,
         stopStream,
-        startRecording,
-        stopRecording,
+        startRecording: recording.startRecording,
+        stopRecording: recording.stopRecording,
         loadRecording,
         startReplay,
         stopReplay,
