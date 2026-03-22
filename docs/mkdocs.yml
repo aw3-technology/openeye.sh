@@ -50,6 +50,7 @@ nav:
       - Custom Adapter: tutorials/custom-adapter.md
       - Docker Deployment: tutorials/docker.md
       - MLOps Workflow: tutorials/mlops-workflow.md
+      - Fleet Management: tutorials/fleet-management.md
 
 markdown_extensions:
   - pymdownx.highlight:

@@ -8,16 +8,18 @@ import io
 import json
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from PIL import Image
 
 from openeye_ai.schema import ImageInfo, PredictionResult
+from openeye_ai.server.agentic_session import AgenticSession
 from openeye_ai.server.metrics import ACTIVE_CONNECTIONS, INFERENCE_LATENCY
 from openeye_ai.server.queue import QueueFullError
 from openeye_ai.server.state import get_state, nebius_stats, normalize_frame_bboxes
+from openeye_ai.vlm import create_async_vlm_client
 
 logger = logging.getLogger(__name__)
 
@@ -157,16 +159,11 @@ async def websocket_vlm(ws: WebSocket):
 
     nebius_key, nebius_base, nebius_model = state.resolve_vlm_model()
 
-    vlm_client = None
-    if nebius_key:
+    vlm_client, _ = create_async_vlm_client(nebius_key, nebius_base, nebius_model)
+    if vlm_client:
         nebius_stats["configured"] = True
         nebius_stats["model"] = nebius_model
         nebius_stats["provider"] = "OpenRouter" if "openrouter.ai" in nebius_base else "Nebius Token Factory"
-        try:
-            import openai
-            vlm_client = openai.AsyncOpenAI(base_url=nebius_base, api_key=nebius_key)
-        except ImportError:
-            logger.warning("openai package not installed — VLM endpoint disabled")
 
     try:
         while True:
@@ -292,135 +289,9 @@ async def websocket_agentic(ws: WebSocket):
 
     # VLM client (resolved from runtime config / env)
     nebius_key, nebius_base, nebius_model = state.resolve_vlm_model()
-    vlm_client = None
-    if nebius_key:
-        try:
-            import openai
-            vlm_client = openai.AsyncOpenAI(base_url=nebius_base, api_key=nebius_key)
-        except ImportError:
-            logger.warning("openai package not installed — VLM disabled for agentic loop")
+    vlm_client, _ = create_async_vlm_client(nebius_key, nebius_base, nebius_model)
 
-    # --- Agentic memory state (persists across frames) ---
-    current_goal: str = ""
-    objects_seen: dict[str, dict[str, Any]] = {}  # track_id -> {label, first_seen, last_seen, count}
-    timeline: list[dict[str, Any]] = []  # [{timestamp, event, details}]
-    frame_count: int = 0
-    last_vlm_time: float = 0.0
-    last_vlm_result: Optional[dict[str, Any]] = None
-    vlm_interval: float = 3.0  # seconds between VLM calls
-
-    def _add_timeline_event(event: str, details: str) -> None:
-        timeline.append({
-            "timestamp": time.time(),
-            "event": event,
-            "details": details,
-        })
-        # Keep last 50 events
-        if len(timeline) > 50:
-            timeline.pop(0)
-
-    def _update_memory(objects: list[dict]) -> list[dict]:
-        """Track objects across frames. Returns change events."""
-        now = time.time()
-        changes: list[dict] = []
-        current_ids = set()
-
-        for obj in objects:
-            tid = obj.get("track_id", "")
-            label = obj.get("label", "unknown")
-            current_ids.add(tid)
-
-            if tid not in objects_seen:
-                objects_seen[tid] = {
-                    "label": label,
-                    "first_seen": now,
-                    "last_seen": now,
-                    "count": 1,
-                }
-                changes.append({"type": "appeared", "track_id": tid, "label": label})
-                _add_timeline_event("object_appeared", f"{label} (ID: {tid})")
-            else:
-                objects_seen[tid]["last_seen"] = now
-                objects_seen[tid]["count"] += 1
-
-        # Detect disappearances (not seen for > 2 seconds)
-        for tid, info in list(objects_seen.items()):
-            if tid not in current_ids and (now - info["last_seen"]) > 2.0:
-                if (now - info["last_seen"]) < 3.0:  # Only report once
-                    changes.append({"type": "disappeared", "track_id": tid, "label": info["label"]})
-                    _add_timeline_event("object_disappeared", f"{info['label']} (ID: {tid})")
-
-        return changes
-
-    async def _run_vlm_reasoning(frame_b64: str, scene_desc: str, goal: str) -> dict:
-        """Send frame to VLM for high-level reasoning."""
-        if not vlm_client:
-            return {
-                "description": "VLM not configured (missing NEBIUS_API_KEY).",
-                "reasoning": "",
-                "latency_ms": 0,
-            }
-
-        goal_context = f" Current goal: {goal}." if goal else ""
-        objects_summary = ", ".join(
-            f"{info['label']}" for info in objects_seen.values()
-            if (time.time() - info["last_seen"]) < 5.0
-        )
-
-        t0 = time.time()
-        try:
-            resp = await asyncio.wait_for(
-                vlm_client.chat.completions.create(
-                    model=nebius_model,
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": (
-                                "You are OpenEye, an autonomous perception agent.\n"
-                                f"Context: {scene_desc} | Objects: {objects_summary}\n"
-                                f"{goal_context}\n\n"
-                                "Respond exactly:\n"
-                                "OBSERVATION: [what you see now]\n"
-                                "ANALYSIS: [relevance to goal]\n"
-                                "NEXT_ACTION: [specific recommendation]\n"
-                                "CONFIDENCE: [HIGH/MEDIUM/LOW]"
-                            ),
-                        },
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "image_url",
-                                    "image_url": {"url": f"data:image/jpeg;base64,{frame_b64}"},
-                                },
-                                {"type": "text", "text": f"Analyze this frame. Goal: {goal or 'observe and describe'}"},
-                            ],
-                        },
-                    ],
-                    max_tokens=300,
-                ),
-                timeout=10.0,
-            )
-            latency = (time.time() - t0) * 1000
-            content = resp.choices[0].message.content or ""
-            return {
-                "description": content,
-                "reasoning": f"Analyzed by {nebius_model}",
-                "latency_ms": round(latency, 1),
-            }
-        except asyncio.TimeoutError:
-            return {
-                "description": "VLM reasoning timed out.",
-                "reasoning": "Timeout after 10s",
-                "latency_ms": round((time.time() - t0) * 1000, 1),
-            }
-        except Exception as e:
-            logger.error("Agentic VLM error: %s", e)
-            return {
-                "description": "VLM reasoning failed.",
-                "reasoning": "",
-                "latency_ms": round((time.time() - t0) * 1000, 1),
-            }
+    session = AgenticSession(vlm_client=vlm_client, vlm_model=nebius_model)
 
     try:
         while True:
@@ -440,12 +311,12 @@ async def websocket_agentic(ws: WebSocket):
 
             frame_b64 = msg.get("frame", "")
             if msg.get("set_goal"):
-                current_goal = msg["set_goal"]
-                _add_timeline_event("goal_updated", current_goal)
+                session.current_goal = msg["set_goal"]
+                session.add_timeline_event("goal_updated", session.current_goal)
                 if pipeline:
-                    pipeline.set_goal(current_goal)
+                    pipeline.set_goal(session.current_goal)
             if msg.get("goal"):
-                current_goal = msg["goal"]
+                session.current_goal = msg["goal"]
 
             if not frame_b64:
                 await ws.send_json({"error": "No frame data provided."})
@@ -461,12 +332,11 @@ async def websocket_agentic(ws: WebSocket):
 
             img_w, img_h = img.size
             frame_np = np.array(img)
-            frame_count += 1
+            session.frame_count += 1
             t_start = time.time()
 
             # --- Stage 1: YOLO detection + scene graph (sub-100ms) ---
-            detection_result = None
-            frame_dict = None
+            frame_dict: dict[str, Any] | None = None
             t_detect_start = time.time()
 
             if pipeline is not None:
@@ -510,7 +380,7 @@ async def websocket_agentic(ws: WebSocket):
             t_detect_ms = (time.time() - t_detect_start) * 1000
 
             # --- Stage 2: Update memory ---
-            memory_changes = _update_memory(frame_dict.get("objects", []))
+            memory_changes = session.update_memory(frame_dict.get("objects", []))
             for change in memory_changes:
                 if change not in (frame_dict.get("change_alerts") or []):
                     frame_dict.setdefault("change_alerts", []).append({
@@ -520,25 +390,24 @@ async def websocket_agentic(ws: WebSocket):
                         "magnitude": 1.0,
                     })
 
-            # --- Stage 3: VLM reasoning (throttled to every 3s) ---
-            vlm_result = last_vlm_result
+            # --- Stage 3: VLM reasoning (throttled) ---
+            vlm_result = session.last_vlm_result
             vlm_ms = 0.0
             now = time.time()
-            if (now - last_vlm_time) >= vlm_interval:
-                vlm_result = await _run_vlm_reasoning(
+            if (now - session.last_vlm_time) >= session.cfg.vlm_interval:
+                vlm_result = await session.run_vlm_reasoning(
                     frame_b64,
                     frame_dict.get("scene_description", ""),
-                    current_goal,
+                    session.current_goal,
                 )
-                last_vlm_time = now
-                last_vlm_result = vlm_result
+                session.last_vlm_time = now
+                session.last_vlm_result = vlm_result
                 vlm_ms = vlm_result.get("latency_ms", 0)
-                _add_timeline_event("vlm_reasoning", vlm_result.get("description", "")[:100])
+                session.add_timeline_event("vlm_reasoning", vlm_result.get("description", "")[:100])
 
             # --- Stage 4: Build action plan ---
             action_plan = frame_dict.get("action_suggestions", [])
-            if current_goal and vlm_result:
-                # Augment action plan with VLM-informed steps
+            if session.current_goal and vlm_result:
                 vlm_desc = vlm_result.get("description", "")
                 if vlm_desc and not vlm_desc.startswith("VLM"):
                     action_plan.append({
@@ -550,23 +419,11 @@ async def websocket_agentic(ws: WebSocket):
 
             t_total_ms = (time.time() - t_start) * 1000
 
-            # --- Build memory snapshot ---
-            # Only include recently-seen objects in the summary
-            active_objects = {
-                tid: {
-                    "label": info["label"],
-                    "frames_seen": info["count"],
-                    "seconds_tracked": round(now - info["first_seen"], 1),
-                }
-                for tid, info in objects_seen.items()
-                if (now - info["last_seen"]) < 10.0
-            }
-
             # --- Send result ---
             result = {
                 "type": "agentic_frame",
-                "frame_id": frame_count,
-                "goal": current_goal,
+                "frame_id": session.frame_count,
+                "goal": session.current_goal,
                 "detections": frame_dict.get("objects", []),
                 "scene_graph": frame_dict.get("scene_graph", {}),
                 "scene_description": frame_dict.get("scene_description", ""),
@@ -575,12 +432,7 @@ async def websocket_agentic(ws: WebSocket):
                 "safety_zones": frame_dict.get("safety_zones", []),
                 "safety_alerts": frame_dict.get("safety_alerts", []),
                 "change_alerts": frame_dict.get("change_alerts", []),
-                "memory": {
-                    "objects_seen": active_objects,
-                    "timeline": timeline[-10:],  # Last 10 events
-                    "frame_count": frame_count,
-                    "total_objects_tracked": len(objects_seen),
-                },
+                "memory": session.build_memory_payload(),
                 "latency": {
                     "detection_ms": round(t_detect_ms, 1),
                     "vlm_ms": round(vlm_ms, 1),

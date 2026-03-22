@@ -30,11 +30,13 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   useMaintenanceWindows,
   useCreateMaintenanceWindow,
+  useUpdateMaintenanceWindow,
   useDeleteMaintenanceWindow,
   useFleetGroups,
 } from "@/hooks/useFleetQueries";
 import {
   Plus,
+  Pencil,
   Wrench,
   Trash2,
   Clock,
@@ -97,9 +99,16 @@ export default function Maintenance() {
   const { data: windows, isLoading } = useMaintenanceWindows();
   const { data: groups } = useFleetGroups();
   const createMutation = useCreateMaintenanceWindow();
+  const updateMutation = useUpdateMaintenanceWindow();
   const deleteMutation = useDeleteMaintenanceWindow();
 
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editWindow, setEditWindow] = useState<MaintenanceWindowResponse | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editStartsAt, setEditStartsAt] = useState("");
+  const [editEndsAt, setEditEndsAt] = useState("");
+  const [editRecurrence, setEditRecurrence] = useState("");
   const [filter, setFilter] = useState<FilterTab>("all");
 
   // Create form state
@@ -153,6 +162,38 @@ export default function Maintenance() {
     deleteMutation.mutate(id, {
       onSuccess: () => toast.success(`Deleted "${windowName}"`),
     });
+  };
+
+  const openEditDialog = (w: MaintenanceWindowResponse) => {
+    setEditWindow(w);
+    setEditName(w.name);
+    // Convert ISO to datetime-local format
+    setEditStartsAt(w.starts_at.slice(0, 16));
+    setEditEndsAt(w.ends_at.slice(0, 16));
+    setEditRecurrence(w.recurrence || "");
+    setEditOpen(true);
+  };
+
+  const handleEdit = () => {
+    if (!editWindow) return;
+    updateMutation.mutate(
+      {
+        id: editWindow.id,
+        req: {
+          name: editName,
+          starts_at: new Date(editStartsAt).toISOString(),
+          ends_at: new Date(editEndsAt).toISOString(),
+          recurrence: editRecurrence && editRecurrence !== "none" ? editRecurrence : null,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Maintenance window updated");
+          setEditOpen(false);
+          setEditWindow(null);
+        },
+      }
+    );
   };
 
   // Compute filtered list and summary counts
@@ -392,6 +433,14 @@ export default function Maintenance() {
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={() => openEditDialog(w)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
                         className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                         disabled={deleteMutation.isPending}
                         onClick={() => handleDelete(w.id, w.name)}
@@ -406,6 +455,64 @@ export default function Maintenance() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Maintenance Window Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Maintenance Window</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Name</Label>
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Starts At</Label>
+                <Input
+                  type="datetime-local"
+                  value={editStartsAt}
+                  onChange={(e) => setEditStartsAt(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Ends At</Label>
+                <Input
+                  type="datetime-local"
+                  value={editEndsAt}
+                  onChange={(e) => setEditEndsAt(e.target.value)}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Recurrence</Label>
+              <Select value={editRecurrence || "none"} onValueChange={setEditRecurrence}>
+                <SelectTrigger>
+                  <SelectValue placeholder="One-time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RECURRENCE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value || "none"} value={opt.value || "none"}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              className="w-full"
+              disabled={!editName || !editStartsAt || !editEndsAt || updateMutation.isPending}
+              onClick={handleEdit}
+            >
+              {updateMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

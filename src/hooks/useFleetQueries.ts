@@ -13,6 +13,7 @@ import type {
   DeviceRegisterRequest,
   DeviceUpdateRequest,
   MaintenanceWindowCreateRequest,
+  MaintenanceWindowUpdateRequest,
   OTAUpdateRequest,
   AutoScalingPolicy,
   FleetSummary,
@@ -297,6 +298,16 @@ export function useCreateMaintenanceWindow() {
   return useMutation({
     mutationFn: (req: MaintenanceWindowCreateRequest) => fleet.createMaintenanceWindow(req),
     onError: (err) => toastMutationError("Maintenance window creation", err),
+    onSettled: () => qc.invalidateQueries({ queryKey: ["fleet", "maintenance"] }),
+  });
+}
+
+export function useUpdateMaintenanceWindow() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, req }: { id: string; req: MaintenanceWindowUpdateRequest }) =>
+      fleet.updateMaintenanceWindow(id, req),
+    onError: (err) => toastMutationError("Maintenance window update", err),
     onSettled: () => qc.invalidateQueries({ queryKey: ["fleet", "maintenance"] }),
   });
 }

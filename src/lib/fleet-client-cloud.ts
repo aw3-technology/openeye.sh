@@ -14,6 +14,7 @@ import type {
   DeviceGroupCreateRequest,
   DeviceGroupResponse,
   MaintenanceWindowCreateRequest,
+  MaintenanceWindowUpdateRequest,
   MaintenanceWindowResponse,
   FleetAlertResponse,
   AutoScalingPolicy,
@@ -431,6 +432,22 @@ export class CloudFleetClient implements FleetClientInterface {
     if (activeOnly) query = query.eq("is_active", true);
     const result = await query.order("starts_at", { ascending: false });
     return (assertOk(result) as any[]).map(mapMaintenance);
+  }
+
+  async updateMaintenanceWindow(id: string, req: MaintenanceWindowUpdateRequest): Promise<MaintenanceWindowResponse> {
+    const updates: Record<string, unknown> = {};
+    if (req.name !== undefined) updates.name = req.name;
+    if (req.description !== undefined) updates.description = req.description;
+    if (req.starts_at !== undefined) updates.starts_at = req.starts_at;
+    if (req.ends_at !== undefined) updates.ends_at = req.ends_at;
+    if (req.recurrence !== undefined) updates.recurrence = req.recurrence;
+    const result = await supabase
+      .from("maintenance_windows")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+    return mapMaintenance(assertOk(result));
   }
 
   async deleteMaintenanceWindow(id: string): Promise<void> {

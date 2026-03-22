@@ -112,3 +112,9 @@ app.command("health")(health)
 app.command("nebius-stats")(nebius_stats)
 app.command("server-config-get")(server_config_get)
 app.command("server-config-set")(server_config_set)
+
+# ── Docs command ─────────────────────────────────────────────────
+
+from openeye_ai.commands.docs import docs
+
+app.command("docs")(docs)

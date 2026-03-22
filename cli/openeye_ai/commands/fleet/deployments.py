@@ -13,7 +13,7 @@ from ._helpers import _get, _post, err_console, fleet_app
 
 @fleet_app.command("deploy")
 def deploy(
-    name: str = typer.Option(..., "--name", "-n", help="Deployment name"),
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="Deployment name (auto-generated if omitted)"),
     model_id: str = typer.Option(..., "--model", "-m", help="Model ID"),
     model_version: str = typer.Option(..., "--version", "-v", help="Model version"),
     strategy: str = typer.Option("canary", "--strategy", help="canary|rolling|blue_green|all_at_once"),
@@ -25,8 +25,9 @@ def deploy(
     if strategy not in valid_strategies:
         rprint(f"[red]Invalid strategy '{strategy}'. Must be one of: {', '.join(sorted(valid_strategies))}[/red]")
         raise typer.Exit(code=1)
+    resolved_name = name or f"{model_id}-{model_version}"
     payload = {
-        "name": name,
+        "name": resolved_name,
         "model_id": model_id,
         "model_version": model_version,
         "strategy": strategy,

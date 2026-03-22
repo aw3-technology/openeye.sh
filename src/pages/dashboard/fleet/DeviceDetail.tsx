@@ -13,6 +13,14 @@ import {
   useRestartDevice,
   useDecommissionDevice,
 } from "@/hooks/useFleetQueries";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, RotateCcw, Power } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -34,6 +42,9 @@ export default function DeviceDetail() {
 
   const [configJson, setConfigJson] = useState("");
   const [configError, setConfigError] = useState("");
+  const [decommissionOpen, setDecommissionOpen] = useState(false);
+  const [decommissionReason, setDecommissionReason] = useState("");
+  const [decommissionWipe, setDecommissionWipe] = useState(false);
 
   if (isLoading) return <LoadingState className="p-8" />;
   if (!device) return <EmptyState message="Device not found" className="p-8" />;
@@ -62,16 +73,61 @@ export default function DeviceDetail() {
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => {
-            if (!window.confirm(`Decommission "${device.name}"? This cannot be undone.`)) return;
-            decommissionMutation.mutate({ deviceId: device.id }, {
-              onSuccess: () => { toast.success("Device decommissioned"); navigate("/dashboard/fleet"); },
-            });
-          }}
+          onClick={() => setDecommissionOpen(true)}
           disabled={decommissionMutation.isPending}
         >
           <Power className="h-4 w-4 mr-1" /> Decommission
         </Button>
+        <Dialog open={decommissionOpen} onOpenChange={setDecommissionOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Decommission &ldquo;{device.name}&rdquo;</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground">
+              This will permanently decommission the device. This action cannot be undone.
+            </p>
+            <div className="space-y-3 py-2">
+              <div>
+                <Label>Reason</Label>
+                <Input
+                  value={decommissionReason}
+                  onChange={(e) => setDecommissionReason(e.target.value)}
+                  placeholder="e.g. End of life, replaced by new unit"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="wipe"
+                  checked={decommissionWipe}
+                  onCheckedChange={(v) => setDecommissionWipe(v === true)}
+                />
+                <Label htmlFor="wipe" className="text-sm font-normal">Wipe device data after decommissioning</Label>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" size="sm" onClick={() => setDecommissionOpen(false)}>Cancel</Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={decommissionMutation.isPending}
+                onClick={() => {
+                  decommissionMutation.mutate(
+                    { deviceId: device.id, reason: decommissionReason, wipeData: decommissionWipe },
+                    {
+                      onSuccess: () => {
+                        toast.success("Device decommissioned");
+                        setDecommissionOpen(false);
+                        navigate("/dashboard/fleet");
+                      },
+                    }
+                  );
+                }}
+              >
+                {decommissionMutation.isPending ? "Decommissioning..." : "Confirm Decommission"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Tabs defaultValue="overview">

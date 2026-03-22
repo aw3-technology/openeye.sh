@@ -154,24 +154,101 @@ Configuration is stored in `~/.openeye/config.yaml`.
 
 ### `openeye fleet`
 
-Subcommands for managing edge devices, deployments, and groups.
+Subcommands for managing edge devices, deployments, groups, alerts, and maintenance.
+
+### Device Management
 
 ```bash
 openeye fleet register <name> [--type camera|robot|edge_node|gateway|drone]
-openeye fleet ls [--status online|offline] [--type camera|robot]
+openeye fleet ls [--status online|offline|error] [--type camera|robot|edge_node|gateway|drone]
 openeye fleet info <device-id>
+openeye fleet tag <device-id> key=value [key2=value2 ...]
+openeye fleet config <device-id> '<json-string>'
+openeye fleet resources <device-id> [--limit 20]
 openeye fleet restart <device-id>
-openeye fleet decommission <device-id>
-openeye fleet tag <device-id> --key <value>
-openeye fleet config <device-id>
-openeye fleet deploy <device-id> --model <key> [--version <v>]
-openeye fleet rollback <device-id>
-openeye fleet deployments [--status]
-openeye fleet group-create <name> [--devices id1,id2]
-openeye fleet groups
-openeye fleet alerts [--status]
-openeye fleet agent <device-id>
+openeye fleet decommission <device-id> [--reason <text>] [--wipe]
+openeye fleet batch <action> [--tag key=value] [--payload '<json>']
 ```
+
+| Subcommand | Description |
+|------------|-------------|
+| `register` | Register a new device and receive its ID + API key |
+| `ls` | List all devices with optional status/type filters |
+| `info` | Show full device details as JSON |
+| `tag` | Set key=value tags on a device |
+| `config` | Set config overrides on a device (JSON string) |
+| `resources` | Show resource usage history (CPU, memory, disk, GPU) |
+| `restart` | Send restart command to a device |
+| `decommission` | Decommission a device with optional data wipe |
+| `batch` | Send a command to devices matching a tag filter |
+
+### Groups
+
+```bash
+openeye fleet group-create <name> [--desc <description>]
+openeye fleet groups
+openeye fleet group-add <group-id> <device-id>
+openeye fleet group-remove <group-id> <device-id>
+openeye fleet group-members <group-id>
+openeye fleet group-scaling <group-id> [--enabled/--disabled] [--min 1] [--max 10] [--target-cpu 70]
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `group-create` | Create a device group |
+| `groups` | List all device groups |
+| `group-add` | Add a device to a group |
+| `group-remove` | Remove a device from a group |
+| `group-members` | List devices in a group |
+| `group-scaling` | Set auto-scaling policy for a group |
+
+### Deployments
+
+```bash
+openeye fleet deploy --model <key> --version <v> [--name <name>] [--strategy canary|rolling|blue_green|all_at_once] [--group <group-id>] [--url <model-url>]
+openeye fleet deployments [--status pending|in_progress|completed|failed|rolled_back]
+openeye fleet advance <deployment-id>
+openeye fleet pause-deployment <deployment-id>
+openeye fleet rollback <deployment-id>
+openeye fleet ota --url <firmware-url> --version <v> [--group <group-id>] [--devices id1,id2] [--force]
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `deploy` | Create a staged model deployment (name auto-generated if omitted) |
+| `deployments` | List deployments with optional status filter |
+| `advance` | Advance a canary deployment to the next rollout stage |
+| `pause-deployment` | Pause a running deployment |
+| `rollback` | Rollback a deployment to the previous model version |
+| `ota` | Push an OTA firmware/software update to devices |
+
+### Alerts
+
+```bash
+openeye fleet alerts [--resolved true|false]
+openeye fleet resolve-alert <alert-id>
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `alerts` | List fleet alerts (shows unresolved by default) |
+| `resolve-alert` | Resolve a fleet alert by ID |
+
+### Maintenance
+
+```bash
+openeye fleet maintenance-create --name <name> --start <iso8601> --end <iso8601> [--devices id1,id2] [--group <group-id>]
+openeye fleet maintenance-list [--active]
+openeye fleet maintenance-update <window-id> [--name <name>] [--start <iso8601>] [--end <iso8601>]
+openeye fleet maintenance-delete <window-id>
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `maintenance-create` | Create a maintenance window for devices or a group |
+| `maintenance-list` | List maintenance windows (optionally active-only) |
+| `maintenance-update` | Update a maintenance window's name, start, or end time |
+| `maintenance-delete` | Delete a maintenance window |
 
 ## MLOps
 

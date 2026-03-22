@@ -209,6 +209,14 @@ export interface MaintenanceWindowResponse {
   updated_at: string;
 }
 
+export interface MaintenanceWindowUpdateRequest {
+  name?: string;
+  description?: string;
+  starts_at?: string;
+  ends_at?: string;
+  recurrence?: string | null;
+}
+
 // ── OTA ────────────────────────────────────────────────────────
 
 export interface OTAUpdateRequest {

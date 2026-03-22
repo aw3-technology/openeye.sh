@@ -14,6 +14,7 @@ import type {
   DeviceGroupCreateRequest,
   DeviceGroupResponse,
   MaintenanceWindowCreateRequest,
+  MaintenanceWindowUpdateRequest,
   MaintenanceWindowResponse,
   FleetAlertResponse,
   AutoScalingPolicy,
@@ -209,6 +210,14 @@ export class LocalFleetClient implements FleetClientInterface {
   async listMaintenanceWindows(activeOnly = false): Promise<MaintenanceWindowResponse[]> {
     const qs = activeOnly ? "?active_only=true" : "";
     return this.api["request"](`/maintenance${qs}`);
+  }
+
+  async updateMaintenanceWindow(id: string, req: MaintenanceWindowUpdateRequest): Promise<MaintenanceWindowResponse> {
+    return this.api["request"](`/maintenance/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
   }
 
   async deleteMaintenanceWindow(id: string): Promise<void> {
