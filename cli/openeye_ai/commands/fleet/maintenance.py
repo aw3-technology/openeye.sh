@@ -22,8 +22,8 @@ def maintenance_create(
     """Create a maintenance window."""
     payload: dict = {
         "name": name,
-        "start_time": start,
-        "end_time": end,
+        "starts_at": start,
+        "ends_at": end,
     }
     if device_ids:
         payload["device_ids"] = [d.strip() for d in device_ids.split(",")]
@@ -56,8 +56,8 @@ def maintenance_list(
         tbl.add_row(
             w.get("name", "?"),
             w.get("id", "?")[:12],
-            str(w.get("start_time", "\u2014")),
-            str(w.get("end_time", "\u2014")),
+            str(w.get("starts_at", "\u2014")),
+            str(w.get("ends_at", "\u2014")),
             w.get("status", "\u2014"),
         )
     err_console.print(tbl)
@@ -75,9 +75,9 @@ def maintenance_update(
     if name:
         payload["name"] = name
     if start:
-        payload["start_time"] = start
+        payload["starts_at"] = start
     if end:
-        payload["end_time"] = end
+        payload["ends_at"] = end
     if not payload:
         rprint("[yellow]No fields to update. Use --name, --start, or --end.[/yellow]")
         raise typer.Exit(code=1)

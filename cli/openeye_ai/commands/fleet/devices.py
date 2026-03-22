@@ -166,7 +166,7 @@ def batch_command(
     payload_json: Optional[str] = typer.Option(None, "--payload", "-p", help="JSON payload for the command"),
 ) -> None:
     """Send a batch command to devices matching a tag filter."""
-    body: dict = {"command": command}
+    body: dict = {"action": command}
     if tag_filter:
         if "=" not in tag_filter:
             rprint("[red]Tag filter must be key=value format[/red]")

@@ -32,6 +32,32 @@ def _resolve_provider() -> tuple[str, str, str]:
     return api_key, base_url, model
 
 
+def create_async_vlm_client(
+    api_key: str,
+    base_url: str,
+    model: str,
+) -> tuple[object | None, str]:
+    """Create an async OpenAI-compatible VLM client.
+
+    Returns ``(client, model)`` on success or ``(None, model)`` if the
+    ``openai`` package is not installed.  This consolidates the duplicated
+    client-init blocks from ``/ws/vlm`` and ``/ws/agentic``.
+    """
+    if not api_key:
+        return None, model
+    try:
+        from openai import AsyncOpenAI
+
+        return AsyncOpenAI(base_url=base_url, api_key=api_key), model
+    except ImportError:
+        import logging
+
+        logging.getLogger(__name__).warning(
+            "openai package not installed — VLM client unavailable"
+        )
+        return None, model
+
+
 def create_vlm_caller(max_tokens: int = 400) -> Callable[[str], str]:
     """Create a sync callable that sends a prompt to a VLM and returns the response.
 

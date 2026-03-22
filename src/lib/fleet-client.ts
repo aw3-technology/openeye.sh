@@ -62,6 +62,7 @@ export const setScalingPolicy: FleetClientInterface["setScalingPolicy"] = (...a)
 
 export const createMaintenanceWindow: FleetClientInterface["createMaintenanceWindow"] = (...a) => c().createMaintenanceWindow(...a);
 export const listMaintenanceWindows: FleetClientInterface["listMaintenanceWindows"] = (...a) => c().listMaintenanceWindows(...a);
+export const updateMaintenanceWindow: FleetClientInterface["updateMaintenanceWindow"] = (...a) => c().updateMaintenanceWindow(...a);
 export const deleteMaintenanceWindow: FleetClientInterface["deleteMaintenanceWindow"] = (...a) => c().deleteMaintenanceWindow(...a);
 
 export const listAlerts: FleetClientInterface["listAlerts"] = (...a) => c().listAlerts(...a);

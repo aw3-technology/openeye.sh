@@ -13,6 +13,7 @@ import type {
   DeviceGroupCreateRequest,
   DeviceGroupResponse,
   MaintenanceWindowCreateRequest,
+  MaintenanceWindowUpdateRequest,
   MaintenanceWindowResponse,
   FleetAlertResponse,
   AutoScalingPolicy,
@@ -56,6 +57,7 @@ export interface FleetClientInterface {
   // Maintenance
   createMaintenanceWindow(req: MaintenanceWindowCreateRequest): Promise<MaintenanceWindowResponse>;
   listMaintenanceWindows(activeOnly?: boolean): Promise<MaintenanceWindowResponse[]>;
+  updateMaintenanceWindow(id: string, req: MaintenanceWindowUpdateRequest): Promise<MaintenanceWindowResponse>;
   deleteMaintenanceWindow(id: string): Promise<void>;
 
   // Alerts
