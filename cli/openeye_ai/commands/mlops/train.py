@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -44,7 +43,7 @@ def mlops_pipeline_create(
     model_key: str = typer.Option("default", "--model", "-m", help="Model key"),
     training_script: str = typer.Option("train.py", "--script", help="Training script path"),
     dataset_path: str = typer.Option("", "--dataset", "-d", help="Dataset path"),
-    schedule: Optional[str] = typer.Option(None, "--schedule", help="Cron schedule, e.g. '0 2 * * *'"),
+    schedule: str | None = typer.Option(None, "--schedule", help="Cron schedule, e.g. '0 2 * * *'"),
 ) -> None:
     """Create a retraining pipeline with optional cron schedule."""
     from openeye_ai.mlops.retraining import create_pipeline
@@ -71,7 +70,7 @@ def mlops_pipeline_create(
 
 @train_app.command("pipelines")
 def mlops_pipelines(
-    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
 ) -> None:
     """List retraining pipelines."""
     from openeye_ai.mlops.retraining import list_pipelines
@@ -101,8 +100,8 @@ def mlops_pipelines(
 
 @train_app.command("runs")
 def mlops_runs(
-    pipeline: Optional[str] = typer.Option(None, "--pipeline", "-p", help="Filter by pipeline name"),
-    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    pipeline: str | None = typer.Option(None, "--pipeline", "-p", help="Filter by pipeline name"),
+    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
 ) -> None:
     """List retraining runs with status and metrics."""
     from openeye_ai.mlops.retraining import list_runs
@@ -256,7 +255,7 @@ def mlops_annotate(
         "misclassification", "--type",
         help="Type: false_positive, false_negative, misclassification, wrong_bbox, low_confidence",
     ),
-    predicted: Optional[str] = typer.Option(None, "--predicted", help="What the model predicted"),
+    predicted: str | None = typer.Option(None, "--predicted", help="What the model predicted"),
     annotator: str = typer.Option("cli-user", "--annotator", help="Annotator name"),
     notes: str = typer.Option("", "--notes", help="Additional notes"),
 ) -> None:
@@ -305,8 +304,8 @@ def mlops_feedback_generate(
 
 @train_app.command("annotations")
 def mlops_annotations(
-    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
-    label: Optional[str] = typer.Option(None, "--label", "-l", help="Filter by annotation type"),
+    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    label: str | None = typer.Option(None, "--label", "-l", help="Filter by annotation type"),
     unfed_only: bool = typer.Option(False, "--unfed", help="Show only unfed annotations"),
 ) -> None:
     """List inference failure annotations."""
@@ -352,7 +351,7 @@ def mlops_annotations(
 
 @train_app.command("feedback-batches")
 def mlops_feedback_batches(
-    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
 ) -> None:
     """List feedback batch history."""
     from openeye_ai.mlops.feedback import list_feedback_batches

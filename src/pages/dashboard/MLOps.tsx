@@ -14,6 +14,7 @@ import {
   useLineage,
   useFeedbackBatches,
 } from "@/hooks/useMLOpsQueries";
+
 import { RegistryTab } from "@/components/dashboard/mlops/RegistryTab";
 import { LifecycleTab } from "@/components/dashboard/mlops/LifecycleTab";
 import { ABTestingTab } from "@/components/dashboard/mlops/ABTestingTab";
@@ -33,24 +34,23 @@ import {
 } from "lucide-react";
 
 export default function MLOps() {
-  const { client } = useOpenEyeConnection();
-  const baseUrl = (client?.baseUrl ?? "").replace(/\/+$/, "");
+  const { isConnected } = useOpenEyeConnection();
 
-  const models = useModels(baseUrl);
-  const promotions = usePromotions(baseUrl);
-  const abTests = useABTests(baseUrl);
-  const retrainingRuns = useRetrainingRuns(baseUrl);
-  const batchJobs = useBatchJobs(baseUrl);
-  const shadowDeps = useShadowDeployments(baseUrl);
-  const annotations = useAnnotations(baseUrl);
-  const validationRuns = useValidationRuns(baseUrl);
-  const exports = useExports(baseUrl);
-  const lineage = useLineage(baseUrl);
-  const feedbackBatches = useFeedbackBatches(baseUrl);
+  const models = useModels();
+  const promotions = usePromotions();
+  const abTests = useABTests();
+  const retrainingRuns = useRetrainingRuns();
+  const batchJobs = useBatchJobs();
+  const shadowDeps = useShadowDeployments();
+  const annotations = useAnnotations();
+  const validationRuns = useValidationRuns();
+  const exports = useExports();
+  const lineage = useLineage();
+  const feedbackBatches = useFeedbackBatches();
 
   const queryError = models.error || abTests.error || shadowDeps.error;
 
-  if (!baseUrl) {
+  if (!isConnected) {
     return (
       <div className="p-8 text-center text-muted-foreground">
         Connect to an OpenEye server to view MLOps dashboard.

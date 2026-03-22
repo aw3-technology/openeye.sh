@@ -46,7 +46,7 @@ def test_api_detect_success(tmp_path, monkeypatch):
         "credits_used": 1,
     }
 
-    monkeypatch.setattr("httpx.post", MagicMock(return_value=mock_resp))
+    monkeypatch.setattr("httpx.request", MagicMock(return_value=mock_resp))
 
     result = runner.invoke(app, ["api", "detect", str(img_path)])
     assert result.exit_code == 0
@@ -64,7 +64,7 @@ def test_api_detect_pretty_json(tmp_path, monkeypatch):
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = {"objects": [], "credits_used": 0}
 
-    monkeypatch.setattr("httpx.post", MagicMock(return_value=mock_resp))
+    monkeypatch.setattr("httpx.request", MagicMock(return_value=mock_resp))
 
     result = runner.invoke(app, ["api", "detect", str(img_path), "--pretty"])
     assert result.exit_code == 0
@@ -96,7 +96,7 @@ def test_api_detect_connect_error(tmp_path, monkeypatch):
     def _fail(*a, **kw):
         raise httpx.ConnectError("Connection refused")
 
-    monkeypatch.setattr("httpx.post", _fail)
+    monkeypatch.setattr("httpx.request", _fail)
 
     result = runner.invoke(app, ["api", "detect", str(img_path)])
     assert result.exit_code == 1
@@ -118,7 +118,7 @@ def test_api_detect_http_error(tmp_path, monkeypatch):
 
     mock_resp.raise_for_status = _raise
 
-    monkeypatch.setattr("httpx.post", MagicMock(return_value=mock_resp))
+    monkeypatch.setattr("httpx.request", MagicMock(return_value=mock_resp))
 
     result = runner.invoke(app, ["api", "detect", str(img_path)])
     assert result.exit_code == 1
@@ -144,7 +144,7 @@ def test_api_usage_success(monkeypatch):
         },
     }
 
-    monkeypatch.setattr("httpx.get", MagicMock(return_value=mock_resp))
+    monkeypatch.setattr("httpx.request", MagicMock(return_value=mock_resp))
 
     result = runner.invoke(app, ["api", "usage", "--days", "7"])
     assert result.exit_code == 0
@@ -166,7 +166,7 @@ def test_api_usage_default_days(monkeypatch):
         "total_calls": 0,
     }
 
-    monkeypatch.setattr("httpx.get", MagicMock(return_value=mock_resp))
+    monkeypatch.setattr("httpx.request", MagicMock(return_value=mock_resp))
 
     result = runner.invoke(app, ["api", "usage"])
     assert result.exit_code == 0
@@ -181,7 +181,7 @@ def test_api_usage_connect_error(monkeypatch):
     def _fail(*a, **kw):
         raise httpx.ConnectError("Connection refused")
 
-    monkeypatch.setattr("httpx.get", _fail)
+    monkeypatch.setattr("httpx.request", _fail)
 
     result = runner.invoke(app, ["api", "usage"])
     assert result.exit_code == 1
@@ -212,7 +212,7 @@ def test_api_depth_success(tmp_path, monkeypatch):
         "credits_used": 2,
     }
 
-    monkeypatch.setattr("httpx.post", MagicMock(return_value=mock_resp))
+    monkeypatch.setattr("httpx.request", MagicMock(return_value=mock_resp))
 
     result = runner.invoke(app, ["api", "depth", str(img_path)])
     assert result.exit_code == 0
@@ -235,7 +235,7 @@ def test_api_describe_success(tmp_path, monkeypatch):
         "credits_used": 5,
     }
 
-    monkeypatch.setattr("httpx.post", MagicMock(return_value=mock_resp))
+    monkeypatch.setattr("httpx.request", MagicMock(return_value=mock_resp))
 
     result = runner.invoke(app, ["api", "describe", str(img_path)])
     assert result.exit_code == 0
@@ -258,7 +258,7 @@ def test_api_models_success(monkeypatch):
         ]
     }
 
-    monkeypatch.setattr("httpx.get", MagicMock(return_value=mock_resp))
+    monkeypatch.setattr("httpx.request", MagicMock(return_value=mock_resp))
 
     result = runner.invoke(app, ["api", "models"])
     assert result.exit_code == 0

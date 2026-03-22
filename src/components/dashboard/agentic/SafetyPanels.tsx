@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +75,19 @@ interface SafetyZonesPanelProps {
 }
 
 export function SafetyZonesPanel({ latestFrame, hasSafetyZones }: SafetyZonesPanelProps) {
+  const zoneColors = useMemo(() => {
+    if (!latestFrame?.safety_zones) return [];
+    return latestFrame.safety_zones.map((zone) => ({
+      zone,
+      color:
+        zone.distance_m < 0.5
+          ? "terminal-red"
+          : zone.distance_m < 1.5
+          ? "terminal-amber"
+          : "terminal-green",
+    }));
+  }, [latestFrame?.safety_zones]);
+
   return (
     <AnimatePresence>
       {hasSafetyZones && (
@@ -91,14 +105,7 @@ export function SafetyZonesPanel({ latestFrame, hasSafetyZones }: SafetyZonesPan
             </CardHeader>
             <CardContent>
               <div className="space-y-1.5">
-                {latestFrame?.safety_zones.map((zone) => {
-                  const zoneColor =
-                    zone.distance_m < 0.5
-                      ? "terminal-red"
-                      : zone.distance_m < 1.5
-                      ? "terminal-amber"
-                      : "terminal-green";
-                  return (
+                {zoneColors.map(({ zone, color: zoneColor }) => (
                     <div
                       key={zone.zone}
                       className="flex items-center justify-between py-1.5 px-2 rounded-md bg-muted/30 font-mono text-xs"
@@ -111,8 +118,7 @@ export function SafetyZonesPanel({ latestFrame, hasSafetyZones }: SafetyZonesPan
                         {zone.distance_m.toFixed(1)}m
                       </span>
                     </div>
-                  );
-                })}
+                ))}
               </div>
             </CardContent>
           </Card>

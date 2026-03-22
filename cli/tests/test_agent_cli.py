@@ -68,7 +68,7 @@ def test_agent_start_success():
     mock_response.json.return_value = {"status": "started", "goal": "monitor"}
     mock_response.raise_for_status = MagicMock()
 
-    with patch("httpx.post", return_value=mock_response):
+    with patch("httpx.request", return_value=mock_response):
         result = runner.invoke(agent_app, ["start", "--goal", "monitor"])
     assert result.exit_code == 0
     assert "started" in result.output
@@ -77,7 +77,7 @@ def test_agent_start_success():
 def test_agent_start_connection_error():
     import httpx
 
-    with patch("httpx.post", side_effect=httpx.ConnectError("refused")):
+    with patch("httpx.request", side_effect=httpx.ConnectError("refused")):
         result = runner.invoke(agent_app, ["start"])
     assert result.exit_code == 1
     assert "Cannot connect" in result.output
@@ -92,7 +92,7 @@ def test_agent_stop_success():
     mock_response.json.return_value = {"status": "stopped", "ticks": 42}
     mock_response.raise_for_status = MagicMock()
 
-    with patch("httpx.post", return_value=mock_response):
+    with patch("httpx.request", return_value=mock_response):
         result = runner.invoke(agent_app, ["stop"])
     assert result.exit_code == 0
     assert "42" in result.output
@@ -112,7 +112,7 @@ def test_agent_status_success():
     }
     mock_response.raise_for_status = MagicMock()
 
-    with patch("httpx.get", return_value=mock_response):
+    with patch("httpx.request", return_value=mock_response):
         result = runner.invoke(agent_app, ["status"])
     assert result.exit_code == 0
 
@@ -120,7 +120,7 @@ def test_agent_status_success():
 def test_agent_status_connection_error():
     import httpx
 
-    with patch("httpx.get", side_effect=httpx.ConnectError("refused")):
+    with patch("httpx.request", side_effect=httpx.ConnectError("refused")):
         result = runner.invoke(agent_app, ["status"])
     assert result.exit_code == 1
     assert "Cannot connect" in result.output
@@ -137,7 +137,7 @@ def test_agent_memory_success():
     ]
     mock_response.raise_for_status = MagicMock()
 
-    with patch("httpx.get", return_value=mock_response):
+    with patch("httpx.request", return_value=mock_response):
         result = runner.invoke(agent_app, ["memory"])
     assert result.exit_code == 0
 
@@ -148,7 +148,7 @@ def test_agent_memory_empty():
     mock_response.json.return_value = []
     mock_response.raise_for_status = MagicMock()
 
-    with patch("httpx.get", return_value=mock_response):
+    with patch("httpx.request", return_value=mock_response):
         result = runner.invoke(agent_app, ["memory"])
     assert result.exit_code == 0
     assert "No observations" in result.output
@@ -165,7 +165,7 @@ def test_agent_recall_success():
     ]
     mock_response.raise_for_status = MagicMock()
 
-    with patch("httpx.post", return_value=mock_response):
+    with patch("httpx.request", return_value=mock_response):
         result = runner.invoke(agent_app, ["recall", "person"])
     assert result.exit_code == 0
 
@@ -176,7 +176,7 @@ def test_agent_recall_no_results():
     mock_response.json.return_value = []
     mock_response.raise_for_status = MagicMock()
 
-    with patch("httpx.post", return_value=mock_response):
+    with patch("httpx.request", return_value=mock_response):
         result = runner.invoke(agent_app, ["recall", "nothing"])
     assert result.exit_code == 0
     assert "No matching" in result.output

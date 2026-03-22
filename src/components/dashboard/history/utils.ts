@@ -9,11 +9,7 @@ export function parseObjects(json: string): DetectedObject[] {
   }
 }
 
-export function latencyColor(ms: number) {
-  if (ms < 50) return "text-green-500";
-  if (ms < 150) return "text-yellow-500";
-  return "text-red-500";
-}
+export { latencyColor } from "@/lib/format-utils";
 
 export function taskBadgeVariant(
   task: string,

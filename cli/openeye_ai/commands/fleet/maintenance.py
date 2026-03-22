@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -16,8 +15,8 @@ def maintenance_create(
     name: str = typer.Option(..., "--name", "-n", help="Window name"),
     start: str = typer.Option(..., "--start", help="Start time (ISO 8601)"),
     end: str = typer.Option(..., "--end", help="End time (ISO 8601)"),
-    device_ids: Optional[str] = typer.Option(None, "--devices", "-d", help="Comma-separated device IDs"),
-    group_id: Optional[str] = typer.Option(None, "--group", "-g", help="Target group ID"),
+    device_ids: str | None = typer.Option(None, "--devices", "-d", help="Comma-separated device IDs"),
+    group_id: str | None = typer.Option(None, "--group", "-g", help="Target group ID"),
 ) -> None:
     """Create a maintenance window."""
     payload: dict = {
@@ -38,8 +37,8 @@ def maintenance_list(
     active_only: bool = typer.Option(False, "--active", help="Show only active windows"),
 ) -> None:
     """List maintenance windows."""
-    qs = f"?active_only={str(active_only).lower()}"
-    windows = _get(f"/maintenance{qs}")
+    params = {"active_only": str(active_only).lower()}
+    windows = _get("/maintenance", params=params)
 
     entries = windows if isinstance(windows, list) else windows.get("windows", [])
     if not entries:
@@ -66,9 +65,9 @@ def maintenance_list(
 @fleet_app.command("maintenance-update")
 def maintenance_update(
     window_id: str = typer.Argument(..., help="Maintenance window UUID"),
-    name: Optional[str] = typer.Option(None, "--name", "-n", help="New window name"),
-    start: Optional[str] = typer.Option(None, "--start", help="New start time (ISO 8601)"),
-    end: Optional[str] = typer.Option(None, "--end", help="New end time (ISO 8601)"),
+    name: str | None = typer.Option(None, "--name", "-n", help="New window name"),
+    start: str | None = typer.Option(None, "--start", help="New start time (ISO 8601)"),
+    end: str | None = typer.Option(None, "--end", help="New end time (ISO 8601)"),
 ) -> None:
     """Update a maintenance window."""
     payload: dict = {}

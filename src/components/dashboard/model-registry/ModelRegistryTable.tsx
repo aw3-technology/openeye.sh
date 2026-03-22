@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -93,6 +94,17 @@ export function ModelRegistryTable({
   categoryFilter,
   activeModelKey,
 }: ModelRegistryTableProps) {
+  const rows = useMemo(
+    () =>
+      models.map((model) => ({
+        model,
+        isActive:
+          !!activeModelKey &&
+          activeModelKey.toLowerCase().includes(model.key.replace(/_/g, "")),
+      })),
+    [models, activeModelKey],
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -118,14 +130,11 @@ export function ModelRegistryTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {models.map((model) => (
+            {rows.map(({ model, isActive }) => (
               <ModelTableRow
                 key={model.key}
                 model={model}
-                isActive={
-                  !!activeModelKey &&
-                  activeModelKey.toLowerCase().includes(model.key.replace(/_/g, ""))
-                }
+                isActive={isActive}
               />
             ))}
             {models.length === 0 && (

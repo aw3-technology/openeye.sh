@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,11 +14,11 @@ export function DeviceTable({ devices }: DeviceTableProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const filtered = devices.filter((d) => {
+  const filtered = useMemo(() => devices.filter((d) => {
     const matchesSearch = d.name.toLowerCase().includes(search.toLowerCase()) || d.id.includes(search);
     const matchesStatus = statusFilter === "all" || d.status === statusFilter;
     return matchesSearch && matchesStatus;
-  });
+  }), [devices, search, statusFilter]);
 
   return (
     <div className="space-y-3">

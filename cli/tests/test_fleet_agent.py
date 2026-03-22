@@ -144,7 +144,7 @@ def test_fleet_commands_list_with_entries(monkeypatch):
     ]
     monkeypatch.setattr(
         "openeye_ai.commands.fleet.command_queue._get",
-        lambda path: sample,
+        lambda path, params=None: sample,
     )
     monkeypatch.setenv("OPENEYE_TOKEN", "test-token")
 
@@ -157,7 +157,7 @@ def test_fleet_commands_list_with_entries(monkeypatch):
 def test_fleet_commands_list_empty(monkeypatch):
     monkeypatch.setattr(
         "openeye_ai.commands.fleet.command_queue._get",
-        lambda path: [],
+        lambda path, params=None: [],
     )
     monkeypatch.setenv("OPENEYE_TOKEN", "test-token")
 
@@ -167,10 +167,11 @@ def test_fleet_commands_list_empty(monkeypatch):
 
 
 def test_fleet_commands_filter_by_device(monkeypatch):
-    captured_path = {}
+    captured = {}
 
-    def _mock_get(path):
-        captured_path["path"] = path
+    def _mock_get(path, params=None):
+        captured["path"] = path
+        captured["params"] = params
         return []
 
     monkeypatch.setattr(
@@ -180,14 +181,15 @@ def test_fleet_commands_filter_by_device(monkeypatch):
     monkeypatch.setenv("OPENEYE_TOKEN", "test-token")
 
     runner.invoke(app, ["fleet", "commands", "--device", "dev-123"])
-    assert "device_id=dev-123" in captured_path["path"]
+    assert captured["params"].get("device_id") == "dev-123"
 
 
 def test_fleet_commands_filter_by_status(monkeypatch):
-    captured_path = {}
+    captured = {}
 
-    def _mock_get(path):
-        captured_path["path"] = path
+    def _mock_get(path, params=None):
+        captured["path"] = path
+        captured["params"] = params
         return []
 
     monkeypatch.setattr(
@@ -197,14 +199,15 @@ def test_fleet_commands_filter_by_status(monkeypatch):
     monkeypatch.setenv("OPENEYE_TOKEN", "test-token")
 
     runner.invoke(app, ["fleet", "commands", "--status", "pending"])
-    assert "status=pending" in captured_path["path"]
+    assert captured["params"].get("status") == "pending"
 
 
 def test_fleet_commands_filter_both(monkeypatch):
-    captured_path = {}
+    captured = {}
 
-    def _mock_get(path):
-        captured_path["path"] = path
+    def _mock_get(path, params=None):
+        captured["path"] = path
+        captured["params"] = params
         return []
 
     monkeypatch.setattr(
@@ -214,8 +217,8 @@ def test_fleet_commands_filter_both(monkeypatch):
     monkeypatch.setenv("OPENEYE_TOKEN", "test-token")
 
     runner.invoke(app, ["fleet", "commands", "--device", "dev-1", "--status", "failed"])
-    assert "device_id=dev-1" in captured_path["path"]
-    assert "status=failed" in captured_path["path"]
+    assert captured["params"].get("device_id") == "dev-1"
+    assert captured["params"].get("status") == "failed"
 
 
 def test_fleet_commands_dict_response(monkeypatch):
@@ -233,7 +236,7 @@ def test_fleet_commands_dict_response(monkeypatch):
     }
     monkeypatch.setattr(
         "openeye_ai.commands.fleet.command_queue._get",
-        lambda path: sample,
+        lambda path, params=None: sample,
     )
     monkeypatch.setenv("OPENEYE_TOKEN", "test-token")
 

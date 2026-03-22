@@ -13,7 +13,8 @@ import {
   Camera, Bot, Cpu, Radio, Plane,
   ArrowRight, CheckCircle, Layers, Wrench,
 } from "lucide-react";
-import type { DeviceType, AlertSeverity } from "@/types/fleet";
+import type { DeviceType } from "@/types/fleet";
+import { deploymentStatusBadge, severityBadge } from "@/lib/fleet-constants";
 
 const deviceTypeIcon: Record<DeviceType, typeof Camera> = {
   camera: Camera,
@@ -29,23 +30,6 @@ const deviceTypeLabel: Record<DeviceType, string> = {
   edge_node: "Edge Nodes",
   gateway: "Gateways",
   drone: "Drones",
-};
-
-const severityBadge: Record<AlertSeverity, string> = {
-  info: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  warning: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  error: "bg-red-500/15 text-red-400 border-red-500/30",
-  critical: "bg-red-600/20 text-red-300 border-red-600/40",
-};
-
-const deploymentStatusBadge: Record<string, string> = {
-  pending: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
-  in_progress: "bg-teal-500/15 text-teal-400 border-teal-500/30",
-  paused: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  completed: "bg-green-500/15 text-green-400 border-green-500/30",
-  rolling_back: "bg-orange-500/15 text-orange-400 border-orange-500/30",
-  rolled_back: "bg-gray-500/15 text-gray-400 border-gray-500/30",
-  failed: "bg-red-500/15 text-red-400 border-red-500/30",
 };
 
 export default function FleetDashboard() {

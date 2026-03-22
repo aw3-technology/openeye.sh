@@ -29,12 +29,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { PredictionResult } from "@/types/openeye";
-
-function latencyColor(ms: number) {
-  if (ms < 50) return "text-terminal-green";
-  if (ms < 150) return "text-terminal-amber";
-  return "text-red-400";
-}
+import { latencyColor } from "@/lib/format-utils";
 
 export default function Inference() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -20,9 +19,9 @@ deploy_app = typer.Typer()
 @deploy_app.command("upload")
 def mlops_upload(
     file: Path = typer.Argument(help="Path to model file (ONNX, TorchScript, SafeTensors, PyTorch)"),
-    name: Optional[str] = typer.Option(None, "--name", "-n", help="Human-readable model name (default: filename stem)"),
-    key: Optional[str] = typer.Option(None, "--key", "-k", help="Registry key / slug (default: filename stem, lowered)"),
-    format: Optional[str] = typer.Option(None, "--format", "-f", help="Model format: onnx, torchscript, safetensors, pytorch (auto-detected if omitted)"),
+    name: str | None = typer.Option(None, "--name", "-n", help="Human-readable model name (default: filename stem)"),
+    key: str | None = typer.Option(None, "--key", "-k", help="Registry key / slug (default: filename stem, lowered)"),
+    format: str | None = typer.Option(None, "--format", "-f", help="Model format: onnx, torchscript, safetensors, pytorch (auto-detected if omitted)"),
     task: str = typer.Option("detection", "--task", "-t", help="Model task"),
     author: str = typer.Option("", "--author", help="Author name"),
     description: str = typer.Option("", "--description", "-d", help="Model description"),
@@ -225,8 +224,8 @@ def mlops_create_ab_test(
     challenger: str = typer.Option(..., "--challenger", help="Challenger model version, e.g. yolov8-v3"),
     traffic: str = typer.Option("50/50", "--traffic", help="Traffic split champion/challenger, e.g. 80/20"),
     name: str = typer.Option("", "--name", help="Test name"),
-    model: Optional[str] = typer.Option(None, "--model", "-m", help="Model key (auto-detected from champion)"),
-    max_samples: Optional[int] = typer.Option(None, "--max-samples", help="Stop after N samples"),
+    model: str | None = typer.Option(None, "--model", "-m", help="Model key (auto-detected from champion)"),
+    max_samples: int | None = typer.Option(None, "--max-samples", help="Stop after N samples"),
 ) -> None:
     """Create an A/B test between two model versions."""
     from openeye_ai.mlops.ab_testing import create_ab_test
@@ -259,7 +258,7 @@ def mlops_create_ab_test(
 
 
 @deploy_app.command("ab-tests")
-def mlops_ab_tests(model_key: Optional[str] = typer.Argument(None, help="Filter by model key")) -> None:
+def mlops_ab_tests(model_key: str | None = typer.Argument(None, help="Filter by model key")) -> None:
     """Show running A/B tests and their metrics."""
     from openeye_ai.mlops.ab_testing import list_ab_tests
 
@@ -321,9 +320,9 @@ def mlops_complete_ab_test(
 def mlops_shadow_mode(
     champion: str = typer.Option(..., "--champion", help="Production (champion) version"),
     challenger: str = typer.Option(..., "--challenger", help="Shadow (challenger) version"),
-    model: Optional[str] = typer.Option(None, "--model", "-m", help="Model key (auto-detected from champion)"),
+    model: str | None = typer.Option(None, "--model", "-m", help="Model key (auto-detected from champion)"),
     sample_rate: float = typer.Option(1.0, "--sample-rate", help="Fraction of traffic to shadow (0-1)"),
-    max_samples: Optional[int] = typer.Option(None, "--max-samples", help="Stop after N samples"),
+    max_samples: int | None = typer.Option(None, "--max-samples", help="Stop after N samples"),
 ) -> None:
     """Test a new model in shadow mode without affecting production."""
     from openeye_ai.mlops.shadow_mode import create_shadow_deployment
@@ -346,7 +345,7 @@ def mlops_shadow_mode(
 
 
 @deploy_app.command("shadow-status")
-def mlops_shadow_status(model_key: Optional[str] = typer.Argument(None, help="Filter by model")) -> None:
+def mlops_shadow_status(model_key: str | None = typer.Argument(None, help="Filter by model")) -> None:
     """Show shadow deployment status and comparison metrics."""
     from openeye_ai.mlops.shadow_mode import list_shadow_deployments
 
@@ -387,7 +386,7 @@ def mlops_export(
     model_key: str = typer.Argument(help="Model key"),
     format: str = typer.Option(..., "--format", "-f", help="Export format: onnx, tensorrt, coreml"),
     version: str = typer.Option("latest", "--version", "-v", help="Model version (default: latest)"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output path"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output path"),
     quantize: bool = typer.Option(False, "--quantize", help="Apply INT8 quantization"),
 ) -> None:
     """Export a model to ONNX, TensorRT, or CoreML format for deployment."""
@@ -435,7 +434,7 @@ def mlops_export(
 
 @deploy_app.command("exports")
 def mlops_exports(
-    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
 ) -> None:
     """List previous model exports."""
     from openeye_ai.mlops.export import list_exports

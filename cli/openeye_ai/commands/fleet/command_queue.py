@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -13,18 +12,17 @@ from ._helpers import _get, err_console, fleet_app
 
 @fleet_app.command("commands")
 def list_commands(
-    device_id: Optional[str] = typer.Option(None, "--device", "-d", help="Filter by device ID"),
-    status: Optional[str] = typer.Option(None, "--status", "-s", help="Filter by status"),
+    device_id: str | None = typer.Option(None, "--device", "-d", help="Filter by device ID"),
+    status: str | None = typer.Option(None, "--status", "-s", help="Filter by status"),
 ) -> None:
     """List pending device commands."""
-    params = []
+    params = {}
     if device_id:
-        params.append(f"device_id={device_id}")
+        params["device_id"] = device_id
     if status:
-        params.append(f"status={status}")
-    qs = "?" + "&".join(params) if params else ""
+        params["status"] = status
 
-    commands = _get(f"/commands{qs}")
+    commands = _get("/commands", params=params or None)
 
     entries = commands if isinstance(commands, list) else commands.get("commands", [])
     if not entries:

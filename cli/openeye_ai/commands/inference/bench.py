@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -21,7 +20,7 @@ from openeye_ai.registry import (
 
 def bench(
     model: str = typer.Argument(help="Model name to benchmark"),
-    variant: Optional[str] = typer.Option(None, "--variant", help="Variant to benchmark"),
+    variant: str | None = typer.Option(None, "--variant", help="Variant to benchmark"),
     warmup: int = typer.Option(3, "--warmup", help="Number of warmup runs"),
     runs: int = typer.Option(10, "--runs", help="Number of timed runs"),
     width: int = typer.Option(640, "--width", help="Test image width"),

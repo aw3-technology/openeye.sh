@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { Search, Filter } from "lucide-react";
 import { allTags, demoObservations } from "./data";
 
@@ -28,6 +29,25 @@ export function MemorySearchFilters({
   filteredCount: number;
   totalCount: number;
 }) {
+  const tagCounts = useMemo(
+    () =>
+      allTags.map((tag) => ({
+        tag,
+        count: demoObservations.filter((o) => o.tags.includes(tag)).length,
+      })),
+    [],
+  );
+
+  const handleToggleFilters = useCallback(
+    () => onShowFiltersChange(!showFilters),
+    [onShowFiltersChange, showFilters],
+  );
+
+  const handleClearFilters = useCallback(() => {
+    onActiveTagChange(null);
+    onMinSignificanceChange(0);
+  }, [onActiveTagChange, onMinSignificanceChange]);
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
@@ -52,7 +72,7 @@ export function MemorySearchFilters({
           <option value="last_7d">Last 7d</option>
         </select>
         <button
-          onClick={() => onShowFiltersChange(!showFilters)}
+          onClick={handleToggleFilters}
           className={`flex items-center gap-1.5 px-3 py-2 text-sm font-mono border rounded transition-colors ${
             showFilters || activeTag || minSignificance > 0
               ? "bg-terminal-green/10 border-terminal-green/30 text-terminal-green"
@@ -86,10 +106,7 @@ export function MemorySearchFilters({
               >
                 all
               </button>
-              {allTags.map((tag) => {
-                const count = demoObservations.filter((o) =>
-                  o.tags.includes(tag)
-                ).length;
+              {tagCounts.map(({ tag, count }) => {
                 return (
                   <button
                     key={tag}
@@ -148,10 +165,7 @@ export function MemorySearchFilters({
                 {totalCount} observations
               </span>
               <button
-                onClick={() => {
-                  onActiveTagChange(null);
-                  onMinSignificanceChange(0);
-                }}
+                onClick={handleClearFilters}
                 className="text-[10px] font-mono text-terminal-red hover:underline"
               >
                 Clear filters

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import sys
 
 import typer
 from rich import print as rprint
@@ -33,7 +32,8 @@ def start_agent(
         from fleet.agent.config import AgentConfig
     except ImportError:
         rprint("[yellow]Running with backend package import path...[/yellow]")
-        sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[3] / "backend" / "src"))
+        from openeye_ai._cli_helpers import ensure_backend_path
+        ensure_backend_path()
         from fleet.agent.agent import DeviceAgent
         from fleet.agent.config import AgentConfig
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -26,20 +25,17 @@ def register(
 
 @fleet_app.command("ls")
 def list_devices(
-    status: Optional[str] = typer.Option(None, "--status", "-s", help="Filter by status: online, offline, error"),
-    device_type: Optional[str] = typer.Option(None, "--type", "-t", help="Filter by type: camera, robot, edge_node, gateway, drone"),
+    status: str | None = typer.Option(None, "--status", "-s", help="Filter by status: online, offline, error"),
+    device_type: str | None = typer.Option(None, "--type", "-t", help="Filter by type: camera, robot, edge_node, gateway, drone"),
 ) -> None:
     """List all devices."""
-    qs = ""
-    params = []
+    params = {}
     if status:
-        params.append(f"status={status}")
+        params["status"] = status
     if device_type:
-        params.append(f"device_type={device_type}")
-    if params:
-        qs = "?" + "&".join(params)
+        params["device_type"] = device_type
 
-    devices = _get(f"/devices{qs}")
+    devices = _get("/devices", params=params or None)
 
     tbl = Table(title="Devices")
     tbl.add_column("Name", style="bold")
@@ -128,7 +124,7 @@ def device_resources(
     limit: int = typer.Option(20, "--limit", "-n", help="Number of data points"),
 ) -> None:
     """Show resource usage history for a device."""
-    data = _get(f"/devices/{device_id}/resources?limit={limit}")
+    data = _get(f"/devices/{device_id}/resources", params={"limit": limit})
 
     entries = data if isinstance(data, list) else data.get("entries", [])
     if not entries:
@@ -162,8 +158,8 @@ def device_resources(
 @fleet_app.command("batch")
 def batch_command(
     command: str = typer.Argument(..., help="Command to send: restart, update_config, update_model"),
-    tag_filter: Optional[str] = typer.Option(None, "--tag", "-t", help="Tag filter as key=value"),
-    payload_json: Optional[str] = typer.Option(None, "--payload", "-p", help="JSON payload for the command"),
+    tag_filter: str | None = typer.Option(None, "--tag", "-t", help="Tag filter as key=value"),
+    payload_json: str | None = typer.Option(None, "--payload", "-p", help="JSON payload for the command"),
 ) -> None:
     """Send a batch command to devices matching a tag filter."""
     body: dict = {"action": command}

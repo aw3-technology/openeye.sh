@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -13,12 +12,12 @@ from ._helpers import _get, _post, err_console, fleet_app
 
 @fleet_app.command("deploy")
 def deploy(
-    name: Optional[str] = typer.Option(None, "--name", "-n", help="Deployment name (auto-generated if omitted)"),
+    name: str | None = typer.Option(None, "--name", "-n", help="Deployment name (auto-generated if omitted)"),
     model_id: str = typer.Option(..., "--model", "-m", help="Model ID"),
     model_version: str = typer.Option(..., "--version", "-v", help="Model version"),
     strategy: str = typer.Option("canary", "--strategy", help="canary|rolling|blue_green|all_at_once"),
-    group_id: Optional[str] = typer.Option(None, "--group", "-g", help="Target device group ID"),
-    model_url: Optional[str] = typer.Option(None, "--url", help="Direct URL to model weights file"),
+    group_id: str | None = typer.Option(None, "--group", "-g", help="Target device group ID"),
+    model_url: str | None = typer.Option(None, "--url", help="Direct URL to model weights file"),
 ) -> None:
     """Create a staged model deployment."""
     valid_strategies = {"canary", "rolling", "blue_green", "all_at_once"}
@@ -51,11 +50,11 @@ def rollback(
 
 @fleet_app.command("deployments")
 def list_deployments(
-    status: Optional[str] = typer.Option(None, "--status", "-s", help="Filter by status: pending, in_progress, completed, failed, rolled_back"),
+    status: str | None = typer.Option(None, "--status", "-s", help="Filter by status: pending, in_progress, completed, failed, rolled_back"),
 ) -> None:
     """List deployments."""
-    qs = f"?status={status}" if status else ""
-    deployments = _get(f"/deployments{qs}")
+    params = {"status": status} if status else None
+    deployments = _get("/deployments", params=params)
 
     tbl = Table(title="Deployments")
     tbl.add_column("Name", style="bold")
@@ -99,8 +98,8 @@ def pause_deployment(
 def ota_update(
     firmware_url: str = typer.Option(..., "--url", "-u", help="Firmware/software URL"),
     version: str = typer.Option(..., "--version", "-v", help="Target version string"),
-    group_id: Optional[str] = typer.Option(None, "--group", "-g", help="Target device group"),
-    device_ids: Optional[str] = typer.Option(None, "--devices", "-d", help="Comma-separated device IDs"),
+    group_id: str | None = typer.Option(None, "--group", "-g", help="Target device group"),
+    device_ids: str | None = typer.Option(None, "--devices", "-d", help="Comma-separated device IDs"),
     force: bool = typer.Option(False, "--force", help="Force update even if same version"),
 ) -> None:
     """Push an OTA firmware/software update to devices."""

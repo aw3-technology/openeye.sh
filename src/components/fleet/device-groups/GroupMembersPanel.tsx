@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -23,13 +23,17 @@ export function GroupMembersPanel({ groupId }: { groupId: string }) {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [search, setSearch] = useState("");
 
-  const memberIds = new Set((members || []).map((m) => m.id));
-  const available = (allDevices || []).filter(
-    (d) =>
-      !memberIds.has(d.id) &&
-      d.status !== "decommissioned" &&
-      (d.name.toLowerCase().includes(search.toLowerCase()) ||
-        d.device_type.toLowerCase().includes(search.toLowerCase())),
+  const memberIds = useMemo(() => new Set((members || []).map((m) => m.id)), [members]);
+  const available = useMemo(
+    () =>
+      (allDevices || []).filter(
+        (d) =>
+          !memberIds.has(d.id) &&
+          d.status !== "decommissioned" &&
+          (d.name.toLowerCase().includes(search.toLowerCase()) ||
+            d.device_type.toLowerCase().includes(search.toLowerCase())),
+      ),
+    [allDevices, memberIds, search],
   );
 
   return (

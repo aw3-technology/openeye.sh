@@ -4,17 +4,13 @@ from __future__ import annotations
 
 import logging
 import os
-import sys
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
+from openeye_ai._cli_helpers import ensure_backend_path
 from openeye_ai.server.queue import InferenceQueue
 
-# Add backend/src to path for perception pipeline imports
-_BACKEND_SRC = str(Path(__file__).resolve().parents[3] / "backend" / "src")
-if _BACKEND_SRC not in sys.path:
-    sys.path.insert(0, _BACKEND_SRC)
+ensure_backend_path()
 
 logger = logging.getLogger(__name__)
 

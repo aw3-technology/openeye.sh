@@ -20,41 +20,15 @@ import {
   Play,
   Monitor,
   Clock,
-  Layers,
-  ArrowRightLeft,
-  Copy,
-  Zap,
   CheckCircle2,
   XCircle,
   Loader2,
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { DeploymentStatus, DeploymentStrategy } from "@/types/fleet";
-
-const statusBadge: Record<string, string> = {
-  pending: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
-  in_progress: "bg-teal-500/15 text-teal-400 border-teal-500/30",
-  paused: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  completed: "bg-green-500/15 text-green-400 border-green-500/30",
-  rolling_back: "bg-orange-500/15 text-orange-400 border-orange-500/30",
-  rolled_back: "bg-gray-500/15 text-gray-400 border-gray-500/30",
-  failed: "bg-red-500/15 text-red-400 border-red-500/30",
-};
-
-const strategyLabel: Record<DeploymentStrategy, string> = {
-  canary: "Canary",
-  rolling: "Rolling",
-  blue_green: "Blue/Green",
-  all_at_once: "All at Once",
-};
-
-const strategyIcon: Record<DeploymentStrategy, typeof Layers> = {
-  canary: Layers,
-  rolling: ArrowRightLeft,
-  blue_green: Copy,
-  all_at_once: Zap,
-};
+import type { DeploymentStatus } from "@/types/fleet";
+import { deploymentStatusBadge as statusBadge, strategyIcon, strategyLabel } from "@/lib/fleet-constants";
+import { formatElapsed as formatDuration } from "@/lib/format-utils";
 
 const deviceStatusConfig: Record<string, { icon: typeof CheckCircle2; color: string }> = {
   completed: { icon: CheckCircle2, color: "text-green-400" },
@@ -63,20 +37,6 @@ const deviceStatusConfig: Record<string, { icon: typeof CheckCircle2; color: str
   pending: { icon: Clock, color: "text-yellow-400" },
   rolling_back: { icon: Undo2, color: "text-orange-400" },
 };
-
-function formatDuration(startStr: string, endStr?: string | null): string {
-  const start = new Date(startStr).getTime();
-  const end = endStr ? new Date(endStr).getTime() : Date.now();
-  const diff = end - start;
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "<1m";
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  const remainMins = mins % 60;
-  if (hours < 24) return `${hours}h ${remainMins}m`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ${hours % 24}h`;
-}
 
 export default function DeploymentDetail() {
   const { id } = useParams<{ id: string }>();

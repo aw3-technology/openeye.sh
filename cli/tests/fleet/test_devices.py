@@ -52,8 +52,9 @@ class TestListDevicesStatusFilter:
         mock = mock_request([make_device(status="offline")])
         fleet_runner.invoke(app, ["fleet", "ls", "--status", "offline"])
         mock.assert_called_once()
-        path = mock.call_args[0][1]
-        assert "status=offline" in path
+        assert mock.call_args[0][1] == "/devices"
+        params = mock.call_args[1].get("params", {})
+        assert params.get("status") == "offline"
 
 
 # ── Story 54: info ───────────────────────────────────────────────

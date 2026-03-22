@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { MaintenanceWindowResponse } from "@/types/fleet";
+import { formatDateRange } from "@/lib/format-utils";
 
 type WindowStatus = "active" | "upcoming" | "expired";
 type FilterTab = "all" | WindowStatus;
@@ -85,15 +86,6 @@ const statusConfig: Record<
     className: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
   },
 };
-
-function formatDuration(start: string, end: string): string {
-  const ms = new Date(end).getTime() - new Date(start).getTime();
-  const hours = Math.floor(ms / 3_600_000);
-  const minutes = Math.floor((ms % 3_600_000) / 60_000);
-  if (hours === 0) return `${minutes}m`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes}m`;
-}
 
 export default function Maintenance() {
   const { data: windows, isLoading } = useMaintenanceWindows();
@@ -417,7 +409,7 @@ export default function Maintenance() {
                       {new Date(w.ends_at).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-xs tabular-nums text-muted-foreground">
-                      {formatDuration(w.starts_at, w.ends_at)}
+                      {formatDateRange(w.starts_at, w.ends_at)}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {w.recurrence ? (

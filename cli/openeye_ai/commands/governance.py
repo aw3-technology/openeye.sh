@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -32,7 +31,7 @@ def _get_engine():
 
 @govern_app.command("status")
 def status(
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL to query"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL to query"),
 ):
     """Show current governance status."""
     if server:
@@ -101,7 +100,7 @@ def ls():
 @govern_app.command("enable")
 def enable(
     name: str = typer.Argument(..., help="Policy name to enable"),
-    server: Optional[str] = typer.Option(None, "--server", "-s"),
+    server: str | None = typer.Option(None, "--server", "-s"),
 ):
     """Enable a governance policy."""
     if server:
@@ -125,7 +124,7 @@ def enable(
 @govern_app.command("disable")
 def disable(
     name: str = typer.Argument(..., help="Policy name to disable"),
-    server: Optional[str] = typer.Option(None, "--server", "-s"),
+    server: str | None = typer.Option(None, "--server", "-s"),
 ):
     """Disable a governance policy."""
     if server:
@@ -168,7 +167,7 @@ def presets():
 @govern_app.command("load")
 def load(
     target: str = typer.Argument(..., help="Preset name or path to YAML config"),
-    server: Optional[str] = typer.Option(None, "--server", "-s"),
+    server: str | None = typer.Option(None, "--server", "-s"),
 ):
     """Load a preset or custom YAML governance config."""
     if server:
@@ -264,7 +263,7 @@ def _print_audit_table(entries: list[dict], title: str = "Governance Audit Trail
 
 @govern_app.command("audit")
 def audit(
-    server: Optional[str] = typer.Option(None, "--server", "-s"),
+    server: str | None = typer.Option(None, "--server", "-s"),
     limit: int = typer.Option(20, "--limit", "-n"),
 ):
     """Show recent audit trail."""
@@ -398,7 +397,7 @@ def init(
 
 @govern_app.command("violations")
 def violations(
-    server: Optional[str] = typer.Option(None, "--server", "-s"),
+    server: str | None = typer.Option(None, "--server", "-s"),
     limit: int = typer.Option(20, "--limit", "-n"),
 ):
     """Show governance violations (filtered from audit trail)."""

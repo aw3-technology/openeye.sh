@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -41,7 +41,7 @@ def save_config(cfg: dict[str, Any]) -> None:
         yaml.safe_dump(cfg, f, default_flow_style=False)
 
 
-def get_config_value(key: str) -> Optional[Any]:
+def get_config_value(key: str) -> Any | None:
     """Get a single config value by key."""
     cfg = load_config()
     return cfg.get(key)

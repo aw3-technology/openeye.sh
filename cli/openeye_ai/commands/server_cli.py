@@ -3,17 +3,12 @@
 from __future__ import annotations
 
 import json
-import os
-from typing import Optional
 
 import typer
 from rich import print as rprint
-from rich.console import Console
 from rich.table import Table
 
-console = Console(stderr=True)
-
-_SERVER_URL = os.environ.get("OPENEYE_SERVER_URL", "http://localhost:8000")
+from openeye_ai._cli_helpers import SERVER_URL as _SERVER_URL, err_console as console, http_request
 
 
 def _server_url(server: str | None) -> str:
@@ -24,26 +19,18 @@ def _server_url(server: str | None) -> str:
 
 
 def health(
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Check server health and queue status."""
-    import httpx
-
     url = _server_url(server)
 
-    try:
-        health_r = httpx.get(f"{url}/health", timeout=5)
-        health_r.raise_for_status()
-        health_data = health_r.json()
-    except httpx.ConnectError:
-        rprint(f"[red]Cannot connect to server at {url}[/red]")
-        raise typer.Exit(code=1)
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    r = http_request("GET", f"{url}/health", timeout=5)
+    health_data = r.json()
 
     queue_data = {}
     try:
+        import httpx
+
         queue_r = httpx.get(f"{url}/queue/status", timeout=5)
         queue_r.raise_for_status()
         queue_data = queue_r.json()
@@ -70,22 +57,12 @@ def health(
 
 
 def nebius_stats(
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Show Nebius VLM usage statistics from a running server."""
-    import httpx
-
     url = _server_url(server)
-    try:
-        r = httpx.get(f"{url}/nebius/stats", timeout=5)
-        r.raise_for_status()
-        data = r.json()
-    except httpx.ConnectError:
-        rprint(f"[red]Cannot connect to server at {url}[/red]")
-        raise typer.Exit(code=1)
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    r = http_request("GET", f"{url}/nebius/stats", timeout=5)
+    data = r.json()
 
     table = Table(title="Nebius VLM Stats", show_header=False)
     table.add_column("Metric", style="cyan")
@@ -108,22 +85,12 @@ def nebius_stats(
 
 
 def server_config_get(
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Get runtime configuration from a running server."""
-    import httpx
-
     url = _server_url(server)
-    try:
-        r = httpx.get(f"{url}/config", timeout=5)
-        r.raise_for_status()
-        data = r.json()
-    except httpx.ConnectError:
-        rprint(f"[red]Cannot connect to server at {url}[/red]")
-        raise typer.Exit(code=1)
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    r = http_request("GET", f"{url}/config", timeout=5)
+    data = r.json()
 
     rprint(json.dumps(data, indent=2))
 
@@ -131,11 +98,9 @@ def server_config_get(
 def server_config_set(
     key: str = typer.Argument(help="Config key to set"),
     value: str = typer.Argument(help="Config value (JSON or string)"),
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Update a runtime config value on a running server."""
-    import httpx
-
     url = _server_url(server)
 
     # Try parsing value as JSON, fall back to string
@@ -145,24 +110,11 @@ def server_config_set(
         parsed_value = value
 
     # GET current config, update key, PUT back
-    try:
-        r = httpx.get(f"{url}/config", timeout=5)
-        r.raise_for_status()
-        config = r.json()
-    except httpx.ConnectError:
-        rprint(f"[red]Cannot connect to server at {url}[/red]")
-        raise typer.Exit(code=1)
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    r = http_request("GET", f"{url}/config", timeout=5)
+    config = r.json()
 
     config[key] = parsed_value
 
-    try:
-        r = httpx.put(f"{url}/config", json=config, timeout=5)
-        r.raise_for_status()
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    http_request("PUT", f"{url}/config", json=config, timeout=5)
 
     rprint(f"[green]Config updated:[/green] {key} = {parsed_value}")

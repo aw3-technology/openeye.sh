@@ -1,4 +1,13 @@
+/**
+ * React Query hooks for MLOps API.
+ * Uses the MLOpsClient abstraction via useOpenEyeConnection,
+ * consistent with useGovernanceQueries and other query hooks.
+ */
+
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { MLOpsClient } from "@/lib/mlops-client";
+import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
 import type {
   ModelRegistryEntry,
   ABTestResult,
@@ -20,102 +29,112 @@ export const stageBadgeVariant: Record<string, "default" | "secondary" | "destru
   archived: "destructive",
 };
 
-async function fetchJson<T>(baseUrl: string, path: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(`${baseUrl}${path}`, {
-    signal: signal ?? AbortSignal.timeout(15_000),
-    headers: { "Accept": "application/json" },
-  });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return res.json();
+function useMLOpsClient(): MLOpsClient | null {
+  const { serverUrl, isConnected } = useOpenEyeConnection();
+  return useMemo(
+    () => (isConnected ? new MLOpsClient(serverUrl) : null),
+    [serverUrl, isConnected],
+  );
 }
 
-export function useModels(baseUrl: string) {
-  return useQuery({
+export function useModels() {
+  const client = useMLOpsClient();
+  return useQuery<ModelRegistryEntry[]>({
     queryKey: ["mlops", "models"],
-    queryFn: () => fetchJson<ModelRegistryEntry[]>(baseUrl, "/mlops/models"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listModels(),
+    enabled: !!client,
     refetchInterval: 10_000,
   });
 }
 
-export function usePromotions(baseUrl: string) {
-  return useQuery({
+export function usePromotions() {
+  const client = useMLOpsClient();
+  return useQuery<PromotionRecord[]>({
     queryKey: ["mlops", "promotions"],
-    queryFn: () => fetchJson<PromotionRecord[]>(baseUrl, "/mlops/promotions"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listPromotions(),
+    enabled: !!client,
   });
 }
 
-export function useABTests(baseUrl: string) {
-  return useQuery({
+export function useABTests() {
+  const client = useMLOpsClient();
+  return useQuery<ABTestResult[]>({
     queryKey: ["mlops", "ab-tests"],
-    queryFn: () => fetchJson<ABTestResult[]>(baseUrl, "/mlops/ab-tests"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listABTests(),
+    enabled: !!client,
     refetchInterval: 5_000,
   });
 }
 
-export function useRetrainingRuns(baseUrl: string) {
-  return useQuery({
+export function useRetrainingRuns() {
+  const client = useMLOpsClient();
+  return useQuery<RetrainingRun[]>({
     queryKey: ["mlops", "retraining-runs"],
-    queryFn: () => fetchJson<RetrainingRun[]>(baseUrl, "/mlops/retraining/runs"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listRetrainingRuns(),
+    enabled: !!client,
   });
 }
 
-export function useBatchJobs(baseUrl: string) {
-  return useQuery({
+export function useBatchJobs() {
+  const client = useMLOpsClient();
+  return useQuery<BatchInferenceJob[]>({
     queryKey: ["mlops", "batch-jobs"],
-    queryFn: () => fetchJson<BatchInferenceJob[]>(baseUrl, "/mlops/batch-inference"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listBatchJobs(),
+    enabled: !!client,
   });
 }
 
-export function useShadowDeployments(baseUrl: string) {
-  return useQuery({
+export function useShadowDeployments() {
+  const client = useMLOpsClient();
+  return useQuery<ShadowDeployment[]>({
     queryKey: ["mlops", "shadow-deployments"],
-    queryFn: () => fetchJson<ShadowDeployment[]>(baseUrl, "/mlops/shadow-deployments"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listShadowDeployments(),
+    enabled: !!client,
     refetchInterval: 5_000,
   });
 }
 
-export function useAnnotations(baseUrl: string) {
-  return useQuery({
+export function useAnnotations() {
+  const client = useMLOpsClient();
+  return useQuery<InferenceFailureAnnotation[]>({
     queryKey: ["mlops", "annotations"],
-    queryFn: () => fetchJson<InferenceFailureAnnotation[]>(baseUrl, "/mlops/annotations"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listAnnotations(),
+    enabled: !!client,
   });
 }
 
-export function useValidationRuns(baseUrl: string) {
-  return useQuery({
+export function useValidationRuns() {
+  const client = useMLOpsClient();
+  return useQuery<ValidationTestRun[]>({
     queryKey: ["mlops", "validation-runs"],
-    queryFn: () => fetchJson<ValidationTestRun[]>(baseUrl, "/mlops/validation-runs"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listValidationRuns(),
+    enabled: !!client,
   });
 }
 
-export function useExports(baseUrl: string) {
-  return useQuery({
+export function useExports() {
+  const client = useMLOpsClient();
+  return useQuery<ExportResult[]>({
     queryKey: ["mlops", "exports"],
-    queryFn: () => fetchJson<ExportResult[]>(baseUrl, "/mlops/exports"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listExports(),
+    enabled: !!client,
   });
 }
 
-export function useLineage(baseUrl: string) {
-  return useQuery({
+export function useLineage() {
+  const client = useMLOpsClient();
+  return useQuery<ModelLineage[]>({
     queryKey: ["mlops", "lineage"],
-    queryFn: () => fetchJson<ModelLineage[]>(baseUrl, "/mlops/lineage"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listLineage(),
+    enabled: !!client,
   });
 }
 
-export function useFeedbackBatches(baseUrl: string) {
-  return useQuery({
+export function useFeedbackBatches() {
+  const client = useMLOpsClient();
+  return useQuery<FeedbackBatch[]>({
     queryKey: ["mlops", "feedback-batches"],
-    queryFn: () => fetchJson<FeedbackBatch[]>(baseUrl, "/mlops/feedback-batches"),
-    enabled: !!baseUrl,
+    queryFn: () => client!.listFeedbackBatches(),
+    enabled: !!client,
   });
 }
