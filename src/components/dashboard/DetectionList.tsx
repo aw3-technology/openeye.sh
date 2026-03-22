@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useOpenEyeStream } from "@/hooks/useOpenEyeStream";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,22 +18,26 @@ function DetectionTimeline({ count }: { count: number }) {
   }, [count]);
 
   const points = historyRef.current;
-  if (points.length < 2) return null;
 
-  const max = Math.max(...points, 1);
-  const h = 28;
-  const w = 120;
-  const step = w / (TIMELINE_LENGTH - 1);
-  const d = points
-    .map((v, i) => {
-      const x = i * step;
-      const y = h - (v / max) * (h - 2);
-      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
+  const d = useMemo(() => {
+    if (points.length < 2) return null;
+    const max = Math.max(...points, 1);
+    const h = 28;
+    const w = 120;
+    const step = w / (TIMELINE_LENGTH - 1);
+    return points
+      .map((v, i) => {
+        const x = i * step;
+        const y = h - (v / max) * (h - 2);
+        return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(" ");
+  }, [points]);
+
+  if (d === null) return null;
 
   return (
-    <svg width={w} height={h} className="opacity-60">
+    <svg width={120} height={28} className="opacity-60">
       <path d={d} fill="none" stroke="hsl(var(--terminal-green))" strokeWidth="1.5" />
     </svg>
   );

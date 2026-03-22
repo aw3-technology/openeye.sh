@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePerceptionStream } from "@/hooks/usePerceptionStream";
 import { Camera } from "lucide-react";
@@ -35,6 +36,31 @@ export function DemoFeed() {
 
   const config = stateConfig[overallSafetyState];
   const isActive = mode === "live" || mode === "replay";
+
+  const objectStyles = useMemo(() => {
+    if (!latestFrame?.objects) return [];
+    return latestFrame.objects.map((obj) => {
+      const isHuman = obj.label.toLowerCase() === "person";
+      const isHazard = isHuman || obj.label.toLowerCase().includes("knife");
+      const borderColor = isHuman
+        ? "border-terminal-red"
+        : isHazard
+        ? "border-terminal-amber"
+        : "border-terminal-green";
+      const bgColor = isHuman
+        ? "bg-terminal-red/10"
+        : isHazard
+        ? "bg-terminal-amber/10"
+        : "bg-terminal-green/10";
+      const labelBg = isHuman
+        ? "bg-terminal-red"
+        : isHazard
+        ? "bg-terminal-amber"
+        : "bg-terminal-green";
+      const labelText = "text-primary-foreground";
+      return { obj, borderColor, bgColor, labelBg, labelText };
+    });
+  }, [latestFrame?.objects]);
 
   return (
     <motion.div
@@ -104,27 +130,7 @@ export function DemoFeed() {
 
         {/* Detection bounding boxes */}
         <AnimatePresence>
-          {isActive && latestFrame?.objects?.map((obj) => {
-            const isHuman = obj.label.toLowerCase() === "person";
-            const isHazard = isHuman || obj.label.toLowerCase().includes("knife");
-            const borderColor = isHuman
-              ? "border-terminal-red"
-              : isHazard
-              ? "border-terminal-amber"
-              : "border-terminal-green";
-            const bgColor = isHuman
-              ? "bg-terminal-red/10"
-              : isHazard
-              ? "bg-terminal-amber/10"
-              : "bg-terminal-green/10";
-            const labelBg = isHuman
-              ? "bg-terminal-red"
-              : isHazard
-              ? "bg-terminal-amber"
-              : "bg-terminal-green";
-            const labelText = isHuman ? "text-primary-foreground" : isHazard ? "text-primary-foreground" : "text-primary-foreground";
-
-            return (
+          {isActive && objectStyles.map(({ obj, borderColor, bgColor, labelBg, labelText }) => (
               <motion.div
                 key={obj.track_id}
                 className="absolute"
@@ -156,8 +162,7 @@ export function DemoFeed() {
                 <div className={`absolute bottom-0 left-0 w-2 h-2 border-b border-l ${borderColor}`} />
                 <div className={`absolute bottom-0 right-0 w-2 h-2 border-b border-r ${borderColor}`} />
               </motion.div>
-            );
-          })}
+          ))}
         </AnimatePresence>
 
         {/* Danger flash overlay */}

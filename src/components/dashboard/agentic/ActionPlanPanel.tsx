@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,13 @@ interface ActionPlanPanelProps {
 }
 
 export function ActionPlanPanel({ latestFrame, running }: ActionPlanPanelProps) {
+  const topActions = useMemo(() => {
+    if (!latestFrame?.action_plan || latestFrame.action_plan.length === 0) return [];
+    return [...latestFrame.action_plan]
+      .sort((a, b) => b.priority - a.priority)
+      .slice(0, 5);
+  }, [latestFrame?.action_plan]);
+
   return (
     <Card className="border-terminal-green/20">
       <CardHeader className="pb-2">
@@ -27,11 +35,9 @@ export function ActionPlanPanel({ latestFrame, running }: ActionPlanPanelProps) 
       </CardHeader>
       <CardContent>
         <AnimatePresence mode="popLayout">
-          {latestFrame?.action_plan && latestFrame.action_plan.length > 0 ? (
+          {topActions.length > 0 ? (
             <div className="space-y-2">
-              {latestFrame.action_plan
-                .sort((a, b) => b.priority - a.priority)
-                .slice(0, 5)
+              {topActions
                 .map((step, i) => (
                   <motion.div
                     key={`${step.action}-${step.target_id}-${i}`}

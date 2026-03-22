@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -13,13 +12,13 @@ from ._helpers import _get, _post, err_console, fleet_app
 
 @fleet_app.command("alerts")
 def list_alerts(
-    resolved: Optional[bool] = typer.Option(None, "--resolved", help="Filter by resolved state (true/false)"),
+    resolved: bool | None = typer.Option(None, "--resolved", help="Filter by resolved state (true/false)"),
 ) -> None:
     """List fleet alerts."""
-    qs = ""
+    params = {}
     if resolved is not None:
-        qs = f"?resolved={str(resolved).lower()}"
-    alerts = _get(f"/alerts{qs}")
+        params["resolved"] = str(resolved).lower()
+    alerts = _get("/alerts", params=params or None)
 
     tbl = Table(title="Fleet Alerts")
     tbl.add_column("Severity")

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -198,7 +197,7 @@ def mlops_validation_create(
 
 @evaluate_app.command("validations")
 def mlops_validations(
-    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
 ) -> None:
     """List validation test definitions."""
     from openeye_ai.mlops.validation import list_validation_tests
@@ -230,8 +229,8 @@ def mlops_validations(
 
 @evaluate_app.command("validation-runs")
 def mlops_validation_runs(
-    test_id: Optional[str] = typer.Option(None, "--test", "-t", help="Filter by test ID"),
-    model_key: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    test_id: str | None = typer.Option(None, "--test", "-t", help="Filter by test ID"),
+    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
 ) -> None:
     """List validation test runs."""
     from openeye_ai.mlops.validation import list_validation_runs

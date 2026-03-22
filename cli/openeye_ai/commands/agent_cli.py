@@ -2,25 +2,19 @@
 
 from __future__ import annotations
 
-import json
-import os
 import signal
 import sys
 import time
-from typing import Optional
 
 import typer
 from rich import print as rprint
-from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 
+from openeye_ai._cli_helpers import SERVER_URL as _SERVER_URL, err_console as console, http_request
+
 agent_app = typer.Typer(help="Agentic perception loop — perceive, reason, act.")
-
-console = Console(stderr=True)
-
-_SERVER_URL = os.environ.get("OPENEYE_SERVER_URL", "http://localhost:8000")
 
 
 def _server_url(server: str | None) -> str:
@@ -35,8 +29,8 @@ def agent_run(
     model: str = typer.Option("yolov8", "--model", "-m", help="Detection model to use"),
     goal: str = typer.Option("monitor the scene", "--goal", "-g", help="Agent goal"),
     hz: float = typer.Option(1.0, "--hz", help="Loop frequency in Hz"),
-    video: Optional[str] = typer.Option(None, "--video", help="Video file path (fallback if no camera)"),
-    max_ticks: Optional[int] = typer.Option(None, "--max-ticks", help="Stop after N ticks"),
+    video: str | None = typer.Option(None, "--video", help="Video file path (fallback if no camera)"),
+    max_ticks: int | None = typer.Option(None, "--max-ticks", help="Stop after N ticks"),
     vlm: bool = typer.Option(False, "--vlm", help="Enable VLM reasoning via Nebius"),
 ) -> None:
     """Run the agentic perception loop locally on camera or video."""
@@ -134,24 +128,14 @@ def agent_run(
 @agent_app.command("start")
 def agent_start(
     goal: str = typer.Option("monitor the scene", "--goal", "-g", help="Agent goal"),
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Start the agentic loop on a running server."""
-    import httpx
-
     url = _server_url(server)
-    try:
-        r = httpx.post(f"{url}/agent/start", json={"goal": goal}, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        rprint(f"[green]Agent started:[/green] {data.get('status', 'running')}")
-        rprint(f"  Goal: {data.get('goal', goal)}")
-    except httpx.ConnectError:
-        rprint(f"[red]Cannot connect to server at {url}[/red]")
-        raise typer.Exit(code=1)
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    r = http_request("POST", f"{url}/agent/start", json={"goal": goal}, timeout=10)
+    data = r.json()
+    rprint(f"[green]Agent started:[/green] {data.get('status', 'running')}")
+    rprint(f"  Goal: {data.get('goal', goal)}")
 
 
 # ── agent stop (server) ───────────────────────────────────────────
@@ -159,23 +143,13 @@ def agent_start(
 
 @agent_app.command("stop")
 def agent_stop(
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Stop the agentic loop on a running server."""
-    import httpx
-
     url = _server_url(server)
-    try:
-        r = httpx.post(f"{url}/agent/stop", timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        rprint(f"[yellow]Agent stopped:[/yellow] {data.get('ticks', '?')} ticks completed")
-    except httpx.ConnectError:
-        rprint(f"[red]Cannot connect to server at {url}[/red]")
-        raise typer.Exit(code=1)
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    r = http_request("POST", f"{url}/agent/stop", timeout=10)
+    data = r.json()
+    rprint(f"[yellow]Agent stopped:[/yellow] {data.get('ticks', '?')} ticks completed")
 
 
 # ── agent status (server) ─────────────────────────────────────────
@@ -183,22 +157,12 @@ def agent_stop(
 
 @agent_app.command("status")
 def agent_status(
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Show agentic loop status on a running server."""
-    import httpx
-
     url = _server_url(server)
-    try:
-        r = httpx.get(f"{url}/agent/status", timeout=10)
-        r.raise_for_status()
-        data = r.json()
-    except httpx.ConnectError:
-        rprint(f"[red]Cannot connect to server at {url}[/red]")
-        raise typer.Exit(code=1)
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    r = http_request("GET", f"{url}/agent/status", timeout=10)
+    data = r.json()
 
     running = data.get("running", False)
     table = Table(title="Agent Status", show_header=False)
@@ -225,22 +189,12 @@ def agent_status(
 @agent_app.command("memory")
 def agent_memory(
     limit: int = typer.Option(10, "--limit", "-n", help="Number of recent observations"),
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Show recent observations from the agent's memory."""
-    import httpx
-
     url = _server_url(server)
-    try:
-        r = httpx.get(f"{url}/agent/memory", params={"limit": limit}, timeout=10)
-        r.raise_for_status()
-        observations = r.json()
-    except httpx.ConnectError:
-        rprint(f"[red]Cannot connect to server at {url}[/red]")
-        raise typer.Exit(code=1)
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    r = http_request("GET", f"{url}/agent/memory", params={"limit": limit}, timeout=10)
+    observations = r.json()
 
     if not observations:
         rprint("[dim]No observations in memory.[/dim]")
@@ -274,26 +228,17 @@ def agent_memory(
 def agent_recall(
     query: str = typer.Argument(help="Natural language query to search memory"),
     limit: int = typer.Option(5, "--limit", "-n", help="Max results"),
-    server: Optional[str] = typer.Option(None, "--server", "-s", help="Server URL"),
+    server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Query agent memory with a natural language search."""
-    import httpx
-
     url = _server_url(server)
-    try:
-        r = httpx.post(
-            f"{url}/agent/recall",
-            json={"query": query, "limit": limit},
-            timeout=10,
-        )
-        r.raise_for_status()
-        results = r.json()
-    except httpx.ConnectError:
-        rprint(f"[red]Cannot connect to server at {url}[/red]")
-        raise typer.Exit(code=1)
-    except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
-        raise typer.Exit(code=1)
+    r = http_request(
+        "POST",
+        f"{url}/agent/recall",
+        json={"query": query, "limit": limit},
+        timeout=10,
+    )
+    results = r.json()
 
     if not results:
         rprint(f"[dim]No matching observations for '{query}'.[/dim]")

@@ -7,7 +7,6 @@ import signal
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -21,7 +20,7 @@ from openeye_ai.registry import get_adapter, get_model_info, is_downloaded
 def watch(
     models: str = typer.Option("yolov8", "--models", "-m", help="Comma-separated model names"),
     camera: int = typer.Option(0, "--camera", "-c", help="Camera index"),
-    video: Optional[str] = typer.Option(None, "--video", "-v", help="Video file path (fallback if camera fails)"),
+    video: str | None = typer.Option(None, "--video", "-v", help="Video file path (fallback if camera fails)"),
     safety: bool = typer.Option(False, "--safety", "-s", help="Enable Safety Guardian overlay"),
     danger_m: float = typer.Option(0.5, "--danger-m", help="Danger zone threshold in metres (requires --safety)"),
     caution_m: float = typer.Option(1.5, "--caution-m", help="Caution zone threshold in metres (requires --safety)"),
@@ -241,15 +240,8 @@ def _init_safety_guardian(safety: bool, danger_m: float, caution_m: float):
         return None, None, None, None
 
     try:
-        _repo_root = Path(__file__).resolve().parent
-        for _ in range(6):
-            if (_repo_root / "backend" / "src" / "perception").is_dir():
-                break
-            _repo_root = _repo_root.parent
-        else:
-            rprint("[red]Cannot find backend/src/perception -- run from the repo root[/red]")
-            raise typer.Exit(code=1)
-        sys.path.insert(0, str(_repo_root / "backend" / "src"))
+        from openeye_ai._cli_helpers import ensure_backend_path
+        ensure_backend_path()
         from perception.safety import SafetyGuardian
         from perception.models import BBox2D, DetectedObject3D, Position3D
 
@@ -274,7 +266,7 @@ def _find_demo_video() -> Path | None:
     return None
 
 
-def _open_input_source(camera: int, video: Optional[str]):
+def _open_input_source(camera: int, video: str | None):
     """Open camera or video source. Returns (source, label)."""
     from openeye_ai.utils.camera import Camera, VideoPlayer
 

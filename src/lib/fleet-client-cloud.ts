@@ -4,6 +4,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import type { Database, Json } from "@/integrations/supabase/types";
 import type {
   DeviceRegisterRequest,
   DeviceResponse,
@@ -24,6 +25,14 @@ import type {
 } from "@/types/fleet";
 import type { FleetClientInterface } from "./fleet-client-interface";
 
+type Tables = Database["public"]["Tables"];
+type DeviceRow = Tables["devices"]["Row"];
+type DeploymentRow = Tables["deployments"]["Row"];
+type DeploymentDeviceStatusRow = Tables["deployment_device_status"]["Row"];
+type DeviceGroupRow = Tables["device_groups"]["Row"];
+type MaintenanceWindowRow = Tables["maintenance_windows"]["Row"];
+type FleetAlertRow = Tables["fleet_alerts"]["Row"];
+
 // ── Helpers ────────────────────────────────────────────────────
 
 async function getUserId(): Promise<string> {
@@ -40,17 +49,17 @@ function assertOk<T>(result: { data: T | null; error: { message: string } | null
 
 // ── Mappers (DB rows → API response shapes) ───────────────────
 
-function mapDevice(row: any): DeviceResponse {
+function mapDevice(row: DeviceRow): DeviceResponse {
   return {
     id: row.id,
     user_id: row.user_id,
     name: row.name,
-    device_type: row.device_type || "edge_node",
-    status: row.status || "offline",
+    device_type: (row.device_type || "edge_node") as DeviceResponse["device_type"],
+    status: (row.status || "offline") as DeviceResponse["status"],
     api_key: null,
-    hardware_specs: row.hardware_specs || {},
-    tags: row.tags || {},
-    config_overrides: row.config_overrides || {},
+    hardware_specs: (row.hardware_specs || {}) as DeviceResponse["hardware_specs"],
+    tags: (row.tags || {}) as Record<string, string>,
+    config_overrides: (row.config_overrides || {}) as Record<string, unknown>,
     firmware_version: row.firmware_version,
     current_model_id: row.current_model_id,
     current_model_version: row.current_model_version,
@@ -62,7 +71,7 @@ function mapDevice(row: any): DeviceResponse {
   };
 }
 
-function mapDeployment(row: any): DeploymentResponse {
+function mapDeployment(row: DeploymentRow): DeploymentResponse {
   return {
     id: row.id,
     user_id: row.user_id,
@@ -71,11 +80,11 @@ function mapDeployment(row: any): DeploymentResponse {
     model_version: row.model_version,
     model_url: row.model_url,
     model_checksum: row.model_checksum,
-    strategy: row.strategy || "rolling",
-    status: row.status || "pending",
-    rollout_stages: row.rollout_stages || [],
+    strategy: (row.strategy || "rolling") as DeploymentResponse["strategy"],
+    status: (row.status || "pending") as DeploymentResponse["status"],
+    rollout_stages: (row.rollout_stages || []) as DeploymentResponse["rollout_stages"],
     current_stage: row.current_stage || 0,
-    target_device_ids: row.target_device_ids || [],
+    target_device_ids: (row.target_device_ids || []) as string[],
     target_group_id: row.target_group_id,
     bandwidth_limit_mbps: row.bandwidth_limit_mbps,
     rollback_version: row.rollback_version,
@@ -86,7 +95,7 @@ function mapDeployment(row: any): DeploymentResponse {
   };
 }
 
-function mapDeploymentDeviceStatus(row: any): DeploymentDeviceStatusResponse {
+function mapDeploymentDeviceStatus(row: DeploymentDeviceStatusRow): DeploymentDeviceStatusResponse {
   return {
     id: row.id,
     deployment_id: row.deployment_id,
@@ -100,27 +109,27 @@ function mapDeploymentDeviceStatus(row: any): DeploymentDeviceStatusResponse {
   };
 }
 
-function mapGroup(row: any): DeviceGroupResponse {
+function mapGroup(row: DeviceGroupRow): DeviceGroupResponse {
   return {
     id: row.id,
     user_id: row.user_id,
     name: row.name,
     description: row.description || "",
-    tag_filter: row.tag_filter || {},
-    auto_scaling_policy: row.auto_scaling_policy,
+    tag_filter: (row.tag_filter || {}) as Record<string, string>,
+    auto_scaling_policy: row.auto_scaling_policy as DeviceGroupResponse["auto_scaling_policy"],
     device_count: 0,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
 }
 
-function mapMaintenance(row: any): MaintenanceWindowResponse {
+function mapMaintenance(row: MaintenanceWindowRow): MaintenanceWindowResponse {
   return {
     id: row.id,
     user_id: row.user_id,
     name: row.name,
     description: row.description || "",
-    device_ids: row.device_ids || [],
+    device_ids: (row.device_ids || []) as string[],
     group_id: row.group_id,
     starts_at: row.starts_at,
     ends_at: row.ends_at,
@@ -131,14 +140,14 @@ function mapMaintenance(row: any): MaintenanceWindowResponse {
   };
 }
 
-function mapAlert(row: any): FleetAlertResponse {
+function mapAlert(row: FleetAlertRow): FleetAlertResponse {
   return {
     id: row.id,
     user_id: row.user_id,
     device_id: row.device_id,
     deployment_id: row.deployment_id,
-    alert_type: row.alert_type,
-    severity: row.severity || "info",
+    alert_type: row.alert_type as FleetAlertResponse["alert_type"],
+    severity: (row.severity || "info") as FleetAlertResponse["severity"],
     title: row.title,
     message: row.message || "",
     resolved: row.resolved ?? false,
@@ -174,7 +183,7 @@ export class CloudFleetClient implements FleetClientInterface {
     if (params?.status) query = query.eq("status", params.status);
     if (params?.device_type) query = query.eq("device_type", params.device_type);
     const result = await query.order("created_at", { ascending: false });
-    const rows = assertOk(result) as any[];
+    const rows = assertOk(result) as DeviceRow[];
     let devices = rows.map(mapDevice);
     if (params?.tag_key && params?.tag_value) {
       devices = devices.filter(d => d.tags[params.tag_key!] === params.tag_value);
@@ -204,7 +213,7 @@ export class CloudFleetClient implements FleetClientInterface {
   }
 
   async setConfigOverrides(deviceId: string, config: Record<string, unknown>): Promise<DeviceResponse> {
-    const result = await supabase.from("devices").update({ config_overrides: config as any }).eq("id", deviceId).select().single();
+    const result = await supabase.from("devices").update({ config_overrides: config as Json }).eq("id", deviceId).select().single();
     return mapDevice(assertOk(result));
   }
 
@@ -268,7 +277,7 @@ export class CloudFleetClient implements FleetClientInterface {
       target_group_id: req.target_group_id || null,
       bandwidth_limit_mbps: req.bandwidth_limit_mbps || null,
     };
-    const result = await supabase.from("deployments").insert(row as any).select().single();
+    const result = await supabase.from("deployments").insert(row as Tables["deployments"]["Insert"]).select().single();
     return mapDeployment(assertOk(result));
   }
 
@@ -276,7 +285,7 @@ export class CloudFleetClient implements FleetClientInterface {
     let query = supabase.from("deployments").select("*");
     if (status) query = query.eq("status", status);
     const result = await query.order("created_at", { ascending: false });
-    return (assertOk(result) as any[]).map(mapDeployment);
+    return (assertOk(result) as DeploymentRow[]).map(mapDeployment);
   }
 
   async getDeployment(id: string): Promise<DeploymentResponse> {
@@ -289,7 +298,7 @@ export class CloudFleetClient implements FleetClientInterface {
       .from("deployment_device_status")
       .select("*")
       .eq("deployment_id", id);
-    return (assertOk(result) as any[]).map(mapDeploymentDeviceStatus);
+    return (assertOk(result) as DeploymentDeviceStatusRow[]).map(mapDeploymentDeviceStatus);
   }
 
   async advanceDeployment(id: string): Promise<DeploymentResponse> {
@@ -343,7 +352,7 @@ export class CloudFleetClient implements FleetClientInterface {
 
   async listGroups(): Promise<DeviceGroupResponse[]> {
     const result = await supabase.from("device_groups").select("*").order("created_at", { ascending: false });
-    const groups = (assertOk(result) as any[]).map(mapGroup);
+    const groups = (assertOk(result) as DeviceGroupRow[]).map(mapGroup);
     for (const group of groups) {
       const { count } = await supabase
         .from("group_members")
@@ -396,13 +405,13 @@ export class CloudFleetClient implements FleetClientInterface {
     if (memberRows.length === 0) return [];
     const deviceIds = memberRows.map(m => m.device_id);
     const devResult = await supabase.from("devices").select("*").in("id", deviceIds);
-    return (assertOk(devResult) as any[]).map(mapDevice);
+    return (assertOk(devResult) as DeviceRow[]).map(mapDevice);
   }
 
   async setScalingPolicy(groupId: string, policy: AutoScalingPolicy): Promise<DeviceGroupResponse> {
     const result = await supabase
       .from("device_groups")
-      .update({ auto_scaling_policy: policy as any })
+      .update({ auto_scaling_policy: policy as Json })
       .eq("id", groupId)
       .select()
       .single();
@@ -431,7 +440,7 @@ export class CloudFleetClient implements FleetClientInterface {
     let query = supabase.from("maintenance_windows").select("*");
     if (activeOnly) query = query.eq("is_active", true);
     const result = await query.order("starts_at", { ascending: false });
-    return (assertOk(result) as any[]).map(mapMaintenance);
+    return (assertOk(result) as MaintenanceWindowRow[]).map(mapMaintenance);
   }
 
   async updateMaintenanceWindow(id: string, req: MaintenanceWindowUpdateRequest): Promise<MaintenanceWindowResponse> {
@@ -462,7 +471,7 @@ export class CloudFleetClient implements FleetClientInterface {
     if (resolved !== undefined) query = query.eq("resolved", resolved);
     if (severity) query = query.eq("severity", severity);
     const result = await query.order("created_at", { ascending: false });
-    return (assertOk(result) as any[]).map(mapAlert);
+    return (assertOk(result) as FleetAlertRow[]).map(mapAlert);
   }
 
   async resolveAlert(id: string): Promise<FleetAlertResponse> {

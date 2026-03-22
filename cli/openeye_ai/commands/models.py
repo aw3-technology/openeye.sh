@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -157,9 +156,9 @@ def _pull_single(
 
 
 def pull(
-    model: Optional[str] = typer.Argument(None, help="Model name to download (e.g. yolov8)"),
+    model: str | None = typer.Argument(None, help="Model name to download (e.g. yolov8)"),
     all_models: bool = typer.Option(False, "--all", help="Pull all models in the registry"),
-    variant: Optional[str] = typer.Option(None, "--variant", help="Pull a specific variant"),
+    variant: str | None = typer.Option(None, "--variant", help="Pull a specific variant"),
     quantized: bool = typer.Option(False, "--quantized", help="Pull the quantized variant (shortcut for --variant quantized)"),
     force: bool = typer.Option(False, "--force", help="Force re-download even if already pulled"),
 ) -> None:
@@ -231,12 +230,12 @@ def remove(model: str = typer.Argument(help="Model name to remove")) -> None:
 
 def add_model(
     key: str = typer.Argument(help="Registry key (e.g. my-model)"),
-    name: Optional[str] = typer.Option(None, "--name", help="Display name (defaults to key)"),
+    name: str | None = typer.Option(None, "--name", help="Display name (defaults to key)"),
     task: str = typer.Option(..., "--task", help="Task type (detection, depth, segmentation, classification, embedding)"),
     adapter: str = typer.Option(..., "--adapter", help="Adapter key or path to .py file"),
-    hf_repo: Optional[str] = typer.Option(None, "--hf-repo", help="HuggingFace repo ID"),
-    filename: Optional[str] = typer.Option(None, "--filename", help="Model filename"),
-    size_mb: Optional[float] = typer.Option(None, "--size-mb", help="Model size in MB"),
+    hf_repo: str | None = typer.Option(None, "--hf-repo", help="HuggingFace repo ID"),
+    filename: str | None = typer.Option(None, "--filename", help="Model filename"),
+    size_mb: float | None = typer.Option(None, "--size-mb", help="Model size in MB"),
     description: str = typer.Option("", "--description", help="Model description"),
 ) -> None:
     """Add a new model to the registry."""

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -275,14 +274,14 @@ def _save_visualization(result, img, image_path: Path) -> None:
 
 def run(
     model: str = typer.Argument(help="Model name (e.g. yolov8)"),
-    image: Optional[str] = typer.Argument(None, help="Image path, directory, or '-' for stdin"),
-    prompt: Optional[str] = typer.Option(None, "--prompt", "-p", help="Text prompt (for grounding-dino)"),
+    image: str | None = typer.Argument(None, help="Image path, directory, or '-' for stdin"),
+    prompt: str | None = typer.Option(None, "--prompt", "-p", help="Text prompt (for grounding-dino)"),
     pretty: bool = typer.Option(False, "--pretty", help="Human-readable colored output"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Write JSON output to file"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Write JSON output to file"),
     visualize: bool = typer.Option(False, "--visualize", help="Save annotated image with bounding boxes"),
-    backend: Optional[str] = typer.Option(None, "--backend", "-b", help="Backend: onnx, tensorrt"),
-    variant: Optional[str] = typer.Option(None, "--variant", help="Use a specific model variant"),
-    confidence: Optional[float] = typer.Option(None, "--confidence", "-c", help="Minimum confidence threshold (0.0-1.0)"),
+    backend: str | None = typer.Option(None, "--backend", "-b", help="Backend: onnx, tensorrt"),
+    variant: str | None = typer.Option(None, "--variant", help="Use a specific model variant"),
+    confidence: float | None = typer.Option(None, "--confidence", "-c", help="Minimum confidence threshold (0.0-1.0)"),
 ) -> None:
     """Run inference on an image (or directory of images) and output unified JSON."""
     import json

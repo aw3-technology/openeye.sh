@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,27 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { useFleetAlerts, useResolveAlert } from "@/hooks/useFleetQueries";
 import {
-  Bell, BellOff, CheckCircle, AlertTriangle, AlertOctagon,
-  Info, ShieldAlert, Clock, Filter,
+  Bell, BellOff, CheckCircle, Clock, Filter,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { AlertSeverity, AlertType, FleetAlertResponse } from "@/types/fleet";
-
-// ── Severity config ──────────────────────────────────────────────
-
-const severityBadge: Record<AlertSeverity, string> = {
-  info: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  warning: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  error: "bg-red-500/15 text-red-400 border-red-500/30",
-  critical: "bg-red-600/20 text-red-300 border-red-600/40",
-};
-
-const severityIcon: Record<AlertSeverity, typeof Info> = {
-  info: Info,
-  warning: AlertTriangle,
-  error: AlertOctagon,
-  critical: ShieldAlert,
-};
+import type { AlertType, FleetAlertResponse } from "@/types/fleet";
+import { severityBadge, severityIcon } from "@/lib/fleet-constants";
+import { timeAgo } from "@/lib/format-utils";
 
 const alertTypeLabels: Record<AlertType, string> = {
   device_offline: "Device Offline",
@@ -40,21 +25,6 @@ const alertTypeLabels: Record<AlertType, string> = {
 };
 
 // ── Helpers ──────────────────────────────────────────────────────
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = now - then;
-  const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString();
-}
 
 // ── Component ────────────────────────────────────────────────────
 
@@ -80,21 +50,21 @@ export default function FleetAlerts() {
   }, [alerts]);
 
   // Filter logic
-  const filterAlerts = (list: FleetAlertResponse[], resolved: boolean) => {
+  const filterAlerts = useCallback((list: FleetAlertResponse[], resolved: boolean) => {
     return list
       .filter((a) => a.resolved === resolved)
       .filter((a) => severityFilter === "all" || a.severity === severityFilter)
       .filter((a) => typeFilter === "all" || a.alert_type === typeFilter)
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  };
+  }, [severityFilter, typeFilter]);
 
   const activeAlerts = useMemo(
     () => filterAlerts(alerts ?? [], false),
-    [alerts, severityFilter, typeFilter],
+    [alerts, filterAlerts],
   );
   const resolvedAlerts = useMemo(
     () => filterAlerts(alerts ?? [], true),
-    [alerts, severityFilter, typeFilter],
+    [alerts, filterAlerts],
   );
 
   // Alert types present in current data for filter options

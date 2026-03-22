@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import time
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -18,8 +17,8 @@ def serve(
     host: str = typer.Option("0.0.0.0", "--host", help="Bind host"),
     port: int = typer.Option(8000, "--port", help="Bind port"),
     demo: bool = typer.Option(False, "--demo", help="Demo mode: warm up model, show live status bar"),
-    vlm_model: Optional[str] = typer.Option(None, "--vlm-model", help="VLM model ID for perception (e.g. qwen/qwen3.5-9b, openrouter/healer-alpha)"),
-    cortex_llm: Optional[str] = typer.Option(None, "--cortex-llm", help="Cortex LLM model ID for reasoning (e.g. z-ai/glm-5-turbo, openrouter/hunter-alpha)"),
+    vlm_model: str | None = typer.Option(None, "--vlm-model", help="VLM model ID for perception (e.g. qwen/qwen3.5-9b, openrouter/healer-alpha)"),
+    cortex_llm: str | None = typer.Option(None, "--cortex-llm", help="Cortex LLM model ID for reasoning (e.g. z-ai/glm-5-turbo, openrouter/hunter-alpha)"),
 ) -> None:
     """Start a FastAPI server with REST API, WebSocket, and browser dashboard."""
     if port < 1 or port > 65535:

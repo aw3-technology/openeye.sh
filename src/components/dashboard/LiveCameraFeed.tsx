@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useOpenEyeStream } from "@/hooks/useOpenEyeStream";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
 import type { DetectedObject } from "@/types/openeye";
+import { latencyColor } from "@/lib/format-utils";
 
 type SafetyZoneLevel = "SAFE" | "CAUTION" | "DANGER";
 
@@ -61,11 +62,6 @@ function fpsColor(fps: number): string {
   return "text-red-400";
 }
 
-function latencyColor(ms: number): string {
-  if (ms < 50) return "text-terminal-green";
-  if (ms < 100) return "text-terminal-amber";
-  return "text-red-400";
-}
 
 export function LiveCameraFeed() {
   const { videoRef, latestResult, isStreaming, metrics } = useOpenEyeStream();

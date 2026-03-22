@@ -235,8 +235,8 @@ def test_health_success(tmp_openeye_home, monkeypatch):
     mock_response.json.return_value = {"model": "yolov8", "loaded": True, "uptime": "1h"}
     mock_response.raise_for_status = MagicMock()
 
-    mock_get = MagicMock(return_value=mock_response)
-    monkeypatch.setattr("httpx.get", mock_get)
+    mock_request = MagicMock(return_value=mock_response)
+    monkeypatch.setattr("httpx.request", mock_request)
 
     result = runner.invoke(app, ["health", "--server", "http://localhost:9999"])
     assert result.exit_code == 0
@@ -249,7 +249,7 @@ def test_health_connection_error(tmp_openeye_home, monkeypatch):
     def _fail(*a, **kw):
         raise httpx.ConnectError("Connection refused")
 
-    monkeypatch.setattr("httpx.get", _fail)
+    monkeypatch.setattr("httpx.request", _fail)
 
     result = runner.invoke(app, ["health", "--server", "http://localhost:9999"])
     assert result.exit_code == 1

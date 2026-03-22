@@ -17,26 +17,7 @@ export interface SessionStats {
   totalDetections: number;
 }
 
-export function fpsColor(fps: number): string {
-  if (fps >= 20) return "text-terminal-green";
-  if (fps >= 10) return "text-terminal-amber";
-  return "text-red-400";
-}
-
-export function latencyColor(ms: number): string {
-  if (ms <= 50) return "text-terminal-green";
-  if (ms <= 150) return "text-terminal-amber";
-  return "text-red-400";
-}
-
-export function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${Math.floor(seconds)}s`;
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  if (m < 60) return `${m}m ${s}s`;
-  const h = Math.floor(m / 60);
-  return `${h}h ${m % 60}m`;
-}
+export { fpsColor, latencyColor, formatDuration } from "@/lib/format-utils";
 
 export function computeStats(history: DataPoint[]): SessionStats {
   if (history.length === 0) {

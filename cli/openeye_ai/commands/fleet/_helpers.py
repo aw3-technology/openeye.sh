@@ -6,14 +6,12 @@ import os
 
 import typer
 from rich import print as rprint
-from rich.console import Console
+
+from openeye_ai._cli_helpers import FLEET_URL as _BASE_URL, err_console
 
 fleet_app = typer.Typer(help="Fleet & device management for edge AI.")
 
-_BASE_URL = os.environ.get("OPENEYE_FLEET_URL", "http://localhost:8001")
 _TOKEN = os.environ.get("OPENEYE_TOKEN", "")
-
-err_console = Console(stderr=True)
 
 
 def _headers() -> dict:
@@ -32,7 +30,12 @@ def _ensure_token() -> None:
         raise typer.Exit(code=1)
 
 
-def _request(method: str, path: str, data: dict | None = None) -> dict:
+def _request(
+    method: str,
+    path: str,
+    data: dict | None = None,
+    params: dict | None = None,
+) -> dict:
     import httpx
 
     _ensure_token()
@@ -42,6 +45,7 @@ def _request(method: str, path: str, data: dict | None = None) -> dict:
             f"{_BASE_URL}{path}",
             headers=_headers(),
             json=data if data is not None else (None if method == "GET" else {}),
+            params=params,
             timeout=30,
         )
         if r.status_code == 204:
@@ -64,8 +68,8 @@ def _request(method: str, path: str, data: dict | None = None) -> dict:
         raise typer.Exit(code=1)
 
 
-def _get(path: str) -> dict:
-    return _request("GET", path)
+def _get(path: str, params: dict | None = None) -> dict:
+    return _request("GET", path, params=params)
 
 
 def _post(path: str, data: dict | None = None) -> dict:
