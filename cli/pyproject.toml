@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "openeye-sh"
-version = "0.1.0"
+version = "0.2.0"
 description = "Ollama for vision AI models — pull, run, and serve computer-vision models from your terminal."
 readme = "README.md"
 license = "MIT"
