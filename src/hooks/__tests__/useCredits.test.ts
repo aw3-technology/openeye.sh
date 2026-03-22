@@ -17,15 +17,17 @@ vi.mock("@/lib/utils", () => ({
   toastMutationError: vi.fn(),
 }));
 
-const mockCredApi = {
-  getBalance: vi.fn(),
-  deduct: vi.fn(),
-  issue: vi.fn(),
-  createCheckout: vi.fn(),
-  getPricingTiers: vi.fn(),
-  getTransactions: vi.fn(),
-  syncUser: vi.fn(),
-};
+const { mockCredApi } = vi.hoisted(() => ({
+  mockCredApi: {
+    getBalance: vi.fn(),
+    deduct: vi.fn(),
+    issue: vi.fn(),
+    createCheckout: vi.fn(),
+    getPricingTiers: vi.fn(),
+    getTransactions: vi.fn(),
+    syncUser: vi.fn(),
+  },
+}));
 
 vi.mock("@/lib/cred-api", () => ({
   credApi: mockCredApi,

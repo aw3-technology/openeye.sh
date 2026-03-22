@@ -8,6 +8,8 @@ import { FileDropzone } from "@/components/dashboard/FileDropzone";
 import { DetectionCanvas } from "@/components/dashboard/DetectionCanvas";
 import { InsufficientCreditsDialog } from "@/components/dashboard/InsufficientCreditsDialog";
 import { MetricCard } from "@/components/dashboard/MetricCard";
+import { DetectionList } from "@/components/dashboard/inference/DetectionList";
+import { InferenceResultsSidebar } from "@/components/dashboard/inference/InferenceResultsSidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +20,6 @@ import {
   Copy,
   Cpu,
   Eye,
-  Gauge,
   Hash,
   ImagePlus,
   Loader2,
@@ -29,7 +30,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { PredictionResult } from "@/types/openeye";
-import { latencyColor } from "@/lib/format-utils";
 
 export default function Inference() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -299,185 +299,11 @@ export default function Inference() {
           {/* Detection Canvas */}
           <div className="lg:col-span-2 space-y-4">
             <DetectionCanvas objects={result.objects} imageUrl={imageUrl} />
-
-            {/* Detection List */}
-            <Card className="border-foreground/10 bg-card/50">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Eye className="h-4 w-4 text-terminal-green" />
-                    <CardTitle className="text-sm">Detections</CardTitle>
-                  </div>
-                  {result.objects.length > 0 && (
-                    <Badge variant="outline" className="text-[10px] font-mono">
-                      {result.objects.length} detected
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {result.objects.length === 0 ? (
-                  <p className="text-sm text-muted-foreground font-mono py-4 text-center">
-                    No objects detected.
-                  </p>
-                ) : (
-                  <div className="space-y-1 max-h-[300px] overflow-y-auto pr-1">
-                    {result.objects.map((obj, i) => {
-                      const isPerson = obj.label.toLowerCase() === "person";
-                      const isHazard =
-                        obj.label.toLowerCase().includes("knife") || obj.confidence < 0.5;
-                      const confidence = obj.confidence * 100;
-
-                      return (
-                        <div
-                          key={`${obj.label}-${i}`}
-                          className={`flex items-center justify-between font-mono text-xs py-1.5 px-2 rounded-md ${
-                            isHazard
-                              ? "bg-terminal-amber/5 border border-terminal-amber/10"
-                              : isPerson
-                                ? "bg-purple-500/5 border border-purple-500/10"
-                                : "bg-foreground/5 border border-foreground/5"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                isHazard
-                                  ? "bg-terminal-amber"
-                                  : isPerson
-                                    ? "bg-purple-400"
-                                    : "bg-terminal-green"
-                              }`}
-                            />
-                            <span
-                              className={
-                                isHazard
-                                  ? "text-terminal-amber"
-                                  : isPerson
-                                    ? "text-purple-400"
-                                    : ""
-                              }
-                            >
-                              {obj.label}
-                            </span>
-                            {isHazard && (
-                              <span className="text-[9px] bg-terminal-amber/20 text-terminal-amber px-1 py-0.5 rounded uppercase">
-                                hazard
-                              </span>
-                            )}
-                            {isPerson && (
-                              <span className="text-[9px] bg-purple-500/20 text-purple-400 px-1 py-0.5 rounded">
-                                PERSON
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 h-1.5 bg-foreground/10 rounded-full overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${
-                                  confidence > 80
-                                    ? "bg-terminal-green"
-                                    : confidence > 50
-                                      ? "bg-terminal-amber"
-                                      : "bg-red-400"
-                                }`}
-                                style={{ width: `${confidence}%` }}
-                              />
-                            </div>
-                            <span className="tabular-nums text-muted-foreground w-12 text-right">
-                              {confidence.toFixed(1)}%
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <DetectionList objects={result.objects} />
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-4">
-            {/* Summary Card */}
-            <Card className="border-foreground/10 bg-card/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <Cpu className="h-3.5 w-3.5 text-blue-400" />
-                  Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Model</span>
-                  <span className="font-mono">{result.model}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Task</span>
-                  <Badge variant="outline" className="text-[10px] font-mono">
-                    {result.task}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Objects</span>
-                  <span className="font-mono tabular-nums font-semibold">
-                    {result.objects.length}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Inference</span>
-                  <span className={`font-mono tabular-nums font-semibold ${latencyColor(result.inference_ms)}`}>
-                    {result.inference_ms.toFixed(1)}ms
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Resolution</span>
-                  <span className="font-mono tabular-nums">
-                    {result.image.width}&times;{result.image.height}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Timestamp</span>
-                  <span className="font-mono tabular-nums text-[10px]">
-                    {new Date(result.timestamp).toLocaleTimeString()}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Object Distribution */}
-            {result.objects.length > 0 && <ObjectDistribution objects={result.objects} />}
-
-            {/* Bounding Box Details */}
-            {result.objects.length > 0 && (
-              <Card className="border-foreground/10 bg-card/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <ImagePlus className="h-3.5 w-3.5 text-muted-foreground" />
-                    Bounding Boxes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1">
-                    {result.objects.map((obj, i) => (
-                      <div
-                        key={`bbox-${obj.label}-${i}`}
-                        className="flex items-center justify-between font-mono text-[10px] py-1 px-2 rounded bg-foreground/5"
-                      >
-                        <span className="text-muted-foreground truncate max-w-[80px]">
-                          {obj.label}
-                        </span>
-                        <span className="tabular-nums text-muted-foreground">
-                          [{obj.bbox.x.toFixed(2)}, {obj.bbox.y.toFixed(2)}, {obj.bbox.w.toFixed(2)},{" "}
-                          {obj.bbox.h.toFixed(2)}]
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          <InferenceResultsSidebar result={result} />
         </div>
       )}
 
@@ -501,54 +327,5 @@ export default function Inference() {
         </Card>
       )}
     </div>
-  );
-}
-
-/* ─── Object Distribution ────────────────────────────────────────── */
-
-function ObjectDistribution({ objects }: { objects: PredictionResult["objects"] }) {
-  const labelCounts: Record<string, { count: number; avgConf: number }> = {};
-  objects.forEach((o) => {
-    if (!labelCounts[o.label]) labelCounts[o.label] = { count: 0, avgConf: 0 };
-    labelCounts[o.label].count += 1;
-    labelCounts[o.label].avgConf += o.confidence;
-  });
-  Object.values(labelCounts).forEach((v) => {
-    v.avgConf /= v.count;
-  });
-  const sorted = Object.entries(labelCounts).sort((a, b) => b[1].count - a[1].count);
-
-  return (
-    <Card className="border-foreground/10 bg-card/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Gauge className="h-3.5 w-3.5 text-green-400" />
-          Distribution
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {sorted.map(([label, { count, avgConf }]) => {
-            const pct = Math.round((count / objects.length) * 100);
-            return (
-              <div key={label} className="space-y-1">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="truncate max-w-[120px]">{label}</span>
-                  <span className="text-muted-foreground tabular-nums">
-                    {count} &middot; {(avgConf * 100).toFixed(0)}%
-                  </span>
-                </div>
-                <div className="h-1.5 bg-foreground/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-primary/70 transition-all"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
   );
 }
