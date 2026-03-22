@@ -19,6 +19,7 @@ runner = CliRunner()
 
 # Module path shorthand for patching
 _W = "openeye_ai.commands.inference.watch"
+_WH = "openeye_ai.commands.inference.watch_helpers"
 
 
 class FakeCamera:
@@ -73,9 +74,9 @@ def watch_env():
     cam = FakeCamera(3)
 
     with (
-        patch(f"{_W}._load_adapters", return_value=adapters),
-        patch(f"{_W}._init_safety_guardian", return_value=(None, None, None, None)),
-        patch(f"{_W}._open_input_source", return_value=(cam, "camera 0")),
+        patch(f"{_W}.load_adapters", return_value=adapters),
+        patch(f"{_W}.init_safety_guardian", return_value=(None, None, None, None)),
+        patch(f"{_W}.open_input_source", return_value=(cam, "camera 0")),
         patch(f"{_W}.time.sleep"),
         patch("rich.live.Live", NoOpLive),
     ):
@@ -108,9 +109,9 @@ class TestStory30VideoInput:
             patch("openeye_ai.utils.camera.VideoPlayer", return_value=mock_vp) as vp_cls,
             patch("openeye_ai.utils.camera.Camera") as cam_cls,
         ):
-            from openeye_ai.commands.inference.watch import _open_input_source
+            from openeye_ai.commands.inference.watch_helpers import open_input_source
 
-            src, label = _open_input_source(0, "/tmp/demo.mp4")
+            src, label = open_input_source(0, "/tmp/demo.mp4")
 
         vp_cls.assert_called_once_with("/tmp/demo.mp4")
         cam_cls.assert_not_called()
@@ -127,9 +128,9 @@ class TestStory30VideoInput:
             ),
             patch("openeye_ai.utils.camera.Camera", return_value=mock_cam),
         ):
-            from openeye_ai.commands.inference.watch import _open_input_source
+            from openeye_ai.commands.inference.watch_helpers import open_input_source
 
-            src, label = _open_input_source(0, "/tmp/missing.mp4")
+            src, label = open_input_source(0, "/tmp/missing.mp4")
 
         assert src is mock_cam
         assert "camera" in label
@@ -144,7 +145,7 @@ class TestStory31MultiModel:
             "yolov8": StubAdapter(),
             "depth-anything": StubAdapter(detections=[], inference_ms=8.0),
         }
-        with patch(f"{_W}._load_adapters", return_value=adapters):
+        with patch(f"{_W}.load_adapters", return_value=adapters):
             result = runner.invoke(app, ["watch", "-m", "yolov8,depth-anything"])
         assert result.exit_code == 0
 
@@ -239,9 +240,9 @@ class TestStory36ExternalCamera:
         """Passing -c 1 should open Camera(1)."""
         mock_cam = MagicMock()
         with patch("openeye_ai.utils.camera.Camera", return_value=mock_cam) as cam_cls:
-            from openeye_ai.commands.inference.watch import _open_input_source
+            from openeye_ai.commands.inference.watch_helpers import open_input_source
 
-            _open_input_source(1, None)
+            open_input_source(1, None)
 
         cam_cls.assert_called_once_with(1)
 
@@ -267,11 +268,11 @@ class TestStory37DemoFallback:
                 side_effect=RuntimeError("no cam"),
             ),
             patch("openeye_ai.utils.camera.VideoPlayer", return_value=mock_vp),
-            patch(f"{_W}._find_demo_video", return_value=demo_mp4),
+            patch(f"{_WH}.find_demo_video", return_value=demo_mp4),
         ):
-            from openeye_ai.commands.inference.watch import _open_input_source
+            from openeye_ai.commands.inference.watch_helpers import open_input_source
 
-            src, label = _open_input_source(0, None)
+            src, label = open_input_source(0, None)
 
         assert src is mock_vp
         assert "demo" in label
@@ -285,12 +286,12 @@ class TestStory37DemoFallback:
                 "openeye_ai.utils.camera.Camera",
                 side_effect=RuntimeError("no cam"),
             ),
-            patch(f"{_W}._find_demo_video", return_value=None),
+            patch(f"{_WH}.find_demo_video", return_value=None),
         ):
-            from openeye_ai.commands.inference.watch import _open_input_source
+            from openeye_ai.commands.inference.watch_helpers import open_input_source
 
             with pytest.raises(ClickExit):
-                _open_input_source(0, None)
+                open_input_source(0, None)
 
     def test_video_flag_fallback_on_camera_fail(self):
         """When camera fails but --video is given, use that video."""
@@ -302,9 +303,9 @@ class TestStory37DemoFallback:
             ),
             patch("openeye_ai.utils.camera.VideoPlayer", return_value=mock_vp),
         ):
-            from openeye_ai.commands.inference.watch import _open_input_source
+            from openeye_ai.commands.inference.watch_helpers import open_input_source
 
-            src, label = _open_input_source(0, "/tmp/fallback.mp4")
+            src, label = open_input_source(0, "/tmp/fallback.mp4")
 
         assert src is mock_vp
         assert "video" in label
@@ -313,19 +314,19 @@ class TestStory37DemoFallback:
         """_find_demo_video finds ~/.openeye/demo.mp4."""
         demo = tmp_path / "demo.mp4"
         demo.touch()
-        with patch(f"{_W}.OPENEYE_HOME", tmp_path):
-            from openeye_ai.commands.inference.watch import _find_demo_video
+        with patch(f"{_WH}.OPENEYE_HOME", tmp_path):
+            from openeye_ai.commands.inference.watch_helpers import find_demo_video
 
-            result = _find_demo_video()
+            result = find_demo_video()
 
         assert result == demo
 
     def test_find_demo_video_returns_none(self, tmp_path):
         """_find_demo_video returns None when no demo exists."""
-        with patch(f"{_W}.OPENEYE_HOME", tmp_path):
-            from openeye_ai.commands.inference.watch import _find_demo_video
+        with patch(f"{_WH}.OPENEYE_HOME", tmp_path):
+            from openeye_ai.commands.inference.watch_helpers import find_demo_video
 
-            result = _find_demo_video()
+            result = find_demo_video()
 
         assert result is None
 
@@ -337,8 +338,8 @@ class TestEdgeCases:
     def test_model_not_downloaded(self):
         """Model not downloaded should exit 1 with helpful message."""
         with (
-            patch(f"{_W}.get_model_info", return_value={"name": "YOLOv8"}),
-            patch(f"{_W}.is_downloaded", return_value=False),
+            patch(f"{_WH}.get_model_info", return_value={"name": "YOLOv8"}),
+            patch(f"{_WH}.is_downloaded", return_value=False),
         ):
             result = runner.invoke(app, ["watch"])
         assert result.exit_code == 1
@@ -346,7 +347,7 @@ class TestEdgeCases:
 
     def test_unknown_model(self):
         """Unknown model key should exit 1."""
-        with patch(f"{_W}.get_model_info", side_effect=KeyError("'nope' not found")):
+        with patch(f"{_WH}.get_model_info", side_effect=KeyError("'nope' not found")):
             result = runner.invoke(app, ["watch", "-m", "nope"])
         assert result.exit_code == 1
 
@@ -362,9 +363,9 @@ class TestEdgeCases:
 
         adapters = {"yolov8": StubAdapter()}
         with (
-            patch(f"{_W}._load_adapters", return_value=adapters),
-            patch(f"{_W}._init_safety_guardian", return_value=(None, None, None, None)),
-            patch(f"{_W}._open_input_source", return_value=(DroppingCamera(), "camera 0")),
+            patch(f"{_W}.load_adapters", return_value=adapters),
+            patch(f"{_W}.init_safety_guardian", return_value=(None, None, None, None)),
+            patch(f"{_W}.open_input_source", return_value=(DroppingCamera(), "camera 0")),
             patch(f"{_W}.time.sleep"),
             patch("rich.live.Live", NoOpLive),
         ):

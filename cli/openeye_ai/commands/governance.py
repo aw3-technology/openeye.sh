@@ -10,6 +10,8 @@ from rich import print as rprint
 from rich.console import Console
 from rich.table import Table
 
+from openeye_ai.commands.governance_client import GovernanceClient
+
 # Ensure backend/src is importable
 _BACKEND_SRC = str(Path(__file__).resolve().parents[3] / "backend" / "src")
 if _BACKEND_SRC not in sys.path:
@@ -35,15 +37,7 @@ def status(
 ):
     """Show current governance status."""
     if server:
-        import httpx
-        try:
-            r = httpx.get(f"{server}/governance/status", timeout=5)
-            r.raise_for_status()
-            data = r.json()
-            _print_status(data)
-        except Exception as e:
-            rprint(f"[red]Error:[/red] {e}")
-            raise typer.Exit(1)
+        _print_status(GovernanceClient(server).get_status())
     else:
         rprint("[dim]No server specified. Showing local engine status.[/dim]")
         engine = _get_engine()
@@ -104,14 +98,8 @@ def enable(
 ):
     """Enable a governance policy."""
     if server:
-        import httpx
-        try:
-            r = httpx.post(f"{server}/governance/policies/{name}/enable", timeout=5)
-            r.raise_for_status()
-            rprint(f"[green]Enabled policy:[/green] {name}")
-        except Exception as e:
-            rprint(f"[red]Error:[/red] {e}")
-            raise typer.Exit(1)
+        GovernanceClient(server).enable_policy(name)
+        rprint(f"[green]Enabled policy:[/green] {name}")
     else:
         engine = _get_engine()
         if engine.enable_policy(name):
@@ -128,14 +116,8 @@ def disable(
 ):
     """Disable a governance policy."""
     if server:
-        import httpx
-        try:
-            r = httpx.post(f"{server}/governance/policies/{name}/disable", timeout=5)
-            r.raise_for_status()
-            rprint(f"[yellow]Disabled policy:[/yellow] {name}")
-        except Exception as e:
-            rprint(f"[red]Error:[/red] {e}")
-            raise typer.Exit(1)
+        GovernanceClient(server).disable_policy(name)
+        rprint(f"[yellow]Disabled policy:[/yellow] {name}")
     else:
         engine = _get_engine()
         if engine.disable_policy(name):
@@ -171,31 +153,14 @@ def load(
 ):
     """Load a preset or custom YAML governance config."""
     if server:
-        # If it's a file path, read and send as YAML config
+        client = GovernanceClient(server)
         path = Path(target)
         if path.is_file():
-            import httpx
-            yaml_content = path.read_text()
-            try:
-                r = httpx.put(
-                    f"{server}/governance/config",
-                    json={"yaml": yaml_content},
-                    timeout=5,
-                )
-                r.raise_for_status()
-                rprint(f"[green]Loaded config from:[/green] {target}")
-            except Exception as e:
-                rprint(f"[red]Error:[/red] {e}")
-                raise typer.Exit(1)
+            client.load_config_yaml(path.read_text())
+            rprint(f"[green]Loaded config from:[/green] {target}")
         else:
-            import httpx
-            try:
-                r = httpx.post(f"{server}/governance/presets/{target}/load", timeout=5)
-                r.raise_for_status()
-                rprint(f"[green]Loaded preset:[/green] {target}")
-            except Exception as e:
-                rprint(f"[red]Error:[/red] {e}")
-                raise typer.Exit(1)
+            client.load_preset(target)
+            rprint(f"[green]Loaded preset:[/green] {target}")
     else:
         # Local validation
         path = Path(target)
@@ -268,14 +233,7 @@ def audit(
 ):
     """Show recent audit trail."""
     if server:
-        import httpx
-        try:
-            r = httpx.get(f"{server}/governance/audit", params={"limit": limit}, timeout=5)
-            r.raise_for_status()
-            entries = r.json()
-        except Exception as e:
-            rprint(f"[red]Error:[/red] {e}")
-            raise typer.Exit(1)
+        entries = GovernanceClient(server).get_audit(limit=limit)
     else:
         engine = _get_engine()
         entries = [e.model_dump(mode="json") for e in engine.audit.get_entries(limit=limit)]
@@ -402,14 +360,7 @@ def violations(
 ):
     """Show governance violations (filtered from audit trail)."""
     if server:
-        import httpx
-        try:
-            r = httpx.get(f"{server}/governance/violations", params={"limit": limit}, timeout=5)
-            r.raise_for_status()
-            entries = r.json()
-        except Exception as e:
-            rprint(f"[red]Error:[/red] {e}")
-            raise typer.Exit(1)
+        entries = GovernanceClient(server).get_violations(limit=limit)
     else:
         engine = _get_engine()
         entries = [e.model_dump(mode="json") for e in engine.audit.get_violations(limit=limit)]

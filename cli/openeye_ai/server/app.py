@@ -14,6 +14,7 @@ from openeye_ai.server.queue import InferenceQueue
 from openeye_ai.server.routes.rest import router as rest_router
 from openeye_ai.server.routes.v1 import router as v1_router
 from openeye_ai.server.routes.websockets import router as ws_router
+from openeye_ai.server.routes.ws_vlm import router as ws_vlm_router
 from openeye_ai.server.state import ServerState
 
 logger = logging.getLogger(__name__)
@@ -63,6 +64,7 @@ def create_app(
     app.include_router(rest_router)
     app.include_router(v1_router)
     app.include_router(ws_router)
+    app.include_router(ws_vlm_router)
 
     # Mount MLOps router
     from openeye_ai.mlops.api import router as mlops_router

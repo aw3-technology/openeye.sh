@@ -262,3 +262,52 @@ def memory_store(tmp_path):
     from openeye_ai.memory.store import ObservationMemoryStore
 
     return ObservationMemoryStore(path=tmp_path / "obs.jsonl")
+
+
+# ── MLOps module test fixtures ────────────────────────────────────────
+
+
+@pytest.fixture(autouse=True)
+def _isolate_mlops(tmp_openeye_home, monkeypatch):
+    """Redirect all MLOps YAML paths to a temp dir so tests don't touch real state."""
+    home = tmp_openeye_home
+    monkeypatch.setattr("openeye_ai.mlops.model_registry._ENTERPRISE_REGISTRY_PATH", home / "registry.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.model_registry.MODELS_DIR", home / "models")
+    monkeypatch.setattr("openeye_ai.mlops.lifecycle._PROMOTIONS_PATH", home / "promotions.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.ab_testing._AB_TESTS_PATH", home / "ab_tests.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.shadow_mode._SHADOW_PATH", home / "shadow_deployments.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.retraining._PIPELINES_PATH", home / "retraining_pipelines.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.retraining._RUNS_PATH", home / "retraining_runs.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.batch_inference._BATCH_JOBS_PATH", home / "batch_jobs.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.feedback._ANNOTATIONS_PATH", home / "annotations.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.feedback._BATCHES_PATH", home / "feedback_batches.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.validation._TESTS_PATH", home / "validation_tests.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.validation._RUNS_PATH", home / "validation_runs.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.lineage._LINEAGE_PATH", home / "model_lineage.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.export._EXPORTS_PATH", home / "model_exports.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.benchmark_matrix._BENCHMARKS_PATH", home / "benchmark_results.yaml")
+
+
+@pytest.fixture()
+def model_file(tmp_path):
+    """Create a fake .pt model file."""
+    p = tmp_path / "my-model.pt"
+    p.write_bytes(b"\x00" * 2048)
+    return p
+
+
+@pytest.fixture()
+def _seed_registry(tmp_openeye_home, model_file):
+    """Upload a model into the enterprise registry for tests that need one."""
+    from openeye_ai.mlops.model_registry import upload_and_register
+    from openeye_ai.mlops.schemas import ModelFormat, ModelUploadRequest
+
+    upload_and_register(
+        ModelUploadRequest(
+            name="Test Model",
+            key="test-model",
+            format=ModelFormat.PYTORCH,
+            task="detection",
+            file_path=str(model_file),
+        )
+    )
