@@ -92,25 +92,28 @@ let mockSingleResult: { data: any; error: any } = { data: fakeDeviceRow, error: 
 let mockListResult: { data: any; error: any } = { data: [fakeDeviceRow], error: null };
 let mockCountResult: { count: number } = { count: 3 };
 
-const chainMock = () => {
-  const mock: any = {
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    order: vi.fn().mockImplementation(function (this: any) {
-      Object.assign(this, { then: (fn: any) => Promise.resolve(mockListResult).then(fn) });
-      return this;
-    }),
-    limit: vi.fn().mockReturnThis(),
-    single: vi.fn().mockImplementation(() => Promise.resolve(mockSingleResult)),
-    then: undefined as any,
-  };
+function chainMock() {
+  const mock: Record<string, any> = {};
+
+  // Every chainable method returns the mock itself
+  for (const method of ["select", "insert", "update", "delete", "eq", "in", "limit"]) {
+    mock[method] = vi.fn(() => mock);
+  }
+
+  // order() makes the chain thenable (resolves with list result)
+  mock.order = vi.fn(() => {
+    mock.then = (fn: any) => Promise.resolve(mockListResult).then(fn);
+    return mock;
+  });
+
+  // single() resolves with single result
+  mock.single = vi.fn(() => Promise.resolve(mockSingleResult));
+
+  // Default thenable for list queries
   mock.then = (resolve: any, reject: any) => Promise.resolve(mockListResult).then(resolve, reject);
+
   return mock;
-};
+}
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
@@ -123,11 +126,14 @@ vi.mock("@/integrations/supabase/client", () => ({
       const mock = chainMock();
       // For count queries (head: true), return mock count
       const origSelect = mock.select;
-      mock.select = vi.fn().mockImplementation((...args: any[]) => {
+      mock.select = vi.fn((...args: any[]) => {
         if (args[1]?.head) {
-          return { ...mock, then: (fn: any) => Promise.resolve(mockCountResult).then(fn) };
+          const countMock = chainMock();
+          countMock.then = (fn: any) => Promise.resolve(mockCountResult).then(fn);
+          return countMock;
         }
-        return origSelect(...args);
+        origSelect(...args);
+        return mock;
       });
       return mock;
     }),
