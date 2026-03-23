@@ -1,5 +1,10 @@
 import { useMemo } from "react";
 import { useOpenEyeStream } from "@/hooks/useOpenEyeStream";
+import {
+  PERSON_DANGER_THRESHOLD,
+  PERSON_CAUTION_THRESHOLD,
+  LOW_CONFIDENCE_THRESHOLD,
+} from "@/lib/safety-thresholds";
 
 export function MetricsBar() {
   const { metrics, latestResult } = useOpenEyeStream();
@@ -7,12 +12,12 @@ export function MetricsBar() {
   const overallSafety = useMemo(() => {
     if (!latestResult) return "safe";
     for (const obj of latestResult.objects) {
-      if (obj.label.toLowerCase() === "person" && obj.bbox.h > 0.6) return "danger";
+      if (obj.label.toLowerCase() === "person" && obj.bbox.h > PERSON_DANGER_THRESHOLD) return "danger";
     }
     for (const obj of latestResult.objects) {
-      if (obj.label.toLowerCase() === "person" && obj.bbox.h > 0.3) return "caution";
+      if (obj.label.toLowerCase() === "person" && obj.bbox.h > PERSON_CAUTION_THRESHOLD) return "caution";
     }
-    if (latestResult.objects.some((o) => o.label.toLowerCase().includes("knife") || o.confidence < 0.5))
+    if (latestResult.objects.some((o) => o.label.toLowerCase().includes("knife") || o.confidence < LOW_CONFIDENCE_THRESHOLD))
       return "caution";
     return "safe";
   }, [latestResult]);
