@@ -1,5 +1,5 @@
 # ---- Builder ----
-FROM python:3.13-slim AS builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /build
 
@@ -17,12 +17,12 @@ RUN pip install --no-cache-dir ".[yolo]"
 RUN python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')"
 
 # ---- Runtime ----
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
 # Copy installed packages from builder
-COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin/openeye /usr/local/bin/openeye
 COPY --from=builder /build/openeye_ai /app/openeye_ai
 

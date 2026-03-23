@@ -40,6 +40,8 @@ dist/
 # Python backend
 backend/.venv/
 .env
+.env.*
+!.env.example
 backend/.env
 backend/config/memory/
 backend/dump/

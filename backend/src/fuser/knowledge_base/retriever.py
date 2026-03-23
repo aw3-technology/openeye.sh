@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -20,7 +21,7 @@ class KnowledgeBase:
         self,
         knowledge_base_name: str = "demo",
         knowledge_base_root: Optional[str | Path] = None,
-        base_url: str = "http://localhost:8100",
+        base_url: str = os.environ.get("EMBEDDING_SERVICE_URL", "http://localhost:8100"),
         retriever_type: str = "faiss",
         embedding_type: str = "http",
         **kwargs,

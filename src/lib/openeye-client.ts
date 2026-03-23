@@ -1,4 +1,4 @@
-import type { HealthResponse, PredictionResult, RuntimeConfig } from "@/types/openeye";
+import type { HealthResponse, PerceptionFrame, PredictionResult, RuntimeConfig } from "@/types/openeye";
 import { BaseApiClient } from "./base-api-client";
 import { isCloudDeployment } from "./deployment-env";
 
@@ -59,9 +59,33 @@ export class OpenEyeClient extends BaseApiClient {
     });
   }
 
+  async vlmAnalyze(file: File, prompt?: string): Promise<VLMAnalyzeResult> {
+    const form = new FormData();
+    form.append("file", file);
+    const qs = prompt ? `?prompt=${encodeURIComponent(prompt)}` : "";
+    return this.request(`/vlm/analyze${qs}`, { method: "POST", body: form }, 35_000);
+  }
+
+  async perception(file: File): Promise<PerceptionFrame | PredictionResult> {
+    const form = new FormData();
+    form.append("file", file);
+    return this.request("/perception", { method: "POST", body: form }, 15_000);
+  }
+
   async nebiusStats(): Promise<NebiusStats> {
     return this.request("/nebius/stats", undefined, 5000);
   }
+}
+
+export interface VLMAnalyzeResult {
+  raw: string;
+  inference_ms: number;
+  bugs?: Array<{
+    type: string;
+    description: string;
+    severity: "high" | "medium" | "low";
+    region?: { x: number; y: number; width: number; height: number };
+  }>;
 }
 
 export interface NebiusStats {

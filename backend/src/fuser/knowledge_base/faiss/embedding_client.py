@@ -1,5 +1,6 @@
 import base64
 import logging
+import os
 from typing import Optional
 
 import aiohttp
@@ -17,7 +18,7 @@ class EmbeddingClient(BaseEmbeddingClient):
     exposes a compatible API.
     """
 
-    def __init__(self, base_url: str = "http://localhost:8100", timeout: float = 30.0):
+    def __init__(self, base_url: str = os.environ.get("EMBEDDING_SERVICE_URL", "http://localhost:8100"), timeout: float = 30.0):
         """
         Initialize the embedding client.
 

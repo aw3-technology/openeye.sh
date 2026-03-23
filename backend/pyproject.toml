@@ -3,7 +3,7 @@ name = "openeye-perception"
 version = "0.1.0"
 description = "OpenEye Perception Engine - OM1-derived vision/VLM pipeline"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "ultralytics>=8.3",
     "json5>=0.10.0",
