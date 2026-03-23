@@ -3,6 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  PERSON_DANGER_THRESHOLD,
+  PERSON_CAUTION_THRESHOLD,
+  LOW_CONFIDENCE_THRESHOLD,
+} from "@/lib/safety-thresholds";
 
 interface SafetyLogEntry {
   id: number;
@@ -34,19 +39,19 @@ export function SafetyLog({ isStreaming, objects }: {
     const ts = new Date().toLocaleTimeString("en-US", { hour12: false });
     const persons = objects.filter((o) => o.label.toLowerCase() === "person");
     const hazards = objects.filter(
-      (o) => o.label.toLowerCase().includes("knife") || o.confidence < 0.5,
+      (o) => o.label.toLowerCase().includes("knife") || o.confidence < LOW_CONFIDENCE_THRESHOLD,
     );
 
     // Person proximity alerts
     for (const p of persons) {
-      if (p.bbox.h > 0.6) {
+      if (p.bbox.h > PERSON_DANGER_THRESHOLD) {
         entries.push({
           id: ++safetyLogCounter,
           message: "Person in DANGER zone — too close",
           level: "danger",
           timestamp: ts,
         });
-      } else if (p.bbox.h > 0.3) {
+      } else if (p.bbox.h > PERSON_CAUTION_THRESHOLD) {
         entries.push({
           id: ++safetyLogCounter,
           message: "Person in CAUTION zone",
