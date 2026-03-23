@@ -1,16 +1,16 @@
 import asyncio
 import json
 import logging
-import os
 import time
 from typing import Dict, List, Optional
 
-import cv2
 from pydantic import Field
 from ultralytics import YOLO
 
 from inputs.base import Message, SensorConfig
 from inputs.base.loop import FuserInput
+from inputs.plugins.camera import CameraManager, RESOLUTIONS, check_webcam, set_best_resolution
+from inputs.plugins.yolo_file_logger import YOLOFileLogger
 from providers.event_bus import DetectionEvent, EventBus, EventType, PerceptionEvent
 from providers.io_provider import IOProvider
 from providers.telemetry_provider import FrameTelemetry, TelemetryProvider
@@ -37,43 +37,6 @@ class VLM_Local_YOLOConfig(SensorConfig):
     )
 
 
-RESOLUTIONS = [
-    (3840, 2160),
-    (2560, 1440),
-    (1920, 1080),
-    (1280, 720),
-    (1024, 576),
-    (800, 600),
-    (640, 480),
-]
-
-
-def set_best_resolution(cap: cv2.VideoCapture, resolutions: List[tuple]) -> tuple:
-    for width, height in resolutions:
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        time.sleep(0.1)
-        actual_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        actual_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        if actual_width == width and actual_height == height:
-            logging.info(f"Resolution set to: {width}x{height}")
-            return width, height
-    logging.info("Could not set preferred resolution. Using default.")
-    return int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-
-def check_webcam(index_to_check):
-    cap = cv2.VideoCapture(index_to_check)
-    if not cap.isOpened():
-        logging.error(f"YOLO did not find cam: {index_to_check}")
-        cap.release()
-        return 0, 0
-    width, height = set_best_resolution(cap, RESOLUTIONS)
-    logging.info(f"YOLO found cam: {index_to_check} set to {width}x{height}")
-    cap.release()
-    return width, height
-
-
 class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
     def __init__(self, config: VLM_Local_YOLOConfig):
         super().__init__(config)
@@ -98,96 +61,52 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
         self.confidence_thresholds = dict(self.config.confidence_thresholds)
         self.default_confidence = self.config.default_confidence
 
-        # File logging
+        # File logging (delegated to YOLOFileLogger)
         self.write_to_local_file = False
         if self.config.log_file:
             self.write_to_local_file = self.config.log_file
-        self.filename_current = None
-        self.max_file_size_bytes = 1024 * 1024
-        if self.write_to_local_file:
-            self.filename_current = self.update_filename()
+        self._file_logger = YOLOFileLogger(
+            enabled=self.write_to_local_file,
+        )
+        self.filename_current = self._file_logger.filename_current
+        self.max_file_size_bytes = self._file_logger.max_file_size_bytes
 
-        # Camera init
-        self.width, self.height = check_webcam(self.camera_index)
-        self.have_cam = self.width > 0
+        # Camera management (delegated to CameraManager)
+        self._camera = CameraManager(
+            camera_index=self.camera_index,
+            reconnect_attempts=self.config.reconnect_attempts,
+            reconnect_delay=self.config.reconnect_delay,
+            telemetry=self.telemetry,
+            event_bus=self.event_bus,
+        )
+        self.width = self._camera.width
+        self.height = self._camera.height
+        self.have_cam = self._camera.have_cam
         self.frame_index = 0
-        self.cam_third = int(self.width / 3) if self.width > 0 else 0
-        self.cap = None
-        self._camera_disconnected = False
-
-        if self.have_cam:
-            self._open_camera()
+        self.cam_third = self._camera.cam_third
+        self.cap = self._camera.cap
+        self._camera_disconnected = self._camera._camera_disconnected
 
     def _open_camera(self) -> bool:
         """Open the camera capture device."""
-        try:
-            self.cap = cv2.VideoCapture(self.camera_index)
-            if not self.cap.isOpened():
-                logging.error(f"Failed to open camera {self.camera_index}")
-                self.have_cam = False
-                return False
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
-            self.cam_third = int(self.width / 3)
-            self.have_cam = True
-            self._camera_disconnected = False
-            logging.info(f"Camera {self.camera_index} opened: {self.width}x{self.height}")
-            return True
-        except Exception as e:
-            logging.error(f"Error opening camera: {e}")
-            self.telemetry.record_error("camera", "open_failed", str(e))
-            self.have_cam = False
-            return False
+        result = self._camera._open_camera()
+        self._sync_camera_state()
+        return result
 
     async def _reconnect_camera(self) -> bool:
         """Attempt to reconnect to the camera with retries."""
-        max_attempts = self.config.reconnect_attempts
-        delay = self.config.reconnect_delay
+        result = await self._camera._reconnect_camera()
+        self._sync_camera_state()
+        return result
 
-        logging.warning(
-            f"Camera {self.camera_index} disconnected, attempting reconnect "
-            f"(max {max_attempts} attempts, {delay}s delay)"
-        )
-        self.event_bus.publish(
-            PerceptionEvent(
-                event_type=EventType.CAMERA_STATUS,
-                source="VLM_Local_YOLO",
-                data={"status": "disconnected", "camera_index": self.camera_index},
-            )
-        )
-
-        for attempt in range(1, max_attempts + 1):
-            await asyncio.sleep(delay)
-            logging.info(f"Reconnect attempt {attempt}/{max_attempts}...")
-
-            if self.cap is not None:
-                try:
-                    self.cap.release()
-                except Exception as exc:
-                    logging.debug("Error releasing camera during reconnect: %s", exc)
-
-            if self._open_camera():
-                self.telemetry.record_camera_reconnect()
-                self.event_bus.publish(
-                    PerceptionEvent(
-                        event_type=EventType.CAMERA_STATUS,
-                        source="VLM_Local_YOLO",
-                        data={
-                            "status": "reconnected",
-                            "camera_index": self.camera_index,
-                            "attempt": attempt,
-                        },
-                    )
-                )
-                logging.info(f"Camera reconnected on attempt {attempt}")
-                return True
-
-        logging.error(f"Failed to reconnect camera after {max_attempts} attempts")
-        self.telemetry.record_error(
-            "camera", "reconnect_failed", f"Failed after {max_attempts} attempts"
-        )
-        self._camera_disconnected = True
-        return False
+    def _sync_camera_state(self):
+        """Sync local attributes from camera manager."""
+        self.width = self._camera.width
+        self.height = self._camera.height
+        self.have_cam = self._camera.have_cam
+        self.cam_third = self._camera.cam_third
+        self.cap = self._camera.cap
+        self._camera_disconnected = self._camera._camera_disconnected
 
     def _passes_threshold(self, label: str, confidence: float) -> bool:
         """Check if a detection passes the per-class confidence threshold."""
@@ -195,11 +114,8 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
         return confidence >= threshold
 
     def update_filename(self):
-        dump_dir = "dump"
-        os.makedirs(dump_dir, exist_ok=True)
-        unix_ts = round(time.time(), 6)
-        unix_ts = str(unix_ts).replace(".", "_")
-        filename = f"{dump_dir}/yolo_{unix_ts}Z.jsonl"
+        filename = self._file_logger.update_filename()
+        self.filename_current = self._file_logger.filename_current
         return filename
 
     def get_top_detection(self, detections: List[dict]) -> tuple:
@@ -219,7 +135,8 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
             else:
                 # Already failed reconnect, wait longer before trying again
                 await asyncio.sleep(5.0)
-                self._camera_disconnected = False  # Allow retry
+                self._camera_disconnected = False
+                self._camera._camera_disconnected = False
                 return None
 
         frame_start = time.perf_counter()
@@ -229,6 +146,7 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
             logging.error(f"Exception reading frame from camera: {e}")
             self.telemetry.record_error("camera", "read_exception", str(e))
             self.have_cam = False
+            self._camera.have_cam = False
             reconnected = await self._reconnect_camera()
             if not reconnected:
                 return None
@@ -240,6 +158,7 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
         if not ret or frame is None:
             logging.warning("Failed to read frame from camera")
             self.have_cam = False
+            self._camera.have_cam = False
             reconnected = await self._reconnect_camera()
             if not reconnected:
                 return None
@@ -319,18 +238,8 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
         return detections
 
     def write_str_to_file(self, json_line: str):
-        if not isinstance(json_line, str):
-            raise ValueError("Provided json_line must be a json string.")
-        if (
-            self.filename_current is not None
-            and os.path.exists(self.filename_current)
-            and os.path.getsize(self.filename_current) > self.max_file_size_bytes
-        ):
-            self.filename_current = self.update_filename()
-        if self.filename_current is not None:
-            with open(self.filename_current, "a", encoding="utf-8") as f:
-                f.write(json_line + "\n")
-                f.flush()
+        self._file_logger.write_str_to_file(json_line)
+        self.filename_current = self._file_logger.filename_current
 
     async def _raw_to_text(self, raw_input: Optional[List]) -> Optional[Message]:
         detections = raw_input
@@ -370,10 +279,6 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
         return result
 
     def stop(self):
-        if self.cap is not None:
-            try:
-                self.cap.release()
-            except Exception as exc:
-                logging.debug("Error releasing camera: %s", exc)
-            self.cap = None
+        self._camera.stop()
+        self.cap = None
         self.have_cam = False

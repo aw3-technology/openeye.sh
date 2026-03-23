@@ -29,7 +29,7 @@ def _isolate_mlops(tmp_openeye_home, monkeypatch):
     monkeypatch.setattr("openeye_ai.mlops.shadow_mode._SHADOW_PATH", home / "shadow_deployments.yaml")
     monkeypatch.setattr("openeye_ai.mlops.retraining._PIPELINES_PATH", home / "retraining_pipelines.yaml")
     monkeypatch.setattr("openeye_ai.mlops.retraining._RUNS_PATH", home / "retraining_runs.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.batch_inference._BATCH_JOBS_PATH", home / "batch_jobs.yaml")
+    monkeypatch.setattr("openeye_ai.mlops.batch_jobs._BATCH_JOBS_PATH", home / "batch_jobs.yaml")
     monkeypatch.setattr("openeye_ai.mlops.feedback._ANNOTATIONS_PATH", home / "annotations.yaml")
     monkeypatch.setattr("openeye_ai.mlops.feedback._BATCHES_PATH", home / "feedback_batches.yaml")
 

@@ -1,12 +1,7 @@
 import asyncio
-import json
 import logging
-import os
 import time
-from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional
-
-import json5
 
 from runtime.config import (
     LifecycleHookType,
@@ -16,23 +11,17 @@ from runtime.config import (
     TransitionType,
     mode_config_to_dict,
 )
-
-
-@dataclass
-class ModeState:
-    current_mode: str
-    previous_mode: Optional[str] = None
-    mode_start_time: float = field(default_factory=time.time)
-    transition_history: List[str] = field(default_factory=list)
-    last_transition_time: float = 0.0
-    user_context: Dict = field(default_factory=dict)
+from runtime.state import ModeState, ModeStatePersistence
+from runtime.transition_evaluator import TransitionEvaluator
 
 
 class ModeManager:
     def __init__(self, config: ModeSystemConfig):
         self.config = config
         self.state = ModeState(current_mode=config.default_mode)
-        self.transition_cooldowns: Dict[str, float] = {}
+        self._persistence = ModeStatePersistence(config)
+        self._evaluator = TransitionEvaluator(config)
+        self.transition_cooldowns = self._evaluator.transition_cooldowns
         self.pending_transitions: List[TransitionRule] = []
         self._transition_callbacks: List = []
         self._main_event_loop: Optional[asyncio.AbstractEventLoop] = None
@@ -51,24 +40,10 @@ class ModeManager:
         self._create_runtime_config_file()
 
     def _get_runtime_config_path(self) -> str:
-        memory_folder_path = os.path.join(
-            os.path.dirname(__file__), "../../config", "memory"
-        )
-        if not os.path.exists(memory_folder_path):
-            os.makedirs(memory_folder_path, mode=0o755, exist_ok=True)
-        return os.path.join(memory_folder_path, ".runtime.json5")
+        return self._persistence._get_runtime_config_path()
 
     def _create_runtime_config_file(self):
-        runtime_config_path = self._get_runtime_config_path()
-        try:
-            runtime_config = mode_config_to_dict(self.config)
-            temp_file = runtime_config_path + ".tmp"
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json5.dump(runtime_config, f, indent=2)
-            os.rename(temp_file, runtime_config_path)
-            logging.debug(f"Runtime config file created/updated: {runtime_config_path}")
-        except Exception:
-            logging.exception("Error creating runtime config file")
+        self._persistence._create_runtime_config_file()
 
     def set_event_loop(self, loop: asyncio.AbstractEventLoop):
         self._main_event_loop = loop
@@ -99,113 +74,22 @@ class ModeManager:
                 logging.error(f"Error in transition callback: {e}")
 
     async def check_time_based_transitions(self) -> Optional[str]:
-        current_time = time.time()
-        mode_duration = current_time - self.state.mode_start_time
-        current_config = self.current_mode_config
-        if current_config.timeout_seconds and mode_duration >= current_config.timeout_seconds:
-            timeout_context = {
-                "mode_name": self.state.current_mode,
-                "timeout_seconds": current_config.timeout_seconds,
-                "actual_duration": mode_duration,
-                "timestamp": current_time,
-            }
-            try:
-                await current_config.execute_lifecycle_hooks(
-                    LifecycleHookType.ON_TIMEOUT, timeout_context
-                )
-            except Exception as e:
-                logging.error(f"Error executing timeout lifecycle hooks: {e}")
-            for rule in self.config.transition_rules:
-                if (
-                    rule.from_mode == self.state.current_mode or rule.from_mode == "*"
-                ) and rule.transition_type == TransitionType.TIME_BASED:
-                    if self._can_transition(rule):
-                        logging.info(f"Time-based transition triggered: {self.state.current_mode} -> {rule.to_mode}")
-                        return rule.to_mode
-        return None
+        return await self._evaluator.check_time_based_transitions(self.state)
 
     async def check_context_aware_transitions(self) -> Optional[str]:
-        matching_rules = []
-        for rule in self.config.transition_rules:
-            if (
-                rule.from_mode == self.state.current_mode or rule.from_mode == "*"
-            ) and rule.transition_type == TransitionType.CONTEXT_AWARE:
-                if self._can_transition(rule) and self._evaluate_context_conditions(rule):
-                    matching_rules.append(rule)
-        if matching_rules:
-            matching_rules.sort(key=lambda r: r.priority, reverse=True)
-            target_rule = matching_rules[0]
-            logging.info(f"Context-aware transition triggered: {self.state.current_mode} -> {target_rule.to_mode}")
-            return target_rule.to_mode
-        return None
+        return await self._evaluator.check_context_aware_transitions(self.state)
 
     def check_input_triggered_transitions(self, input_text: str) -> Optional[str]:
-        if not input_text:
-            return None
-        input_lower = input_text.lower()
-        matching_rules = []
-        for rule in self.config.transition_rules:
-            if (
-                rule.from_mode == self.state.current_mode or rule.from_mode == "*"
-            ) and rule.transition_type == TransitionType.INPUT_TRIGGERED:
-                for keyword in rule.trigger_keywords:
-                    if keyword.lower() in input_lower:
-                        if self._can_transition(rule):
-                            matching_rules.append(rule)
-                        break
-        if matching_rules:
-            matching_rules.sort(key=lambda r: r.priority, reverse=True)
-            best_rule = matching_rules[0]
-            logging.info(f"Input-triggered transition: {self.state.current_mode} -> {best_rule.to_mode}")
-            return best_rule.to_mode
-        return None
+        return self._evaluator.check_input_triggered_transitions(input_text, self.state)
 
     def _can_transition(self, rule: TransitionRule) -> bool:
-        current_time = time.time()
-        transition_key = f"{rule.from_mode}->{rule.to_mode}"
-        if transition_key in self.transition_cooldowns:
-            if current_time - self.transition_cooldowns[transition_key] < rule.cooldown_seconds:
-                return False
-        if rule.to_mode not in self.config.modes:
-            logging.warning(f"Target mode '{rule.to_mode}' not found in configuration")
-            return False
-        return True
+        return self._evaluator._can_transition(rule)
 
     def _evaluate_context_conditions(self, rule: TransitionRule) -> bool:
-        if not rule.context_conditions:
-            return True
-        user_context = self.state.user_context
-        for condition_key, condition_value in rule.context_conditions.items():
-            if not self._evaluate_single_condition(condition_key, condition_value, user_context):
-                return False
-        return True
+        return self._evaluator._evaluate_context_conditions(rule, self.state)
 
     def _evaluate_single_condition(self, key: str, expected_value, user_context: Dict) -> bool:
-        if key not in user_context:
-            return False
-        actual_value = user_context[key]
-        if isinstance(expected_value, dict):
-            if "min" in expected_value or "max" in expected_value:
-                if not isinstance(actual_value, (int, float)):
-                    return False
-                if "min" in expected_value and actual_value < expected_value["min"]:
-                    return False
-                if "max" in expected_value and actual_value > expected_value["max"]:
-                    return False
-                return True
-            elif "contains" in expected_value:
-                if not isinstance(actual_value, str):
-                    return False
-                return expected_value["contains"].lower() in actual_value.lower()
-            elif "one_of" in expected_value:
-                return actual_value in expected_value["one_of"]
-            elif "not" in expected_value:
-                return actual_value != expected_value["not"]
-        elif isinstance(expected_value, list):
-            return actual_value in expected_value
-        else:
-            return actual_value == expected_value
-        return False
+        return self._evaluator._evaluate_single_condition(key, expected_value, user_context)
 
     async def request_transition(self, target_mode: str, reason: str = "manual") -> bool:
         if not self.config.allow_manual_switching and reason == "manual":
@@ -318,62 +202,10 @@ class ModeManager:
         return None
 
     def _get_state_file_path(self) -> str:
-        memory_folder_path = os.path.join(
-            os.path.dirname(__file__), "../../config", "memory"
-        )
-        if not os.path.exists(memory_folder_path):
-            os.makedirs(memory_folder_path, mode=0o755, exist_ok=True)
-        config_name = getattr(self.config, "config_name", "default")
-        state_filename = (
-            f"{config_name}.memory.json5"
-            if config_name.startswith(".")
-            else f".{config_name}.memory.json5"
-        )
-        return os.path.join(memory_folder_path, state_filename)
+        return self._persistence._get_state_file_path()
 
     def _load_mode_state(self):
-        state_file = self._get_state_file_path()
-        try:
-            with open(state_file, "r") as f:
-                state_data = json.load(f)
-            last_active_mode = state_data.get("last_active_mode")
-            if (
-                last_active_mode
-                and last_active_mode in self.config.modes
-                and last_active_mode != self.config.default_mode
-            ):
-                logging.info(f"Restoring last active mode: {last_active_mode}")
-                self.state.current_mode = last_active_mode
-                self.state.previous_mode = state_data.get("previous_mode")
-                saved_history = state_data.get("transition_history", [])
-                if saved_history:
-                    self.state.transition_history.extend(saved_history)
-                    if len(self.state.transition_history) > 50:
-                        self.state.transition_history = self.state.transition_history[-25:]
-            else:
-                logging.info(f"Using default mode: {self.config.default_mode}")
-        except FileNotFoundError:
-            logging.debug(f"No state file found at {state_file}, using default mode")
-        except (json.JSONDecodeError, KeyError) as e:
-            logging.warning(f"Invalid state file format: {e}, using default mode")
-        except Exception as e:
-            logging.error(f"Error loading mode state: {e}, using default mode")
+        self._persistence._load_mode_state(self.state)
 
     def _save_mode_state(self):
-        if not self.config.mode_memory_enabled:
-            return
-        state_file = self._get_state_file_path()
-        try:
-            os.makedirs(os.path.dirname(state_file), exist_ok=True)
-            state_data = {
-                "last_active_mode": self.state.current_mode,
-                "previous_mode": self.state.previous_mode,
-                "timestamp": time.time(),
-                "transition_history": self.state.transition_history[-10:],
-            }
-            temp_file = state_file + ".tmp"
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(state_data, f, indent=2)
-            os.rename(temp_file, state_file)
-        except Exception as e:
-            logging.error(f"Error saving mode state: {e}")
+        self._persistence._save_mode_state(self.state)
