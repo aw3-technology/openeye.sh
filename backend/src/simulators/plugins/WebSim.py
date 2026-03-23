@@ -178,6 +178,48 @@ class WebSim(Simulator):
 
             self.sleep(0.5)
 
+    def _collect_inputs(self, earliest_time: float) -> List[dict]:
+        """Re-zero input timestamps relative to the earliest input time."""
+        rezeroed = []
+        for input_type, input_info in self.io_provider.inputs.items():
+            timestamp = 0
+            if input_type != "GovernanceEthereum" and input_info.timestamp is not None:
+                timestamp = input_info.timestamp - earliest_time
+            rezeroed.append({
+                "input_type": input_type,
+                "timestamp": timestamp,
+                "input": input_info.input,
+            })
+        return rezeroed
+
+    def _compute_latency(self) -> Dict[str, float]:
+        """Compute system latency metrics from IOProvider timestamps."""
+        fuser_start = self.io_provider.fuser_start_time or 0
+        fuser_end = self.io_provider.fuser_end_time or 0
+        llm_start = self.io_provider.llm_start_time or 0
+        llm_end = self.io_provider.llm_end_time or 0
+        return {
+            "fuse_time": (fuser_end - fuser_start) if (fuser_end and fuser_start) else 0,
+            "llm_start": (llm_start - fuser_start) if (llm_start and fuser_start) else 0,
+            "processing": (llm_end - llm_start) if (llm_end and llm_start) else 0,
+            "complete": (llm_end - fuser_start) if (llm_end and fuser_start) else 0,
+        }
+
+    def _apply_actions(self, actions: List[Action]) -> bool:
+        """Apply actions to state, return True if any state changed."""
+        updated = False
+        for action in actions:
+            if action.type == "move" and action.value != self.state.current_action:
+                self.state.current_action = action.value
+                updated = True
+            elif action.type == "speak" and action.value != self.state.last_speech:
+                self.state.last_speech = action.value
+                updated = True
+            elif action.type == "emotion" and action.value != self.state.current_emotion:
+                self.state.current_emotion = action.value
+                updated = True
+        return updated
+
     def sim(self, actions: List[Action]) -> None:
         """
         Handle simulation updates from commands.
@@ -192,71 +234,11 @@ class WebSim(Simulator):
             return
 
         try:
-            updated = False
             with self._lock:
                 earliest_time = self.get_earliest_time(self.io_provider.inputs)
-                logging.debug(f"earliest_time: {earliest_time}")
-
-                input_rezeroed = []
-                for input_type, input_info in self.io_provider.inputs.items():
-                    timestamp = 0
-                    if (
-                        input_type != "GovernanceEthereum"
-                        and input_info.timestamp is not None
-                    ):
-                        timestamp = input_info.timestamp - earliest_time
-                    input_rezeroed.append(
-                        {
-                            "input_type": input_type,
-                            "timestamp": timestamp,
-                            "input": input_info.input,
-                        }
-                    )
-
-                fuser_start_time = self.io_provider.fuser_start_time or 0
-                fuser_end_time = self.io_provider.fuser_end_time or 0
-                llm_start_time = self.io_provider.llm_start_time or 0
-                llm_end_time = self.io_provider.llm_end_time or 0
-
-                system_latency = {
-                    "fuse_time": (
-                        fuser_end_time - fuser_start_time
-                        if (fuser_end_time and fuser_start_time)
-                        else 0
-                    ),
-                    "llm_start": (
-                        llm_start_time - fuser_start_time
-                        if (llm_start_time and fuser_start_time)
-                        else 0
-                    ),
-                    "processing": (
-                        llm_end_time - llm_start_time
-                        if (llm_end_time and llm_start_time)
-                        else 0
-                    ),
-                    "complete": (
-                        llm_end_time - fuser_start_time
-                        if (llm_end_time and fuser_start_time)
-                        else 0
-                    ),
-                }
-
-                for action in actions:
-                    if action.type == "move":
-                        new_action = action.value
-                        if new_action != self.state.current_action:
-                            self.state.current_action = new_action
-                            updated = True
-                    elif action.type == "speak":
-                        new_speech = action.value
-                        if new_speech != self.state.last_speech:
-                            self.state.last_speech = new_speech
-                            updated = True
-                    elif action.type == "emotion":
-                        new_emotion = action.value
-                        if new_emotion != self.state.current_emotion:
-                            self.state.current_emotion = new_emotion
-                            updated = True
+                input_rezeroed = self._collect_inputs(earliest_time)
+                system_latency = self._compute_latency()
+                updated = self._apply_actions(actions)
 
                 self.state_dict = {
                     "current_action": self.state.current_action,

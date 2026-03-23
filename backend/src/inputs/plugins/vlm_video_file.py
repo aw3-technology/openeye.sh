@@ -8,7 +8,6 @@ live camera plugin.
 """
 
 import asyncio
-import json
 import logging
 import os
 import time
@@ -20,9 +19,8 @@ from ultralytics import YOLO
 
 from inputs.base import Message, SensorConfig
 from inputs.base.loop import FuserInput
-from providers.event_bus import DetectionEvent, EventBus
-from providers.io_provider import IOProvider
-from providers.telemetry_provider import FrameTelemetry, TelemetryProvider
+from inputs.plugins.detection_processor import DetectionProcessor
+from providers import Providers
 
 
 class VLM_VideoFileConfig(SensorConfig):
@@ -51,11 +49,21 @@ class VLM_VideoFileConfig(SensorConfig):
 class VLM_VideoFile(FuserInput[VLM_VideoFileConfig, Optional[List]]):
     def __init__(self, config: VLM_VideoFileConfig):
         super().__init__(config)
-        self.io_provider = IOProvider()
-        self.event_bus = EventBus()
-        self.telemetry = TelemetryProvider()
+        self._providers = Providers()
+        self.io_provider = self._providers.io
+        self.event_bus = self._providers.events
+        self.telemetry = self._providers.telemetry
         self.messages: list[Message] = []
         self.descriptor_for_LLM = "Eyes"
+
+        # Detection processor (shared with VLM_Local_YOLO)
+        self._detector = DetectionProcessor(
+            event_bus=self._providers.events,
+            telemetry=self._providers.telemetry,
+            confidence_thresholds=dict(self.config.confidence_thresholds),
+            default_confidence=self.config.default_confidence,
+            source_name="VLM_VideoFile",
+        )
 
         self.video_path = self.config.video_path
         if not os.path.exists(self.video_path):
@@ -77,6 +85,7 @@ class VLM_VideoFile(FuserInput[VLM_VideoFileConfig, Optional[List]]):
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.cam_third = int(self.width / 3) if self.width > 0 else 0
+        self._detector.cam_third = self.cam_third
 
         # Validate: zero-frame video with loop would spin forever
         if self.total_frames == 0 and self.config.loop:
@@ -139,16 +148,6 @@ class VLM_VideoFile(FuserInput[VLM_VideoFileConfig, Optional[List]]):
         os.makedirs("dump", exist_ok=True)
         return f"dump/video_{unix_ts}Z.jsonl"
 
-    def _passes_threshold(self, label: str, confidence: float) -> bool:
-        threshold = self.confidence_thresholds.get(label, self.default_confidence)
-        return confidence >= threshold
-
-    def get_top_detection(self, detections: List[dict]) -> tuple:
-        if not detections:
-            return None, None
-        top = max(detections, key=lambda d: d["confidence"])
-        return top["class"], top["bbox"]
-
     async def _poll(self) -> Optional[List]:
         if self._finished:
             await asyncio.sleep(1.0)
@@ -205,64 +204,42 @@ class VLM_VideoFile(FuserInput[VLM_VideoFileConfig, Optional[List]]):
 
         inference_start = time.perf_counter()
         results = self.model.predict(source=frame, save=False, stream=True, verbose=False)
-        detections = []
-        for r in results:
-            if r.boxes is not None:
-                for box in r.boxes:
-                    x1, y1, x2, y2 = map(float, box.xyxy[0])
-                    cls = int(box.cls[0])
-                    conf = float(box.conf[0])
-                    label = self.model.names[cls]
-                    if self._passes_threshold(label, conf):
-                        detections.append({
-                            "class": label,
-                            "confidence": round(conf, 4),
-                            "bbox": [round(x1), round(y1), round(x2), round(y2)],
-                        })
+        detections = self._detector.extract_detections(results, self.model.names)
         inference_ms = (time.perf_counter() - inference_start) * 1000
         total_ms = (time.perf_counter() - frame_start) * 1000
 
-        # Record telemetry
         progress = (self.frame_index / self.total_frames * 100) if self.total_frames > 0 else 0
-        self.telemetry.record_frame(
-            FrameTelemetry(
-                frame_index=self.frame_index,
-                timestamp=timestamp,
-                capture_ms=capture_ms,
-                inference_ms=inference_ms,
-                total_ms=total_ms,
-                num_detections=len(detections),
-                source=f"VLM_VideoFile({os.path.basename(self.video_path)})",
-            )
+
+        self._detector.record_telemetry(
+            frame_index=self.frame_index,
+            timestamp=timestamp,
+            capture_ms=capture_ms,
+            inference_ms=inference_ms,
+            total_ms=total_ms,
+            num_detections=len(detections),
+            source_suffix=os.path.basename(self.video_path),
         )
 
-        # Emit detection event
-        self.event_bus.publish(
-            DetectionEvent(
-                source="VLM_VideoFile",
-                timestamp=timestamp,
-                frame_index=self.frame_index,
-                detections=detections,
-                data={
-                    "video_path": self.video_path,
-                    "progress_pct": round(progress, 1),
-                    "capture_ms": round(capture_ms, 2),
-                    "inference_ms": round(inference_ms, 2),
-                },
-            )
+        self._detector.publish_detection_event(
+            timestamp=timestamp,
+            frame_index=self.frame_index,
+            detections=detections,
+            extra_data={
+                "video_path": self.video_path,
+                "progress_pct": round(progress, 1),
+                "capture_ms": round(capture_ms, 2),
+                "inference_ms": round(inference_ms, 2),
+            },
         )
 
         if self.write_to_local_file and self.filename_current:
-            try:
-                json_line = json.dumps({
-                    "frame": self.frame_index,
-                    "timestamp": timestamp,
-                    "detections": detections,
-                    "video_progress_pct": round(progress, 1),
-                })
-                self._write_str_to_file(json_line)
-            except Exception as e:
-                logging.error(f"Error saving video detections: {e}")
+            self._detector.log_detections_to_file(
+                write_fn=self._write_str_to_file,
+                frame_index=self.frame_index,
+                timestamp=timestamp,
+                detections=detections,
+                extra_fields={"video_progress_pct": round(progress, 1)},
+            )
 
         return detections
 
@@ -279,20 +256,8 @@ class VLM_VideoFile(FuserInput[VLM_VideoFileConfig, Optional[List]]):
                 f.flush()
 
     async def _raw_to_text(self, raw_input: Optional[List]) -> Optional[Message]:
-        detections = raw_input
-        if detections:
-            thing, bbox = self.get_top_detection(detections)
-            x1 = bbox[0]
-            x2 = bbox[2]
-            center_x = (x1 + x2) / 2
-            direction = "in front of you"
-            if self.cam_third > 0:
-                if center_x < self.cam_third:
-                    direction = "on your left"
-                elif center_x > 2 * self.cam_third:
-                    direction = "on your right"
-            sentence = f"You see a {thing} {direction}."
-            return Message(timestamp=time.time(), message=sentence)
+        if raw_input:
+            return self._detector.detections_to_text(raw_input)
 
     async def raw_to_text(self, raw_input: Optional[List]):
         pending_message = await self._raw_to_text(raw_input)

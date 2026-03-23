@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import time
 from typing import Dict, List, Optional
@@ -9,11 +8,10 @@ from ultralytics import YOLO
 
 from inputs.base import Message, SensorConfig
 from inputs.base.loop import FuserInput
-from inputs.plugins.camera import CameraManager, RESOLUTIONS, check_webcam, set_best_resolution
+from inputs.plugins.camera import CameraManager
+from inputs.plugins.detection_processor import DetectionProcessor
 from inputs.plugins.yolo_file_logger import YOLOFileLogger
-from providers.event_bus import DetectionEvent, EventBus, EventType, PerceptionEvent
-from providers.io_provider import IOProvider
-from providers.telemetry_provider import FrameTelemetry, TelemetryProvider
+from providers import Providers
 
 
 class VLM_Local_YOLOConfig(SensorConfig):
@@ -41,11 +39,21 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
     def __init__(self, config: VLM_Local_YOLOConfig):
         super().__init__(config)
         self.camera_index = self.config.camera_index
-        self.io_provider = IOProvider()
-        self.event_bus = EventBus()
-        self.telemetry = TelemetryProvider()
+        self._providers = Providers()
+        self.io_provider = self._providers.io
+        self.event_bus = self._providers.events
+        self.telemetry = self._providers.telemetry
         self.messages: list[Message] = []
         self.descriptor_for_LLM = "Eyes"
+
+        # Detection processor (shared with VLM_VideoFile)
+        self._detector = DetectionProcessor(
+            event_bus=self._providers.events,
+            telemetry=self._providers.telemetry,
+            confidence_thresholds=dict(self.config.confidence_thresholds),
+            default_confidence=self.config.default_confidence,
+            source_name="VLM_Local_YOLO",
+        )
 
         # Model loading with telemetry
         model_load_start = time.perf_counter()
@@ -105,24 +113,14 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
         self.height = self._camera.height
         self.have_cam = self._camera.have_cam
         self.cam_third = self._camera.cam_third
+        self._detector.cam_third = self.cam_third
         self.cap = self._camera.cap
         self._camera_disconnected = self._camera._camera_disconnected
-
-    def _passes_threshold(self, label: str, confidence: float) -> bool:
-        """Check if a detection passes the per-class confidence threshold."""
-        threshold = self.confidence_thresholds.get(label, self.default_confidence)
-        return confidence >= threshold
 
     def update_filename(self):
         filename = self._file_logger.update_filename()
         self.filename_current = self._file_logger.filename_current
         return filename
-
-    def get_top_detection(self, detections: List[dict]) -> tuple:
-        if not detections:
-            return None, None
-        top = max(detections, key=lambda d: d["confidence"])
-        return top["class"], top["bbox"]
 
     async def _poll(self) -> Optional[List]:
         await asyncio.sleep(self._frame_interval)
@@ -178,62 +176,37 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
 
         inference_start = time.perf_counter()
         results = self.model.predict(source=frame, save=False, stream=True, verbose=False)
-        detections = []
-        for r in results:
-            if r.boxes is not None:
-                for box in r.boxes:
-                    x1, y1, x2, y2 = map(float, box.xyxy[0])
-                    cls = int(box.cls[0])
-                    conf = float(box.conf[0])
-                    label = self.model.names[cls]
-                    if self._passes_threshold(label, conf):
-                        detections.append({
-                            "class": label,
-                            "confidence": round(conf, 4),
-                            "bbox": [round(x1), round(y1), round(x2), round(y2)],
-                        })
+        detections = self._detector.extract_detections(results, self.model.names)
         inference_ms = (time.perf_counter() - inference_start) * 1000
         total_ms = (time.perf_counter() - frame_start) * 1000
 
-        # Record telemetry
-        self.telemetry.record_frame(
-            FrameTelemetry(
-                frame_index=self.frame_index,
-                timestamp=timestamp,
-                capture_ms=capture_ms,
-                inference_ms=inference_ms,
-                total_ms=total_ms,
-                num_detections=len(detections),
-                source="VLM_Local_YOLO",
-            )
+        self._detector.record_telemetry(
+            frame_index=self.frame_index,
+            timestamp=timestamp,
+            capture_ms=capture_ms,
+            inference_ms=inference_ms,
+            total_ms=total_ms,
+            num_detections=len(detections),
         )
 
-        # Emit detection event
-        self.event_bus.publish(
-            DetectionEvent(
-                source="VLM_Local_YOLO",
-                timestamp=timestamp,
-                frame_index=self.frame_index,
-                detections=detections,
-                data={
-                    "capture_ms": round(capture_ms, 2),
-                    "inference_ms": round(inference_ms, 2),
-                    "total_ms": round(total_ms, 2),
-                },
-            )
+        self._detector.publish_detection_event(
+            timestamp=timestamp,
+            frame_index=self.frame_index,
+            detections=detections,
+            extra_data={
+                "capture_ms": round(capture_ms, 2),
+                "inference_ms": round(inference_ms, 2),
+                "total_ms": round(total_ms, 2),
+            },
         )
 
         if self.write_to_local_file:
-            try:
-                json_line = json.dumps({
-                    "frame": self.frame_index,
-                    "timestamp": timestamp,
-                    "detections": detections,
-                })
-                self.write_str_to_file(json_line)
-            except Exception as e:
-                logging.error(f"Error saving YOLO: {str(e)}")
-                self.telemetry.record_error("file_logging", "write_failed", str(e))
+            self._detector.log_detections_to_file(
+                write_fn=self.write_str_to_file,
+                frame_index=self.frame_index,
+                timestamp=timestamp,
+                detections=detections,
+            )
 
         return detections
 
@@ -242,22 +215,8 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
         self.filename_current = self._file_logger.filename_current
 
     async def _raw_to_text(self, raw_input: Optional[List]) -> Optional[Message]:
-        detections = raw_input
-        if detections:
-            thing, bbox = self.get_top_detection(detections)
-            if thing is None or bbox is None:
-                return None
-            x1 = bbox[0]
-            x2 = bbox[2]
-            center_x = (x1 + x2) / 2
-            direction = "in the center"
-            if self.cam_third > 0:
-                if center_x < self.cam_third:
-                    direction = "on the left"
-                elif center_x > 2 * self.cam_third:
-                    direction = "on the right"
-            sentence = f"You see a {thing} {direction}."
-            return Message(timestamp=time.time(), message=sentence)
+        if raw_input:
+            return self._detector.detections_to_text(raw_input)
 
     async def raw_to_text(self, raw_input: Optional[List]):
         pending_message = await self._raw_to_text(raw_input)
