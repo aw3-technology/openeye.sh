@@ -91,6 +91,9 @@ def upload_and_register(request: ModelUploadRequest) -> ModelVersion:
     Copies the model file to ~/.openeye/models/{key}/ and creates a
     registry entry with version 1.0.0.
     """
+    import re
+    if not re.match(r"^[a-zA-Z0-9_.-]+$", request.key):
+        raise ValueError(f"Invalid model key: {request.key!r} — must be alphanumeric with dashes/underscores only")
     src = Path(request.file_path)
     if not src.exists():
         raise FileNotFoundError(f"Model file not found: {src}")

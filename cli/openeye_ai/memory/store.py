@@ -51,8 +51,10 @@ class ObservationMemoryStore:
         # Time range filter
         if query.time_range and query.time_range in _TIME_RANGES:
             cutoff = datetime.now(timezone.utc) - _TIME_RANGES[query.time_range]
-            cutoff_iso = cutoff.isoformat()
-            filtered = [o for o in filtered if o.timestamp >= cutoff_iso]
+            filtered = [
+                o for o in filtered
+                if datetime.fromisoformat(o.timestamp.replace("Z", "+00:00")) >= cutoff
+            ]
 
         # Significance filter
         if query.significance_min > 0:

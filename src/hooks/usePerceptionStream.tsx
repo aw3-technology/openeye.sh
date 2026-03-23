@@ -176,7 +176,7 @@ export function PerceptionStreamProvider({ children }: { children: ReactNode }) 
             ? (now - fpsBuffer.current[0]) / 1000
             : 1;
         setMetrics({
-          fps: Math.round(fpsBuffer.current.length / elapsed),
+          fps: Math.round(Math.max(0, fpsBuffer.current.length - 1) / elapsed),
           latency_ms: frame.inference_ms,
           frame_count: frameCount.current,
         });

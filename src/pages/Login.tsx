@@ -66,6 +66,9 @@ export default function LoginPage() {
       });
       if (error) {
         setError(error.message);
+      } else {
+        const from = (location.state as { from?: string })?.from || "/dashboard";
+        navigate(from, { replace: true });
       }
     }
     setLoading(null);

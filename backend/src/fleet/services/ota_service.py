@@ -16,6 +16,14 @@ class OTAService:
 
     def push_update(self, user_id: str, req: OTAUpdateRequest) -> List[Dict[str, Any]]:
         """Enqueue OTA update commands for each target device."""
+        # Validate firmware URL at control plane level (defense in depth)
+        from urllib.parse import urlparse
+        parsed = urlparse(req.firmware_url)
+        if parsed.scheme != "https":
+            raise ValueError(f"Firmware URL must use HTTPS, got: {parsed.scheme!r}")
+        if not parsed.hostname:
+            raise ValueError("Firmware URL has no hostname")
+
         # Verify user owns all target devices
         owned = (
             self.sb.table("devices")

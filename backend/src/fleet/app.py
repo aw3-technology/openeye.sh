@@ -59,6 +59,10 @@ def create_fleet_app() -> FastAPI:
             bucket = _rate_buckets[key]
             cutoff = now - _FLEET_RATE_WINDOW
             _rate_buckets[key] = bucket = [t for t in bucket if t > cutoff]
+            # Prune empty buckets to prevent memory leak from many distinct IPs
+            if not bucket:
+                del _rate_buckets[key]
+                return await call_next(request)
 
             if len(bucket) >= _FLEET_RATE_LIMIT:
                 return JSONResponse(
@@ -88,7 +92,9 @@ def create_fleet_app() -> FastAPI:
     @app.on_event("shutdown")
     async def shutdown_services():
         from .routers.v1_api import _credits_svc
+        from .routers.v1_stream import _credits_svc as _stream_credits_svc
         await _credits_svc.close()
+        await _stream_credits_svc.close()
 
     logger.info("Fleet control plane app created")
     return app

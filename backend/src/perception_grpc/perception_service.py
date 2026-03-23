@@ -205,6 +205,10 @@ class PerceptionGRPCServer:
 
         if not self._started.wait(timeout=10.0):
             logging.error("gRPC server failed to start within 10 seconds")
+            # Clean up the orphaned thread
+            if self._server:
+                self._server.stop(grace=0)
+            self._thread = None
             return
         if self._start_error:
             logging.error(f"gRPC server start error: {self._start_error}")

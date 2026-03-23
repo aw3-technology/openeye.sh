@@ -71,6 +71,7 @@ export function useSetDeviceTags() {
     onError: (err) => toastMutationError("Tag update", err),
     onSettled: (_, __, { deviceId }) => {
       qc.invalidateQueries({ queryKey: ["fleet", "device", deviceId] });
+      qc.invalidateQueries({ queryKey: ["fleet", "devices"] });
     },
   });
 }
@@ -83,6 +84,7 @@ export function useSetDeviceConfig() {
     onError: (err) => toastMutationError("Config update", err),
     onSettled: (_, __, { deviceId }) => {
       qc.invalidateQueries({ queryKey: ["fleet", "device", deviceId] });
+      qc.invalidateQueries({ queryKey: ["fleet", "devices"] });
     },
   });
 }
@@ -104,6 +106,7 @@ export function useRestartDevice() {
     onError: (err) => toastMutationError("Device restart", err),
     onSettled: (_, __, deviceId) => {
       qc.invalidateQueries({ queryKey: ["fleet", "device", deviceId] });
+      qc.invalidateQueries({ queryKey: ["fleet", "devices"] });
     },
   });
 }
@@ -114,7 +117,10 @@ export function useDecommissionDevice() {
     mutationFn: ({ deviceId, reason, wipeData }: { deviceId: string; reason?: string; wipeData?: boolean }) =>
       fleet.decommissionDevice(deviceId, { reason, wipe_data: wipeData }),
     onError: (err) => toastMutationError("Device decommission", err),
-    onSettled: () => qc.invalidateQueries({ queryKey: ["fleet", "devices"] }),
+    onSettled: (_, __, { deviceId }) => {
+      qc.invalidateQueries({ queryKey: ["fleet", "devices"] });
+      qc.invalidateQueries({ queryKey: ["fleet", "device", deviceId] });
+    },
   });
 }
 

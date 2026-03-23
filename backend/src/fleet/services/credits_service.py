@@ -26,6 +26,11 @@ def _get_edge_url() -> str:
     global _EDGE_FUNCTION_URL
     if _EDGE_FUNCTION_URL is None:
         base = os.environ.get("SUPABASE_URL", "").rstrip("/")
+        if not base:
+            raise RuntimeError(
+                "SUPABASE_URL environment variable is not set. "
+                "Credit operations require a valid Supabase URL."
+            )
         _EDGE_FUNCTION_URL = f"{base}/functions/v1/credits"
     return _EDGE_FUNCTION_URL
 

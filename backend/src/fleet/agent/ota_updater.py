@@ -83,7 +83,7 @@ class OTAUpdater:
 
         logger.info("Downloading firmware %s from %s", version, url)
         with httpx.Client(timeout=300) as client:
-            resp = client.get(url, follow_redirects=False)
+            resp = client.get(url, follow_redirects=True)
             resp.raise_for_status()
             data = resp.content
 

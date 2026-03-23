@@ -53,8 +53,13 @@ class SleepTickerProvider:
         """
         with self._lock:
             self._skip_sleep = value
-            if value and self._current_sleep_task:
-                self._current_sleep_task.cancel()
+            task = self._current_sleep_task if value else None
+        if task is not None:
+            try:
+                loop = task.get_loop()
+                loop.call_soon_threadsafe(task.cancel)
+            except RuntimeError:
+                task.cancel()
 
     async def sleep(self, duration: float) -> None:
         """

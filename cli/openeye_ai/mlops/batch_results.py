@@ -22,11 +22,17 @@ def _write_results_local(results: list[dict], output_path: str, fmt: str) -> str
 
         dest = out / "results.csv" if out.is_dir() else out
         if results:
-            keys = results[0].keys()
+            # Compute the union of all keys across results and flatten nested values
+            all_keys: set[str] = set()
+            for r in results:
+                all_keys.update(r.keys())
+            keys = sorted(all_keys)
             with open(dest, "w", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=keys)
+                writer = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore")
                 writer.writeheader()
-                writer.writerows(results)
+                for r in results:
+                    flat = {k: json.dumps(v) if isinstance(v, (dict, list)) else v for k, v in r.items()}
+                    writer.writerow(flat)
         return str(dest)
     else:
         raise ValueError(f"Unsupported output format: {fmt}")

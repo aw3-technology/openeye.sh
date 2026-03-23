@@ -91,15 +91,20 @@ async def stream(
             msg = await websocket.receive_text()
 
             # Check if it's a config message
-            if msg.startswith("{"):
+            if msg.startswith("{") and msg.endswith("}"):
                 try:
                     config = json.loads(msg)
-                    if "model" in config:
-                        model = config["model"]
-                    if "confidence" in config:
-                        confidence = float(config["confidence"])
-                    await websocket.send_json({"status": "configured", "model": model})
-                    continue
+                    if isinstance(config, dict) and any(k in config for k in ("model", "confidence")):
+                        supported_models = {"yolov8", "depth", "describe"}
+                        if "model" in config:
+                            if config["model"] not in supported_models:
+                                await websocket.send_json({"error": f"Unsupported model: {config['model']}. Use: {', '.join(sorted(supported_models))}"})
+                                continue
+                            model = config["model"]
+                        if "confidence" in config:
+                            confidence = float(config["confidence"])
+                        await websocket.send_json({"status": "configured", "model": model})
+                        continue
                 except (json.JSONDecodeError, ValueError):
                     pass
 

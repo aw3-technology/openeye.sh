@@ -2,30 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePerceptionStream } from "@/hooks/usePerceptionStream";
 import { useEffect, useRef, useState } from "react";
 import type { SafetyAlert } from "@/types/openeye";
-
-const stateConfig = {
-  safe: {
-    label: "SAFE",
-    border: "hsl(var(--terminal-green))",
-    bg: "hsl(var(--terminal-green) / 0.05)",
-  },
-  caution: {
-    label: "CAUTION",
-    border: "hsl(var(--terminal-amber))",
-    bg: "hsl(var(--terminal-amber) / 0.05)",
-  },
-  danger: {
-    label: "DANGER",
-    border: "hsl(var(--terminal-red))",
-    bg: "hsl(var(--terminal-red) / 0.05)",
-  },
-};
-
-const logColorMap: Record<string, string> = {
-  safe: "text-terminal-green",
-  caution: "text-terminal-amber",
-  danger: "text-terminal-red",
-};
+import { safetyStateConfig, safetyLogColor } from "@/lib/safety-utils";
 
 interface LogEntry {
   id: number;
@@ -34,12 +11,11 @@ interface LogEntry {
   timestamp: string;
 }
 
-let logCounter = 0;
-
 export function SafetyPanel() {
   const { overallSafetyState, haltActive, latestFrame } = usePerceptionStream();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const logRef = useRef<HTMLDivElement>(null);
+  const logCounterRef = useRef(0);
 
   const config = stateConfig[overallSafetyState];
 
@@ -51,7 +27,7 @@ export function SafetyPanel() {
     if ((latestFrame.safety_alerts?.length ?? 0) > 0) {
       for (const alert of latestFrame.safety_alerts ?? []) {
         newEntries.push({
-          id: ++logCounter,
+          id: ++logCounterRef.current,
           message: alert.message,
           zone: alert.zone,
           timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
@@ -61,7 +37,7 @@ export function SafetyPanel() {
       // Only add "Scene clear" occasionally to avoid spam
       if (Math.random() < 0.05) {
         newEntries.push({
-          id: ++logCounter,
+          id: ++logCounterRef.current,
           message: `Scene clear — ${latestFrame.objects?.length ?? 0} objects, 0 hazards.`,
           zone: "safe",
           timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),

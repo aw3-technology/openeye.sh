@@ -106,7 +106,8 @@ class ModeManager:
     async def _execute_transition(self, target_mode: str, reason: str) -> bool:
         async with self._transition_lock:
             if self._is_transitioning:
-                return True
+                logging.warning("Transition already in progress, ignoring request")
+                return False
             self._is_transitioning = True
             from_mode = self.state.current_mode
             try:

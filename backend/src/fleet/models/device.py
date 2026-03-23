@@ -54,7 +54,7 @@ class DeviceResponse(BaseModel):
     current_model_version: Optional[str] = None
     ip_address: Optional[str] = None
     last_heartbeat_at: Optional[datetime] = None
-    registered_at: datetime
+    registered_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 

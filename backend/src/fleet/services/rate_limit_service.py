@@ -1,5 +1,6 @@
 """Sliding-window rate limiting per API key using api_usage_log counts."""
 
+import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
@@ -26,8 +27,8 @@ class RateLimitService:
             datetime.now(timezone.utc) - timedelta(seconds=RATE_LIMIT_WINDOW_SECONDS)
         ).isoformat()
 
-        result = (
-            self._sb.table("api_usage_log")
+        result = await asyncio.to_thread(
+            lambda: self._sb.table("api_usage_log")
             .select("id", count="exact")
             .eq("api_key_id", api_key_id)
             .gte("created_at", window_start)
@@ -52,17 +53,19 @@ class RateLimitService:
     ) -> None:
         """Insert a row into api_usage_log."""
         try:
-            self._sb.table("api_usage_log").insert(
-                {
-                    "api_key_id": api_key_id,
-                    "user_id": user_id,
-                    "endpoint": endpoint,
-                    "model": model,
-                    "credits_used": credits_used,
-                    "inference_ms": inference_ms,
-                    "status_code": status_code,
-                }
-            ).execute()
+            await asyncio.to_thread(
+                lambda: self._sb.table("api_usage_log").insert(
+                    {
+                        "api_key_id": api_key_id,
+                        "user_id": user_id,
+                        "endpoint": endpoint,
+                        "model": model,
+                        "credits_used": credits_used,
+                        "inference_ms": inference_ms,
+                        "status_code": status_code,
+                    }
+                ).execute()
+            )
         except Exception as exc:
             logger.error("Failed to log API usage: %s", exc)
 
@@ -73,8 +76,8 @@ class RateLimitService:
         ).isoformat()
 
         # First get total count
-        count_result = (
-            self._sb.table("api_usage_log")
+        count_result = await asyncio.to_thread(
+            lambda: self._sb.table("api_usage_log")
             .select("id", count="exact")
             .eq("user_id", user_id)
             .gte("created_at", since)
@@ -82,8 +85,8 @@ class RateLimitService:
         )
         total_requests = count_result.count if count_result.count is not None else 0
 
-        result = (
-            self._sb.table("api_usage_log")
+        result = await asyncio.to_thread(
+            lambda: self._sb.table("api_usage_log")
             .select("endpoint, credits_used, created_at")
             .eq("user_id", user_id)
             .gte("created_at", since)

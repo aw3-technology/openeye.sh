@@ -39,12 +39,22 @@ def unmap_roi_detections(
         d = dict(det)
         bbox = d.get("bbox")
         if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
-            d["bbox"] = [
-                bbox[0] + offset_x,
-                bbox[1] + offset_y,
-                bbox[2] + offset_x,
-                bbox[3] + offset_y,
-            ]
+            # If bbox values are normalized (0-1 range), scale to ROI then offset
+            if all(0 <= v <= 1.0 for v in bbox):
+                d["bbox"] = [
+                    bbox[0] * roi_w + offset_x,
+                    bbox[1] * roi_h + offset_y,
+                    bbox[2] * roi_w + offset_x,
+                    bbox[3] * roi_h + offset_y,
+                ]
+            else:
+                # Pixel coordinates — just offset
+                d["bbox"] = [
+                    bbox[0] + offset_x,
+                    bbox[1] + offset_y,
+                    bbox[2] + offset_x,
+                    bbox[3] + offset_y,
+                ]
         elif isinstance(bbox, dict) and all(k in bbox for k in ("x", "y", "w", "h")):
             d["bbox"] = {
                 "x": bbox["x"] * roi_w / full_w + roi.x1,

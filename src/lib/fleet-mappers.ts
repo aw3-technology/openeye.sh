@@ -90,7 +90,7 @@ export function mapGroup(row: DeviceGroupRow): DeviceGroupResponse {
     description: row.description || "",
     tag_filter: (row.tag_filter || {}) as Record<string, string>,
     auto_scaling_policy: row.auto_scaling_policy as DeviceGroupResponse["auto_scaling_policy"],
-    device_count: 0,
+    device_count: (row as Record<string, unknown>).device_count as number ?? 0,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };

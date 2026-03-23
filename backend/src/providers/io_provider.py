@@ -131,12 +131,15 @@ class IOProvider:
 
     @contextmanager
     def mode_transition_input(self):
+        with self._lock:
+            current_input = self._mode_transition_input
+        consumed = False
         try:
-            with self._lock:
-                current_input = self._mode_transition_input
             yield current_input
+            consumed = True
         finally:
-            self.delete_mode_transition_input()
+            if consumed and current_input is not None:
+                self.delete_mode_transition_input()
 
     def get_mode_transition_input(self) -> Optional[str]:
         with self._lock:

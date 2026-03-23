@@ -4,7 +4,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const CRED_API_BASE = "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
+const CRED_API_BASE = Deno.env.get("CRED_API_BASE") || "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -17,7 +17,9 @@ function json(data: unknown, status = 200) {
 function decodeJwtPayload(token: string): Record<string, unknown> {
   const parts = token.split(".");
   if (parts.length !== 3) throw new Error("Invalid JWT");
-  const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+  let payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+  // Add padding required by atob
+  payload += "=".repeat((4 - (payload.length % 4)) % 4);
   const decoded = atob(payload);
   return JSON.parse(decoded);
 }

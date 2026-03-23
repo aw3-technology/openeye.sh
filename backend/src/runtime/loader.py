@@ -79,7 +79,7 @@ def load_mode_config(
             name=mode_name,
             display_name=mode_data.get("display_name", mode_name),
             description=mode_data.get("description", ""),
-            system_prompt_base=mode_data["system_prompt_base"],
+            system_prompt_base=mode_data.get("system_prompt_base", ""),
             hertz=mode_data.get("hertz", 1.0),
             lifecycle_hooks=parse_lifecycle_hooks(
                 mode_data.get("lifecycle_hooks", []), api_key=g_api_key

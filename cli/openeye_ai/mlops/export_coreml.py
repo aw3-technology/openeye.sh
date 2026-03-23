@@ -27,7 +27,7 @@ def export_to_coreml(
 
         if model_path.suffix == ".safetensors":
             traced = _load_model_from_safetensors(model_path, model_key)
-        elif model_path.suffix == ".pt":
+        elif model_path.suffix in (".pt", ".pth"):
             traced = torch.jit.load(str(model_path))
         else:
             raise ValueError(f"Cannot convert {model_path.suffix} to CoreML. Use ONNX, TorchScript, or SafeTensors.")

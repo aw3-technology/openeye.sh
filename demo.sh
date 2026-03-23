@@ -82,9 +82,9 @@ banner "Step 2: Pull a Model"
 step "Download YOLOv8 (6MB) — like 'ollama pull llama3'" "openeye pull yolov8"
 
 if "$OPENEYE" list 2>&1 | grep -q "yolov8.*download"; then
-    echo -e "${DIM}    (yolov8 already downloaded, skipping pull)${RESET}"
+    "$OPENEYE" pull yolov8 2>/dev/null || echo -e "${DIM}    (pull failed)${RESET}"
 else
-    "$OPENEYE" pull yolov8 2>/dev/null || echo -e "${DIM}    (already pulled)${RESET}"
+    echo -e "${DIM}    (yolov8 already downloaded, skipping pull)${RESET}"
 fi
 echo ""
 echo -e "${GREEN}    Model pulled to ~/.openeye/models/yolov8/${RESET}"
@@ -106,7 +106,8 @@ pause
 banner "Step 5: Visualize — Save Annotated Image"
 step "Run detection and save image with bounding boxes drawn" \
      "openeye run yolov8 scene-warehouse.jpg --visualize"
-"$OPENEYE" run yolov8 "$DEMO_IMAGES/scene-warehouse.jpg" --visualize 2>/dev/null | head -1
+VIZ_OUTPUT=$("$OPENEYE" run yolov8 "$DEMO_IMAGES/scene-warehouse.jpg" --visualize 2>/dev/null) || true
+echo "$VIZ_OUTPUT" | head -1
 echo ""
 
 ANNOTATED="$DEMO_IMAGES/scene-warehouse_annotated.png"
@@ -150,7 +151,14 @@ echo ""
 echo -e "${YELLOW}    Starting server for 10 seconds...${RESET}"
 "$OPENEYE" serve yolov8 --port 8111 2>/dev/null &
 SERVER_PID=$!
-sleep 3
+# Clean up server on script exit
+cleanup() { kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true; }
+trap cleanup EXIT INT TERM
+# Wait for server to be ready (up to 10 seconds)
+for _i in $(seq 1 20); do
+    curl -s http://localhost:8111/ >/dev/null 2>&1 && break
+    sleep 0.5
+done
 
 # Hit the predict endpoint
 echo ""
@@ -171,6 +179,7 @@ echo ""
 echo -e "${DIM}    Stopping server...${RESET}"
 kill "$SERVER_PID" 2>/dev/null || true
 wait "$SERVER_PID" 2>/dev/null || true
+trap - EXIT INT TERM  # Remove trap now that server is stopped
 echo -e "${GREEN}    Server stopped.${RESET}"
 pause
 

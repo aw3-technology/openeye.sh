@@ -189,12 +189,15 @@ export class CloudFleetClient implements FleetClientInterface {
 
   async advanceDeployment(id: string): Promise<DeploymentResponse> {
     const current = await this.getDeployment(id);
+    const nextStage = current.current_stage + 1;
+    const isComplete = nextStage >= current.rollout_stages.length;
     const result = await supabase
       .from("deployments")
       .update({
-        current_stage: current.current_stage + 1,
-        status: "in_progress",
+        current_stage: nextStage,
+        status: isComplete ? "completed" : "in_progress",
         started_at: current.started_at || new Date().toISOString(),
+        ...(isComplete ? { completed_at: new Date().toISOString() } : {}),
       })
       .eq("id", id)
       .select()

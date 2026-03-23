@@ -53,10 +53,12 @@ def _load_coco_annotations(dataset_path: Path) -> dict[str, list[dict]]:
     with open(dataset_path, encoding="utf-8") as f:
         coco = json.load(f)
 
-    # Build image_id -> filename map
+    # Build image_id -> filename map and image_id -> (width, height) map
     id_to_file = {}
+    id_to_size: dict[int, tuple[int, int]] = {}
     for img in coco.get("images", []):
         id_to_file[img["id"]] = img["file_name"]
+        id_to_size[img["id"]] = (img.get("width", 1), img.get("height", 1))
 
     # Build category_id -> name map
     id_to_cat = {}
@@ -70,10 +72,12 @@ def _load_coco_annotations(dataset_path: Path) -> dict[str, list[dict]]:
         if fname is None:
             continue
         bbox = ann.get("bbox", [0, 0, 0, 0])  # COCO: [x, y, w, h] in pixels
+        img_w, img_h = id_to_size.get(ann["image_id"], (1, 1))
         cat = id_to_cat.get(ann["category_id"], "unknown")
+        # Normalize pixel coordinates to 0-1 range for consistent IoU computation
         result[fname].append({
             "label": cat,
-            "bbox": {"x": bbox[0], "y": bbox[1], "w": bbox[2], "h": bbox[3]},
+            "bbox": {"x": bbox[0] / img_w, "y": bbox[1] / img_h, "w": bbox[2] / img_w, "h": bbox[3] / img_h},
         })
     return dict(result)
 

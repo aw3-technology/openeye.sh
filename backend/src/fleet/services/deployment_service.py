@@ -80,9 +80,23 @@ class DeploymentService:
         # Enforce min_wait_seconds between stage transitions
         current_stage_def = stages[current] if current < len(stages) else {}
         min_wait = current_stage_def.get("min_wait_seconds", 0)
-        if min_wait and dep.get("started_at"):
-            started = datetime.fromisoformat(dep["started_at"])
-            elapsed = (datetime.now(timezone.utc) - started).total_seconds()
+        # Check elapsed time since the current stage started (via per-device status timestamps)
+        if min_wait:
+            stage_started = dep.get("started_at")
+            # Try to get a more accurate stage start time from device statuses
+            try:
+                dev_statuses = self.get_device_statuses(dep.get("user_id", ""), dep["id"])
+                stage_times = [
+                    ds.get("started_at") for ds in dev_statuses
+                    if ds.get("stage") == current and ds.get("started_at")
+                ]
+                if stage_times:
+                    stage_started = min(stage_times)
+            except Exception:
+                pass
+            if stage_started:
+                started = datetime.fromisoformat(stage_started)
+                elapsed = (datetime.now(timezone.utc) - started).total_seconds()
             if elapsed < min_wait:
                 remaining = int(min_wait - elapsed)
                 raise ValueError(
@@ -103,7 +117,7 @@ class DeploymentService:
 
         now = datetime.now(timezone.utc).isoformat()
         updates: Dict[str, Any] = {"current_stage": next_stage, "status": DeploymentStatus.IN_PROGRESS.value}
-        if next_stage == 0:
+        if current == 0:
             updates["started_at"] = now
         result = self.sb.table("deployments").update(updates).eq("id", deployment_id).execute()
         return result.data[0] if result.data else dep

@@ -94,6 +94,9 @@ class CortexLifecycleMixin:
                 if lc.background_task and not lc.background_task.done():
                     awaitables.append(lc.background_task)
 
+                if not awaitables:
+                    await asyncio.sleep(0.5)
+                    continue
                 await asyncio.gather(*awaitables)
 
             except asyncio.CancelledError:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from governance.engine import GovernanceEngine
@@ -112,7 +112,7 @@ async def update_config(payload: YAMLPayload):
 
 
 @router.get("/audit", response_model=list[AuditEntry])
-async def get_audit(limit: int = 100, offset: int = 0):
+async def get_audit(limit: int = Query(default=100, ge=1, le=1000), offset: int = Query(default=0, ge=0)):
     return _get_engine().audit.get_entries(limit=limit, offset=offset)
 
 

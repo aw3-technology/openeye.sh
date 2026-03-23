@@ -33,8 +33,6 @@ export default function DeviceDetail() {
   const navigate = useNavigate();
   const { data: device, isLoading } = useFleetDevice(deviceId ?? "");
   const { data: resourceHistory } = useDeviceResourceHistory(deviceId ?? "");
-
-  if (!deviceId) return <EmptyState message="Invalid device URL — no device ID provided." className="p-8" />;
   const setTagsMutation = useSetDeviceTags();
   const setConfigMutation = useSetDeviceConfig();
   const restartMutation = useRestartDevice();
@@ -46,6 +44,7 @@ export default function DeviceDetail() {
   const [decommissionReason, setDecommissionReason] = useState("");
   const [decommissionWipe, setDecommissionWipe] = useState(false);
 
+  if (!deviceId) return <EmptyState message="Invalid device URL — no device ID provided." className="p-8" />;
   if (isLoading) return <LoadingState className="p-8" />;
   if (!device) return <EmptyState message="Device not found" className="p-8" />;
 

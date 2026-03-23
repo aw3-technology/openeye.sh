@@ -103,6 +103,7 @@ export function useInference() {
   };
 
   const handleFile = (file: File) => {
+    setLastFile(file);
     if (isCloud) {
       const balance = getTotalBalance(creditBalance.data);
       if (balance < INFERENCE_CREDIT_COST) {

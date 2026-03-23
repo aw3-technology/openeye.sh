@@ -86,14 +86,19 @@ class DeviceAgent:
         if self.model_cache.has_version(version):
             logger.info("Model %s already cached", version)
         elif model_url:
-            # Stream download to avoid loading full model into memory at once
-            chunks: list[bytes] = []
+            # Stream download directly to disk to avoid holding full model in memory
+            import tempfile, shutil
             async with httpx.AsyncClient(timeout=300) as client:
                 async with client.stream("GET", model_url) as resp:
                     resp.raise_for_status()
-                    async for chunk in resp.aiter_bytes(chunk_size=256 * 1024):
-                        chunks.append(chunk)
-            data = b"".join(chunks)
+                    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+                        tmp_path = tmp.name
+                        async for chunk in resp.aiter_bytes(chunk_size=256 * 1024):
+                            tmp.write(chunk)
+            with open(tmp_path, "rb") as f:
+                data = f.read()
+            import os
+            os.unlink(tmp_path)
             self.model_cache.store(version, data, checksum)
         else:
             raise ValueError("No model_url provided and version not cached")
@@ -139,7 +144,7 @@ class DeviceAgent:
         try:
             async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
                 await client.post(
-                    f"{self.config.server_url}/commands/{cmd_id}/complete",
+                    f"{self.config.server_url}/commands/{cmd_id}/device-complete",
                     json=result,
                     headers={"X-Device-API-Key": self.config.api_key},
                 )

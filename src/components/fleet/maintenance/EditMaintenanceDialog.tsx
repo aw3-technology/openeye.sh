@@ -45,6 +45,12 @@ export function EditMaintenanceDialog({ window: editWindow, open, onOpenChange }
 
   const handleEdit = () => {
     if (!editWindow) return;
+    const start = new Date(editStartsAt);
+    const end = new Date(editEndsAt);
+    if (end <= start) {
+      toast.error("End time must be after start time");
+      return;
+    }
     updateMutation.mutate(
       {
         id: editWindow.id,

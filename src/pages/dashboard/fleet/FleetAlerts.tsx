@@ -8,6 +8,7 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { useFleetAlerts, useResolveAlert } from "@/hooks/useFleetQueries";
 import {
   Bell, BellOff, CheckCircle, Clock, Filter,
+  ShieldAlert, AlertOctagon, AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { AlertType, FleetAlertResponse } from "@/types/fleet";

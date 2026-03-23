@@ -1,6 +1,6 @@
 /** Hook for agent loop streaming — demo mode or live SSE. */
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { agentDemoTicks } from "@/data/agentDemoData";
 import type { AgentTickEvent, Observation } from "@/types/agent";
 
@@ -111,10 +111,17 @@ export function useAgentStream(serverUrl = ""): UseAgentStreamReturn {
 
   const currentTick = ticks.length > 0 ? ticks[ticks.length - 1] : null;
   const plan = currentTick?.current_plan ?? [];
-  const memories = ticks
-    .filter((t) => t.observation)
-    .map((t) => t.observation!)
-    .filter((obs, i, arr) => arr.findIndex((o) => o.id === obs.id) === i);
+  const memories = useMemo(() => {
+    const seen = new Set<string>();
+    return ticks
+      .filter((t) => t.observation)
+      .map((t) => t.observation!)
+      .filter((obs) => {
+        if (seen.has(obs.id)) return false;
+        seen.add(obs.id);
+        return true;
+      });
+  }, [ticks]);
 
   return { ticks, currentTick, plan, isRunning, memories, startAgent, stopAgent, mode };
 }

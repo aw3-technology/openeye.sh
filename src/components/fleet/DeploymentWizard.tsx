@@ -37,6 +37,8 @@ export function DeploymentWizard() {
         setModelId("");
         setModelVersion("");
         setModelUrl("");
+        setStrategy("canary");
+        setTargetGroupId("");
       },
     });
   };

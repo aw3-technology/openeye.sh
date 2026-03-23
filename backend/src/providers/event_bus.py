@@ -163,15 +163,17 @@ class EventBus:
                 logging.error(f"EventBus sync callback error: {e}")
 
         if async_cbs and loop is not None and not loop.is_closed():
+            def _on_done(f):
+                if f.cancelled():
+                    return
+                exc = f.exception()
+                if exc:
+                    logging.error(f"EventBus async callback raised: {exc}")
+
             for cb in async_cbs:
                 try:
                     future = asyncio.run_coroutine_threadsafe(cb(event), loop)
-                    future.add_done_callback(
-                        lambda f: (
-                            f.exception()
-                            and logging.error(f"EventBus async callback raised: {f.exception()}")
-                        )
-                    )
+                    future.add_done_callback(_on_done)
                 except Exception as e:
                     logging.error(f"EventBus async dispatch error: {e}")
 

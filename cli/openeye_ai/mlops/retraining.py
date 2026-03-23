@@ -99,8 +99,10 @@ def record_accuracy(model_key: str, accuracy: float) -> bool:
         # Need at least 2x window to have distinct baseline vs recent
         if len(buf) < cfg.window_size * 2:
             continue
-        recent = list(buf)[-cfg.window_size :]
-        baseline = list(buf)[: cfg.window_size]
+        buf_list = list(buf)
+        recent = buf_list[-cfg.window_size:]
+        # Use the window immediately before 'recent' as baseline for comparison
+        baseline = buf_list[-cfg.window_size * 2:-cfg.window_size]
 
         recent_mean = sum(recent) / len(recent)
         baseline_mean = sum(baseline) / len(baseline)

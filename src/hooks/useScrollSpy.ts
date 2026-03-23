@@ -34,7 +34,8 @@ export function useScrollSpy(ids: string[]) {
     }
 
     return () => observer.disconnect();
-  }, [ids]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ids.join(",")]);
 
   return activeId;
 }

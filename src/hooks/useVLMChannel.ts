@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { OpenEyeWebSocket } from "@/lib/openeye-ws";
 import type { VLMReasoning } from "@/types/openeye";
 
@@ -49,10 +49,27 @@ export function useVLMChannel({
     }, VLM_INTERVAL_MS);
   }
 
+  /** Disconnect VLM WebSocket and clear the interval. */
+  function disconnectVLM() {
+    if (vlmIntervalRef.current) {
+      clearInterval(vlmIntervalRef.current);
+      vlmIntervalRef.current = null;
+    }
+    vlmWsRef.current?.disconnect();
+    vlmWsRef.current = null;
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => disconnectVLM();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return {
     vlmWsRef,
     vlmIntervalRef,
     connectVLM,
     startVLMInterval,
+    disconnectVLM,
   };
 }

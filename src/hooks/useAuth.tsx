@@ -126,10 +126,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Sign out even if the API call fails
+    }
     localStorage.removeItem(DEMO_USER_KEY);
     setUser(null);
     setSession(null);
-    await supabase.auth.signOut();
   };
 
   return (

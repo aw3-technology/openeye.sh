@@ -67,7 +67,12 @@ class TransitionHandler:
                     else:
                         logging.error(f"Mode transition failed: {target_mode}")
 
+                # Clear the event before processing to avoid losing transitions
+                # scheduled during the execution of the current transition
                 self._mode_transition_event.clear()
+                # Check if a new transition was scheduled during execution
+                if self._pending_mode_transition:
+                    self._mode_transition_event.set()
 
             except asyncio.CancelledError:
                 logging.debug("Mode transition handler cancelled")

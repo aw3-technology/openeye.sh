@@ -52,16 +52,20 @@ class ServerState:
         env_model = os.environ.get("NEBIUS_MODEL", "Qwen/Qwen2.5-VL-72B-Instruct")
         model = cfg_model or env_model
 
-        # OpenRouter model IDs use lowercase org/model or contain ":free"
-        is_openrouter = "/" in model and (
+        # Explicit provider detection: check for provider-specific API keys first
+        openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
+        nebius_key = os.environ.get("NEBIUS_API_KEY", "")
+
+        # If user explicitly set an OpenRouter key and the model looks like an OpenRouter ID
+        is_openrouter = bool(openrouter_key) and "/" in model and (
             model.split("/")[0].islower() or ":free" in model
         )
 
         if is_openrouter:
-            api_key = os.environ.get("OPENROUTER_API_KEY", "")
+            api_key = openrouter_key
             base_url = "https://openrouter.ai/api/v1"
         else:
-            api_key = os.environ.get("NEBIUS_API_KEY", "")
+            api_key = nebius_key
             base_url = os.environ.get("NEBIUS_BASE_URL", "https://api.studio.nebius.com/v1")
 
         return api_key, base_url, model

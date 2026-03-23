@@ -60,7 +60,7 @@ class InferenceQueue:
             finally:
                 async with self._lock:
                     self._active_count -= 1
-        except Exception:
+        except BaseException:
             if not acquired:
                 # Only decrement queue if we never acquired the semaphore
                 async with self._lock:

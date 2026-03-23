@@ -176,6 +176,10 @@ export class OpenEyeWebSocket {
       this.ws.send(data);
     } else if (this._shouldConnect) {
       this.sendBuffer.push(data);
+      // Prevent unbounded memory growth during reconnection
+      if (this.sendBuffer.length > 10) {
+        this.sendBuffer.splice(0, this.sendBuffer.length - 10);
+      }
     }
   }
 

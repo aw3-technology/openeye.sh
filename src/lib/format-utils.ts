@@ -5,6 +5,7 @@
 /** Relative time label, e.g. "3m ago", "2d ago". Falls back to date string for >7d. */
 export function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
+  if (isNaN(diff) || diff < 0) return "unknown";
   const seconds = Math.floor(diff / 1000);
   if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
@@ -31,6 +32,7 @@ export function formatElapsed(startStr: string, endStr?: string | null): string 
   const start = new Date(startStr).getTime();
   const end = endStr ? new Date(endStr).getTime() : Date.now();
   const diff = end - start;
+  if (isNaN(diff) || diff < 0) return "<1m";
   const mins = Math.floor(diff / 60_000);
   if (mins < 1) return "<1m";
   if (mins < 60) return `${mins}m`;

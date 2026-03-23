@@ -80,7 +80,7 @@ export function useAgenticLoop({
     });
 
     ws.connect();
-  }, [serverUrl]);
+  }, [serverUrl, onDetections]);
 
   // Disconnect + cleanup
   const disconnect = useCallback(() => {
@@ -175,8 +175,7 @@ export function useAgenticLoop({
     return () => {
       disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isStreaming]);
+  }, [isStreaming, connectWs, disconnect]);
 
   // Sync goal ref when goal state changes
   useEffect(() => {

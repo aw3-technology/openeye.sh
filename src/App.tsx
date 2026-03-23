@@ -52,7 +52,14 @@ import Presentation from "./pages/Presentation.tsx";
 import LiveDemo from "./pages/LiveDemo.tsx";
 import HackathonDemo from "./pages/HackathonDemo.tsx";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5_000,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

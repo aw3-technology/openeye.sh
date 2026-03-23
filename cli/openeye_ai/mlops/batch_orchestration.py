@@ -180,7 +180,11 @@ def run_batch_inference(
         with ThreadPoolExecutor(max_workers=config.max_workers) as pool:
             futures = {pool.submit(_process_image, p): p for p in image_paths}
             for future in as_completed(futures):
-                result = future.result()
+                try:
+                    result = future.result()
+                except Exception as exc:
+                    img_path = futures[future]
+                    result = {"source": str(img_path), "status": "error", "error": str(exc)}
                 results.append(result)
 
                 if result.get("status") == "error":

@@ -68,10 +68,19 @@ async def get_device_api_key(
 ) -> str:
     """Authenticate a device via its API key. Returns the device ID."""
     key_hash = hashlib.sha256(x_device_api_key.encode()).hexdigest()
-    result = sb.table("devices").select("id").eq("api_key_hash", key_hash).limit(1).execute()
+    result = (
+        sb.table("devices")
+        .select("id, status")
+        .eq("api_key_hash", key_hash)
+        .limit(1)
+        .execute()
+    )
     if not result.data:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid device API key")
-    return result.data[0]["id"]
+    device = result.data[0]
+    if device.get("status") == "decommissioned":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Device has been decommissioned")
+    return device["id"]
 
 
 async def get_api_key_auth(

@@ -202,12 +202,12 @@ def _evaluate_gate_condition(condition: str, version) -> bool:
         return False
 
     namespace = {
-        "accuracy": metrics.accuracy or 0.0,
-        "precision": metrics.precision or 0.0,
-        "recall": metrics.recall or 0.0,
-        "f1": metrics.f1 or 0.0,
-        "mAP": metrics.mAP or 0.0,
-        "loss": metrics.loss or float("inf"),
+        "accuracy": metrics.accuracy if metrics.accuracy is not None else 0.0,
+        "precision": metrics.precision if metrics.precision is not None else 0.0,
+        "recall": metrics.recall if metrics.recall is not None else 0.0,
+        "f1": metrics.f1 if metrics.f1 is not None else 0.0,
+        "mAP": metrics.mAP if metrics.mAP is not None else 0.0,
+        "loss": metrics.loss if metrics.loss is not None else float("inf"),
     }
     namespace.update(metrics.custom)
 

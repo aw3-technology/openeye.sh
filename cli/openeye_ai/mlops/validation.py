@@ -196,7 +196,7 @@ def run_validation_test(
     metrics = {
         "accuracy": correct / total if total > 0 else 0.0,
         "latency_ms": statistics.mean(latencies) if latencies else 0.0,
-        "p95_latency_ms": sorted(latencies)[int(len(latencies) * 0.95)] if latencies else 0.0,
+        "p95_latency_ms": sorted(latencies)[min(int(len(latencies) * 0.95), len(latencies) - 1)] if latencies else 0.0,
         "total_images": float(total),
         "detection_rate": sum(1 for p in all_predictions if p.get("objects")) / total if total > 0 else 0.0,
     }

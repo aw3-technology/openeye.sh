@@ -26,8 +26,11 @@ def export_to_onnx(
     if model_path.suffix == ".safetensors":
         model = _load_model_from_safetensors(model_path, model_key)
     else:
-        if model_path.suffix == ".pt":
-            model = torch.jit.load(str(model_path))
+        if model_path.suffix in (".pt", ".pth"):
+            try:
+                model = torch.jit.load(str(model_path))
+            except Exception:
+                model = torch.load(str(model_path), weights_only=False)
         else:
             model = torch.load(str(model_path), weights_only=True)
 

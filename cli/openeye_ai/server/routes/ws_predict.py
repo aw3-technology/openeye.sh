@@ -34,9 +34,9 @@ async def websocket_predict(ws: WebSocket):
 
             def run_ws_inference():
                 t0 = time.time()
-                data = state.adapter.predict(img)
+                result = state.adapter.predict(img)
                 INFERENCE_LATENCY.labels(model=state.model_name).observe(time.time() - t0)
-                return data
+                return result
 
             result_data = await submit_inference(
                 state.inference_queue, run_ws_inference, ws,

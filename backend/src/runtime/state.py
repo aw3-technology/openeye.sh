@@ -44,7 +44,7 @@ class ModeStatePersistence:
         state_file = self._get_state_file_path()
         try:
             with open(state_file, "r") as f:
-                state_data = json.load(f)
+                state_data = json5.load(f)
             last_active_mode = state_data.get("last_active_mode")
             if (
                 last_active_mode

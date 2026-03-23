@@ -16,7 +16,9 @@ def _valid_api_key(authorization: str = Header(...)) -> str:
     if scheme.lower() != "bearer" or not token:
         raise _auth_error("Missing Bearer token")
     server_key = os.environ.get("OPENEYE_SERVER_API_KEY", "")
-    if server_key and token != server_key:
+    if server_key:
+        if token == server_key:
+            return token
         raise _auth_error("Invalid API key")
     if not token.startswith("oe_"):
         raise _auth_error("API key must start with oe_")

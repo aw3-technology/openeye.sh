@@ -8,6 +8,7 @@ import {
   PERSON_CAUTION_THRESHOLD,
   LOW_CONFIDENCE_THRESHOLD,
 } from "@/lib/safety-thresholds";
+import { safetyLevelTextColor } from "@/lib/safety-utils";
 
 interface SafetyLogEntry {
   id: number;
@@ -16,7 +17,7 @@ interface SafetyLogEntry {
   timestamp: string;
 }
 
-let safetyLogCounter = 0;
+// Counter moved to useRef inside component to avoid shared mutable state across instances
 
 const levelColors: Record<string, string> = {
   safe: "text-terminal-green",
@@ -31,6 +32,7 @@ export function SafetyLog({ isStreaming, objects }: {
   const [logs, setLogs] = useState<SafetyLogEntry[]>([]);
   const logRef = useRef<HTMLDivElement>(null);
   const prevObjCountRef = useRef(0);
+  const counterRef = useRef(0);
 
   useEffect(() => {
     if (!isStreaming || objects.length === 0) return;
@@ -46,14 +48,14 @@ export function SafetyLog({ isStreaming, objects }: {
     for (const p of persons) {
       if (p.bbox.h > PERSON_DANGER_THRESHOLD) {
         entries.push({
-          id: ++safetyLogCounter,
+          id: ++counterRef.current,
           message: "Person in DANGER zone — too close",
           level: "danger",
           timestamp: ts,
         });
       } else if (p.bbox.h > PERSON_CAUTION_THRESHOLD) {
         entries.push({
-          id: ++safetyLogCounter,
+          id: ++counterRef.current,
           message: "Person in CAUTION zone",
           level: "caution",
           timestamp: ts,
@@ -64,7 +66,7 @@ export function SafetyLog({ isStreaming, objects }: {
     // Hazard alerts
     for (const h of hazards) {
       entries.push({
-        id: ++safetyLogCounter,
+        id: ++counterRef.current,
         message: `Hazard detected: ${h.label} (${(h.confidence * 100).toFixed(0)}%)`,
         level: "danger",
         timestamp: ts,
@@ -74,7 +76,7 @@ export function SafetyLog({ isStreaming, objects }: {
     // Scene clear occasionally
     if (entries.length === 0 && Math.random() < 0.03) {
       entries.push({
-        id: ++safetyLogCounter,
+        id: ++counterRef.current,
         message: `Scene clear — ${objects.length} objects, 0 hazards`,
         level: "safe",
         timestamp: ts,
@@ -85,7 +87,7 @@ export function SafetyLog({ isStreaming, objects }: {
     if (objects.length > prevObjCountRef.current && prevObjCountRef.current > 0) {
       const delta = objects.length - prevObjCountRef.current;
       entries.push({
-        id: ++safetyLogCounter,
+        id: ++counterRef.current,
         message: `+${delta} new object${delta > 1 ? "s" : ""} detected`,
         level: "safe",
         timestamp: ts,

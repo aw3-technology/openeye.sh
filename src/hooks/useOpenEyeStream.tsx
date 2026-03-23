@@ -96,7 +96,7 @@ export function OpenEyeStreamProvider({ children }: { children: ReactNode }) {
             ? result.inference_ms
             : 0;
           setMetrics({
-            fps: Math.round(fpsBuffer.current.length / elapsed),
+            fps: Math.round(Math.max(0, fpsBuffer.current.length - 1) / elapsed),
             latency_ms: latency,
             frame_count: frameCount.current,
           });

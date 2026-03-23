@@ -7,6 +7,7 @@ Models are loaded on first use and cached in module-level singletons.
 import base64
 import io
 import logging
+import threading
 import time
 from typing import Any
 
@@ -18,49 +19,55 @@ logger = logging.getLogger(__name__)
 # Lazy model singletons
 _yolo_model = None
 _depth_model = None
+_yolo_lock = threading.Lock()
+_depth_lock = threading.Lock()
 
 
 def _get_yolo():
-    """Lazy-load YOLOv8 model."""
+    """Lazy-load YOLOv8 model (thread-safe)."""
     global _yolo_model
     if _yolo_model is None:
-        from ultralytics import YOLO
+        with _yolo_lock:
+            if _yolo_model is None:
+                from ultralytics import YOLO
 
-        logger.info("Loading YOLOv8 model...")
-        _yolo_model = YOLO("yolov8n.pt")
-        logger.info("YOLOv8 model loaded")
+                logger.info("Loading YOLOv8 model...")
+                _yolo_model = YOLO("yolov8n.pt")
+                logger.info("YOLOv8 model loaded")
     return _yolo_model
 
 
 def _get_depth():
-    """Lazy-load Depth Anything V2 model."""
+    """Lazy-load Depth Anything V2 model (thread-safe)."""
     global _depth_model
     if _depth_model is None:
-        import torch
-        from torchvision.transforms import Compose, Normalize, Resize, ToTensor
+        with _depth_lock:
+            if _depth_model is None:
+                import torch
+                from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
-        logger.info("Loading Depth Anything V2 model...")
-        _depth_model = {
-            "transform": Compose([
-                Resize((518, 518)),
-                ToTensor(),
-                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            ]),
-            "device": "cuda" if torch.cuda.is_available() else "cpu",
-        }
-        # Attempt to load the actual model; fall back to a simple depth estimation
-        try:
-            model = torch.hub.load(
-                "huggingface/pytorch-image-models",
-                "depth_anything_v2_vits",
-                pretrained=True,
-            )
-            model.eval()
-            _depth_model["model"] = model
-        except Exception:
-            logger.warning("Depth Anything V2 not available; using gradient fallback")
-            _depth_model["model"] = None
-        logger.info("Depth model loaded")
+                logger.info("Loading Depth Anything V2 model...")
+                _depth_model = {
+                    "transform": Compose([
+                        Resize((518, 518)),
+                        ToTensor(),
+                        Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                    ]),
+                    "device": "cuda" if torch.cuda.is_available() else "cpu",
+                }
+                # Attempt to load the actual model; fall back to a simple depth estimation
+                try:
+                    model = torch.hub.load(
+                        "huggingface/pytorch-image-models",
+                        "depth_anything_v2_vits",
+                        pretrained=True,
+                    )
+                    model.eval()
+                    _depth_model["model"] = model
+                except Exception:
+                    logger.warning("Depth Anything V2 not available; using gradient fallback")
+                    _depth_model["model"] = None
+                logger.info("Depth model loaded")
     return _depth_model
 
 

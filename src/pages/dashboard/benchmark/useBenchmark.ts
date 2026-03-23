@@ -88,8 +88,8 @@ export function useBenchmark({ isConnected, client, model }: UseBenchmarkOptions
       const sorted = [...latencies].sort((a, b) => a - b);
       const mean = latencies.reduce((a, b) => a + b, 0) / latencies.length;
       const median = sorted[Math.floor(sorted.length / 2)];
-      const p95 = sorted[Math.floor(sorted.length * 0.95)];
-      const p99 = sorted[Math.floor(sorted.length * 0.99)];
+      const p95 = sorted[Math.min(Math.floor(sorted.length * 0.95), sorted.length - 1)];
+      const p99 = sorted[Math.min(Math.floor(sorted.length * 0.99), sorted.length - 1)];
 
       const result: BenchmarkResult = {
         id: crypto.randomUUID(),

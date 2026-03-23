@@ -213,4 +213,7 @@ class ActionOrchestrator:
         self._action_instances.clear()
 
     def __del__(self):
-        self.stop()
+        try:
+            self.stop()
+        except Exception:
+            pass

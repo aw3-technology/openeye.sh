@@ -97,8 +97,9 @@ class ConfigWatcher:
                 f"config_reload->{current_mode}:hot_reload"
             )
 
-            await rt.lifecycle.initialize_mode(current_mode)
-            await rt.lifecycle.start_orchestrators()
+            mode_config = rt.mode_config.modes.get(current_mode)
+            await rt.lifecycle.initialize_mode(current_mode, mode_config)
+            await rt.lifecycle.start_orchestrators(rt._run_cortex_loop, rt.transitions.ensure_task_running)
 
             logging.info(
                 f"Mode configuration reloaded successfully, active mode: {current_mode}"
@@ -109,8 +110,9 @@ class ConfigWatcher:
             logging.error("Attempting to restart with previous configuration")
             try:
                 current_mode = rt.mode_manager.current_mode_name
-                await rt.lifecycle.initialize_mode(current_mode)
-                await rt.lifecycle.start_orchestrators()
+                mode_config = rt.mode_config.modes.get(current_mode)
+                await rt.lifecycle.initialize_mode(current_mode, mode_config)
+                await rt.lifecycle.start_orchestrators(rt._run_cortex_loop, rt.transitions.ensure_task_running)
                 logging.info("Successfully recovered with previous configuration")
             except Exception as recovery_error:
                 logging.critical(
