@@ -49,7 +49,33 @@ function MegaLinkRow({ link, onClick }: { link: MegaMenuLink; onClick?: () => vo
 function MegaDropdown({ menu, isActive }: { menu: MegaMenu; isActive: (href: string) => boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [offset, setOffset] = useState(0);
+
+  useEffect(() => {
+    if (!open) return;
+    const update = () => {
+      const trigger = triggerRef.current;
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const margin = 16;
+      const width = Math.min(640, vw - margin * 2);
+      const centerX = rect.left + rect.width / 2;
+      let desiredLeft = centerX - width / 2;
+      if (desiredLeft < margin) desiredLeft = margin;
+      if (desiredLeft + width > vw - margin) desiredLeft = vw - margin - width;
+      setOffset(desiredLeft - centerX);
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -73,6 +99,7 @@ function MegaDropdown({ menu, isActive }: { menu: MegaMenu; isActive: (href: str
   return (
     <div ref={ref} className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <button
+        ref={triggerRef}
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-1 uppercase tracking-widest transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
           hasActive || open ? "text-foreground" : "text-muted-foreground hover:text-foreground"
@@ -91,7 +118,8 @@ function MegaDropdown({ menu, isActive }: { menu: MegaMenu; isActive: (href: str
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[min(640px,calc(100vw-2rem))] bg-background border border-foreground/[0.08] rounded-lg shadow-xl z-50 overflow-hidden"
+            style={{ transform: `translateX(calc(-50% + ${offset}px))` }}
+            className="absolute top-full left-1/2 mt-2 w-[min(640px,calc(100vw-2rem))] bg-background border border-foreground/[0.08] rounded-lg shadow-xl z-50 overflow-hidden"
           >
             <div className="grid grid-cols-2 gap-6 p-5">
               {menu.columns.map((col) => (
