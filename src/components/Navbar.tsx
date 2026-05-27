@@ -113,13 +113,16 @@ function MegaDropdown({ menu, isActive }: { menu: MegaMenu; isActive: (href: str
       </button>
       <AnimatePresence>
         {open && (
+          <div
+            className="absolute top-full left-1/2 mt-2 w-[min(640px,calc(100vw-2rem))] z-50"
+            style={{ transform: `translateX(calc(-50% + ${offset}px))` }}
+          >
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15 }}
-            style={{ transform: `translateX(calc(-50% + ${offset}px))` }}
-            className="absolute top-full left-1/2 mt-2 w-[min(640px,calc(100vw-2rem))] bg-background border border-foreground/[0.08] rounded-lg shadow-xl z-50 overflow-hidden"
+            className="bg-background border border-foreground/[0.08] rounded-lg shadow-xl overflow-hidden"
           >
             <div className="grid grid-cols-2 gap-6 p-5">
               {menu.columns.map((col) => (
@@ -141,6 +144,7 @@ function MegaDropdown({ menu, isActive }: { menu: MegaMenu; isActive: (href: str
               </div>
             )}
           </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
