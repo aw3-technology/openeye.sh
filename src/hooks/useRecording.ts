@@ -25,7 +25,7 @@ export function useRecording({ setIsRecording }: UseRecordingParams) {
   }, [setIsRecording]);
 
   const loadRecording = useCallback(
-    (frames: RecordedFrame[], replayFramesRef: React.RefObject<RecordedFrame[]>) => {
+    (frames: RecordedFrame[], replayFramesRef: React.MutableRefObject<RecordedFrame[]>) => {
       replayFramesRef.current = frames;
       recordingRef.current = frames;
     },
