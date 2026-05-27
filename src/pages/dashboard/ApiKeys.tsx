@@ -62,7 +62,17 @@ export default function ApiKeys() {
       </div>
 
       {/* Keys table */}
-      <KeysTable keys={keys} isLoading={isLoading} onDelete={handleDelete} />
+      <KeysTable
+        keys={keys.map((k) => ({
+          id: k.id,
+          name: k.name,
+          key_prefix: k.key_prefix,
+          created_at: k.created_at,
+          last_used_at: k.last_used_at ?? null,
+        }))}
+        isLoading={isLoading}
+        onDelete={handleDelete}
+      />
 
       {/* Quick Start */}
       <div>
