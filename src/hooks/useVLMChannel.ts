@@ -7,7 +7,7 @@ export const VLM_INTERVAL_MS = 2500;
 interface UseVLMChannelParams {
   setLatestVLM: (vlm: VLMReasoning) => void;
   setVlmLoading: (v: boolean) => void;
-  latestVLMRef: React.RefObject<VLMReasoning | null>;
+  latestVLMRef: React.MutableRefObject<VLMReasoning | null>;
 }
 
 export function useVLMChannel({

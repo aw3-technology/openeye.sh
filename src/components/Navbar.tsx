@@ -6,12 +6,50 @@ import { ChevronDown } from "lucide-react";
 import logoLight from "@/assets/openeye-logo-horizontal.png";
 import logoDark from "@/assets/openeye-logo-horizontal-dark.png";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { publicNavItems, isDropdown, GITHUB_URL } from "@/data/navigation";
-import type { NavDropdown } from "@/data/navigation";
+import { publicMegaMenus, GITHUB_URL } from "@/data/navigation";
+import type { MegaMenu, MegaMenuLink } from "@/data/navigation";
 
-function DropdownMenu({ item, isActive }: { item: NavDropdown; isActive: (href: string) => boolean }) {
+function MegaLinkRow({ link, onClick }: { link: MegaMenuLink; onClick?: () => void }) {
+  const Icon = link.icon;
+  const content = (
+    <>
+      {Icon && (
+        <span className="flex-shrink-0 w-9 h-9 rounded-md border border-foreground/10 bg-foreground/[0.03] flex items-center justify-center text-foreground/70 group-hover:text-foreground group-hover:border-foreground/20 transition-colors">
+          <Icon className="w-4 h-4" />
+        </span>
+      )}
+      <span className="min-w-0">
+        <span className="block text-sm font-medium text-foreground normal-case tracking-normal">
+          {link.label}
+        </span>
+        {link.description && (
+          <span className="block text-xs text-muted-foreground normal-case tracking-normal mt-0.5">
+            {link.description}
+          </span>
+        )}
+      </span>
+    </>
+  );
+  const className =
+    "group flex items-start gap-3 p-2 -mx-2 rounded-md hover:bg-foreground/[0.04] transition-colors";
+  if (link.external) {
+    return (
+      <a href={link.href} target="_blank" rel="noopener noreferrer" onClick={onClick} className={className}>
+        {content}
+      </a>
+    );
+  }
+  return (
+    <Link to={link.href} onClick={onClick} className={className}>
+      {content}
+    </Link>
+  );
+}
+
+function MegaDropdown({ menu, isActive }: { menu: MegaMenu; isActive: (href: string) => boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -21,15 +59,27 @@ function DropdownMenu({ item, isActive }: { item: NavDropdown; isActive: (href: 
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const hasActive = item.items.some((link) => isActive(link.href));
+  const allLinks = menu.columns.flatMap((c) => c.links);
+  const hasActive = allLinks.some((l) => !l.external && isActive(l.href));
+
+  const handleEnter = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(true);
+  };
+  const handleLeave = () => {
+    closeTimer.current = setTimeout(() => setOpen(false), 120);
+  };
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 uppercase tracking-widest transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none text-muted-foreground hover:text-foreground"
+        className={`flex items-center gap-1 uppercase tracking-widest transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
+          hasActive || open ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+        }`}
+        aria-expanded={open}
       >
-        {item.label}
+        {menu.label}
         <ChevronDown
           className={`w-3 h-3 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
         />
@@ -37,26 +87,31 @@ function DropdownMenu({ item, isActive }: { item: NavDropdown; isActive: (href: 
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -4 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.12 }}
-            className="absolute top-full right-0 mt-2 min-w-[160px] bg-background border border-foreground/[0.08] rounded-md shadow-lg py-1 z-50"
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[min(640px,calc(100vw-2rem))] bg-background border border-foreground/[0.08] rounded-lg shadow-xl z-50 overflow-hidden"
           >
-            {item.items.map((link) => (
-              <Link
-                key={link.label}
-                to={link.href}
-                onClick={() => setOpen(false)}
-                className={`block px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
-                  isActive(link.href)
-                    ? "text-foreground bg-foreground/[0.04]"
-                    : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            <div className="grid grid-cols-2 gap-6 p-5">
+              {menu.columns.map((col) => (
+                <div key={col.heading}>
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-3">
+                    {col.heading}
+                  </div>
+                  <div className="space-y-1">
+                    {col.links.map((link) => (
+                      <MegaLinkRow key={link.label} link={link} onClick={() => setOpen(false)} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {menu.feature && (
+              <div className="border-t border-foreground/[0.06] bg-foreground/[0.02] px-5 py-3">
+                <MegaLinkRow link={menu.feature} onClick={() => setOpen(false)} />
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -92,21 +147,9 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden lg:flex items-center gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-          {publicNavItems.map((item) =>
-            isDropdown(item) ? (
-              <DropdownMenu key={item.label} item={item} isActive={isActive} />
-            ) : (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={`transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
-                  isActive(item.href) ? "text-foreground" : "hover:text-foreground"
-                }`}
-              >
-                {item.label}
-              </Link>
-            )
-          )}
+          {publicMegaMenus.map((menu) => (
+            <MegaDropdown key={menu.label} menu={menu} isActive={isActive} />
+          ))}
           {user && (
             <Link
               to="/dashboard"
@@ -117,14 +160,6 @@ export function Navbar() {
               Dashboard
             </Link>
           )}
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-foreground transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none"
-          >
-            GitHub
-          </a>
           <ThemeToggle />
 
           {!loading && (
@@ -186,45 +221,26 @@ export function Navbar() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-            className="lg:hidden overflow-hidden border-t border-foreground/[0.06] bg-background/95 backdrop-blur-sm"
+            className="lg:hidden overflow-hidden border-t border-foreground/[0.06] bg-background/95 backdrop-blur-sm max-h-[calc(100vh-3.5rem)] overflow-y-auto"
           >
-            <div className="px-4 py-4 space-y-1 font-mono text-sm">
-              {publicNavItems.map((item) =>
-                isDropdown(item) ? (
-                  item.items.map((link) => (
-                    <Link
-                      key={link.label}
-                      to={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`block py-2.5 transition-colors uppercase tracking-widest text-xs ${
-                        isActive(link.href)
-                          ? "text-foreground"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  ))
-                ) : (
-                  <Link
-                    key={item.label}
-                    to={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`block py-2.5 transition-colors uppercase tracking-widest text-xs ${
-                      isActive(item.href)
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                )
-              )}
+            <div className="px-4 py-4 space-y-5">
+              {publicMegaMenus.map((menu) => (
+                <div key={menu.label}>
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+                    {menu.label}
+                  </div>
+                  <div className="space-y-1">
+                    {menu.columns.flatMap((c) => c.links).map((link) => (
+                      <MegaLinkRow key={link.label} link={link} onClick={() => setMobileOpen(false)} />
+                    ))}
+                  </div>
+                </div>
+              ))}
               {user && (
                 <Link
                   to="/dashboard"
                   onClick={() => setMobileOpen(false)}
-                  className={`block py-2.5 transition-colors uppercase tracking-widest text-xs ${
+                  className={`block py-2.5 font-mono transition-colors uppercase tracking-widest text-xs ${
                     isActive("/dashboard")
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -233,17 +249,20 @@ export function Navbar() {
                   Dashboard
                 </Link>
               )}
-              <a
-                href={GITHUB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileOpen(false)}
-                className="block py-2.5 text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest text-xs"
-              >
-                GitHub
-              </a>
 
               <div className="pt-3 border-t border-foreground/[0.06]">
+                <div className="flex items-center justify-between pb-3">
+                  <a
+                    href={GITHUB_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    GitHub
+                  </a>
+                  <ThemeToggle />
+                </div>
                 {!loading && (
                   user ? (
                     <div className="flex items-center justify-between py-2">

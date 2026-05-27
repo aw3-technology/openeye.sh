@@ -163,7 +163,7 @@ export class CloudFleetClient implements FleetClientInterface {
       target_group_id: req.target_group_id || null,
       bandwidth_limit_mbps: req.bandwidth_limit_mbps || null,
     };
-    const result = await supabase.from("deployments").insert(row as Tables["deployments"]["Insert"]).select().single();
+    const result = await supabase.from("deployments").insert(row as unknown as Tables["deployments"]["Insert"]).select().single();
     return mapDeployment(assertOk(result));
   }
 
@@ -300,7 +300,7 @@ export class CloudFleetClient implements FleetClientInterface {
   async setScalingPolicy(groupId: string, policy: AutoScalingPolicy): Promise<DeviceGroupResponse> {
     const result = await supabase
       .from("device_groups")
-      .update({ auto_scaling_policy: policy as Json })
+      .update({ auto_scaling_policy: policy as unknown as Json })
       .eq("id", groupId)
       .select()
       .single();

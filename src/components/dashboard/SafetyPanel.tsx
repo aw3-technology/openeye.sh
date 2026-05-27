@@ -17,7 +17,7 @@ export function SafetyPanel() {
   const logRef = useRef<HTMLDivElement>(null);
   const logCounterRef = useRef(0);
 
-  const config = stateConfig[overallSafetyState];
+  const config = safetyStateConfig[overallSafetyState];
 
   useEffect(() => {
     if (!latestFrame) return;
@@ -109,7 +109,7 @@ export function SafetyPanel() {
                 initial={{ opacity: 0, x: -6 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.15 }}
-                className={logColorMap[entry.zone] || "text-terminal-fg"}
+                className={safetyLogColor[entry.zone] || "text-terminal-fg"}
               >
                 <span className="text-terminal-muted">[{entry.timestamp}]</span>{" "}
                 {entry.message}

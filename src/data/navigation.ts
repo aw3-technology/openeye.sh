@@ -25,6 +25,19 @@ import {
   Cpu,
   Gauge,
   Settings,
+  BookOpen,
+  Newspaper,
+  ScrollText,
+  MessagesSquare,
+  Info,
+  Presentation as PresentationIcon,
+  Boxes,
+  Network,
+  Sparkles,
+  Github,
+  Trophy,
+  PlayCircle,
+  Tag,
 } from "lucide-react";
 
 export interface NavLink {
@@ -61,7 +74,110 @@ export function isDropdown(item: NavItem): item is NavDropdown {
   return "items" in item;
 }
 
-/** Public site navigation (Navbar) */
+export const GITHUB_URL = "https://github.com/aw3-technology/openeye.sh";
+
+/** Mega-menu types for the public navbar */
+export interface MegaMenuLink {
+  href: string;
+  label: string;
+  description?: string;
+  icon?: LucideIcon;
+  external?: boolean;
+}
+
+export interface MegaMenuColumn {
+  heading: string;
+  links: MegaMenuLink[];
+}
+
+export interface MegaMenu {
+  label: string;
+  columns: MegaMenuColumn[];
+  feature?: MegaMenuLink;
+}
+
+/** Public site navigation (Navbar) — mega-menu format */
+export const publicMegaMenus: MegaMenu[] = [
+  {
+    label: "Product",
+    columns: [
+      {
+        heading: "Platform",
+        links: [
+          { href: "/", label: "Overview", description: "Perception engine for agents & robots", icon: Sparkles },
+          { href: "/models", label: "Models", description: "YOLO, depth, VLM adapters", icon: Boxes },
+          { href: "/architecture", label: "Architecture", description: "How OpenEye fits together", icon: Network },
+          { href: "/use-cases", label: "Use Cases", description: "Where teams ship OpenEye", icon: Crosshair },
+        ],
+      },
+      {
+        heading: "Try it",
+        links: [
+          { href: "/demo", label: "Live Demo", description: "Run perception in the browser", icon: PlayCircle },
+          { href: "/dashboard", label: "Dashboard", description: "Inference, fleet & metrics", icon: LayoutDashboard },
+          { href: "/pricing", label: "Pricing", description: "Free CLI, paid cloud credits", icon: Tag },
+        ],
+      },
+    ],
+    feature: {
+      href: "/demo",
+      label: "Try the Live Demo",
+      description: "Stream your camera through OpenEye in under a minute",
+      icon: PlayCircle,
+    },
+  },
+  {
+    label: "Resources",
+    columns: [
+      {
+        heading: "Learn",
+        links: [
+          { href: "/docs", label: "Docs", description: "Install, run & integrate", icon: BookOpen },
+          { href: "/blog", label: "Blog", description: "Engineering notes & releases", icon: Newspaper },
+          { href: "/changelog", label: "Changelog", description: "What shipped recently", icon: ScrollText },
+        ],
+      },
+      {
+        heading: "Company",
+        links: [
+          { href: "/about", label: "About", description: "Mission & team", icon: Info },
+          { href: "/community", label: "Community", description: "Join the conversation", icon: MessagesSquare },
+          { href: "/presentation", label: "Pitch Deck", description: "The OpenEye story", icon: PresentationIcon },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Developers",
+    columns: [
+      {
+        heading: "Build",
+        links: [
+          { href: "/docs", label: "Documentation", description: "CLI, API & adapters", icon: BookOpen },
+          { href: "/models", label: "Model Registry", description: "Pretrained model catalog", icon: Boxes },
+          { href: "/architecture", label: "Architecture", description: "Pipeline internals", icon: Network },
+        ],
+      },
+      {
+        heading: "Open source",
+        links: [
+          { href: GITHUB_URL, label: "GitHub", description: "Star, fork & contribute", icon: Github, external: true },
+          { href: "/hackathon", label: "Hackathon", description: "Build on OpenEye", icon: Trophy },
+          { href: "/community", label: "Community", description: "Get help from devs", icon: MessagesSquare },
+        ],
+      },
+    ],
+    feature: {
+      href: GITHUB_URL,
+      label: "Star us on GitHub",
+      description: "OpenEye is fully open-source — drop a star to follow along",
+      icon: Github,
+      external: true,
+    },
+  },
+];
+
+/** Legacy flat nav (kept for backward compat with tests/components) */
 export const publicNavItems: NavItem[] = [
   { href: "/docs", label: "Docs" },
   { href: "/pricing", label: "Pricing" },
@@ -154,4 +270,4 @@ export const fleetNavItems: DashboardNavItem[] = [
   { label: "Alerts", icon: Bell, path: "/dashboard/fleet/alerts" },
 ];
 
-export const GITHUB_URL = "https://github.com/aw3-technology/openeye.sh";
+
