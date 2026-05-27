@@ -74,6 +74,8 @@ export function isDropdown(item: NavItem): item is NavDropdown {
   return "items" in item;
 }
 
+export const GITHUB_URL = "https://github.com/aw3-technology/openeye.sh";
+
 /** Mega-menu types for the public navbar */
 export interface MegaMenuLink {
   href: string;
