@@ -40,6 +40,7 @@ export default function Blog() {
       />
       <Navbar />
 
+      <main>
       <section className="pt-28 pb-16 px-4">
         <div className="container max-w-6xl mx-auto">
           <motion.div
