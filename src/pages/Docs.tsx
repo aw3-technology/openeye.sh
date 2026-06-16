@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { DocsSidebar, SidebarNav } from "@/components/docs/DocsSidebar";
 import { DocsContent } from "@/components/docs/DocsContent";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
@@ -46,6 +47,11 @@ export default function Docs() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Docs | OpenEye"
+        description="OpenEye documentation: installation, CLI reference, model catalog, scene-graph API, and self-hosted deployment guides."
+        path="/docs"
+      />
       <Navbar />
 
       {/* Header */}

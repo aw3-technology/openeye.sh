@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import {
   pricingTiers,
   pricingFaq,
@@ -132,6 +133,11 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Pricing | OpenEye"
+        description="Compare OpenEye plans for self-hosted, hosted inference, and team usage. Transparent per-call credits with no surprise overage."
+        path="/pricing"
+      />
       <Navbar />
 
       {/* Hero */}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { isCloudDeployment } from "@/lib/deployment-env";
 import logoVertical from "@/assets/openeye-logo-vertical.png";
@@ -76,6 +77,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <PageMeta
+        title="Sign in | OpenEye"
+        description="Sign in to OpenEye to access your dashboard, manage API keys, and monitor inference usage across your perception deployments."
+        path="/login"
+      />
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

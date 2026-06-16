@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 const channels = [
   {
@@ -59,6 +60,11 @@ export default function Community() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Community | OpenEye"
+        description="Join the OpenEye community on Discord, GitHub Discussions, and beyond. Share projects, ask questions, and contribute to open perception."
+        path="/community"
+      />
       <Navbar />
 
       {/* Header */}

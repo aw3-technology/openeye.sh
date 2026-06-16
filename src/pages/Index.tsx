@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { TechEcosystem } from "@/components/TechEcosystem";
 import { CodeExamples } from "@/components/CodeExamples";
 import { GetStarted } from "@/components/GetStarted";
@@ -24,6 +25,11 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="OpenEye — Open-Source Perception for Agents & Robots"
+        description="OpenEye is a CLI-first perception engine that turns raw video into structured world models for robots, VLA models, and autonomous agents."
+        path="/"
+      />
       <Navbar />
       <HeroSection />
       <VisionDemoSection />

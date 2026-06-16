@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
@@ -111,6 +112,11 @@ export default function Architecture() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Architecture | OpenEye"
+        description="Inside the OpenEye architecture: the perception pipeline, scene-graph layer, CLI runtime, and how it plugs into VLA agents."
+        path="/architecture"
+      />
       <Navbar />
 
       {/* Hero */}

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { ModelCard } from "@/components/ModelCard";
 import { modelGroups } from "@/data/modelsData";
 import { HeroSection } from "@/pages/models/HeroSection";
@@ -23,6 +24,11 @@ export default function Models() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Models | OpenEye"
+        description="Browse the OpenEye model catalog: detection, depth, segmentation, and vision-language models tuned for real-time perception on commodity GPUs."
+        path="/models"
+      />
       <Navbar />
 
       <HeroSection />
