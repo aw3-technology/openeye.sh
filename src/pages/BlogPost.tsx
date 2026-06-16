@@ -211,6 +211,7 @@ export default function BlogPost() {
         path={`/blog/${post.slug}`}
       />
       <Navbar />
+      <main>
 
       <article className="pt-28 pb-24 px-4">
         <div className="container max-w-3xl mx-auto">
@@ -280,6 +281,7 @@ export default function BlogPost() {
         </div>
       </article>
 
+      </main>
       <Footer />
     </div>
   );

@@ -23,12 +23,14 @@ export default function About() {
         path="/about"
       />
       <Navbar />
+      <main>
       <HeroSection />
       <MissionSection />
       <ValuesSection />
       <TeamSection />
       <TimelineSection />
       <CtaSection />
+      </main>
       <Footer />
     </div>
   );

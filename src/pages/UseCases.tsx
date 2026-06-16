@@ -24,6 +24,7 @@ export default function UseCases() {
         path="/use-cases"
       />
       <Navbar />
+      <main>
 
       {/* Hero */}
       <section className="pt-28 pb-16 px-4">
@@ -187,6 +188,7 @@ export default function UseCases() {
         </div>
       </section>
 
+      </main>
       <Footer />
     </div>
   );

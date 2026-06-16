@@ -66,6 +66,7 @@ export default function Community() {
         path="/community"
       />
       <Navbar />
+      <main>
 
       {/* Header */}
       <section className="pt-28 pb-16 px-4">
@@ -260,6 +261,7 @@ export default function Community() {
         </div>
       </section>
 
+      </main>
       <Footer />
     </div>
   );

@@ -30,6 +30,7 @@ export default function Models() {
         path="/models"
       />
       <Navbar />
+      <main>
 
       <HeroSection />
       <StatsSection />
@@ -73,6 +74,7 @@ export default function Models() {
       <FaqSection />
       <CtaSection />
 
+      </main>
       <Footer />
     </div>
   );

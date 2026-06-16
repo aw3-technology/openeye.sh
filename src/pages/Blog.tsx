@@ -18,10 +18,12 @@ export default function Blog() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
+      <main>
         <div className="pt-28 px-4 text-center">
           <p className="text-muted-foreground font-mono">No posts yet.</p>
         </div>
-        <Footer />
+        </main>
+      <Footer />
       </div>
     );
   }
@@ -164,6 +166,7 @@ export default function Blog() {
         </div>
       </section>
 
+      </main>
       <Footer />
     </div>
   );
