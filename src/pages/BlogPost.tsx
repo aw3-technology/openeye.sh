@@ -3,6 +3,7 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { getBlogPost, formatDate } from "@/data/blogPosts";
 import { categoryColors } from "@/data/categoryColors";
 import { blogHeroImages } from "@/data/blogHeroImages";
@@ -204,6 +205,11 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title={`${post.title} | OpenEye Blog`}
+        description={post.excerpt || `Read “${post.title}” on the OpenEye blog — engineering notes and updates from the open-source perception team.`}
+        path={`/blog/${post.slug}`}
+      />
       <Navbar />
 
       <article className="pt-28 pb-24 px-4">
