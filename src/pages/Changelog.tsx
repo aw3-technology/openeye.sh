@@ -55,6 +55,7 @@ export default function Changelog() {
         path="/changelog"
       />
       <Navbar />
+      <main>
 
       {/* Header */}
       <section className="pt-28 pb-12 px-4">
@@ -187,6 +188,7 @@ export default function Changelog() {
         </div>
       </section>
 
+      </main>
       <Footer />
     </div>
   );

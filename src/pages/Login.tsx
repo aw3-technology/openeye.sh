@@ -76,7 +76,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <main className="min-h-screen bg-background flex items-center justify-center px-4">
       <PageMeta
         title="Sign in | OpenEye"
         description="Sign in to OpenEye to access your dashboard, manage API keys, and monitor inference usage across your perception deployments."
@@ -228,6 +228,6 @@ export default function LoginPage() {
           {isCloud ? "By signing in, you agree to OpenEye's open-source terms." : "Running locally — use email/password or demo login."}
         </p>
       </motion.div>
-    </div>
+    </main>
   );
 }

@@ -53,6 +53,7 @@ export default function Docs() {
         path="/docs"
       />
       <Navbar />
+      <main>
 
       {/* Header */}
       <div className="pt-20 pb-8 px-4 border-b border-foreground/[0.06]">
@@ -120,6 +121,7 @@ export default function Docs() {
         </div>
       </div>
 
+      </main>
       <Footer />
     </div>
   );

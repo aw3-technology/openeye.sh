@@ -31,6 +31,7 @@ export default function Index() {
         path="/"
       />
       <Navbar />
+      <main>
       <HeroSection />
       <VisionDemoSection />
       <SafetyGuardianSection />
@@ -46,6 +47,7 @@ export default function Index() {
       <DeployAnywhereSection />
       <BuiltWithSection />
       <FinalCTA />
+      </main>
       <Footer />
     </div>
   );

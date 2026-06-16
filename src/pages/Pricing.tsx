@@ -139,6 +139,7 @@ export default function Pricing() {
         path="/pricing"
       />
       <Navbar />
+      <main>
 
       {/* Hero */}
       <section className="pt-28 pb-16 px-4">
@@ -278,6 +279,7 @@ export default function Pricing() {
         </div>
       </section>
 
+      </main>
       <Footer />
     </div>
   );

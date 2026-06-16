@@ -118,6 +118,7 @@ export default function Architecture() {
         path="/architecture"
       />
       <Navbar />
+      <main>
 
       {/* Hero */}
       <section className="pt-28 pb-16 px-4">
@@ -367,6 +368,7 @@ export default function Architecture() {
         </div>
       </section>
 
+      </main>
       <Footer />
     </div>
   );
