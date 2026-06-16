@@ -1,0 +1,24 @@
+# OpenEye
+
+> Open-source "Ollama for vision" — a CLI-first perception engine that turns raw video into structured world models for robots, VLA models, and autonomous agents.
+
+OpenEye provides open-source perception infrastructure for the next generation of embodied AI. It runs locally on commodity GPUs, ships as a pipx-installable CLI, and exposes a scene-graph API that converts visual input into structured observations for agents and robots.
+
+## Pages
+
+- [Home](/): Product overview, key features, CLI examples, demo video, and deployment options.
+- [About](/about): Mission, values, team, and timeline for the OpenEye project.
+- [Blog](/blog): Articles on perception research, releases, and community updates.
+- [Changelog](/changelog): Version history and release notes.
+- [Community](/community): Discord, GitHub, and contributor guidelines.
+- [Use Cases](/use-cases): Robotics, industrial safety, drone navigation, and home automation scenarios.
+- [Docs](/docs): Installation, CLI reference, model catalog, scene-graph API, and deployment guides.
+- [Pricing](/pricing): Plans for individuals, teams, and enterprise deployments.
+- [Models](/models): Detection, depth, segmentation, and vision-language models tuned for real-time perception.
+- [Architecture](/architecture): System design, inference pipeline, and fleet management.
+- [Live Demo](/demo): Interactive demonstration of OpenEye's perception capabilities.
+
+## Optional
+
+- [Terms of Service](/terms): Legal terms governing use of OpenEye.
+- [Privacy Policy](/privacy): Data collection, usage, and user rights.
