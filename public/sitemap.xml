@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://openeye.sh/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://openeye.sh/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://openeye.sh/blog</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openeye.sh/changelog</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openeye.sh/community</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openeye.sh/use-cases</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://openeye.sh/docs</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://openeye.sh/pricing</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openeye.sh/models</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openeye.sh/architecture</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://openeye.sh/demo</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openeye.sh/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://openeye.sh/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://openeye.sh/login</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+</urlset>
