@@ -31,6 +31,11 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Blog | OpenEye"
+        description="Read OpenEye engineering notes, release walkthroughs, and deep dives on building open-source perception systems for robots and AI agents."
+        path="/blog"
+      />
       <Navbar />
 
       <section className="pt-28 pb-16 px-4">

@@ -47,6 +47,11 @@ export default function Docs() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Docs | OpenEye"
+        description="OpenEye documentation: installation, CLI reference, model catalog, scene-graph API, and self-hosted deployment guides."
+        path="/docs"
+      />
       <Navbar />
 
       {/* Header */}

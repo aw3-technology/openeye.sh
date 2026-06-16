@@ -15,6 +15,11 @@ export default function LiveDemo() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Live Demo | OpenEye"
+        description="Try OpenEye in your browser: run detection, VLM reasoning, and safety guardian demos against live video streams."
+        path="/demo"
+      />
       <Navbar />
 
       <main className="pt-24 pb-20 px-4">

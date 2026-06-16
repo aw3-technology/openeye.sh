@@ -112,6 +112,11 @@ export default function Architecture() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Architecture | OpenEye"
+        description="Inside the OpenEye architecture: the perception pipeline, scene-graph layer, CLI runtime, and how it plugs into VLA agents."
+        path="/architecture"
+      />
       <Navbar />
 
       {/* Hero */}

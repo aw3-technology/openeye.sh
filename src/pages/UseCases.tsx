@@ -18,6 +18,11 @@ export default function UseCases() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Use Cases | OpenEye"
+        description="Explore how teams use OpenEye for industrial safety, autonomous robotics, smart spaces, and AI-agent perception workflows."
+        path="/use-cases"
+      />
       <Navbar />
 
       {/* Hero */}

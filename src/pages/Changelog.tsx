@@ -49,6 +49,11 @@ export default function Changelog() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Changelog | OpenEye"
+        description="Browse the OpenEye changelog: new models, CLI features, dashboard improvements, and platform updates shipped each release."
+        path="/changelog"
+      />
       <Navbar />
 
       {/* Header */}

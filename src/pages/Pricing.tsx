@@ -133,6 +133,11 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Pricing | OpenEye"
+        description="Compare OpenEye plans for self-hosted, hosted inference, and team usage. Transparent per-call credits with no surprise overage."
+        path="/pricing"
+      />
       <Navbar />
 
       {/* Hero */}
