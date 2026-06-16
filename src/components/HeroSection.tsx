@@ -7,15 +7,11 @@ export function HeroSection() {
     <section className="pt-28 pb-[15vh] px-4">
       <div className="container max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-          >
+          <div>
             <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
               Open-Source Perception Engine
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold font-display leading-[1.05] mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold font-display leading-[1.05] mb-6">
               Open-source eyes for the agent era.
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed mb-6 max-w-lg">
@@ -53,7 +49,7 @@ export function HeroSection() {
                 GitHub
               </a>
             </div>
-          </motion.div>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 16 }}
