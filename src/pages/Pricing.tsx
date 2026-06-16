@@ -139,6 +139,17 @@ export default function Pricing() {
         description="Compare OpenEye plans for self-hosted, hosted inference, and team usage. Transparent per-call credits with no surprise overage."
         path="/pricing"
       />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: pricingFaq.map((item) => ({
+            "@type": "Question",
+            name: item.question,
+            acceptedAnswer: { "@type": "Answer", text: item.answer },
+          })),
+        }}
+      />
       <Navbar />
       <main>
 
