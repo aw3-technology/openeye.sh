@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageMeta } from "@/components/seo/PageMeta";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getBlogPost, formatDate } from "@/data/blogPosts";
 import { categoryColors } from "@/data/categoryColors";
 import { blogHeroImages } from "@/data/blogHeroImages";
@@ -209,6 +210,23 @@ export default function BlogPost() {
         title={`${post.title} | OpenEye Blog`}
         description={post.excerpt || `Read “${post.title}” on the OpenEye blog — engineering notes and updates from the open-source perception team.`}
         path={`/blog/${post.slug}`}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: post.title,
+          description: post.excerpt,
+          datePublished: post.date,
+          author: { "@type": "Person", name: post.author },
+          publisher: {
+            "@type": "Organization",
+            name: "OpenEye",
+            logo: { "@type": "ImageObject", url: "https://openeye.sh/favicon.ico" },
+          },
+          mainEntityOfPage: `https://openeye.sh/blog/${post.slug}`,
+          ...(blogHeroImages[post.slug] ? { image: blogHeroImages[post.slug] } : {}),
+        }}
       />
       <Navbar />
       <main>
