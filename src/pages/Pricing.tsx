@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageMeta } from "@/components/seo/PageMeta";
+import { JsonLd } from "@/components/seo/JsonLd";
 import {
   pricingTiers,
   pricingFaq,
@@ -137,6 +138,17 @@ export default function Pricing() {
         title="Pricing | OpenEye"
         description="Compare OpenEye plans for self-hosted, hosted inference, and team usage. Transparent per-call credits with no surprise overage."
         path="/pricing"
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: pricingFaq.map((item) => ({
+            "@type": "Question",
+            name: item.question,
+            acceptedAnswer: { "@type": "Answer", text: item.answer },
+          })),
+        }}
       />
       <Navbar />
       <main>

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageMeta } from "@/components/seo/PageMeta";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { TechEcosystem } from "@/components/TechEcosystem";
 import { CodeExamples } from "@/components/CodeExamples";
 import { GetStarted } from "@/components/GetStarted";
@@ -29,6 +30,29 @@ export default function Index() {
         title="OpenEye — Open-Source Perception for Agents & Robots"
         description="OpenEye is a CLI-first perception engine that turns raw video into structured world models for robots, VLA models, and autonomous agents."
         path="/"
+      />
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "OpenEye",
+            url: "https://openeye.sh",
+            logo: "https://openeye.sh/favicon.ico",
+            sameAs: ["https://github.com/aw3-technology/openeye.sh"],
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "OpenEye",
+            url: "https://openeye.sh",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: "https://openeye.sh/docs?q={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
+          },
+        ]}
       />
       <Navbar />
       <main>
