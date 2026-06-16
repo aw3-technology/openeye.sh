@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { ShieldCheck, Zap, Eye, Cog } from "lucide-react";
 import { useCases } from "@/data/useCasesData";
 import { UseCaseSection } from "@/components/UseCaseCard";

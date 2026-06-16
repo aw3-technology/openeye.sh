@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { blogPosts, formatDate } from "@/data/blogPosts";
 import { categoryColors } from "@/data/categoryColors";
 import { blogHeroImages } from "@/data/blogHeroImages";

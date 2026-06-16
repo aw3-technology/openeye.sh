@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { ChevronRight } from "lucide-react";
 import { tabs } from "@/components/live-demo/constants";
 import { SafetyDemo } from "@/components/live-demo/SafetyDemo";

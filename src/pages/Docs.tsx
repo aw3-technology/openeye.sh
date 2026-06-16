@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { DocsSidebar, SidebarNav } from "@/components/docs/DocsSidebar";
 import { DocsContent } from "@/components/docs/DocsContent";
 import { useScrollSpy } from "@/hooks/useScrollSpy";

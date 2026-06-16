@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { ModelCard } from "@/components/ModelCard";
 import { modelGroups } from "@/data/modelsData";
 import { HeroSection } from "@/pages/models/HeroSection";

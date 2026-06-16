@@ -1,9 +1,15 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageMeta
+        title="Privacy Policy | OpenEye"
+        description="Learn how OpenEye collects, uses, and protects your data when you use the perception engine, dashboard, and CLI tools."
+        path="/privacy"
+      />
       <Navbar />
       <main className="pt-28 pb-20 px-4">
         <div className="container max-w-3xl mx-auto">

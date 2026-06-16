@@ -1,9 +1,15 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageMeta
+        title="Terms of Service | OpenEye"
+        description="Read the OpenEye terms of service covering acceptable use, account responsibilities, and the terms governing access to the OpenEye platform and CLI."
+        path="/terms"
+      />
       <Navbar />
       <main className="pt-28 pb-20 px-4">
         <div className="container max-w-3xl mx-auto">
