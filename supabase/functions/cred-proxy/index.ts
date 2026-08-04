@@ -1,10 +1,13 @@
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-client-info, apikey, content-type, x-signup-url, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const CRED_API_BASE = Deno.env.get("CRED_API_BASE") || "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
+
+/** App origin used for Cred first-touch attribution. */
+const APP_ORIGIN = Deno.env.get("CRED_APP_ORIGIN") || "https://openeye.sh";
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -84,6 +87,7 @@ Deno.serve(async (req) => {
 
   try {
     let body: string | undefined;
+    const signupUrl = req.headers.get("x-signup-url") || APP_ORIGIN;
     if (req.method !== "GET" && req.method !== "HEAD") {
       const rawBody = await req.text();
       // For POST/PATCH requests, inject user identity into body if not present
@@ -96,6 +100,8 @@ Deno.serve(async (req) => {
         if (!parsed.user_email && userEmail) parsed.user_email = userEmail;
         if (!parsed.email && userEmail) parsed.email = userEmail;
         if (!parsed.name && userEmail) parsed.name = userEmail.split("@")[0];
+        // Cred first-touch attribution (recorded once, never overwritten)
+        if (!parsed.signup_url) parsed.signup_url = signupUrl;
         body = JSON.stringify(parsed);
       } catch {
         body = rawBody;
@@ -110,6 +116,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
         "x-api-key": CRED_API_KEY,
         "x-user-token": token,
+        "x-app-origin": APP_ORIGIN,
       },
       body,
     });
