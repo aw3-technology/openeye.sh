@@ -38,6 +38,9 @@ async function request<T>(
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        ...(typeof window !== "undefined"
+          ? { "x-signup-url": window.location.href }
+          : {}),
         ...(options?.headers as Record<string, string> || {}),
       },
       signal: controller.signal,
