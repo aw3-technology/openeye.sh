@@ -1,6 +1,6 @@
 /**
  * React Query hooks for fleet management data.
- * Uses Supabase-backed fleet client (no local server required).
+ * Uses the Neon-backed fleet client (no local server required).
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

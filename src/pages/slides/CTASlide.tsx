@@ -55,7 +55,7 @@ export function CTASlide() {
           <span className="text-primary">&middot;</span>
           <span>Apache 2.0</span>
           <span className="text-primary">&middot;</span>
-          <span>openeye.lovable.app</span>
+          <span>openeye.sh</span>
         </motion.div>
       </div>
     </SlideLayout>

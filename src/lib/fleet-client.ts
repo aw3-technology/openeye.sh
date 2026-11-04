@@ -1,7 +1,7 @@
 /**
  * Fleet Management client — Hybrid facade.
  *
- * - Cloud/production mode → uses Supabase directly (CloudFleetClient)
+ * - Cloud/production mode → uses the /api/data Vercel functions (CloudFleetClient)
  * - Local/development mode → hits the local Python fleet server via HTTP (LocalFleetClient)
  *
  * Detection is automatic via VITE_DEPLOY_ENV / hostname (see deployment-env.ts).

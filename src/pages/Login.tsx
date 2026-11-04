@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { PageMeta } from "@/components/seo/PageMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { isCloudDeployment } from "@/lib/deployment-env";
@@ -9,6 +9,11 @@ import logoVertical from "@/assets/openeye-logo-vertical.png";
 import logoVerticalDark from "@/assets/openeye-logo-vertical-dark.png";
 
 type AuthMode = "sign_in" | "sign_up";
+
+// Social providers configured on the server (GOOGLE_CLIENT_ID, APPLE_CLIENT_ID).
+const OAUTH_PROVIDERS = new Set(
+  (import.meta.env.VITE_AUTH_PROVIDERS as string | undefined)?.split(",").map((p) => p.trim()) ?? [],
+);
 
 export default function LoginPage() {
   const [loading, setLoading] = useState<string | null>(null);
@@ -33,9 +38,11 @@ export default function LoginPage() {
     setLoading(provider);
     setError(null);
     setSuccess(null);
-    const { lovable } = await import("@/integrations/lovable/index");
-    const result = await lovable.auth.signInWithOAuth(provider, {
-      redirect_uri: window.location.origin,
+    const from = (location.state as { from?: string })?.from || "/dashboard";
+    const result = await authClient.signIn.social({
+      provider,
+      callbackURL: from,
+      errorCallbackURL: "/login",
     });
     if (result?.error) {
       setError(result.error.message || "Sign-in failed");
@@ -49,28 +56,15 @@ export default function LoginPage() {
     setError(null);
     setSuccess(null);
 
-    if (mode === "sign_up") {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: window.location.origin },
-      });
-      if (error) {
-        setError(error.message);
-      } else {
-        setSuccess("Check your email to confirm your account.");
-      }
+    const { error } =
+      mode === "sign_up"
+        ? await authClient.signUp.email({ email, password, name: email.split("@")[0] })
+        : await authClient.signIn.email({ email, password });
+    if (error) {
+      setError(error.message || "Sign-in failed");
     } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        setError(error.message);
-      } else {
-        const from = (location.state as { from?: string })?.from || "/dashboard";
-        navigate(from, { replace: true });
-      }
+      const from = (location.state as { from?: string })?.from || "/dashboard";
+      navigate(from, { replace: true });
     }
     setLoading(null);
   };
@@ -140,10 +134,11 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* OAuth Buttons — cloud only (requires managed broker) */}
+        {/* OAuth Buttons — cloud only, for providers configured on the server */}
         {isCloud && (
           <>
             <div className="space-y-3 mb-4">
+              {OAUTH_PROVIDERS.has("google") && (
               <button
                 onClick={() => handleOAuthSignIn("google")}
                 disabled={!!loading}
@@ -157,7 +152,9 @@ export default function LoginPage() {
                 </svg>
                 {loading === "google" ? "Signing in..." : "Continue with Google"}
               </button>
+              )}
 
+              {OAUTH_PROVIDERS.has("apple") && (
               <button
                 onClick={() => handleOAuthSignIn("apple")}
                 disabled={!!loading}
@@ -168,6 +165,7 @@ export default function LoginPage() {
                 </svg>
                 {loading === "apple" ? "Signing in..." : "Continue with Apple"}
               </button>
+              )}
             </div>
 
             <div className="relative my-5">

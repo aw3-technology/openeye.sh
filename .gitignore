@@ -48,3 +48,7 @@ backend/dump/
 backend/uv.lock
 *.pt
 *.pth
+
+.vercel
+.env*.local
+.env*

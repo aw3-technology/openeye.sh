@@ -86,65 +86,32 @@ const fakeMaintenanceRow = {
   updated_at: now,
 };
 
-// ── Supabase mock builder ───────────────────────────────────────
+// ── /api/data fetch mock ────────────────────────────────────────
 
 let mockSingleResult: { data: any; error: any } = { data: fakeDeviceRow, error: null };
 let mockListResult: { data: any; error: any } = { data: [fakeDeviceRow], error: null };
-let mockCountResult: { count: number } = { count: 3 };
 
-function chainMock() {
-  const mock: Record<string, any> = {};
-
-  // Every chainable method returns the mock itself
-  for (const method of ["select", "insert", "update", "delete", "eq", "in", "limit"]) {
-    mock[method] = vi.fn(() => mock);
-  }
-
-  // order() makes the chain thenable (resolves with list result)
-  mock.order = vi.fn(() => {
-    mock.then = (fn: any) => Promise.resolve(mockListResult).then(fn);
-    return mock;
-  });
-
-  // single() resolves with single result
-  mock.single = vi.fn(() => Promise.resolve(mockSingleResult));
-
-  // Default thenable for list queries
-  mock.then = (resolve: any, reject: any) => Promise.resolve(mockListResult).then(resolve, reject);
-
-  return mock;
-}
-
-vi.mock("@/integrations/supabase/client", () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: { user: { id: "test-user" }, access_token: "test-token" } },
-      }),
-    },
-    from: vi.fn(() => {
-      const mock = chainMock();
-      // For count queries (head: true), return mock count
-      const origSelect = mock.select;
-      mock.select = vi.fn((...args: any[]) => {
-        if (args[1]?.head) {
-          const countMock = chainMock();
-          countMock.then = (fn: any) => Promise.resolve(mockCountResult).then(fn);
-          return countMock;
-        }
-        origSelect(...args);
-        return mock;
-      });
-      return mock;
-    }),
-  },
-}));
+const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+  const method = init?.method || "GET";
+  const path = new URL(url, "http://localhost").pathname.replace(/^\/api\/data\//, "");
+  const isCollection = path.split("/").length === 1;
+  // Collection GETs and deletes use the list result; everything else the single result.
+  const result = (method === "GET" && isCollection) || method === "DELETE" ? mockListResult : mockSingleResult;
+  const ok = !result.error;
+  const body = !ok
+    ? { error: result.error.message }
+    : method === "GET" && isCollection
+      ? { data: result.data ?? [] }
+      : result.data ?? {};
+  return { ok, status: ok ? 200 : 400, text: async () => JSON.stringify(body) };
+});
+vi.stubGlobal("fetch", fetchMock);
 
 import { CloudFleetClient } from "../fleet-client-cloud";
 
 // ── Tests ───────────────────────────────────────────────────────
 
-describe("CloudFleetClient (Supabase)", () => {
+describe("CloudFleetClient (/api/data)", () => {
   let client: CloudFleetClient;
 
   beforeEach(() => {
@@ -163,7 +130,16 @@ describe("CloudFleetClient (Supabase)", () => {
       expect(device.name).toBe("cam-front");
     });
 
-    it("throws on supabase error", async () => {
+    it("POSTs to /api/data/devices without a client-supplied user_id", async () => {
+      fetchMock.mockClear();
+      await client.registerDevice({ name: "cam-1" } as any);
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(url).toBe("/api/data/devices");
+      expect(init?.method).toBe("POST");
+      expect(JSON.parse(init?.body as string)).not.toHaveProperty("user_id");
+    });
+
+    it("throws on API error", async () => {
       mockSingleResult = { data: null, error: { message: "insert failed" } };
       await expect(client.registerDevice({ name: "cam-1" } as any)).rejects.toThrow("insert failed");
     });
@@ -292,7 +268,7 @@ describe("CloudFleetClient (Supabase)", () => {
       await expect(client.deleteGroup("grp-1")).resolves.not.toThrow();
     });
 
-    it("throws on supabase error", async () => {
+    it("throws on API error", async () => {
       mockListResult = { data: null, error: { message: "foreign key violation" } };
       await expect(client.deleteGroup("grp-1")).rejects.toThrow("foreign key violation");
     });

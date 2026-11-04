@@ -2,7 +2,7 @@
  * DB-row-to-API-response mappers for the cloud fleet client.
  */
 
-import type { Database } from "@/integrations/supabase/types";
+import type { Database } from "@/types/database";
 import type {
   DeviceResponse,
   DeploymentResponse,

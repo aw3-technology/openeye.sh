@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOpenEyeConnection } from "./useOpenEyeConnection";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import { useAuth } from "./useAuth";
 import type { InferenceHistoryRow, ApiKeyRow, DeviceRow } from "@/types/openeye";
 
@@ -30,16 +30,12 @@ export function useInferenceHistory(page = 0, pageSize = 20) {
     queryKey: ["openeye", "inference_history", user?.id, page, pageSize],
     queryFn: async () => {
       if (!user || isDemo) return { data: [] as InferenceHistoryRow[], count: 0 };
-      const from = page * pageSize;
-      const to = from + pageSize - 1;
-      const { data, count, error } = await supabase
-        .from("inference_history" as any)
-        .select("*", { count: "exact" })
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .range(from, to);
-      if (error) throw error;
-      return { data: (data || []) as unknown as InferenceHistoryRow[], count: count || 0 };
+      const { data, count } = await api.list<InferenceHistoryRow>("inference_history", {
+        limit: pageSize,
+        offset: page * pageSize,
+        count: 1,
+      });
+      return { data, count: count || 0 };
     },
     enabled: !!user,
   });
@@ -51,10 +47,7 @@ export function useSaveInference() {
   return useMutation({
     mutationFn: async (row: Omit<InferenceHistoryRow, "id" | "user_id" | "created_at">) => {
       if (!user || isDemo) return;
-      const { error } = await supabase
-        .from("inference_history" as any)
-        .insert({ ...row, user_id: user.id });
-      if (error) throw error;
+      await api.create("inference_history", row);
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["openeye", "inference_history"] });
@@ -68,13 +61,8 @@ export function useApiKeys() {
     queryKey: ["openeye", "api_keys", user?.id],
     queryFn: async () => {
       if (!user || isDemo) return [];
-      const { data, error } = await supabase
-        .from("api_keys" as any)
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data || []) as unknown as ApiKeyRow[];
+      const { data } = await api.list<ApiKeyRow>("api_keys");
+      return data;
     },
     enabled: !!user,
   });
@@ -86,13 +74,8 @@ export function useDevices() {
     queryKey: ["openeye", "devices", user?.id],
     queryFn: async () => {
       if (!user || isDemo) return [];
-      const { data, error } = await supabase
-        .from("devices" as any)
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data || []) as unknown as DeviceRow[];
+      const { data } = await api.list<DeviceRow>("devices");
+      return data;
     },
     enabled: !!user,
   });

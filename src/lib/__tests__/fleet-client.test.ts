@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Force cloud mode so the Supabase mock is used
+// Force cloud mode so the /api/data fetch mock is used
 vi.mock("@/lib/deployment-env", () => ({
   isCloudDeployment: () => true,
 }));
@@ -84,49 +84,27 @@ const fakeMaintenance = {
   updated_at: now,
 };
 
-// ── Supabase mock builder ───────────────────────────────────────
+// ── /api/data fetch mock ────────────────────────────────────────
 
 let mockSingleResult: { data: any; error: any } = { data: fakeDevice, error: null };
 let mockListResult: { data: any; error: any } = { data: [fakeDevice], error: null };
 
-const chainMock = () => ({
-  select: vi.fn().mockReturnThis(),
-  insert: vi.fn().mockReturnThis(),
-  update: vi.fn().mockReturnThis(),
-  delete: vi.fn().mockReturnThis(),
-  eq: vi.fn().mockReturnThis(),
-  in: vi.fn().mockReturnThis(),
-  order: vi.fn().mockImplementation(function (this: any) {
-    // Resolve with the list result when order() is the terminal call
-    Object.assign(this, { then: (fn: any) => Promise.resolve(mockListResult).then(fn) });
-    return this;
-  }),
-  limit: vi.fn().mockReturnThis(),
-  single: vi.fn().mockImplementation(() => Promise.resolve(mockSingleResult)),
-  then: undefined as any,
-});
-
-vi.mock("@/integrations/supabase/client", () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: { user: { id: "test-user" }, access_token: "test-token" } },
-      }),
-    },
-    from: vi.fn(() => {
-      const mock = chainMock();
-      // Make the chain itself thenable for list queries (select -> order -> await)
-      (mock as any).then = (resolve: any, reject: any) => Promise.resolve(mockListResult).then(resolve, reject);
-      return mock;
-    }),
-  },
+vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+  const method = init?.method || "GET";
+  const path = new URL(url, "http://localhost").pathname.replace(/^\/api\/data\//, "");
+  const isCollection = path.split("/").length === 1;
+  const isList = method === "GET" && isCollection;
+  const result = isList || method === "DELETE" ? mockListResult : mockSingleResult;
+  const ok = !result.error;
+  const body = !ok ? { error: result.error.message } : isList ? { data: result.data ?? [] } : result.data ?? {};
+  return { ok, status: ok ? 200 : 400, text: async () => JSON.stringify(body) };
 }));
 
 import * as fleet from "../fleet-client";
 
 // ── Tests ───────────────────────────────────────────────────────
 
-describe("fleet-client (Supabase) — Stories 51-65", () => {
+describe("fleet-client (cloud) — Stories 51-65", () => {
   beforeEach(() => {
     mockSingleResult = { data: fakeDevice, error: null };
     mockListResult = { data: [fakeDevice], error: null };

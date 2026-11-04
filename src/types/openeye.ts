@@ -1,4 +1,4 @@
-/** TypeScript mirrors of cli/openeye_ai/schema.py Pydantic models + Supabase row types. */
+/** TypeScript mirrors of cli/openeye_ai/schema.py Pydantic models + database row types. */
 
 // --- Prediction schemas (mirror of schema.py) ---
 
@@ -76,7 +76,7 @@ export interface RuntimeConfig {
   [key: string]: unknown;
 }
 
-// --- Supabase row types ---
+// --- database row types ---
 
 export interface InferenceHistoryRow {
   id: string;

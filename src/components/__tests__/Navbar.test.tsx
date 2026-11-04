@@ -29,10 +29,8 @@ describe("Navbar", () => {
   it("shows Sign In button when no user", () => {
     mockUseAuth.mockReturnValue({
       user: null,
-      session: null,
       loading: false,
       signOut: vi.fn(),
-      tokenError: null,
       isDemo: false,
       signInAsDemo: vi.fn(),
     });
@@ -49,10 +47,8 @@ describe("Navbar", () => {
         email: "test@example.com",
         user_metadata: { full_name: "Test User" },
       } as unknown as ReturnType<typeof useAuth>["user"],
-      session: {} as unknown as ReturnType<typeof useAuth>["session"],
       loading: false,
       signOut: vi.fn(),
-      tokenError: null,
       isDemo: false,
       signInAsDemo: vi.fn(),
     });
@@ -66,10 +62,8 @@ describe("Navbar", () => {
   it("renders nav links", () => {
     mockUseAuth.mockReturnValue({
       user: null,
-      session: null,
       loading: false,
       signOut: vi.fn(),
-      tokenError: null,
       isDemo: false,
       signInAsDemo: vi.fn(),
     });
@@ -88,10 +82,8 @@ describe("Navbar", () => {
   it("renders while loading", () => {
     mockUseAuth.mockReturnValue({
       user: null,
-      session: null,
       loading: true,
       signOut: vi.fn(),
-      tokenError: null,
       isDemo: false,
       signInAsDemo: vi.fn(),
     });
@@ -108,10 +100,8 @@ describe("Navbar", () => {
         email: "noname@example.com",
         user_metadata: {},
       } as unknown as ReturnType<typeof useAuth>["user"],
-      session: {} as unknown as ReturnType<typeof useAuth>["session"],
       loading: false,
       signOut: vi.fn(),
-      tokenError: null,
       isDemo: false,
       signInAsDemo: vi.fn(),
     });

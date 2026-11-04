@@ -4,22 +4,13 @@ import type {
   PricingTier,
   CheckoutSession,
 } from "@/types/credits";
-import { supabase } from "@/integrations/supabase/client";
 
 const REQUEST_TIMEOUT_MS = 15_000;
-
-async function getToken(): Promise<string> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  if (!token) throw new Error("Not authenticated");
-  return token;
-}
 
 async function request<T>(
   subPath: string,
   options?: RequestInit,
 ): Promise<T> {
-  const token = await getToken();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -29,15 +20,12 @@ async function request<T>(
   }
 
   try {
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    const url = `https://${projectId}.supabase.co/functions/v1/cred-proxy/${subPath}`;
-
-    const res = await fetch(url, {
+    // Same-origin proxy (api/cred/[...path].ts); auth is the session cookie.
+    const res = await fetch(`/api/cred/${subPath}`, {
       ...options,
+      credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         ...(typeof window !== "undefined"
           ? { "x-signup-url": window.location.href }
           : {}),

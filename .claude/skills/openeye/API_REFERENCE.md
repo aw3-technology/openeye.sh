@@ -250,7 +250,7 @@ const credApi = {
 |------|---------|-------|
 | `useOpenEyeConnection()` | `{ serverUrl, setServerUrl, client, isConnected, healthData }` | Context provider for server connection |
 | `useOpenEyeStream()` | `{ isStreaming, latestResult, metrics, modelParams, setModelParams, startStream, stopStream, videoRef }` | WebSocket camera streaming |
-| `useAuth()` | `{ user, session, loading, signOut }` | Supabase auth context |
+| `useAuth()` | `{ user, loading, isDemo, signOut }` | Better Auth session context |
 | `useIsMobile()` | `boolean` | Responsive breakpoint (768px) |
 | `useScrollSpy(ids)` | `string` | Active section ID from IntersectionObserver |
 | `useToast()` | `{ toasts, toast, dismiss }` | Toast notification system (max 1 concurrent) |
@@ -262,7 +262,7 @@ const credApi = {
 | `useHealth()` | 5s | Server health check |
 | `usePredict()` | mutation | Single file prediction |
 | `useInferenceHistory(page, pageSize)` | — | Paginated inference history |
-| `useSaveInference()` | mutation | Save inference to Supabase |
+| `useSaveInference()` | mutation | Save inference to Neon (`/api/data`) |
 | `useApiKeys()` | — | User's API keys |
 | `useDevices()` | — | User's devices |
 | `useCreditBalance()` | 30s | Credit balance |
