@@ -9,7 +9,7 @@ export function BuiltWithSection() {
         <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
           Built With
         </div>
-        <h2 className="text-3xl md:text-4xl font-semibold font-display mb-12">
+        <h2 className="font-display text-4xl md:text-5xl font-light leading-[1.08] tracking-[-0.01em] mb-12">
           Open infrastructure. Open models.
         </h2>
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 font-mono text-sm text-muted-foreground">

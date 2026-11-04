@@ -1,33 +1,32 @@
 import logoVertical from "@/assets/openeye-logo-vertical.png";
 import logoVerticalDark from "@/assets/openeye-logo-vertical-dark.png";
+import { InstallButton } from "@/components/InstallButton";
 
 export function FinalCTA() {
   return (
-    <section className="py-[15vh] px-4 border-t border-foreground/[0.06]">
+    <section className="py-[15vh] px-4">
       <div className="container max-w-6xl mx-auto text-center">
         <img src={logoVerticalDark} alt="OpenEye" className="h-36 mx-auto mb-8 logo-dark" />
         <img src={logoVertical} alt="OpenEye" className="h-36 mx-auto mb-8 logo-light" />
-        <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+        <h2 className="font-display text-4xl md:text-5xl font-light leading-[1.08] tracking-[-0.01em] mb-4">
           The perception layer is open.
         </h2>
         <p className="text-muted-foreground mb-8 max-w-md mx-auto">
           Give your robots and agents the ability to see, understand, and act. Start building with OpenEye today.
         </p>
-        <div className="flex flex-wrap justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <a
             href="#get-started"
-            className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
+            className="rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
           >
-            Get Started
+            Get started
           </a>
-          <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border select-all cursor-text">
-            pipx install openeye-sh
-          </div>
+          <InstallButton />
           <a
             href="https://github.com/aw3-technology/openeye.sh"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-sm text-muted-foreground px-4 py-2.5 rounded-inner border border-foreground/[0.06] hover:text-foreground hover:border-foreground/10 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none"
+            className="rounded-full px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
           >
             Star on GitHub
           </a>

@@ -3,12 +3,12 @@ import { planTerminalLines } from "@/data/indexPageData";
 
 export function PerceptionLoopSection() {
   return (
-    <section className="py-[15vh] px-4">
+    <section id="perception-loop" className="py-[15vh] px-4">
       <div className="container max-w-6xl mx-auto">
         <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
           Agentic Perception Loop
         </div>
-        <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+        <h2 className="font-display text-4xl md:text-5xl font-light leading-[1.08] tracking-[-0.01em] mb-4">
           Perceive. Reason. Act. Repeat.
         </h2>
         <p className="text-muted-foreground mb-12 max-w-xl">

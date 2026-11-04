@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { ThemeProvider } from "@/hooks/useTheme";
 import { vi } from "vitest";
 
 // Mock useAuth before importing Navbar
@@ -19,14 +20,16 @@ const mockUseAuth = vi.mocked(useAuth);
 
 function renderNavbar() {
   return render(
-    <MemoryRouter>
-      <Navbar />
-    </MemoryRouter>
+    <ThemeProvider>
+      <MemoryRouter>
+        <Navbar />
+      </MemoryRouter>
+    </ThemeProvider>
   );
 }
 
 describe("Navbar", () => {
-  it("shows Sign In button when no user", () => {
+  it("shows Sign in button when no user", () => {
     mockUseAuth.mockReturnValue({
       user: null,
       loading: false,
@@ -37,10 +40,10 @@ describe("Navbar", () => {
 
     renderNavbar();
 
-    expect(screen.getAllByText("Sign In").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Sign in").length).toBeGreaterThan(0);
   });
 
-  it("shows Sign Out button when user exists", () => {
+  it("shows Sign out button when user exists", () => {
     mockUseAuth.mockReturnValue({
       user: {
         id: "123",
@@ -55,7 +58,7 @@ describe("Navbar", () => {
 
     renderNavbar();
 
-    expect(screen.getAllByText("Sign Out").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Sign out").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Test User").length).toBeGreaterThan(0);
   });
 
@@ -71,10 +74,10 @@ describe("Navbar", () => {
     const { container } = renderNavbar();
     const html = container.innerHTML;
 
-    expect(html).toContain("Docs");
-    expect(html).toContain("Pricing");
+    // Top-level menus; Docs, Pricing and GitHub live inside their dropdowns.
+    expect(html).toContain("Product");
     expect(html).toContain("Resources");
-    expect(html).toContain("GitHub");
+    expect(html).toContain("Developers");
   });
 
   // ── Edge cases ─────────────────────────────────────────────────
@@ -108,6 +111,6 @@ describe("Navbar", () => {
 
     renderNavbar();
 
-    expect(screen.getAllByText("Sign Out").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Sign out").length).toBeGreaterThan(0);
   });
 });

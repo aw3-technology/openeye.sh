@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
@@ -31,54 +32,54 @@
 
 @layer base {
   :root {
-    /* Dark mode as default per brand guide */
-    --background: 0 0% 7%;
-    --foreground: 0 0% 93%;
+    /* Dark mode as default per brand guide: cool lens-black ground */
+    --background: 200 33% 4%;
+    --foreground: 200 15% 94%;
 
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 93%;
+    --card: 200 25% 7%;
+    --card-foreground: 200 15% 94%;
 
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 93%;
+    --popover: 200 25% 7%;
+    --popover-foreground: 200 15% 94%;
 
-    --primary: 199 58% 44%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 199 64% 57%;
+    --primary-foreground: 200 33% 4%;
 
-    --secondary: 0 0% 17%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 200 18% 11%;
+    --secondary-foreground: 200 10% 90%;
 
-    --muted: 0 0% 25%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 200 12% 22%;
+    --muted-foreground: 200 8% 58%;
 
-    --accent: 0 72% 50%;
+    --accent: 358 75% 59%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 50%;
+    --destructive: 358 75% 59%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 100% / 0.08;
+    --border: 0 0% 100% / 0.07;
     --input: 0 0% 100% / 0.08;
-    --ring: 199 58% 44%;
+    --ring: 199 64% 57%;
 
     --radius: 0.75rem;
 
-    --oe-blue: 199 58% 44%;
-    --oe-red: 0 72% 50%;
-    --oe-black: 0 0% 12%;
+    --oe-blue: 199 64% 57%;
+    --oe-red: 358 75% 59%;
+    --oe-black: 200 25% 7%;
     --oe-green: 153 100% 50%;
 
-    --terminal-bg: 0 0% 7%;
+    --terminal-bg: 200 30% 5%;
     --terminal-fg: 0 0% 75%;
     --terminal-green: 153 100% 50%;
     --terminal-amber: 199 58% 55%;
-    --terminal-red: 0 72% 50%;
-    --terminal-muted: 0 0% 35%;
-    --terminal-blue: 199 58% 44%;
+    --terminal-red: 358 75% 59%;
+    --terminal-muted: 200 8% 38%;
+    --terminal-blue: 199 64% 57%;
 
-    --vision-glow: 199 58% 44% / 0.12;
-    --vision-border: 199 58% 44%;
+    --vision-glow: 199 64% 57% / 0.12;
+    --vision-border: 199 64% 57%;
 
-    --surface-elevated: 0 0% 14%;
+    --surface-elevated: 200 20% 10%;
 
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow-md: 0 4px 16px -4px rgb(0 0 0 / 0.3);
@@ -222,3 +223,92 @@
 .logo-dark { display: block; }
 .light .logo-light { display: block; }
 .light .logo-dark { display: none; }
+
+/* ── Framed column (shared with the TRMNLY / InfoSpace / Devya sites) ── */
+
+.oe-frame {
+  position: relative;
+  max-width: 72rem;
+  margin-inline: auto;
+  border-inline: 1px solid hsl(var(--border));
+}
+
+/* Section join: a hairline with viewfinder brackets where it meets the frame */
+.oe-rule {
+  position: relative;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.oe-rule::before,
+.oe-rule::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  width: 10px;
+  height: 10px;
+  border: 0 solid hsl(var(--primary) / 0.6);
+  pointer-events: none;
+}
+
+.oe-rule::before {
+  left: -1px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.oe-rule::after {
+  right: -1px;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+/* ── Hero detection field: boxes that lock on, hold, and release ── */
+
+.oe-detect {
+  position: absolute;
+  opacity: 0;
+  animation: oe-lock var(--oe-cycle, 12s) cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  animation-delay: var(--oe-delay, 0s);
+  --oe-tone: var(--primary);
+}
+
+.oe-detect[data-hazard] {
+  --oe-tone: var(--destructive);
+}
+
+.oe-detect > i {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 0 solid hsl(var(--oe-tone) / 0.7);
+}
+
+.oe-detect > i:nth-of-type(1) { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+.oe-detect > i:nth-of-type(2) { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
+.oe-detect > i:nth-of-type(3) { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
+.oe-detect > i:nth-of-type(4) { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
+
+.oe-detect > span {
+  position: absolute;
+  top: -18px;
+  left: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 14px;
+  white-space: nowrap;
+  color: hsl(var(--oe-tone));
+}
+
+@keyframes oe-lock {
+  0% { opacity: 0; transform: scale(1.18); }
+  6% { opacity: 1; transform: scale(1); }
+  30% { opacity: 1; transform: scale(1); }
+  38%, 100% { opacity: 0; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oe-detect {
+    animation: none;
+    opacity: 0.6;
+  }
+}
