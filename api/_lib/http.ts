@@ -43,6 +43,20 @@ export async function requireUser(req: IncomingMessage) {
   return session.user;
 }
 
+/**
+ * vercel.json rewrites `/api/<fn>/<rest>` to `/api/<fn>?__path=<rest>`.
+ * Restores `req.url` to the original path so routing (ours and Better Auth's)
+ * sees `/api/<fn>/<rest>?<query>`.
+ */
+export function restoreRewrittenUrl(req: IncomingMessage, prefix: string) {
+  const url = new URL(req.url || "/", "http://localhost");
+  const rest = url.searchParams.get("__path");
+  if (rest === null) return;
+  url.searchParams.delete("__path");
+  const qs = url.searchParams.toString();
+  req.url = `${prefix}/${rest}${qs ? `?${qs}` : ""}`;
+}
+
 /** Path segments after the given prefix, e.g. "/api/data/devices/1" → ["devices", "1"]. */
 export function pathSegments(req: IncomingMessage, prefix: string): { segments: string[]; query: URLSearchParams } {
   const url = new URL(req.url || "/", "http://localhost");

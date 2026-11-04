@@ -20,7 +20,7 @@ async function request<T>(
   }
 
   try {
-    // Same-origin proxy (api/cred/[...path].ts); auth is the session cookie.
+    // Same-origin proxy (api/cred.ts); auth is the session cookie.
     const res = await fetch(`/api/cred/${subPath}`, {
       ...options,
       credentials: "same-origin",

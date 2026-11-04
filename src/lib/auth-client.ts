@@ -1,6 +1,6 @@
 import { createAuthClient } from "better-auth/react";
 
-/** Better Auth client; the server lives at /api/auth (api/auth/[...all].ts). */
+/** Better Auth client; the server lives at /api/auth (api/auth.ts). */
 const client = createAuthClient({
   baseURL: typeof window !== "undefined" ? window.location.origin : undefined,
   basePath: "/api/auth",

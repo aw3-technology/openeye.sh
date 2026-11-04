@@ -4,5 +4,10 @@
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/auth/:path*", "destination": "/api/auth?__path=:path*" },
+    { "source": "/api/data/:path*", "destination": "/api/data?__path=:path*" },
+    { "source": "/api/cred/:path*", "destination": "/api/cred?__path=:path*" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
 }

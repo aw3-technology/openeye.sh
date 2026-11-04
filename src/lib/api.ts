@@ -1,5 +1,5 @@
 /**
- * Fetch helper for the owner-scoped data API (api/data/[...path].ts).
+ * Fetch helper for the owner-scoped data API (api/data.ts).
  * Auth is the Better Auth session cookie, so requests are same-origin only.
  */
 

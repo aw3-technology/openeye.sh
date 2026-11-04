@@ -13,8 +13,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import pg from "pg";
 import { put } from "@vercel/blob";
-import { pool } from "../_lib/db.js";
-import { resources, type Resource } from "../_lib/resources.js";
+import { pool } from "./_lib/db.js";
+import { resources, type Resource } from "./_lib/resources.js";
 import {
   HttpError,
   handleError,
@@ -22,8 +22,9 @@ import {
   readJson,
   readRawBody,
   requireUser,
+  restoreRewrittenUrl,
   sendJson,
-} from "../_lib/http.js";
+} from "./_lib/http.js";
 
 // Return numeric columns as numbers, matching what PostgREST returned.
 pg.types.setTypeParser(pg.types.builtins.NUMERIC, (v) => (v === null ? null : parseFloat(v)));
@@ -165,6 +166,7 @@ async function uploadAvatar(req: IncomingMessage, userId: string) {
 }
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
+  restoreRewrittenUrl(req, "/api/data");
   try {
     const user = await requireUser(req);
     const { segments, query } = pathSegments(req, "/api/data");

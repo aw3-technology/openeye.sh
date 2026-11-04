@@ -3,7 +3,7 @@
  * function). Injects the signed-in user's identity and the server-side API key.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { handleError, pathSegments, readRawBody, requireUser, sendJson } from "../_lib/http.js";
+import { handleError, pathSegments, readRawBody, requireUser, restoreRewrittenUrl, sendJson } from "./_lib/http.js";
 
 const CRED_API_BASE = process.env.CRED_API_BASE || "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
 
@@ -25,6 +25,7 @@ function targetUrl(path: string, search: URLSearchParams) {
 }
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
+  restoreRewrittenUrl(req, "/api/cred");
   try {
     const user = await requireUser(req);
     const apiKey = process.env.CRED_API_KEY;
