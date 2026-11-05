@@ -15,10 +15,8 @@ import logoHorizontalDark from "@/assets/openeye-logo-horizontal-dark.png";
 
 type AuthMode = "sign_in" | "sign_up";
 
-// Social providers configured on the server (GOOGLE_CLIENT_ID, APPLE_CLIENT_ID). 1Profile is always on.
-const OAUTH_PROVIDERS = new Set(
-  (import.meta.env.VITE_AUTH_PROVIDERS as string | undefined)?.split(",").map((p) => p.trim()) ?? [],
-);
+// Sign-in methods brokered by 1Profile; each button skips 1Profile's picker (api/signin/1profile.ts).
+type Connection = "google" | "azure" | "apple" | "github";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState<string | null>(null);
@@ -38,21 +36,16 @@ export default function LoginPage() {
     navigate(from, { replace: true });
   };
 
-  const handleOAuthSignIn = async (provider: "1profile" | "google" | "apple") => {
+  // Full-page navigation: the server sets the OAuth state cookies and redirects to 1Profile.
+  const handleOAuthSignIn = (connection?: Connection) => {
     if (!isCloud) return;
-    setLoading(provider);
+    setLoading(connection ?? "1profile");
     setError(null);
     setSuccess(null);
     const from = (location.state as { from?: string })?.from || "/dashboard";
-    const result = await authClient.signIn.social({
-      provider,
-      callbackURL: from,
-      errorCallbackURL: "/login",
-    });
-    if (result?.error) {
-      setError(result.error.message || "Sign-in failed");
-      setLoading(null);
-    }
+    const params = new URLSearchParams({ callbackURL: from });
+    if (connection) params.set("connection", connection);
+    window.location.href = `/api/signin/1profile?${params}`;
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -149,14 +142,64 @@ export default function LoginPage() {
               : "Start running perception in a few minutes."}
           </p>
 
-          {/* OAuth Buttons — cloud only, for providers configured on the server */}
+          {/* OAuth Buttons — cloud only; every provider signs in through 1Profile */}
           {isCloud && (
             <>
               <div className="space-y-3">
                 <Button
                   variant="outline"
                   className="w-full h-11"
-                  onClick={() => handleOAuthSignIn("1profile")}
+                  onClick={() => handleOAuthSignIn("google")}
+                  disabled={!!loading}
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18">
+                    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+                    <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+                    <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+                  </svg>
+                  {loading === "google" ? "Signing in..." : "Continue with Google"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full h-11"
+                  onClick={() => handleOAuthSignIn("azure")}
+                  disabled={!!loading}
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18">
+                    <path d="M0 0h8.5v8.5H0z" fill="#F25022"/>
+                    <path d="M9.5 0H18v8.5H9.5z" fill="#7FBA00"/>
+                    <path d="M0 9.5h8.5V18H0z" fill="#00A4EF"/>
+                    <path d="M9.5 9.5H18V18H9.5z" fill="#FFB900"/>
+                  </svg>
+                  {loading === "azure" ? "Signing in..." : "Continue with Microsoft"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full h-11"
+                  onClick={() => handleOAuthSignIn("apple")}
+                  disabled={!!loading}
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+                    <path d="M14.94 9.88c-.02-2.08 1.7-3.08 1.78-3.13-0.97-1.42-2.48-1.61-3.01-1.63-1.28-0.13-2.5 0.75-3.15 0.75s-1.65-0.73-2.71-0.71c-1.39 0.02-2.68 0.81-3.4 2.06-1.45 2.51-0.37 6.24 1.04 8.28 0.69 1 1.51 2.12 2.59 2.08 1.04-0.04 1.43-0.67 2.69-0.67s1.61 0.67 2.71 0.65c1.12-0.02 1.82-1.02 2.5-2.02 0.79-1.16 1.11-2.28 1.13-2.34-0.02-0.01-2.17-0.83-2.19-3.3zM12.89 3.42c0.57-0.69 0.96-1.65 0.85-2.6-0.82 0.03-1.82 0.55-2.41 1.24-0.53 0.61-0.99 1.59-0.87 2.52 0.92 0.07 1.85-0.46 2.43-1.16z"/>
+                  </svg>
+                  {loading === "apple" ? "Signing in..." : "Continue with Apple"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full h-11"
+                  onClick={() => handleOAuthSignIn("github")}
+                  disabled={!!loading}
+                >
+                  <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                  </svg>
+                  {loading === "github" ? "Signing in..." : "Continue with GitHub"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full h-11"
+                  onClick={() => handleOAuthSignIn()}
                   disabled={!!loading}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -164,35 +207,6 @@ export default function LoginPage() {
                   </svg>
                   {loading === "1profile" ? "Signing in..." : "Continue with 1Profile"}
                 </Button>
-                {OAUTH_PROVIDERS.has("google") && (
-                  <Button
-                    variant="outline"
-                    className="w-full h-11"
-                    onClick={() => handleOAuthSignIn("google")}
-                    disabled={!!loading}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 18 18">
-                      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
-                      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-                      <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-                      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-                    </svg>
-                    {loading === "google" ? "Signing in..." : "Continue with Google"}
-                  </Button>
-                )}
-                {OAUTH_PROVIDERS.has("apple") && (
-                  <Button
-                    variant="outline"
-                    className="w-full h-11"
-                    onClick={() => handleOAuthSignIn("apple")}
-                    disabled={!!loading}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
-                      <path d="M14.94 9.88c-.02-2.08 1.7-3.08 1.78-3.13-0.97-1.42-2.48-1.61-3.01-1.63-1.28-0.13-2.5 0.75-3.15 0.75s-1.65-0.73-2.71-0.71c-1.39 0.02-2.68 0.81-3.4 2.06-1.45 2.51-0.37 6.24 1.04 8.28 0.69 1 1.51 2.12 2.59 2.08 1.04-0.04 1.43-0.67 2.69-0.67s1.61 0.67 2.71 0.65c1.12-0.02 1.82-1.02 2.5-2.02 0.79-1.16 1.11-2.28 1.13-2.34-0.02-0.01-2.17-0.83-2.19-3.3zM12.89 3.42c0.57-0.69 0.96-1.65 0.85-2.6-0.82 0.03-1.82 0.55-2.41 1.24-0.53 0.61-0.99 1.59-0.87 2.52 0.92 0.07 1.85-0.46 2.43-1.16z"/>
-                    </svg>
-                    {loading === "apple" ? "Signing in..." : "Continue with Apple"}
-                  </Button>
-                )}
               </div>
               <Divider label="or with email" />
             </>
