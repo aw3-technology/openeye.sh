@@ -1,8 +1,15 @@
-"""OpenEye MCP server — 8 tools wrapping the CLI via subprocess."""
+"""OpenEye MCP server.
+
+Local tools wrap the ``openeye`` CLI via subprocess. Hosted tools call the
+OpenEye API at https://openeye.sh/v1 (override with OPENEYE_API_URL) and need
+OPENEYE_API_KEY in the server's environment.
+"""
 
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
@@ -10,7 +17,12 @@ from openeye_ai.mcp.tools import OPENEYE, run_cli
 
 mcp = FastMCP(
     "openeye",
-    instructions="Vision AI model management — pull, run, serve, and benchmark computer-vision models.",
+    instructions=(
+        "Vision AI for agents. Local tools pull, run, serve and benchmark "
+        "computer-vision models on this machine. Hosted tools (openeye_api_*) "
+        "run detection and scene description on https://openeye.sh/v1 using "
+        "OPENEYE_API_KEY; they cost credits."
+    ),
 )
 
 
@@ -32,7 +44,7 @@ async def openeye_pull(model: str) -> str:
     """Download a vision AI model's weights.
 
     Args:
-        model: Model key, e.g. 'yolov8', 'depth_anything', 'grounding_dino'.
+        model: Model key, e.g. 'yolov8', 'depth-anything', 'grounding-dino'.
     """
     result = await run_cli("pull", model, timeout=300)
     if result["returncode"] != 0:
@@ -156,6 +168,109 @@ async def openeye_nebius_stats() -> str:
     if result["returncode"] != 0:
         return f"Error: {result['stderr']}"
     return result["stdout"] or result["stderr"]
+
+
+# ── Hosted API (https://openeye.sh/v1) ───────────────────────────────────
+
+
+def _api_url() -> str:
+    return os.environ.get("OPENEYE_API_URL", "https://openeye.sh").rstrip("/")
+
+
+async def _api_call(
+    method: str,
+    path: str,
+    *,
+    image: str | None = None,
+    data: dict | None = None,
+    params: dict | None = None,
+    timeout: float = 60,
+) -> str:
+    """Call the hosted API and return the JSON response (or an error) as text."""
+    import httpx
+
+    key = os.environ.get("OPENEYE_API_KEY", "")
+    if not key:
+        return (
+            "Error: OPENEYE_API_KEY is not set. Create a key at "
+            "https://openeye.sh/dashboard/settings/api-keys and add it to the "
+            "MCP server's environment."
+        )
+
+    files = None
+    if image is not None:
+        path_obj = Path(image).expanduser()
+        if not path_obj.is_file():
+            return f"Error: image not found: {path_obj}"
+        files = {"file": (path_obj.name, path_obj.read_bytes())}
+
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.request(
+                method,
+                f"{_api_url()}{path}",
+                headers={"Authorization": f"Bearer {key}"},
+                files=files,
+                data=data,
+                params=params,
+            )
+    except httpx.HTTPError as e:
+        return f"Error: could not reach {_api_url()}: {e}"
+
+    if resp.status_code >= 400:
+        try:
+            detail = resp.json().get("error", resp.text)
+        except ValueError:
+            detail = resp.text
+        return f"Error {resp.status_code}: {detail}"
+    return json.dumps(resp.json(), indent=2)
+
+
+@mcp.tool()
+async def openeye_api_detect(image_path: str, confidence: float = 0.25) -> str:
+    """Detect objects in an image with the hosted OpenEye API (1 credit).
+
+    Returns JSON with objects (label, confidence, bbox normalized 0-1 as
+    x, y, w, h), image size and inference time.
+
+    Args:
+        image_path: Path to a JPEG or PNG under 4 MB.
+        confidence: Minimum confidence 0-1 (default 0.25).
+    """
+    return await _api_call(
+        "POST", "/v1/detect", image=image_path, data={"confidence": str(confidence)}
+    )
+
+
+@mcp.tool()
+async def openeye_api_describe(
+    image_path: str, prompt: str = "Describe what you see in this image."
+) -> str:
+    """Describe an image or answer a question about it with the hosted API (3 credits).
+
+    Args:
+        image_path: Path to a JPEG or PNG under 4 MB.
+        prompt: Question or instruction for the vision-language model.
+    """
+    return await _api_call(
+        "POST", "/v1/describe", image=image_path, data={"prompt": prompt}, timeout=120
+    )
+
+
+@mcp.tool()
+async def openeye_api_models() -> str:
+    """List hosted API models, their credit cost and whether each is available."""
+    return await _api_call("GET", "/v1/models", timeout=15)
+
+
+@mcp.tool()
+async def openeye_api_usage(days: int = 30) -> str:
+    """Show the hosted API credit balance and usage for the last N days.
+
+    Args:
+        days: Period to report, 1-365 (default 30).
+    """
+    return await _api_call("GET", "/v1/usage", params={"days": days}, timeout=15)
 
 
 # ── Entry point ──────────────────────────────────────────────────────────

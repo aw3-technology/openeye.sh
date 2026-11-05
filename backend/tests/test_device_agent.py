@@ -19,7 +19,7 @@ class TestAgentConfig:
         cfg = AgentConfig()
         assert cfg.device_id == ""
         assert cfg.api_key == ""
-        assert cfg.server_url == "https://localhost:8001"
+        assert cfg.server_url == "http://localhost:8001"
         assert cfg.heartbeat_interval == 15.0
         assert cfg.model_cache_dir == "/tmp/openeye/models"
         assert cfg.firmware_dir == "/tmp/openeye/firmware"
