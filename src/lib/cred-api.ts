@@ -68,29 +68,7 @@ export const credApi = {
     return request<CreditBalance>(`balance${param ? `?${param}` : ""}`);
   },
 
-  /** POST /deduct */
-  deduct(amount: number, description: string, creditTypeId?: string) {
-    return request<{ success: boolean; new_balance: number }>("deduct", {
-      method: "POST",
-      body: JSON.stringify({
-        amount,
-        reason: description,
-        ...(creditTypeId ? { credit_type_id: creditTypeId } : {}),
-      }),
-    });
-  },
 
-  /** POST /issue (refund / add credits) */
-  issue(amount: number, description: string, creditTypeId?: string) {
-    return request<{ success: boolean; new_balance: number }>("issue", {
-      method: "POST",
-      body: JSON.stringify({
-        amount,
-        reason: description,
-        ...(creditTypeId ? { credit_type_id: creditTypeId } : {}),
-      }),
-    });
-  },
 
   /** POST /checkout → routed to hosted-checkout by proxy */
   createCheckout(tierId: string, successUrl: string, cancelUrl: string, userEmail?: string) {

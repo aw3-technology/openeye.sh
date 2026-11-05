@@ -2,19 +2,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Eye, ImagePlus, Loader2 } from "lucide-react";
 
 interface InferenceLoadingProps {
-  isDeducting: boolean;
   model: string | undefined;
   prompt: string;
 }
 
-export function InferenceLoading({ isDeducting, model, prompt }: InferenceLoadingProps) {
+export function InferenceLoading({ model, prompt }: InferenceLoadingProps) {
   return (
     <Card className="border-foreground/10 bg-card/50">
       <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
         <div className="text-center">
           <p className="text-sm font-medium">
-            {isDeducting ? "Reserving credits..." : "Running inference..."}
+            Running inference...
           </p>
           <p className="text-xs text-muted-foreground mt-1 font-mono">
             {model || "model"} &middot; {prompt || "no prompt"}

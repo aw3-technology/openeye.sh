@@ -1,7 +1,5 @@
 import { useInference } from "@/hooks/useInference";
-import { getTotalBalance } from "@/types/credits";
 import { DetectionCanvas } from "@/components/dashboard/DetectionCanvas";
-import { InsufficientCreditsDialog } from "@/components/dashboard/InsufficientCreditsDialog";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { DetectionList } from "@/components/dashboard/inference/DetectionList";
 import { InferenceResultsSidebar } from "@/components/dashboard/inference/InferenceResultsSidebar";
@@ -10,7 +8,6 @@ import { InferenceLoading, InferenceError, InferenceEmpty } from "@/components/d
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Coins,
   Copy,
   Cpu,
   Hash,
@@ -25,16 +22,11 @@ export default function Inference() {
     result,
     prompt,
     setPrompt,
-    showCreditsDialog,
-    setShowCreditsDialog,
     lastFile,
     serverUrl,
     isConnected,
     healthData,
-    isCloud,
     predict,
-    creditBalance,
-    deductCredits,
     totalInferences,
     isLoading,
     handleFile,
@@ -85,7 +77,7 @@ export default function Inference() {
       </div>
 
       {/* ---- Metric Cards ---- */}
-      <div className={`grid gap-4 sm:grid-cols-2 ${isCloud ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <MetricCard
           label="Server"
           value={isConnected ? "Connected" : "Offline"}
@@ -105,14 +97,6 @@ export default function Inference() {
           icon={Hash}
           color="bg-purple-500/15 text-purple-500"
         />
-        {isCloud && (
-          <MetricCard
-            label="Credits"
-            value={creditBalance.data ? getTotalBalance(creditBalance.data) : "—"}
-            icon={Coins}
-            color="bg-yellow-500/15 text-yellow-500"
-          />
-        )}
       </div>
 
       {/* ---- Prompt + Upload ---- */}
@@ -123,16 +107,10 @@ export default function Inference() {
         disabled={isLoading}
       />
 
-      <InsufficientCreditsDialog
-        open={showCreditsDialog}
-        onOpenChange={setShowCreditsDialog}
-        balance={getTotalBalance(creditBalance.data)}
-      />
 
       {/* ---- Loading State ---- */}
       {isLoading && (
         <InferenceLoading
-          isDeducting={deductCredits.isPending}
           model={healthData?.model}
           prompt={prompt}
         />

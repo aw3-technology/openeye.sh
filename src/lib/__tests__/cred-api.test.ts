@@ -27,11 +27,6 @@ describe("credApi (/api/cred proxy)", () => {
     expect(opts.headers).not.toHaveProperty("Authorization");
   });
 
-  it("deduct sends amount and reason", async () => {
-    globalThis.fetch = mockFetchOk({ success: true, new_balance: 90 });
-    const result = await credApi.deduct(10, "test deduction");
-    expect(result.new_balance).toBe(90);
-  });
 
   it("syncUser calls users endpoint", async () => {
     globalThis.fetch = mockFetchOk({ user: { id: "u1" }, created: true });
