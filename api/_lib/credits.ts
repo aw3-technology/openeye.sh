@@ -8,8 +8,11 @@
 const CRED_API_BASE = process.env.CRED_API_BASE || "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
 const APP_ORIGIN = process.env.CRED_APP_ORIGIN || "https://openeye.sh";
 
-/** Cred replies with these when a deduction is refused (e.g. insufficient balance). */
-const DENIED_STATUSES = new Set([400, 402, 409, 422]);
+/**
+ * Cred replies with these when a deduction is refused: insufficient balance,
+ * or 404 when the user has no Cred account yet (they've never bought credits).
+ */
+const DENIED_STATUSES = new Set([400, 402, 404, 409, 422]);
 
 export const CREDIT_COSTS = { detect: 1, depth: 2, describe: 3 } as const;
 

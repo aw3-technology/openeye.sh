@@ -64,7 +64,7 @@ class TestDeduct:
         assert body["amount"] == 3
         assert "credit_type_id" not in body
 
-    @pytest.mark.parametrize("status", [400, 402, 409, 422])
+    @pytest.mark.parametrize("status", [400, 402, 404, 409, 422])
     def test_insufficient_credits_returns_false(self, status):
         svc, _ = _service(
             lambda r: httpx.Response(status, json={"error": "Insufficient credits"})

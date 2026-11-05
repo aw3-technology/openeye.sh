@@ -42,7 +42,8 @@ CREDIT_COSTS = {
 }
 
 # Cred responses that mean "the user can't pay", not "the call broke".
-_DENIED_STATUSES = {400, 402, 409, 422}
+# 404: the user has no Cred account yet, so they have no credits.
+_DENIED_STATUSES = {400, 402, 404, 409, 422}
 
 EmailLookup = Callable[[str], Optional[str]]
 
