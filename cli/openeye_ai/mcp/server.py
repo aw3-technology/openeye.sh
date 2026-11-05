@@ -97,21 +97,47 @@ async def openeye_serve(model: str, port: int = 8000) -> str:
     import asyncio
 
     args = ["serve", model, "--port", str(port)]
-    proc = await asyncio.create_subprocess_exec(
-        OPENEYE,
-        *args,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
+    log_path = _serve_log_path(port)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    # Send output to a log file rather than PIPEs: nothing drains pipes once
+    # this tool returns, so a chatty server would block on a full buffer.
+    with open(log_path, "wb") as log:
+        proc = await asyncio.create_subprocess_exec(
+            OPENEYE,
+            *args,
+            stdin=asyncio.subprocess.DEVNULL,
+            stdout=log,
+            stderr=asyncio.subprocess.STDOUT,
+        )
     # Wait briefly for startup, then return
     try:
         await asyncio.wait_for(proc.wait(), timeout=3)
-        # If it exited within 3s, it likely failed
-        stderr = (await proc.stderr.read()).decode(errors="replace").strip()
-        return f"Server exited immediately. Error: {stderr}"
     except asyncio.TimeoutError:
         # Still running — good
-        return f"Server started on port {port} (PID {proc.pid}). Use openeye_health to verify."
+        return (
+            f"Server started on port {port} (PID {proc.pid}). "
+            f"Logs: {log_path}. Use openeye_health to verify."
+        )
+    # If it exited within 3s, it likely failed
+    output = _tail(log_path)
+    return (
+        f"Server exited immediately (code {proc.returncode}). "
+        f"Error: {output or '(no output)'}\nLogs: {log_path}"
+    )
+
+
+def _serve_log_path(port: int) -> Path:
+    from openeye_ai import config
+
+    return config.OPENEYE_HOME / "logs" / f"serve-{port}.log"
+
+
+def _tail(path: Path, max_chars: int = 2000) -> str:
+    try:
+        text = path.read_text(errors="replace")
+    except OSError:
+        return ""
+    return text[-max_chars:].strip()
 
 
 @mcp.tool()
