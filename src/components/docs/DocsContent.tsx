@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { DocBlock, DocSection } from "@/data/docsContent";
+import { InlineMarkdown } from "./InlineMarkdown";
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -60,7 +61,7 @@ function TableBlock({ block }: { block: DocBlock }) {
                 key={col}
                 className="text-left px-4 py-2.5 text-xs uppercase tracking-widest text-muted-foreground font-medium"
               >
-                {col}
+                <InlineMarkdown text={col} />
               </th>
             ))}
           </tr>
@@ -76,7 +77,7 @@ function TableBlock({ block }: { block: DocBlock }) {
                   key={j}
                   className={`px-4 py-2.5 ${j === 0 ? "text-foreground" : "text-muted-foreground"}`}
                 >
-                  {cell}
+                  <InlineMarkdown text={cell} />
                 </td>
               ))}
             </tr>
@@ -99,7 +100,7 @@ function NoteBlock({ block }: { block: DocBlock }) {
     <div
       className={`border-l-2 pl-4 py-3 rounded-r-inner text-sm text-muted-foreground ${variantStyles[variant]}`}
     >
-      {block.content}
+      <InlineMarkdown text={block.content} />
     </div>
   );
 }
@@ -113,7 +114,7 @@ function renderBlock(block: DocBlock, index: number) {
             key={index}
             className="text-lg font-light font-display mt-6 mb-2"
           >
-            {block.content}
+            <InlineMarkdown text={block.content} />
           </h3>
         );
       }
@@ -122,14 +123,14 @@ function renderBlock(block: DocBlock, index: number) {
           key={index}
           className="text-2xl font-light font-display mt-8 mb-3"
         >
-          {block.content}
+          <InlineMarkdown text={block.content} />
         </h2>
       );
 
     case "paragraph":
       return (
         <p key={index} className="text-muted-foreground leading-relaxed">
-          {block.content}
+          <InlineMarkdown text={block.content} />
         </p>
       );
 
@@ -140,12 +141,29 @@ function renderBlock(block: DocBlock, index: number) {
       return <TableBlock key={index} block={block} />;
 
     case "list":
+      if (block.ordered) {
+        return (
+          <ol
+            key={index}
+            start={block.start && block.start !== 1 ? block.start : undefined}
+            className="list-decimal pl-6 space-y-1.5 text-sm text-muted-foreground marker:text-primary marker:font-mono"
+          >
+            {block.items?.map((item, i) => (
+              <li key={i} className="pl-1">
+                <InlineMarkdown text={item} />
+              </li>
+            ))}
+          </ol>
+        );
+      }
       return (
         <ul key={index} className="space-y-1.5">
           {block.items?.map((item, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
               <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-              {item}
+              <span className="min-w-0">
+                <InlineMarkdown text={item} />
+              </span>
             </li>
           ))}
         </ul>

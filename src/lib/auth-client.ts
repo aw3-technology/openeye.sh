@@ -14,6 +14,13 @@ export interface SessionUser {
   createdAt: Date | string;
 }
 
+export interface SessionInfo {
+  /** Opaque session token; the `session.token` column Better Auth stores. */
+  token: string;
+  userId: string;
+  expiresAt: Date | string;
+}
+
 type Result<T = unknown> = Promise<{ data: T | null; error: { message?: string } | null }>;
 
 /**
@@ -23,6 +30,8 @@ type Result<T = unknown> = Promise<{ data: T | null; error: { message?: string }
  */
 interface AuthClient {
   useSession(): { data: { user: SessionUser } | null; isPending: boolean };
+  /** One-shot session fetch (GET /api/auth/get-session). `data` is null when signed out. */
+  getSession(): Result<{ session: SessionInfo; user: SessionUser }>;
   signOut(): Result;
   signIn: {
     email(body: { email: string; password: string }): Result;
