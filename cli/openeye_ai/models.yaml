@@ -21,9 +21,6 @@ models:
         filename: yolov8n_int8.onnx
         size_mb: 3
         adapter: yolov8:onnx
-        checksum:
-          algorithm: sha256
-          value: bf00000000000000000000000000000000000000000000000000000000000000
   depth-anything:
     name: Depth Anything V2
     task: depth
@@ -38,7 +35,7 @@ models:
       mps: true
     checksum:
       algorithm: sha256
-      value: cf00000000000000000000000000000000000000000000000000000000000000
+      value: 3152477ce0d8d6978d76b995120de97cb5b928701fd0f817769f59e249a16b70
   grounding-dino:
     name: Grounding DINO
     task: detection
@@ -53,7 +50,7 @@ models:
       mps: false
     checksum:
       algorithm: sha256
-      value: df00000000000000000000000000000000000000000000000000000000000000
+      value: 1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3
   yolo26:
     name: YOLO26
     task: detection
@@ -68,7 +65,7 @@ models:
       mps: true
     checksum:
       algorithm: sha256
-      value: ef00000000000000000000000000000000000000000000000000000000000000
+      value: 0ebbc80d4a7680d14987a577cd21342b65ecfd94632bd9a8da63ae6417644ee1
   sam2:
     name: SAM 2
     task: segmentation
@@ -83,7 +80,7 @@ models:
       mps: true
     checksum:
       algorithm: sha256
-      value: ff00000000000000000000000000000000000000000000000000000000000000
+      value: 95949964d4e548409021d47b22712d5f1abf2564cc0c3c765ba599a24ac7dce3
   rfdetr:
     name: RF-DETR
     task: detection
@@ -96,15 +93,12 @@ models:
       cpu: true
       cuda: true
       mps: false
-    checksum:
-      algorithm: sha256
-      value: 0f00000000000000000000000000000000000000000000000000000000000000
   smolvla:
     name: SmolVLA
     task: vla
     description: Vision-language-action model for robotic control
     adapter: smolvla
-    hf_repo: HuggingFaceTB/SmolVLA-base
+    hf_repo: lerobot/smolvla_base
     filename: model.safetensors
     size_mb: 500
     hardware:
@@ -113,19 +107,4 @@ models:
       mps: false
     checksum:
       algorithm: sha256
-      value: 1f00000000000000000000000000000000000000000000000000000000000000
-  my-model:
-    name: My Model
-    task: detection
-    adapter: yolov8
-    description: ''
-  cool-detector:
-    name: cool-detector
-    task: detection
-    adapter: yolov8
-    description: ''
-  custom-det:
-    name: Custom Det
-    task: detection
-    adapter: /private/var/folders/s7/k_h8pbn95l9b3r0p8kpkq3_40000gn/T/pytest-of-williamschulz/pytest-30/test_register_adapter_success0/my_adapter.py
-    description: ''
+      value: 7cd549ac2351fb069c0ddb3c34ad2d09cfc92b56a15dccdfc2e41467aaca01eb

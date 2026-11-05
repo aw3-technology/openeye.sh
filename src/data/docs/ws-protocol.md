@@ -46,11 +46,11 @@ Response fields: `detections`, `scene_graph`, `scene_description`, `vlm_reasonin
 
 ### Hosted API Streaming — /v1/stream
 
-> [!warning] The hosted API endpoint is not yet available. This section describes planned functionality. Use `ws://localhost:8000/ws/perception` on your own `openeye serve` today.
+> [!warning] Streaming isn't on the hosted API at openeye.sh. It's available on the self-hosted control plane (`backend/`) at `/v1/stream`, and `openeye serve` offers `ws://localhost:8000/ws/perception`. For hosted use, send frames to `POST https://openeye.sh/v1/detect`.
 
-The hosted API will include a WebSocket streaming endpoint at `wss://api.openeye.ai/v1/stream` with API key authentication and credit-based billing.
+The self-hosted control plane's streaming endpoint uses API key authentication and credit-based billing:
 
-- 1. Connect to `wss://api.openeye.ai/v1/stream`
+- 1. Connect to `ws://<your-control-plane>/v1/stream`
 - 2. Send auth: `{"api_key": "oe_xxx"}`
 - 3. Server responds: `{"status": "authenticated"}`
 - 4. Optionally send config: `{"model": "yolov8", "confidence": 0.3}`

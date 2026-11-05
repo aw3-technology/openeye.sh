@@ -21,7 +21,7 @@ class Adapter(ModelAdapter):
 
         model_dir.mkdir(parents=True, exist_ok=True)
         snapshot_download(
-            repo_id="HuggingFaceTB/SmolVLA-base",
+            repo_id="lerobot/smolvla_base",
             local_dir=str(model_dir),
         )
 

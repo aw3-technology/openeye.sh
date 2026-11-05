@@ -2,18 +2,20 @@
 title: POST /v1/depth
 ---
 
-> [!warning] The hosted API endpoint is not yet available. This page describes planned functionality. Use `openeye serve` for self-hosted inference today.
+> [!warning] Depth estimation isn't on the hosted API yet; `POST https://openeye.sh/v1/depth` returns `501`. Run it on your own hardware with `openeye serve` today.
 
-### Self-Hosted Equivalent
+### Self-hosted
 
 ```bash
+openeye pull depth-anything
 openeye serve depth-anything --port 8000
 
-curl -X POST http://localhost:8000/predict \
+curl -X POST http://localhost:8000/v1/depth \
+  -H "Authorization: Bearer oe_local" \
   -F "file=@scene.jpg"
 ```
 
-### Response Schema
+### Response
 
 ```json
 {
@@ -24,4 +26,4 @@ curl -X POST http://localhost:8000/predict \
 }
 ```
 
-The `depth_map` field is a base64-encoded grayscale PNG where brighter pixels are closer to the camera.
+`depth_map` is a base64-encoded grayscale PNG where brighter pixels are closer to the camera.

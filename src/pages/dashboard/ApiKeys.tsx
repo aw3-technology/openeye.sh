@@ -72,10 +72,8 @@ export default function ApiKeys() {
       <div>
         <h2 className="mb-1 text-lg font-medium">Quick Start</h2>
         <p className="mb-3 text-sm text-muted-foreground">
-          The hosted API isn't live yet; keys created here will work with it at launch. Until then, run{" "}
-          <code className="text-xs">openeye serve</code> and call it locally. It accepts any key starting with{" "}
-          <code className="text-xs">oe_</code>, or only <code className="text-xs">OPENEYE_SERVER_API_KEY</code> when
-          that is set.
+          Calls to <code className="text-xs">https://openeye.sh/v1</code> use credits (detection costs 1 per call).
+          Your own <code className="text-xs">openeye serve</code> exposes the same routes for free.
         </p>
         <Card>
           <CardContent className="pt-6">
@@ -84,13 +82,14 @@ export default function ApiKeys() {
                 <TabsTrigger value="curl">cURL</TabsTrigger>
                 <TabsTrigger value="python">Python</TabsTrigger>
                 <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-                <TabsTrigger value="websocket">WebSocket</TabsTrigger>
+                <TabsTrigger value="cli">CLI</TabsTrigger>
               </TabsList>
               <TabsContent value="curl">
                 <CodeBlock
-                  code={`curl -X POST "http://localhost:8000/v1/detect?confidence=0.3" \\
+                  code={`curl -X POST https://openeye.sh/v1/detect \\
   -H "Authorization: Bearer oe_your_key_here" \\
-  -F "file=@photo.jpg"`}
+  -F "file=@photo.jpg" \\
+  -F "confidence=0.3"`}
                 />
               </TabsContent>
               <TabsContent value="python">
@@ -99,10 +98,10 @@ export default function ApiKeys() {
                   code={`import requests
 
 resp = requests.post(
-    "http://localhost:8000/v1/detect",
+    "https://openeye.sh/v1/detect",
     headers={"Authorization": "Bearer oe_your_key_here"},
     files={"file": open("photo.jpg", "rb")},
-    params={"confidence": 0.3},
+    data={"confidence": 0.3},
 )
 detections = resp.json()["objects"]
 for obj in detections:
@@ -114,8 +113,9 @@ for obj in detections:
                   lang="javascript"
                   code={`const form = new FormData();
 form.append("file", imageBlob, "photo.jpg");
+form.append("confidence", "0.3");
 
-const res = await fetch("http://localhost:8000/v1/detect?confidence=0.3", {
+const res = await fetch("https://openeye.sh/v1/detect", {
   method: "POST",
   headers: { Authorization: "Bearer oe_your_key_here" },
   body: form,
@@ -124,18 +124,13 @@ const { objects } = await res.json();
 objects.forEach(o => console.log(\`\${o.label}: \${o.confidence}\`));`}
                 />
               </TabsContent>
-              <TabsContent value="websocket">
+              <TabsContent value="cli">
                 <CodeBlock
-                  lang="javascript"
-                  code={`const ws = new WebSocket("ws://localhost:8000/ws/perception");
+                  code={`pipx install openeye-sh
+export OPENEYE_API_KEY=oe_your_key_here
 
-ws.onmessage = (event) => {
-  const frame = JSON.parse(event.data);
-  console.log("Detections:", frame.objects);
-};
-
-// Each message is one base64-encoded JPEG or PNG frame
-ws.onopen = () => ws.send(base64Frame);`}
+openeye api detect photo.jpg --confidence 0.3
+openeye api usage`}
                 />
               </TabsContent>
             </Tabs>

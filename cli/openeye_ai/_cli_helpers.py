@@ -19,7 +19,7 @@ err_console = Console(stderr=True)
 # All default ports/URLs in one place; each can be overridden by env var.
 
 SERVER_URL = os.environ.get("OPENEYE_SERVER_URL", "http://localhost:8000")
-API_URL = os.environ.get("OPENEYE_API_URL", "http://localhost:8001")
+API_URL = os.environ.get("OPENEYE_API_URL", "https://openeye.sh")
 FLEET_URL = os.environ.get("OPENEYE_FLEET_URL", "http://localhost:8001")
 
 

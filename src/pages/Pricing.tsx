@@ -136,7 +136,7 @@ export default function Pricing() {
     <div className="min-h-screen bg-background">
       <PageMeta
         title="Pricing | OpenEye"
-        description="OpenEye is free and open source to self-host. Hosted inference with per-call credits is coming soon; enterprise deployments are available on request."
+        description="OpenEye is free and open source to self-host. The hosted API at openeye.sh charges per call in credits; enterprise deployments are available on request."
         path="/pricing"
       />
       <JsonLd
@@ -163,7 +163,7 @@ export default function Pricing() {
             Open source. Self-hosted.
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Start with the free CLI. Hosted inference coming soon.
+            Self-host for free, or call the hosted API and pay per request.
           </p>
         </div>
       </section>
