@@ -16,7 +16,9 @@ from providers import Providers
 
 class VLM_Local_YOLOConfig(SensorConfig):
     camera_index: int = Field(default=0, description="Index of the camera device")
-    fps: float = Field(default=4.0, gt=0, description="Target frames per second for capture")
+    fps: float = Field(
+        default=4.0, gt=0, description="Target frames per second for capture"
+    )
     log_file: bool = Field(default=False, description="Whether to enable file logging")
     confidence_thresholds: Dict[str, float] = Field(
         default_factory=dict,
@@ -175,7 +177,9 @@ class VLM_Local_YOLO(FuserInput[VLM_Local_YOLOConfig, Optional[List]]):
         timestamp = time.time()
 
         inference_start = time.perf_counter()
-        results = self.model.predict(source=frame, save=False, stream=True, verbose=False)
+        results = self.model.predict(
+            source=frame, save=False, stream=True, verbose=False
+        )
         detections = self._detector.extract_detections(results, self.model.names)
         inference_ms = (time.perf_counter() - inference_start) * 1000
         total_ms = (time.perf_counter() - frame_start) * 1000

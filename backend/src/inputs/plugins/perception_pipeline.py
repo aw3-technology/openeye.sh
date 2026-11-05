@@ -27,13 +27,21 @@ class PerceptionPipelineConfig(SensorConfig):
     yolo_model: str = Field(default="yolov8n.pt", description="YOLO model weights")
     enable_depth: bool = Field(default=False, description="Enable depth estimation")
     danger_zone_m: float = Field(default=0.5, description="Danger zone radius (metres)")
-    caution_zone_m: float = Field(default=1.5, description="Caution zone radius (metres)")
+    caution_zone_m: float = Field(
+        default=1.5, description="Caution zone radius (metres)"
+    )
     robot_goal: str = Field(default="", description="Current robot goal")
-    lighting_robustness: bool = Field(default=True, description="Enable CLAHE lighting normalisation")
-    poll_interval: float = Field(default=0.033, description="Polling interval in seconds (~30fps)")
+    lighting_robustness: bool = Field(
+        default=True, description="Enable CLAHE lighting normalisation"
+    )
+    poll_interval: float = Field(
+        default=0.033, description="Polling interval in seconds (~30fps)"
+    )
 
 
-class PerceptionPipelineSensor(FuserInput[PerceptionPipelineConfig, Optional[PerceptionFrame]]):
+class PerceptionPipelineSensor(
+    FuserInput[PerceptionPipelineConfig, Optional[PerceptionFrame]]
+):
     """Unified perception sensor producing PerceptionFrame outputs."""
 
     def __init__(self, config: PerceptionPipelineConfig):
@@ -82,7 +90,9 @@ class PerceptionPipelineSensor(FuserInput[PerceptionPipelineConfig, Optional[Per
 
     def _detect(self, frame: np.ndarray) -> list[dict]:
         """Run YOLO detection on a frame."""
-        results = self._yolo.predict(source=frame, save=False, stream=True, verbose=False)
+        results = self._yolo.predict(
+            source=frame, save=False, stream=True, verbose=False
+        )
         detections = []
         for r in results:
             if r.boxes is not None:
@@ -91,11 +101,13 @@ class PerceptionPipelineSensor(FuserInput[PerceptionPipelineConfig, Optional[Per
                     cls = int(box.cls[0])
                     conf = float(box.conf[0])
                     label = self._yolo.names[cls]
-                    detections.append({
-                        "label": label,
-                        "confidence": round(conf, 4),
-                        "bbox": [round(x1), round(y1), round(x2), round(y2)],
-                    })
+                    detections.append(
+                        {
+                            "label": label,
+                            "confidence": round(conf, 4),
+                            "bbox": [round(x1), round(y1), round(x2), round(y2)],
+                        }
+                    )
         return detections
 
     @staticmethod
@@ -103,6 +115,7 @@ class PerceptionPipelineSensor(FuserInput[PerceptionPipelineConfig, Optional[Per
         """Attempt to load Depth Anything V2 for depth estimation."""
         try:
             from transformers import pipeline as hf_pipeline
+
             pipe = hf_pipeline(
                 "depth-estimation",
                 model="depth-anything/Depth-Anything-V2-Small-hf",
@@ -111,6 +124,7 @@ class PerceptionPipelineSensor(FuserInput[PerceptionPipelineConfig, Optional[Per
 
             def estimate(frame: np.ndarray) -> np.ndarray:
                 from PIL import Image
+
                 img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                 result = pipe(img)
                 depth = np.array(result["depth"], dtype=np.float32)
@@ -145,7 +159,9 @@ class PerceptionPipelineSensor(FuserInput[PerceptionPipelineConfig, Optional[Per
             return None
         return self._pipeline.process_frame(frame=frame)
 
-    async def _raw_to_text(self, raw_input: Optional[PerceptionFrame]) -> Optional[Message]:
+    async def _raw_to_text(
+        self, raw_input: Optional[PerceptionFrame]
+    ) -> Optional[Message]:
         pf = raw_input
         if pf is None:
             return None
@@ -202,8 +218,7 @@ class PerceptionPipelineSensor(FuserInput[PerceptionPipelineConfig, Optional[Per
             return None
         latest = self.messages[-1]
         result = (
-            f"\nINPUT: {self.descriptor_for_LLM}\n// START\n"
-            f"{latest.message}\n// END\n"
+            f"\nINPUT: {self.descriptor_for_LLM}\n// START\n{latest.message}\n// END\n"
         )
         self.io_provider.add_input(
             self.descriptor_for_LLM, latest.message, latest.timestamp

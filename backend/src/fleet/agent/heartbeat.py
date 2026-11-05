@@ -23,7 +23,9 @@ class HeartbeatSender:
     async def start(self) -> None:
         """Start the heartbeat loop."""
         self._running = True
-        logger.info("Heartbeat sender started (interval=%.1fs)", self.config.heartbeat_interval)
+        logger.info(
+            "Heartbeat sender started (interval=%.1fs)", self.config.heartbeat_interval
+        )
         while self._running:
             try:
                 await self._send_heartbeat()

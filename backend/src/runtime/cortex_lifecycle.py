@@ -100,9 +100,7 @@ class CortexLifecycleMixin:
                 await asyncio.gather(*awaitables)
 
             except asyncio.CancelledError:
-                logging.debug(
-                    "Tasks cancelled during mode transition, continuing..."
-                )
+                logging.debug("Tasks cancelled during mode transition, continuing...")
                 await asyncio.sleep(0.1)
 
             except Exception as e:
@@ -116,9 +114,7 @@ class CortexLifecycleMixin:
             "timestamp": asyncio.get_event_loop().time(),
         }
 
-        current_config = self.mode_config.modes.get(
-            self.mode_manager.current_mode_name
-        )
+        current_config = self.mode_config.modes.get(self.mode_manager.current_mode_name)
         if current_config:
             await current_config.execute_lifecycle_hooks(
                 LifecycleHookType.ON_SHUTDOWN, shutdown_context

@@ -62,6 +62,7 @@ class TestDeviceAgent:
             firmware_dir=str(tmp_path / "firmware"),
         )
         from fleet.agent.agent import DeviceAgent
+
         return DeviceAgent(cfg)
 
     def test_init(self, tmp_path):
@@ -96,6 +97,7 @@ class TestHandleCommands:
             firmware_dir=str(tmp_path / "firmware"),
         )
         from fleet.agent.agent import DeviceAgent
+
         a = DeviceAgent(cfg)
         a._report_command_result = AsyncMock()
         return a
@@ -104,16 +106,26 @@ class TestHandleCommands:
     async def test_handle_commands_restart(self, agent):
         cmds = [{"id": "c1", "command_type": "restart", "payload": {}}]
         await agent._handle_commands(cmds)
-        agent._report_command_result.assert_awaited_once_with("c1", {"status": "restarting"})
+        agent._report_command_result.assert_awaited_once_with(
+            "c1", {"status": "restarting"}
+        )
 
     @pytest.mark.asyncio
     async def test_handle_commands_deploy_model_cached(self, agent):
         agent.model_cache = MagicMock()
         agent.model_cache.has_version.return_value = True
 
-        cmds = [{"id": "c2", "command_type": "deploy_model", "payload": {"model_version": "v1.0"}}]
+        cmds = [
+            {
+                "id": "c2",
+                "command_type": "deploy_model",
+                "payload": {"model_version": "v1.0"},
+            }
+        ]
         await agent._handle_commands(cmds)
-        agent._report_command_result.assert_awaited_once_with("c2", {"status": "deployed", "version": "v1.0"})
+        agent._report_command_result.assert_awaited_once_with(
+            "c2", {"status": "deployed", "version": "v1.0"}
+        )
 
     @pytest.mark.asyncio
     async def test_handle_commands_deploy_model_download(self, agent):
@@ -137,19 +149,23 @@ class TestHandleCommands:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch("httpx.AsyncClient", return_value=mock_client):
-            cmds = [{
-                "id": "c3",
-                "command_type": "deploy_model",
-                "payload": {
-                    "model_version": "v2.0",
-                    "model_url": "https://models.example.com/v2.pt",
-                    "model_checksum": checksum,
-                },
-            }]
+            cmds = [
+                {
+                    "id": "c3",
+                    "command_type": "deploy_model",
+                    "payload": {
+                        "model_version": "v2.0",
+                        "model_url": "https://models.example.com/v2.pt",
+                        "model_checksum": checksum,
+                    },
+                }
+            ]
             await agent._handle_commands(cmds)
 
         agent.model_cache.store.assert_called_once_with("v2.0", data, checksum)
-        agent._report_command_result.assert_awaited_once_with("c3", {"status": "deployed", "version": "v2.0"})
+        agent._report_command_result.assert_awaited_once_with(
+            "c3", {"status": "deployed", "version": "v2.0"}
+        )
 
     @pytest.mark.asyncio
     async def test_handle_commands_deploy_model_missing_version(self, agent):
@@ -167,7 +183,9 @@ class TestHandleCommands:
 
         cmds = [{"id": "c5", "command_type": "rollback_model", "payload": {}}]
         await agent._handle_commands(cmds)
-        agent._report_command_result.assert_awaited_once_with("c5", {"status": "rolled_back", "version": "v0.9"})
+        agent._report_command_result.assert_awaited_once_with(
+            "c5", {"status": "rolled_back", "version": "v0.9"}
+        )
 
     @pytest.mark.asyncio
     async def test_handle_commands_rollback_no_previous(self, agent):
@@ -181,17 +199,25 @@ class TestHandleCommands:
 
     @pytest.mark.asyncio
     async def test_handle_commands_update_config(self, agent):
-        cmds = [{"id": "c7", "command_type": "update_config", "payload": {"key": "value"}}]
+        cmds = [
+            {"id": "c7", "command_type": "update_config", "payload": {"key": "value"}}
+        ]
         await agent._handle_commands(cmds)
-        agent._report_command_result.assert_awaited_once_with("c7", {"status": "config_updated"})
+        agent._report_command_result.assert_awaited_once_with(
+            "c7", {"status": "config_updated"}
+        )
 
     @pytest.mark.asyncio
     async def test_handle_commands_decommission(self, agent):
         agent.stop = MagicMock()
 
-        cmds = [{"id": "c8", "command_type": "decommission", "payload": {"wipe_data": True}}]
+        cmds = [
+            {"id": "c8", "command_type": "decommission", "payload": {"wipe_data": True}}
+        ]
         await agent._handle_commands(cmds)
-        agent._report_command_result.assert_awaited_once_with("c8", {"status": "decommissioned"})
+        agent._report_command_result.assert_awaited_once_with(
+            "c8", {"status": "decommissioned"}
+        )
         agent.stop.assert_called_once()
 
     @pytest.mark.asyncio
@@ -224,6 +250,7 @@ class TestHeartbeatSender:
             heartbeat_interval=10.0,
         )
         from fleet.agent.heartbeat import HeartbeatSender
+
         return HeartbeatSender(cfg, on_commands=on_commands)
 
     @pytest.mark.asyncio
@@ -232,7 +259,10 @@ class TestHeartbeatSender:
         sender.monitor = MagicMock()
 
         from fleet.models import ResourceUsage
-        sender.monitor.collect.return_value = ResourceUsage(cpu_percent=50.0, memory_percent=60.0)
+
+        sender.monitor.collect.return_value = ResourceUsage(
+            cpu_percent=50.0, memory_percent=60.0
+        )
 
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
@@ -258,6 +288,7 @@ class TestHeartbeatSender:
         sender.monitor = MagicMock()
 
         from fleet.models import ResourceUsage
+
         sender.monitor.collect.return_value = ResourceUsage()
 
         pending = [{"id": "cmd-1", "command_type": "restart", "payload": {}}]
@@ -282,6 +313,7 @@ class TestHeartbeatSender:
         sender.monitor = MagicMock()
 
         from fleet.models import ResourceUsage
+
         sender.monitor.collect.return_value = ResourceUsage()
 
         mock_resp = MagicMock()
@@ -319,6 +351,7 @@ class TestReportCommandResult:
             firmware_dir=str(tmp_path / "firmware"),
         )
         from fleet.agent.agent import DeviceAgent
+
         agent = DeviceAgent(cfg)
 
         mock_client = AsyncMock()
@@ -345,6 +378,7 @@ class TestReportCommandResult:
             firmware_dir=str(tmp_path / "firmware"),
         )
         from fleet.agent.agent import DeviceAgent
+
         agent = DeviceAgent(cfg)
 
         mock_client = AsyncMock()
@@ -423,7 +457,11 @@ class TestModelCache:
         data = b"some-data"
 
         with pytest.raises(ValueError, match="Checksum mismatch"):
-            cache.store("v1.0", data, "0000000000000000000000000000000000000000000000000000000000000000")
+            cache.store(
+                "v1.0",
+                data,
+                "0000000000000000000000000000000000000000000000000000000000000000",
+            )
 
     def test_rollback(self, tmp_path):
         cache = ModelCache(cache_dir=str(tmp_path / "cache"))

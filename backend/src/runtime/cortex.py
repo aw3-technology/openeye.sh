@@ -51,10 +51,10 @@ class ModeCortexRuntime(CortexLifecycleMixin, CortexLoopMixin):
         self.transitions = TransitionHandler(self.mode_manager, self.lifecycle)
         self.transitions.set_runtime_getter(lambda: self)
 
-        config_path = self.mode_manager._get_runtime_config_path() if hot_reload else None
-        self.config_watcher = ConfigWatcher(
-            config_path, check_interval, lambda: self
+        config_path = (
+            self.mode_manager._get_runtime_config_path() if hot_reload else None
         )
+        self.config_watcher = ConfigWatcher(config_path, check_interval, lambda: self)
 
         # Setup transition callback
         self.mode_manager.add_transition_callback(self.transitions.on_mode_transition)

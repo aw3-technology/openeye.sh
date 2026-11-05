@@ -15,7 +15,9 @@ class HardwareSpecs(BaseModel):
     gpu: str = Field(default="", description="GPU model name")
     gpu_vram_gb: float = Field(default=0, description="GPU VRAM in GB")
     disk_gb: float = Field(default=0, description="Total disk in GB")
-    architecture: str = Field(default="", description="CPU architecture (x86_64, arm64)")
+    architecture: str = Field(
+        default="", description="CPU architecture (x86_64, arm64)"
+    )
 
 
 class ResourceUsage(BaseModel):
@@ -25,17 +27,29 @@ class ResourceUsage(BaseModel):
     disk_percent: float = Field(default=0, ge=0, le=100, description="Disk usage %")
     disk_used_gb: float = Field(default=0, description="Disk used in GB")
     gpu_percent: Optional[float] = Field(default=None, description="GPU usage %")
-    gpu_memory_percent: Optional[float] = Field(default=None, description="GPU memory usage %")
-    gpu_temp_celsius: Optional[float] = Field(default=None, description="GPU temperature C")
-    cpu_temp_celsius: Optional[float] = Field(default=None, description="CPU temperature C")
+    gpu_memory_percent: Optional[float] = Field(
+        default=None, description="GPU memory usage %"
+    )
+    gpu_temp_celsius: Optional[float] = Field(
+        default=None, description="GPU temperature C"
+    )
+    cpu_temp_celsius: Optional[float] = Field(
+        default=None, description="CPU temperature C"
+    )
 
 
 class DeviceRegisterRequest(BaseModel):
     name: str = Field(description="Human-readable device name")
-    device_type: DeviceType = Field(default=DeviceType.EDGE_NODE, description="Device type")
-    hardware_specs: Optional[HardwareSpecs] = Field(default=None, description="Hardware specifications")
+    device_type: DeviceType = Field(
+        default=DeviceType.EDGE_NODE, description="Device type"
+    )
+    hardware_specs: Optional[HardwareSpecs] = Field(
+        default=None, description="Hardware specifications"
+    )
     tags: Dict[str, str] = Field(default_factory=dict, description="Key-value tags")
-    firmware_version: Optional[str] = Field(default=None, description="Current firmware version")
+    firmware_version: Optional[str] = Field(
+        default=None, description="Current firmware version"
+    )
     ip_address: Optional[str] = Field(default=None, description="Device IP address")
 
 
@@ -45,7 +59,9 @@ class DeviceResponse(BaseModel):
     name: str
     device_type: DeviceType
     status: DeviceStatus
-    api_key: Optional[str] = Field(default=None, description="Only returned on registration")
+    api_key: Optional[str] = Field(
+        default=None, description="Only returned on registration"
+    )
     hardware_specs: HardwareSpecs = Field(default_factory=HardwareSpecs)
     tags: Dict[str, str] = Field(default_factory=dict)
     config_overrides: Dict[str, Any] = Field(default_factory=dict)

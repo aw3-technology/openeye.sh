@@ -28,7 +28,7 @@ class VLMOpenRouterConfig(SensorConfig):
     )
     camera_index: int = Field(default=0, description="Camera Index")
     site_url: str = Field(
-        default="https://perceptify.dev",
+        default="https://openeye.sh",
         description="Site URL for OpenRouter HTTP-Referer header",
     )
     site_name: str = Field(

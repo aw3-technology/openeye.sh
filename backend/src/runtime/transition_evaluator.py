@@ -26,7 +26,10 @@ class TransitionEvaluator:
         current_time = time.time()
         mode_duration = current_time - state.mode_start_time
         current_config = self._get_current_mode_config(state)
-        if current_config.timeout_seconds and mode_duration >= current_config.timeout_seconds:
+        if (
+            current_config.timeout_seconds
+            and mode_duration >= current_config.timeout_seconds
+        ):
             timeout_context = {
                 "mode_name": state.current_mode,
                 "timeout_seconds": current_config.timeout_seconds,
@@ -44,7 +47,9 @@ class TransitionEvaluator:
                     rule.from_mode == state.current_mode or rule.from_mode == "*"
                 ) and rule.transition_type == TransitionType.TIME_BASED:
                     if self._can_transition(rule):
-                        logging.info(f"Time-based transition triggered: {state.current_mode} -> {rule.to_mode}")
+                        logging.info(
+                            f"Time-based transition triggered: {state.current_mode} -> {rule.to_mode}"
+                        )
                         return rule.to_mode
         return None
 
@@ -54,16 +59,22 @@ class TransitionEvaluator:
             if (
                 rule.from_mode == state.current_mode or rule.from_mode == "*"
             ) and rule.transition_type == TransitionType.CONTEXT_AWARE:
-                if self._can_transition(rule) and self._evaluate_context_conditions(rule, state):
+                if self._can_transition(rule) and self._evaluate_context_conditions(
+                    rule, state
+                ):
                     matching_rules.append(rule)
         if matching_rules:
             matching_rules.sort(key=lambda r: r.priority, reverse=True)
             target_rule = matching_rules[0]
-            logging.info(f"Context-aware transition triggered: {state.current_mode} -> {target_rule.to_mode}")
+            logging.info(
+                f"Context-aware transition triggered: {state.current_mode} -> {target_rule.to_mode}"
+            )
             return target_rule.to_mode
         return None
 
-    def check_input_triggered_transitions(self, input_text: str, state: ModeState) -> Optional[str]:
+    def check_input_triggered_transitions(
+        self, input_text: str, state: ModeState
+    ) -> Optional[str]:
         if not input_text:
             return None
         input_lower = input_text.lower()
@@ -80,7 +91,9 @@ class TransitionEvaluator:
         if matching_rules:
             matching_rules.sort(key=lambda r: r.priority, reverse=True)
             best_rule = matching_rules[0]
-            logging.info(f"Input-triggered transition: {state.current_mode} -> {best_rule.to_mode}")
+            logging.info(
+                f"Input-triggered transition: {state.current_mode} -> {best_rule.to_mode}"
+            )
             return best_rule.to_mode
         return None
 
@@ -88,23 +101,32 @@ class TransitionEvaluator:
         current_time = time.time()
         transition_key = f"{rule.from_mode}->{rule.to_mode}"
         if transition_key in self.transition_cooldowns:
-            if current_time - self.transition_cooldowns[transition_key] < rule.cooldown_seconds:
+            if (
+                current_time - self.transition_cooldowns[transition_key]
+                < rule.cooldown_seconds
+            ):
                 return False
         if rule.to_mode not in self.config.modes:
             logging.warning(f"Target mode '{rule.to_mode}' not found in configuration")
             return False
         return True
 
-    def _evaluate_context_conditions(self, rule: TransitionRule, state: ModeState) -> bool:
+    def _evaluate_context_conditions(
+        self, rule: TransitionRule, state: ModeState
+    ) -> bool:
         if not rule.context_conditions:
             return True
         user_context = state.user_context
         for condition_key, condition_value in rule.context_conditions.items():
-            if not self._evaluate_single_condition(condition_key, condition_value, user_context):
+            if not self._evaluate_single_condition(
+                condition_key, condition_value, user_context
+            ):
                 return False
         return True
 
-    def _evaluate_single_condition(self, key: str, expected_value, user_context: Dict) -> bool:
+    def _evaluate_single_condition(
+        self, key: str, expected_value, user_context: Dict
+    ) -> bool:
         if key not in user_context:
             return False
         actual_value = user_context[key]

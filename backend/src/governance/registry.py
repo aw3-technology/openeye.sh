@@ -54,10 +54,12 @@ class PolicyRegistry:
 
         scan_dirs = list(dirs or [])
         # Default plugin directories
-        scan_dirs.extend([
-            Path.home() / ".openeye" / "governance" / "plugins",
-            Path.cwd() / "governance" / "plugins",
-        ])
+        scan_dirs.extend(
+            [
+                Path.home() / ".openeye" / "governance" / "plugins",
+                Path.cwd() / "governance" / "plugins",
+            ]
+        )
 
         for d in scan_dirs:
             d = Path(d)
@@ -93,7 +95,9 @@ class PolicyRegistry:
                 self._custom_types[attr.name] = attr
                 logger.info("Registered plugin policy: %s from %s", attr.name, path)
 
-    def _load_module_class(self, module_path: str, class_name: str) -> Type[GovernancePolicy]:
+    def _load_module_class(
+        self, module_path: str, class_name: str
+    ) -> Type[GovernancePolicy]:
         """Import a policy class from a dotted module path."""
         mod = importlib.import_module(module_path)
         cls = getattr(mod, class_name)

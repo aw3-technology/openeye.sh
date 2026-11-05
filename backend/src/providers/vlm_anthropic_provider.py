@@ -56,7 +56,9 @@ class VLMAnthropicProvider:
                 ],
             )
             processing_latency = time.perf_counter() - processing_start
-            logging.debug(f"Anthropic VLM processing latency: {processing_latency:.3f}s")
+            logging.debug(
+                f"Anthropic VLM processing latency: {processing_latency:.3f}s"
+            )
             if self.message_callback:
                 self.message_callback(response)
         except Exception as e:

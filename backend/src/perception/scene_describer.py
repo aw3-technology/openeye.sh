@@ -52,29 +52,35 @@ def suggest_actions(
 
     for alert in safety_alerts:
         if alert.halt_recommended:
-            suggestions.append(ActionSuggestion(
-                action="halt",
-                target_id=alert.human_track_id,
-                reason=alert.message,
-                priority=1.0,
-            ))
+            suggestions.append(
+                ActionSuggestion(
+                    action="halt",
+                    target_id=alert.human_track_id,
+                    reason=alert.message,
+                    priority=1.0,
+                )
+            )
         elif alert.zone.value == "caution":
-            suggestions.append(ActionSuggestion(
-                action="slow_down",
-                target_id=alert.human_track_id,
-                reason=alert.message,
-                priority=0.8,
-            ))
+            suggestions.append(
+                ActionSuggestion(
+                    action="slow_down",
+                    target_id=alert.human_track_id,
+                    reason=alert.message,
+                    priority=0.8,
+                )
+            )
 
     if robot_goal:
         goal_lower = robot_goal.lower()
         for obj in objects:
             if obj.label.lower() in goal_lower and obj.is_manipulable:
-                suggestions.append(ActionSuggestion(
-                    action="pick_up",
-                    target_id=obj.track_id,
-                    reason=f"Object '{obj.label}' matches current goal: {robot_goal}",
-                    priority=0.7,
-                ))
+                suggestions.append(
+                    ActionSuggestion(
+                        action="pick_up",
+                        target_id=obj.track_id,
+                        reason=f"Object '{obj.label}' matches current goal: {robot_goal}",
+                        priority=0.7,
+                    )
+                )
 
     return suggestions

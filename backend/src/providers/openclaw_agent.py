@@ -30,9 +30,7 @@ class OpenClawAgent:
 
         # Subscribe to events
         self._event_bus.subscribe(EventType.DETECTION, self._on_detection)
-        self._event_bus.subscribe(
-            EventType.SCENE_DESCRIPTION, self._on_scene
-        )
+        self._event_bus.subscribe(EventType.SCENE_DESCRIPTION, self._on_scene)
 
     def _on_detection(self, event: DetectionEvent) -> None:
         """Handle detection events and update internal state."""

@@ -71,7 +71,11 @@ class TestHeartbeatService:
         # 4. device_commands.select (pending)
         pending_cmds = [
             {"id": "cmd-1", "command_type": "restart", "payload": {}},
-            {"id": "cmd-2", "command_type": "deploy_model", "payload": {"model_version": "v1"}},
+            {
+                "id": "cmd-2",
+                "command_type": "deploy_model",
+                "payload": {"model_version": "v1"},
+            },
         ]
         db.add("device_commands", _chainable_mock(data=pending_cmds))
         # 5+6. device_commands.update (ack each) — same mock can handle both

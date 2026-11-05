@@ -125,7 +125,12 @@ def _load_mode_components(mode_config: ModeConfig, system_config: ModeSystemConf
             {
                 **inp,
                 "config": add_meta(
-                    inp.get("config", {}), g_api_key, g_ut_eth, g_URID, g_robot_ip, g_mode,
+                    inp.get("config", {}),
+                    g_api_key,
+                    g_ut_eth,
+                    g_URID,
+                    g_robot_ip,
+                    g_mode,
                 ),
             }
         )
@@ -136,7 +141,12 @@ def _load_mode_components(mode_config: ModeConfig, system_config: ModeSystemConf
             {
                 **sim,
                 "config": add_meta(
-                    sim.get("config", {}), g_api_key, g_ut_eth, g_URID, g_robot_ip, g_mode,
+                    sim.get("config", {}),
+                    g_api_key,
+                    g_ut_eth,
+                    g_URID,
+                    g_robot_ip,
+                    g_mode,
                 ),
             }
         )
@@ -147,7 +157,12 @@ def _load_mode_components(mode_config: ModeConfig, system_config: ModeSystemConf
             {
                 **action,
                 "config": add_meta(
-                    action.get("config", {}), g_api_key, g_ut_eth, g_URID, g_robot_ip, g_mode,
+                    action.get("config", {}),
+                    g_api_key,
+                    g_ut_eth,
+                    g_URID,
+                    g_robot_ip,
+                    g_mode,
                 ),
             }
         )
@@ -158,7 +173,12 @@ def _load_mode_components(mode_config: ModeConfig, system_config: ModeSystemConf
             {
                 **bg,
                 "config": add_meta(
-                    bg.get("config", {}), g_api_key, g_ut_eth, g_URID, g_robot_ip, g_mode,
+                    bg.get("config", {}),
+                    g_api_key,
+                    g_ut_eth,
+                    g_URID,
+                    g_robot_ip,
+                    g_mode,
                 ),
             }
         )
@@ -170,7 +190,12 @@ def _load_mode_components(mode_config: ModeConfig, system_config: ModeSystemConf
             {
                 **llm_config,
                 "config": add_meta(
-                    llm_config.get("config", {}), g_api_key, g_ut_eth, g_URID, g_robot_ip, g_mode,
+                    llm_config.get("config", {}),
+                    g_api_key,
+                    g_ut_eth,
+                    g_URID,
+                    g_robot_ip,
+                    g_mode,
                 ),
             },
             available_actions=mode_config.agent_actions,

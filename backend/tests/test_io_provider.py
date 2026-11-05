@@ -208,8 +208,8 @@ def test_mode_transition_input_delete(io_provider):
     assert io_provider.get_mode_transition_input() is None
 
 
-def test_mode_transition_context_manager_cleans_up_on_exception(io_provider):
-    """Context manager should clear transition input even if body raises."""
+def test_mode_transition_context_manager_keeps_input_on_exception(io_provider):
+    """If the body raises, the transition input is kept so it can be retried."""
     io_provider.add_mode_transition_input("before_error")
     try:
         with io_provider.mode_transition_input() as text:
@@ -217,7 +217,7 @@ def test_mode_transition_context_manager_cleans_up_on_exception(io_provider):
             raise ValueError("test error")
     except ValueError:
         pass
-    assert io_provider.get_mode_transition_input() is None
+    assert io_provider.get_mode_transition_input() == "before_error"
 
 
 def test_inputs_empty_initially(io_provider):

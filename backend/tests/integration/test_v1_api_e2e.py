@@ -190,8 +190,11 @@ class TestDetectEndpoint:
 
         credits_svc = _mock_credits_service(deduct_ok=False)
         fleet_app.dependency_overrides[get_api_key_auth] = lambda: ApiKeyContext(
-            user_id=TEST_USER_ID, api_key_id="ak-integ-1",
-            key_prefix="oe_test_", scopes=["inference"], rate_limit=100,
+            user_id=TEST_USER_ID,
+            api_key_id="ak-integ-1",
+            key_prefix="oe_test_",
+            scopes=["inference"],
+            rate_limit=100,
         )
         fleet_app.dependency_overrides[get_credits_service] = lambda: credits_svc
         fleet_app.dependency_overrides[get_inference_service] = lambda: mock_inference
@@ -207,10 +210,15 @@ class TestDetectEndpoint:
         from fleet.deps import ApiKeyContext, get_api_key_auth
 
         credits_svc = _mock_credits_service()
-        inference_svc = _mock_inference_service(detect_error=RuntimeError("Model crashed"))
+        inference_svc = _mock_inference_service(
+            detect_error=RuntimeError("Model crashed")
+        )
         fleet_app.dependency_overrides[get_api_key_auth] = lambda: ApiKeyContext(
-            user_id=TEST_USER_ID, api_key_id="ak-integ-1",
-            key_prefix="oe_test_", scopes=["inference"], rate_limit=100,
+            user_id=TEST_USER_ID,
+            api_key_id="ak-integ-1",
+            key_prefix="oe_test_",
+            scopes=["inference"],
+            rate_limit=100,
         )
         fleet_app.dependency_overrides[get_credits_service] = lambda: credits_svc
         fleet_app.dependency_overrides[get_inference_service] = lambda: inference_svc
@@ -289,30 +297,32 @@ class TestUsageEndpoint:
         self, v1_client: TestClient, mock_credits, fake_db: InMemoryDB
     ):
         # Seed some usage log rows
-        fake_db.store.setdefault("api_usage_log", []).extend([
-            {
-                "id": "usage-1",
-                "api_key_id": "ak-integ-1",
-                "user_id": TEST_USER_ID,
-                "endpoint": "/v1/detect",
-                "model": "yolov8",
-                "credits_used": 1,
-                "inference_ms": 12.0,
-                "status_code": 200,
-                "created_at": _hours_ago(2),
-            },
-            {
-                "id": "usage-2",
-                "api_key_id": "ak-integ-1",
-                "user_id": TEST_USER_ID,
-                "endpoint": "/v1/depth",
-                "model": "depth-anything-v2",
-                "credits_used": 2,
-                "inference_ms": 25.0,
-                "status_code": 200,
-                "created_at": _hours_ago(1),
-            },
-        ])
+        fake_db.store.setdefault("api_usage_log", []).extend(
+            [
+                {
+                    "id": "usage-1",
+                    "api_key_id": "ak-integ-1",
+                    "user_id": TEST_USER_ID,
+                    "endpoint": "/v1/detect",
+                    "model": "yolov8",
+                    "credits_used": 1,
+                    "inference_ms": 12.0,
+                    "status_code": 200,
+                    "created_at": _hours_ago(2),
+                },
+                {
+                    "id": "usage-2",
+                    "api_key_id": "ak-integ-1",
+                    "user_id": TEST_USER_ID,
+                    "endpoint": "/v1/depth",
+                    "model": "depth-anything-v2",
+                    "credits_used": 2,
+                    "inference_ms": 25.0,
+                    "status_code": 200,
+                    "created_at": _hours_ago(1),
+                },
+            ]
+        )
 
         resp = v1_client.get("/v1/usage?days=30")
         assert resp.status_code == 200
@@ -349,8 +359,7 @@ class TestImageValidation:
 
 class TestDetectThenUsage:
     def test_detect_then_usage_reflects_call(
-        self, v1_client: TestClient, mock_credits, mock_inference,
-        fake_db: InMemoryDB
+        self, v1_client: TestClient, mock_credits, mock_inference, fake_db: InMemoryDB
     ):
         """Run detection, then verify /v1/usage reflects the API call."""
         # Make a detection call

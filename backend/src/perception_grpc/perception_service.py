@@ -293,7 +293,12 @@ class _GenericHandler(grpc.GenericRpcHandler):
             try:
                 result = servicer.get_latest_detections()
                 if result is None:
-                    result = {"frame_index": 0, "timestamp": 0, "detections": [], "source": ""}
+                    result = {
+                        "frame_index": 0,
+                        "timestamp": 0,
+                        "detections": [],
+                        "source": "",
+                    }
                 return json.dumps(result).encode("utf-8")
             except Exception as e:
                 logging.error(f"GetLatestDetections error: {e}")

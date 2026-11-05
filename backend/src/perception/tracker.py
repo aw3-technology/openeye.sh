@@ -56,9 +56,7 @@ class ObjectTracker:
         clean = label.upper().replace(" ", "_")
         return f"{clean}_{self._next_id:04d}"
 
-    def update(
-        self, detections: list[dict]
-    ) -> list[dict]:
+    def update(self, detections: list[dict]) -> list[dict]:
         """Match incoming detections to existing tracks and return augmented detections.
 
         Parameters
@@ -85,7 +83,9 @@ class ObjectTracker:
                     y2=raw_bbox["y"] + raw_bbox["h"],
                 )
             elif isinstance(raw_bbox, (list, tuple)) and len(raw_bbox) == 4:
-                bbox = BBox2D(x1=raw_bbox[0], y1=raw_bbox[1], x2=raw_bbox[2], y2=raw_bbox[3])
+                bbox = BBox2D(
+                    x1=raw_bbox[0], y1=raw_bbox[1], x2=raw_bbox[2], y2=raw_bbox[3]
+                )
             else:
                 bbox = raw_bbox  # already BBox2D
             parsed.append((det, bbox))
@@ -132,20 +132,14 @@ class ObjectTracker:
         for tid in unmatched_tracks:
             self._tracks[tid].misses += 1
         self._tracks = {
-            tid: t
-            for tid, t in self._tracks.items()
-            if t.misses <= self._max_misses
+            tid: t for tid, t in self._tracks.items() if t.misses <= self._max_misses
         }
 
         return results
 
     def get_disappeared(self) -> list[str]:
         """Return track IDs that just exceeded the miss threshold."""
-        return [
-            tid
-            for tid, t in self._tracks.items()
-            if t.misses == self._max_misses
-        ]
+        return [tid for tid, t in self._tracks.items() if t.misses == self._max_misses]
 
     @property
     def active_tracks(self) -> dict[str, _Track]:

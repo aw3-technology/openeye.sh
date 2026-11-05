@@ -44,7 +44,9 @@ def _make_desktop_context(
     )
 
 
-def _make_object(label: str, track_id: str = "t1", x=0.0, y=0.0, z=0.0) -> DetectedObject3D:
+def _make_object(
+    label: str, track_id: str = "t1", x=0.0, y=0.0, z=0.0
+) -> DetectedObject3D:
     return DetectedObject3D(
         track_id=track_id,
         label=label,
@@ -68,7 +70,18 @@ class TestEngineBasic:
                 PolicyConfig(
                     name="zone1",
                     type="zone_policy",
-                    config={"zones": [{"name": "z", "level": "danger", "shape": "circle", "center": [0, 0, 0], "radius_m": 1.0, "on_violation": "halt"}]},
+                    config={
+                        "zones": [
+                            {
+                                "name": "z",
+                                "level": "danger",
+                                "shape": "circle",
+                                "center": [0, 0, 0],
+                                "radius_m": 1.0,
+                                "on_violation": "halt",
+                            }
+                        ]
+                    },
                 ),
             ],
         )
@@ -81,7 +94,12 @@ class TestEngineBasic:
         config = GovernanceConfig(
             name="test",
             policies=[
-                PolicyConfig(name="zone1", type="zone_policy", enabled=False, config={"zones": []}),
+                PolicyConfig(
+                    name="zone1",
+                    type="zone_policy",
+                    enabled=False,
+                    config={"zones": []},
+                ),
             ],
         )
         engine = GovernanceEngine(config=config)
@@ -104,14 +122,16 @@ class TestZonePolicy:
                     type="zone_policy",
                     severity="critical",
                     config={
-                        "zones": [{
-                            "name": "danger",
-                            "level": "danger",
-                            "shape": "circle",
-                            "center": [0, 0, 0],
-                            "radius_m": 1.0,
-                            "on_violation": "halt",
-                        }]
+                        "zones": [
+                            {
+                                "name": "danger",
+                                "level": "danger",
+                                "shape": "circle",
+                                "center": [0, 0, 0],
+                                "radius_m": 1.0,
+                                "on_violation": "halt",
+                            }
+                        ]
                     },
                 ),
             ],
@@ -131,14 +151,16 @@ class TestZonePolicy:
                     name="workspace",
                     type="zone_policy",
                     config={
-                        "zones": [{
-                            "name": "danger",
-                            "level": "danger",
-                            "shape": "circle",
-                            "center": [0, 0, 0],
-                            "radius_m": 0.5,
-                            "on_violation": "halt",
-                        }]
+                        "zones": [
+                            {
+                                "name": "danger",
+                                "level": "danger",
+                                "shape": "circle",
+                                "center": [0, 0, 0],
+                                "radius_m": 0.5,
+                                "on_violation": "halt",
+                            }
+                        ]
                     },
                 ),
             ],
@@ -158,7 +180,10 @@ class TestObjectRestriction:
                 PolicyConfig(
                     name="obj_filter",
                     type="object_restriction",
-                    config={"deny_labels": ["knife", "scissors"], "on_violation": "deny"},
+                    config={
+                        "deny_labels": ["knife", "scissors"],
+                        "on_violation": "deny",
+                    },
                 ),
             ],
         )
@@ -246,7 +271,11 @@ class TestPIIFilter:
                     name="pii",
                     type="pii_filter",
                     domain="desktop_agent",
-                    config={"redact_patterns": [{"type": "ssn", "action": "block_and_alert"}]},
+                    config={
+                        "redact_patterns": [
+                            {"type": "ssn", "action": "block_and_alert"}
+                        ]
+                    },
                 ),
             ],
         )
@@ -266,14 +295,16 @@ class TestEnforcement:
                     type="zone_policy",
                     enforcement="audit_only",
                     config={
-                        "zones": [{
-                            "name": "z",
-                            "level": "danger",
-                            "shape": "circle",
-                            "center": [0, 0, 0],
-                            "radius_m": 10.0,
-                            "on_violation": "halt",
-                        }]
+                        "zones": [
+                            {
+                                "name": "z",
+                                "level": "danger",
+                                "shape": "circle",
+                                "center": [0, 0, 0],
+                                "radius_m": 10.0,
+                                "on_violation": "halt",
+                            }
+                        ]
                     },
                 ),
             ],
@@ -334,14 +365,16 @@ class TestAuditIntegration:
                     name="zone1",
                     type="zone_policy",
                     config={
-                        "zones": [{
-                            "name": "z",
-                            "level": "danger",
-                            "shape": "circle",
-                            "center": [0, 0, 0],
-                            "radius_m": 10.0,
-                            "on_violation": "halt",
-                        }]
+                        "zones": [
+                            {
+                                "name": "z",
+                                "level": "danger",
+                                "shape": "circle",
+                                "center": [0, 0, 0],
+                                "radius_m": 10.0,
+                                "on_violation": "halt",
+                            }
+                        ]
                     },
                 ),
             ],

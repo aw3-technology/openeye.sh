@@ -14,23 +14,39 @@ from providers.io_provider import Input
 # Stub fastapi/uvicorn before any simulator import.
 # ---------------------------------------------------------------------------
 
+
 def _stub(name, attrs=None):
     if name in sys.modules:
         return
     mod = ModuleType(name)
-    for attr in (attrs or []):
+    for attr in attrs or []:
         setattr(mod, attr, MagicMock)
     mod.__getattr__ = lambda self_name: MagicMock  # type: ignore
     sys.modules[name] = mod
 
 
 for _mod_name in [
-    "fastapi", "fastapi.responses", "fastapi.staticfiles",
-    "fastapi.middleware", "fastapi.middleware.cors",
-    "uvicorn", "starlette", "starlette.staticfiles", "starlette.responses",
+    "fastapi",
+    "fastapi.responses",
+    "fastapi.staticfiles",
+    "fastapi.middleware",
+    "fastapi.middleware.cors",
+    "uvicorn",
+    "starlette",
+    "starlette.staticfiles",
+    "starlette.responses",
 ]:
-    _stub(_mod_name, ["FastAPI", "WebSocket", "StaticFiles", "HTMLResponse",
-                       "CORSMiddleware", "JSONResponse"])
+    _stub(
+        _mod_name,
+        [
+            "FastAPI",
+            "WebSocket",
+            "StaticFiles",
+            "HTMLResponse",
+            "CORSMiddleware",
+            "JSONResponse",
+        ],
+    )
 
 
 def _make_inputs(mapping):
@@ -49,6 +65,7 @@ def websim():
     ):
         mock_thread.return_value = MagicMock(is_alive=MagicMock(return_value=True))
         from simulators.base import SimulatorConfig
+
         cfg = SimulatorConfig(name="test", port=9999)
         ws = ws_mod.WebSim(cfg)
         return ws

@@ -13,7 +13,9 @@ class ZonePolicy(GovernancePolicy):
     name = "zone_policy"
     version = "1.0"
     domain = PolicyDomain.UNIVERSAL
-    description = "Enforce spatial zones — 3D for robotics, screen regions for desktop agents."
+    description = (
+        "Enforce spatial zones — 3D for robotics, screen regions for desktop agents."
+    )
 
     def _setup(self, params: dict) -> None:
         self.zones: list[dict] = params.get("zones", [])
@@ -65,7 +67,11 @@ class ZonePolicy(GovernancePolicy):
 
                 if in_zone:
                     severity = Severity.CRITICAL if level == "danger" else Severity.HIGH
-                    decision = PolicyDecision.DENY if on_violation == "halt" else PolicyDecision.WARN
+                    decision = (
+                        PolicyDecision.DENY
+                        if on_violation == "halt"
+                        else PolicyDecision.WARN
+                    )
                     results.append(
                         GovernanceResult(
                             policy_name=self.config.name,
@@ -109,7 +115,11 @@ class ZonePolicy(GovernancePolicy):
 
             if overlap:
                 severity = Severity.CRITICAL if level == "danger" else Severity.HIGH
-                decision = PolicyDecision.DENY if on_violation == "block" else PolicyDecision.WARN
+                decision = (
+                    PolicyDecision.DENY
+                    if on_violation == "block"
+                    else PolicyDecision.WARN
+                )
                 results.append(
                     GovernanceResult(
                         policy_name=self.config.name,

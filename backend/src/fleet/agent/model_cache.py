@@ -48,7 +48,9 @@ class ModelCache:
         if checksum:
             actual = hashlib.sha256(data).hexdigest()
             if actual != checksum:
-                raise ValueError(f"Checksum mismatch: expected {checksum}, got {actual}")
+                raise ValueError(
+                    f"Checksum mismatch: expected {checksum}, got {actual}"
+                )
 
         dest = self.cache_dir / version
         dest.mkdir(parents=True, exist_ok=True)
@@ -65,7 +67,11 @@ class ModelCache:
 
     def rollback(self) -> Optional[str]:
         """Swap to previous version. Returns the version string or None if unavailable."""
-        if not self._previous_version or not self.previous_path or not self.previous_path.exists():
+        if (
+            not self._previous_version
+            or not self.previous_path
+            or not self.previous_path.exists()
+        ):
             logger.warning("No previous version available for rollback")
             return None
 
@@ -87,16 +93,24 @@ class ModelCache:
     def _restore_versions(self) -> None:
         """Restore current/previous version from disk by modification time."""
         version_dirs = sorted(
-            (d for d in self.cache_dir.iterdir() if d.is_dir() and (d / "model.bin").exists()),
+            (
+                d
+                for d in self.cache_dir.iterdir()
+                if d.is_dir() and (d / "model.bin").exists()
+            ),
             key=lambda d: d.stat().st_mtime,
             reverse=True,
         )
         if version_dirs:
             self._current_version = version_dirs[0].name
-            logger.info("Restored current model version from disk: %s", self._current_version)
+            logger.info(
+                "Restored current model version from disk: %s", self._current_version
+            )
         if len(version_dirs) > 1:
             self._previous_version = version_dirs[1].name
-            logger.info("Restored previous model version from disk: %s", self._previous_version)
+            logger.info(
+                "Restored previous model version from disk: %s", self._previous_version
+            )
 
     def _cleanup(self) -> None:
         """Remove versions beyond max_versions."""

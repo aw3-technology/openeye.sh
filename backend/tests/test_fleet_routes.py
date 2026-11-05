@@ -46,9 +46,25 @@ class _ChainMock(MagicMock):
         def _chain(*args, **kwargs):
             return self
 
-        for method in ("select", "eq", "limit", "order", "insert", "update",
-                        "delete", "range", "in_", "lt", "neq", "gt", "gte",
-                        "lte", "is_", "like", "ilike"):
+        for method in (
+            "select",
+            "eq",
+            "limit",
+            "order",
+            "insert",
+            "update",
+            "delete",
+            "range",
+            "in_",
+            "lt",
+            "neq",
+            "gt",
+            "gte",
+            "lte",
+            "is_",
+            "like",
+            "ilike",
+        ):
             setattr(self, method, _chain)
 
         result = MagicMock()
@@ -159,7 +175,10 @@ class TestDeviceRoutes:
 
     @patch("fleet.routers.devices.DeviceService")
     def test_list_devices(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.list_devices.return_value = [_device_row(), _device_row(id="dev-002")]
+        mock_svc_cls.return_value.list_devices.return_value = [
+            _device_row(),
+            _device_row(id="dev-002"),
+        ]
         resp = client.get("/devices")
         assert resp.status_code == 200
         assert len(resp.json()) == 2
@@ -167,7 +186,9 @@ class TestDeviceRoutes:
     @patch("fleet.routers.devices.DeviceService")
     def test_list_devices_with_filters(self, mock_svc_cls, client):
         mock_svc_cls.return_value.list_devices.return_value = []
-        resp = client.get("/devices?status=offline&device_type=camera&limit=50&offset=10")
+        resp = client.get(
+            "/devices?status=offline&device_type=camera&limit=50&offset=10"
+        )
         assert resp.status_code == 200
         call_args = mock_svc_cls.return_value.list_devices.call_args
         assert call_args[0][1] == "offline"
@@ -188,7 +209,9 @@ class TestDeviceRoutes:
 
     @patch("fleet.routers.devices.DeviceService")
     def test_update_device(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.update_device.return_value = _device_row(name="updated")
+        mock_svc_cls.return_value.update_device.return_value = _device_row(
+            name="updated"
+        )
         resp = client.patch("/devices/dev-001", json={"name": "updated"})
         assert resp.status_code == 200
 
@@ -200,7 +223,9 @@ class TestDeviceRoutes:
 
     @patch("fleet.routers.devices.DeviceService")
     def test_set_tags(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.set_tags.return_value = _device_row(tags={"env": "prod"})
+        mock_svc_cls.return_value.set_tags.return_value = _device_row(
+            tags={"env": "prod"}
+        )
         resp = client.put("/devices/dev-001/tags", json={"env": "prod"})
         assert resp.status_code == 200
 
@@ -218,7 +243,9 @@ class TestDeviceRoutes:
 
     @patch("fleet.services.heartbeat_service.HeartbeatService")
     def test_get_resource_history(self, mock_hb_cls, client):
-        mock_hb_cls.return_value.get_resource_history.return_value = [{"cpu_percent": 50}]
+        mock_hb_cls.return_value.get_resource_history.return_value = [
+            {"cpu_percent": 50}
+        ]
         resp = client.get("/devices/dev-001/resources?limit=10")
         assert resp.status_code == 200
 
@@ -233,8 +260,12 @@ class TestDeviceRoutes:
 
     @patch("fleet.routers.devices.DeviceService")
     def test_decommission_device(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.decommission.return_value = _device_row(status="decommissioned")
-        resp = client.request("DELETE", "/devices/dev-001", json={"reason": "old", "wipe_data": False})
+        mock_svc_cls.return_value.decommission.return_value = _device_row(
+            status="decommissioned"
+        )
+        resp = client.request(
+            "DELETE", "/devices/dev-001", json={"reason": "old", "wipe_data": False}
+        )
         assert resp.status_code == 200
 
     @patch("fleet.routers.devices.DeviceService")
@@ -246,29 +277,41 @@ class TestDeviceRoutes:
     @patch("fleet.routers.devices.CommandService")
     @patch("fleet.routers.devices.DeviceService")
     def test_batch_operation(self, mock_dev_cls, mock_cmd_cls, client):
-        mock_dev_cls.return_value.get_devices_by_tags.return_value = [{"id": "d1"}, {"id": "d2"}]
+        mock_dev_cls.return_value.get_devices_by_tags.return_value = [
+            {"id": "d1"},
+            {"id": "d2"},
+        ]
         mock_cmd_cls.return_value.enqueue.return_value = {"id": "cmd-x"}
-        resp = client.post("/devices/batch", json={
-            "action": "restart",
-            "tag_filter": {"zone": "a"},
-        })
+        resp = client.post(
+            "/devices/batch",
+            json={
+                "action": "restart",
+                "tag_filter": {"zone": "a"},
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["matched"] == 2
 
     @patch("fleet.routers.devices.DeviceService")
     def test_batch_no_matching_devices(self, mock_dev_cls, client):
         mock_dev_cls.return_value.get_devices_by_tags.return_value = []
-        resp = client.post("/devices/batch", json={
-            "action": "restart",
-            "tag_filter": {"zone": "nonexistent"},
-        })
+        resp = client.post(
+            "/devices/batch",
+            json={
+                "action": "restart",
+                "tag_filter": {"zone": "nonexistent"},
+            },
+        )
         assert resp.status_code == 404
 
     def test_batch_invalid_action(self, client):
-        resp = client.post("/devices/batch", json={
-            "action": "invalid_action",
-            "tag_filter": {"zone": "a"},
-        })
+        resp = client.post(
+            "/devices/batch",
+            json={
+                "action": "invalid_action",
+                "tag_filter": {"zone": "a"},
+            },
+        )
         assert resp.status_code == 422
 
 
@@ -311,12 +354,15 @@ class TestDeploymentRoutes:
     @patch("fleet.routers.deployments.DeploymentService")
     def test_create_deployment(self, mock_svc_cls, client):
         mock_svc_cls.return_value.create.return_value = _deployment_row()
-        resp = client.post("/deployments", json={
-            "name": "test-deploy",
-            "model_id": "yolov8",
-            "model_version": "2.1",
-            "strategy": "canary",
-        })
+        resp = client.post(
+            "/deployments",
+            json={
+                "name": "test-deploy",
+                "model_id": "yolov8",
+                "model_version": "2.1",
+                "strategy": "canary",
+            },
+        )
         assert resp.status_code == 201
         assert resp.json()["id"] == "dep-001"
 
@@ -332,7 +378,9 @@ class TestDeploymentRoutes:
         mock_svc_cls.return_value.list_deployments.return_value = []
         resp = client.get("/deployments?status=completed")
         assert resp.status_code == 200
-        mock_svc_cls.return_value.list_deployments.assert_called_once_with("user-test-1", "completed")
+        mock_svc_cls.return_value.list_deployments.assert_called_once_with(
+            "user-test-1", "completed"
+        )
 
     @patch("fleet.routers.deployments.DeploymentService")
     def test_get_deployment(self, mock_svc_cls, client):
@@ -349,22 +397,34 @@ class TestDeploymentRoutes:
     @patch("fleet.routers.deployments.DeploymentService")
     def test_get_deployment_devices(self, mock_svc_cls, client):
         mock_svc_cls.return_value.get_device_statuses.return_value = [
-            {"id": "dds-1", "deployment_id": "dep-001", "device_id": "d1",
-             "status": "success", "stage": 0, "progress": 1.0,
-             "error_message": None, "started_at": None, "completed_at": None},
+            {
+                "id": "dds-1",
+                "deployment_id": "dep-001",
+                "device_id": "d1",
+                "status": "success",
+                "stage": 0,
+                "progress": 1.0,
+                "error_message": None,
+                "started_at": None,
+                "completed_at": None,
+            },
         ]
         resp = client.get("/deployments/dep-001/devices")
         assert resp.status_code == 200
 
     @patch("fleet.routers.deployments.DeploymentService")
     def test_advance_deployment(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.advance_stage.return_value = _deployment_row(current_stage=1)
+        mock_svc_cls.return_value.advance_stage.return_value = _deployment_row(
+            current_stage=1
+        )
         resp = client.post("/deployments/dep-001/advance")
         assert resp.status_code == 200
 
     @patch("fleet.routers.deployments.DeploymentService")
     def test_advance_deployment_error(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.advance_stage.side_effect = ValueError("Already completed")
+        mock_svc_cls.return_value.advance_stage.side_effect = ValueError(
+            "Already completed"
+        )
         resp = client.post("/deployments/dep-001/advance")
         assert resp.status_code == 400
 
@@ -382,7 +442,9 @@ class TestDeploymentRoutes:
 
     @patch("fleet.routers.deployments.DeploymentService")
     def test_rollback_deployment(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.rollback.return_value = _deployment_row(status="rolled_back")
+        mock_svc_cls.return_value.rollback.return_value = _deployment_row(
+            status="rolled_back"
+        )
         resp = client.post("/deployments/dep-001/rollback")
         assert resp.status_code == 200
 
@@ -403,6 +465,7 @@ class TestDeviceGroupRoutes:
         db = _FakeDB()
         db.override("device_groups", _ChainMock(data=[_group_row()]))
         from fleet.deps import get_db
+
         app.dependency_overrides[get_db] = lambda: db
 
         resp = client.post("/groups", json={"name": "Test Group"})
@@ -419,6 +482,7 @@ class TestDeviceGroupRoutes:
         db.override("device_groups", _ChainMock(data=[_group_row()]))
         db.override("group_members", _ChainMock(data=[], count=3))
         from fleet.deps import get_db
+
         app.dependency_overrides[get_db] = lambda: db
 
         resp = client.get("/groups")
@@ -429,6 +493,7 @@ class TestDeviceGroupRoutes:
         db = _FakeDB()
         db.override("device_groups", _ChainMock(data=[]))
         from fleet.deps import get_db
+
         app.dependency_overrides[get_db] = lambda: db
 
         resp = client.get("/groups/grp-missing")
@@ -439,6 +504,7 @@ class TestDeviceGroupRoutes:
         db = _FakeDB()
         db.override("device_groups", _ChainMock(data=[]))
         from fleet.deps import get_db
+
         app.dependency_overrides[get_db] = lambda: db
 
         resp = client.delete("/groups/grp-missing")
@@ -450,6 +516,7 @@ class TestDeviceGroupRoutes:
         db.override("device_groups", _ChainMock(data=[{"id": "grp-1"}]))
         db.override("deployments", _ChainMock(data=[], count=2))
         from fleet.deps import get_db
+
         app.dependency_overrides[get_db] = lambda: db
 
         resp = client.delete("/groups/grp-1")
@@ -460,6 +527,7 @@ class TestDeviceGroupRoutes:
         db = _FakeDB()
         db.override("device_groups", _ChainMock(data=[]))
         from fleet.deps import get_db
+
         app.dependency_overrides[get_db] = lambda: db
 
         resp = client.post("/groups/grp-missing/members?device_id=dev-1")
@@ -470,6 +538,7 @@ class TestDeviceGroupRoutes:
         db = _FakeDB()
         db.override("device_groups", _ChainMock(data=[]))
         from fleet.deps import get_db
+
         app.dependency_overrides[get_db] = lambda: db
 
         resp = client.get("/groups/grp-missing/members")
@@ -480,14 +549,18 @@ class TestDeviceGroupRoutes:
         db = _FakeDB()
         db.override("device_groups", _ChainMock(data=[]))
         from fleet.deps import get_db
+
         app.dependency_overrides[get_db] = lambda: db
 
-        resp = client.put("/groups/grp-missing/scaling", json={
-            "enabled": True,
-            "min_devices": 1,
-            "max_devices": 10,
-            "target_cpu_percent": 70.0,
-        })
+        resp = client.put(
+            "/groups/grp-missing/scaling",
+            json={
+                "enabled": True,
+                "min_devices": 1,
+                "max_devices": 10,
+                "target_cpu_percent": 70.0,
+            },
+        )
         assert resp.status_code == 404
 
 
@@ -498,11 +571,19 @@ class TestAlertRoutes:
     @patch("fleet.routers.alerts.AlertService")
     def test_list_alerts(self, mock_svc_cls, client):
         mock_svc_cls.return_value.list_alerts.return_value = [
-            {"id": "a1", "user_id": "user-test-1", "device_id": "d1",
-             "deployment_id": None, "alert_type": "device_offline",
-             "severity": "warning", "title": "Offline", "message": "msg",
-             "resolved": False, "resolved_at": None,
-             "created_at": "2025-01-01T00:00:00Z"},
+            {
+                "id": "a1",
+                "user_id": "user-test-1",
+                "device_id": "d1",
+                "deployment_id": None,
+                "alert_type": "device_offline",
+                "severity": "warning",
+                "title": "Offline",
+                "message": "msg",
+                "resolved": False,
+                "resolved_at": None,
+                "created_at": "2025-01-01T00:00:00Z",
+            },
         ]
         resp = client.get("/alerts")
         assert resp.status_code == 200
@@ -514,16 +595,24 @@ class TestAlertRoutes:
         resp = client.get("/alerts?resolved=true&severity=critical")
         assert resp.status_code == 200
         mock_svc_cls.return_value.list_alerts.assert_called_once_with(
-            "user-test-1", True, "critical",
+            "user-test-1",
+            True,
+            "critical",
         )
 
     @patch("fleet.routers.alerts.AlertService")
     def test_resolve_alert(self, mock_svc_cls, client):
         mock_svc_cls.return_value.resolve_alert.return_value = {
-            "id": "a1", "user_id": "user-test-1", "device_id": "d1",
-            "deployment_id": None, "alert_type": "device_offline",
-            "severity": "warning", "title": "Offline", "message": "msg",
-            "resolved": True, "resolved_at": "2025-01-02T00:00:00Z",
+            "id": "a1",
+            "user_id": "user-test-1",
+            "device_id": "d1",
+            "deployment_id": None,
+            "alert_type": "device_offline",
+            "severity": "warning",
+            "title": "Offline",
+            "message": "msg",
+            "resolved": True,
+            "resolved_at": "2025-01-02T00:00:00Z",
             "created_at": "2025-01-01T00:00:00Z",
         }
         resp = client.post("/alerts/a1/resolve")
@@ -556,13 +645,16 @@ class TestCommandRoutes:
         resp = client.get("/commands?device_id=dev-1&status=completed")
         assert resp.status_code == 200
         mock_svc_cls.return_value.list_commands.assert_called_once_with(
-            "user-test-1", "dev-1", "completed",
+            "user-test-1",
+            "dev-1",
+            "completed",
         )
 
     @patch("fleet.routers.commands.CommandService")
     def test_complete_command(self, mock_svc_cls, client):
         mock_svc_cls.return_value.complete_command.return_value = {
-            "id": "cmd-1", "status": "completed",
+            "id": "cmd-1",
+            "status": "completed",
         }
         resp = client.post("/commands/cmd-1/complete", json={"status": "done"})
         assert resp.status_code == 200
@@ -576,7 +668,8 @@ class TestCommandRoutes:
     @patch("fleet.routers.commands.CommandService")
     def test_device_complete_command(self, mock_svc_cls, client):
         mock_svc_cls.return_value.device_complete_command.return_value = {
-            "id": "cmd-1", "status": "completed",
+            "id": "cmd-1",
+            "status": "completed",
         }
         resp = client.post(
             "/commands/cmd-1/device-complete",
@@ -587,7 +680,9 @@ class TestCommandRoutes:
 
     @patch("fleet.routers.commands.CommandService")
     def test_device_complete_not_found(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.device_complete_command.side_effect = KeyError("not found")
+        mock_svc_cls.return_value.device_complete_command.side_effect = KeyError(
+            "not found"
+        )
         resp = client.post(
             "/commands/cmd-missing/device-complete",
             headers={"X-Device-API-Key": "test-key"},
@@ -602,17 +697,28 @@ class TestMaintenanceRoutes:
     @patch("fleet.routers.maintenance.MaintenanceService")
     def test_create_maintenance(self, mock_svc_cls, client):
         mock_svc_cls.return_value.create.return_value = {
-            "id": "maint-1", "user_id": "user-test-1", "name": "Window",
-            "description": "", "device_ids": [], "group_id": None,
-            "starts_at": "2025-06-01T02:00:00Z", "ends_at": "2025-06-01T04:00:00Z",
-            "recurrence": None, "is_active": True, "status": "upcoming",
-            "created_at": "2025-01-01T00:00:00Z", "updated_at": "2025-01-01T00:00:00Z",
-        }
-        resp = client.post("/maintenance", json={
+            "id": "maint-1",
+            "user_id": "user-test-1",
             "name": "Window",
+            "description": "",
+            "device_ids": [],
+            "group_id": None,
             "starts_at": "2025-06-01T02:00:00Z",
             "ends_at": "2025-06-01T04:00:00Z",
-        })
+            "recurrence": None,
+            "is_active": True,
+            "status": "upcoming",
+            "created_at": "2025-01-01T00:00:00Z",
+            "updated_at": "2025-01-01T00:00:00Z",
+        }
+        resp = client.post(
+            "/maintenance",
+            json={
+                "name": "Window",
+                "starts_at": "2025-06-01T02:00:00Z",
+                "ends_at": "2025-06-01T04:00:00Z",
+            },
+        )
         assert resp.status_code == 201
 
     @patch("fleet.routers.maintenance.MaintenanceService")
@@ -626,16 +732,26 @@ class TestMaintenanceRoutes:
         mock_svc_cls.return_value.list_windows.return_value = []
         resp = client.get("/maintenance?active_only=true")
         assert resp.status_code == 200
-        mock_svc_cls.return_value.list_windows.assert_called_once_with("user-test-1", True)
+        mock_svc_cls.return_value.list_windows.assert_called_once_with(
+            "user-test-1", True
+        )
 
     @patch("fleet.routers.maintenance.MaintenanceService")
     def test_get_maintenance(self, mock_svc_cls, client):
         mock_svc_cls.return_value.get_window.return_value = {
-            "id": "maint-1", "user_id": "user-test-1", "name": "Window",
-            "description": "", "device_ids": [], "group_id": None,
-            "starts_at": "2025-06-01T02:00:00Z", "ends_at": "2025-06-01T04:00:00Z",
-            "recurrence": None, "is_active": True, "status": "upcoming",
-            "created_at": "2025-01-01T00:00:00Z", "updated_at": "2025-01-01T00:00:00Z",
+            "id": "maint-1",
+            "user_id": "user-test-1",
+            "name": "Window",
+            "description": "",
+            "device_ids": [],
+            "group_id": None,
+            "starts_at": "2025-06-01T02:00:00Z",
+            "ends_at": "2025-06-01T04:00:00Z",
+            "recurrence": None,
+            "is_active": True,
+            "status": "upcoming",
+            "created_at": "2025-01-01T00:00:00Z",
+            "updated_at": "2025-01-01T00:00:00Z",
         }
         resp = client.get("/maintenance/maint-1")
         assert resp.status_code == 200
@@ -649,11 +765,19 @@ class TestMaintenanceRoutes:
     @patch("fleet.routers.maintenance.MaintenanceService")
     def test_update_maintenance(self, mock_svc_cls, client):
         mock_svc_cls.return_value.update_window.return_value = {
-            "id": "maint-1", "user_id": "user-test-1", "name": "Updated",
-            "description": "", "device_ids": [], "group_id": None,
-            "starts_at": "2025-06-01T02:00:00Z", "ends_at": "2025-06-01T04:00:00Z",
-            "recurrence": None, "is_active": True, "status": "upcoming",
-            "created_at": "2025-01-01T00:00:00Z", "updated_at": "2025-01-01T00:00:00Z",
+            "id": "maint-1",
+            "user_id": "user-test-1",
+            "name": "Updated",
+            "description": "",
+            "device_ids": [],
+            "group_id": None,
+            "starts_at": "2025-06-01T02:00:00Z",
+            "ends_at": "2025-06-01T04:00:00Z",
+            "recurrence": None,
+            "is_active": True,
+            "status": "upcoming",
+            "created_at": "2025-01-01T00:00:00Z",
+            "updated_at": "2025-01-01T00:00:00Z",
         }
         resp = client.patch("/maintenance/maint-1", json={"name": "Updated"})
         assert resp.status_code == 200
@@ -682,23 +806,34 @@ class TestMaintenanceRoutes:
 class TestOTARoutes:
     @patch("fleet.routers.ota.OTAService")
     def test_push_ota_update(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.push_update.return_value = [{"id": "cmd-1"}, {"id": "cmd-2"}]
-        resp = client.post("/ota/update", json={
-            "device_ids": ["dev-1", "dev-2"],
-            "firmware_url": "https://example.com/fw.bin",
-            "firmware_version": "2.0.0",
-            "checksum": "abc123" * 10 + "abcd",
-        })
+        mock_svc_cls.return_value.push_update.return_value = [
+            {"id": "cmd-1"},
+            {"id": "cmd-2"},
+        ]
+        resp = client.post(
+            "/ota/update",
+            json={
+                "device_ids": ["dev-1", "dev-2"],
+                "firmware_url": "https://example.com/fw.bin",
+                "firmware_version": "2.0.0",
+                "checksum": "abc123" * 10 + "abcd",
+            },
+        )
         assert resp.status_code == 202
         assert resp.json()["command_count"] == 2
 
     @patch("fleet.routers.ota.OTAService")
     def test_push_ota_permission_error(self, mock_svc_cls, client):
-        mock_svc_cls.return_value.push_update.side_effect = PermissionError("Not allowed")
-        resp = client.post("/ota/update", json={
-            "device_ids": ["dev-1"],
-            "firmware_url": "https://example.com/fw.bin",
-            "firmware_version": "2.0.0",
-            "checksum": "abc123" * 10 + "abcd",
-        })
+        mock_svc_cls.return_value.push_update.side_effect = PermissionError(
+            "Not allowed"
+        )
+        resp = client.post(
+            "/ota/update",
+            json={
+                "device_ids": ["dev-1"],
+                "firmware_url": "https://example.com/fw.bin",
+                "firmware_version": "2.0.0",
+                "checksum": "abc123" * 10 + "abcd",
+            },
+        )
         assert resp.status_code == 403

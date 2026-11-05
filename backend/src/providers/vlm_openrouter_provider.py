@@ -19,7 +19,7 @@ class VLMOpenRouterProvider:
         model: str = "qwen/qwen3-vl-235b:free",
         fps: int = 10,
         camera_index: int = 0,
-        site_url: str = "https://perceptify.dev",
+        site_url: str = "https://openeye.sh",
         site_name: str = "OpenEye",
     ):
         self.running: bool = False
@@ -65,7 +65,9 @@ class VLMOpenRouterProvider:
                 max_tokens=300,
             )
             processing_latency = time.perf_counter() - processing_start
-            logging.debug(f"OpenRouter VLM processing latency: {processing_latency:.3f}s")
+            logging.debug(
+                f"OpenRouter VLM processing latency: {processing_latency:.3f}s"
+            )
             if self.message_callback:
                 self.message_callback(response)
         except Exception as e:

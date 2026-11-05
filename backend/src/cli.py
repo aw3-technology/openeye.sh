@@ -18,7 +18,9 @@ def modes(config_name: str) -> None:
         print("-" * 32)
         print(f"Mode System: {mode_config.name}")
         print(f"Default Mode: {mode_config.default_mode}")
-        print(f"Manual Switching: {'Enabled' if mode_config.allow_manual_switching else 'Disabled'}")
+        print(
+            f"Manual Switching: {'Enabled' if mode_config.allow_manual_switching else 'Disabled'}"
+        )
         print()
         print("Available Modes:")
         print("-" * 50)
@@ -35,7 +37,9 @@ def modes(config_name: str) -> None:
             from_display = (
                 mode_config.modes[rule.from_mode].display_name
                 if rule.from_mode != "*" and rule.from_mode in mode_config.modes
-                else rule.from_mode if rule.from_mode != "*" else "Any Mode"
+                else rule.from_mode
+                if rule.from_mode != "*"
+                else "Any Mode"
             )
             to_display = (
                 mode_config.modes[rule.to_mode].display_name
