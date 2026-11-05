@@ -23,7 +23,7 @@ function SidebarNav({ activeId, onSelect }: DocsSidebarProps) {
                   aria-current={activeId === section.id ? "page" : undefined}
                   className={`block w-full text-left px-2 py-1.5 rounded-inner text-sm transition-colors ${
                     activeId === section.id
-                      ? "text-terminal-green bg-terminal-green/5"
+                      ? "text-primary bg-primary/5"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >

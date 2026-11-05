@@ -50,7 +50,7 @@ function LiveStreamInner() {
       {/* ---- Header ---- */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">Live Stream</h1>
+          <h1 className="font-display text-3xl font-light">Live Stream</h1>
           {isStreaming && (
             <Badge
               variant="outline"

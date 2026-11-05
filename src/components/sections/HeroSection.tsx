@@ -35,13 +35,13 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
           >
-            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
+            <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground mb-6">
               <Diamond className="bg-oe-blue" />
               <Diamond className="bg-oe-red" />
               <Diamond className="bg-foreground" />
               <span className="ml-1">Open-Source Model Manager for Vision AI</span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold font-display leading-[1.05] mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-light font-display leading-[1.05] mb-6">
               Ollama for vision{" "}
               <span className="text-primary">and physical AI.</span>
             </h1>

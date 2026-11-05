@@ -22,7 +22,7 @@ export function UseCaseSection({ uc, index }: UseCaseSectionProps) {
           transition={{ duration: 0.3, ease }}
         >
           <div
-            className={`font-mono text-xs uppercase tracking-widest ${uc.overlineColor} mb-4`}
+            className={`font-mono text-xs ${uc.overlineColor} mb-4`}
           >
             {uc.overline}
           </div>
@@ -51,10 +51,10 @@ export function UseCaseSection({ uc, index }: UseCaseSectionProps) {
             className="absolute inset-0 w-full h-full object-cover opacity-50"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
-          <div className="absolute bottom-4 left-4 font-mono text-[10px] text-terminal-green/70 space-y-0.5">
+          <div className="absolute bottom-4 left-4 font-mono text-[10px] text-primary/70 space-y-0.5">
             <div>OPENEYE v0.1.0 — {uc.overline.toUpperCase()}</div>
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-terminal-green animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               LIVE
             </div>
           </div>
@@ -100,7 +100,7 @@ export function UseCaseSection({ uc, index }: UseCaseSectionProps) {
         >
           {uc.stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="text-2xl font-semibold font-display">
+              <div className="text-2xl font-light font-display">
                 {stat.value}
               </div>
               <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mt-1">

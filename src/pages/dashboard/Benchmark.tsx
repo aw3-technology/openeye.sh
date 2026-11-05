@@ -36,7 +36,7 @@ export default function Benchmark() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Gauge className="h-5 w-5 text-terminal-amber" />
-          <h1 className="text-2xl font-semibold">Benchmark</h1>
+          <h1 className="font-display text-3xl font-light">Benchmark</h1>
         </div>
         <div className="flex items-center gap-2">
           {isConnected && healthData?.model && (

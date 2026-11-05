@@ -48,7 +48,7 @@ export function UseCasesSection() {
                 {uc.icon}
                 {uc.overline}
               </div>
-              <h3 className="font-display text-lg font-semibold mb-2">
+              <h3 className="font-display text-lg font-light mb-2">
                 {uc.title}
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">

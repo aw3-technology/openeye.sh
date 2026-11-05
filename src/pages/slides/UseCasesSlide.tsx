@@ -53,7 +53,7 @@ export function UseCasesSlide() {
           Use Cases
         </motion.div>
         <motion.h2
-          className="text-[60px] font-semibold font-display leading-[1.05] mb-14"
+          className="text-[60px] font-light font-display leading-[1.05] mb-14"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}

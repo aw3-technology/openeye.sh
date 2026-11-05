@@ -18,11 +18,11 @@ export function SafetyMonitorSection() {
   return (
     <section className="py-[15vh] px-4 bg-card">
       <div className="container max-w-6xl mx-auto">
-        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+        <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground mb-4">
           <span className="w-2 h-2 rotate-45 bg-oe-red" />
           Safety Monitor
         </div>
-        <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+        <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
           The system that watches the robots.
         </h2>
         <p className="text-muted-foreground mb-12 max-w-xl">

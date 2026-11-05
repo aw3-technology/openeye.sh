@@ -13,10 +13,10 @@ export function AdapterSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.3, ease }}
         >
-          <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-4">
+          <div className="font-mono text-xs text-primary mb-4">
             Model Adapter Pattern
           </div>
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+          <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
             One interface for every model.
           </h2>
           <p className="text-muted-foreground mb-12 max-w-2xl">
@@ -36,10 +36,10 @@ export function AdapterSection() {
               transition={{ duration: 0.3, delay: 0.05 + i * 0.04, ease }}
               className="border border-foreground/[0.06] rounded-outer p-6 bg-foreground/[0.02]"
             >
-              <div className="font-mono text-2xl font-semibold text-terminal-green/30 mb-3">
+              <div className="font-mono text-2xl font-semibold text-primary/30 mb-3">
                 {step.step}
               </div>
-              <div className="text-lg font-semibold font-display mb-2">
+              <div className="text-lg font-light font-display mb-2">
                 {step.title}
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">

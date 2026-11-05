@@ -31,7 +31,7 @@ export function StatsSection() {
               key={s.label}
               className="text-center p-6 border border-foreground/[0.06] rounded-outer bg-foreground/[0.02]"
             >
-              <div className="text-3xl font-semibold font-display text-terminal-green mb-1">
+              <div className="text-3xl font-light font-display text-primary mb-1">
                 {s.value}
               </div>
               <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">

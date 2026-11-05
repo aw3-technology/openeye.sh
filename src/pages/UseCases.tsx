@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/PageHero";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -25,32 +26,15 @@ export default function UseCases() {
       <Navbar />
       <main>
 
-      {/* Hero */}
-      <section className="pt-28 pb-16 px-4">
-        <div className="container max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease }}
-          >
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-              Use Cases
-            </div>
-            <h1 className="text-4xl md:text-5xl font-semibold font-display leading-[1.05] mb-4">
-              Perception for every machine.
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              OpenEye adapts to any environment where software needs to see.
-              From robots navigating human spaces to agents automating desktops
-              to CI pipelines catching visual bugs — the same perception engine,
-              tuned for each context.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero eyebrow="Use cases" title="Perception for" accent="every machine.">
+        OpenEye adapts to any environment where software needs to see.
+        From robots navigating human spaces to agents automating desktops
+        to CI pipelines catching visual bugs — the same perception engine,
+        tuned for each context.
+      </PageHero>
 
       {/* Quick Nav */}
-      <section className="px-4 pb-16">
+      <section className="pt-16 px-4 pb-16">
         <div className="container max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -62,7 +46,7 @@ export default function UseCases() {
               <a
                 key={uc.id}
                 href={`#${uc.id}`}
-                className="group border border-foreground/[0.06] rounded-outer p-5 bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-colors focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
+                className="group border border-foreground/[0.06] rounded-outer p-5 bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <span className={uc.overlineColor}>{uc.icon}</span>
@@ -93,10 +77,10 @@ export default function UseCases() {
             viewport={{ once: true }}
             transition={{ duration: 0.3, ease }}
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+            <div className="font-mono text-xs text-muted-foreground mb-4">
               Every Use Case
             </div>
-            <h2 className="text-3xl md:text-4xl font-semibold font-display mb-12">
+            <h2 className="text-3xl md:text-4xl font-light font-display mb-12">
               Shared capabilities across verticals.
             </h2>
           </motion.div>
@@ -104,7 +88,7 @@ export default function UseCases() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                icon: <ShieldCheck className="w-5 h-5 text-terminal-green" aria-hidden="true" />,
+                icon: <ShieldCheck className="w-5 h-5 text-primary" aria-hidden="true" />,
                 label: "Safety-first architecture",
                 detail:
                   "Dual-layer detection — fast YOLO geometry for real-time halt, VLM reasoning for context-dependent risks.",
@@ -116,7 +100,7 @@ export default function UseCases() {
                   "Real-time detection pipeline with low-latency halt capability. All inference runs locally — no cloud round-trips.",
               },
               {
-                icon: <Eye className="w-5 h-5 text-terminal-green" aria-hidden="true" />,
+                icon: <Eye className="w-5 h-5 text-primary" aria-hidden="true" />,
                 label: "Model-agnostic",
                 detail:
                   "Swap YOLO, Grounding DINO, Depth Anything, or any custom model without code changes via the adapter system.",
@@ -156,7 +140,7 @@ export default function UseCases() {
             viewport={{ once: true }}
             transition={{ duration: 0.3, ease }}
           >
-            <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+            <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
               Build for your use case.
             </h2>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto">
@@ -167,7 +151,7 @@ export default function UseCases() {
             <div className="flex flex-wrap justify-center gap-3">
               <Link
                 to="/#get-started"
-                className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
+                className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
               >
                 Get Started
               </Link>
@@ -178,7 +162,7 @@ export default function UseCases() {
                 href="https://github.com/aw3-technology/openeye.sh"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-sm text-muted-foreground px-4 py-2.5 rounded-inner border border-foreground/[0.06] hover:text-foreground hover:border-foreground/10 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
+                className="font-mono text-sm text-muted-foreground px-4 py-2.5 rounded-inner border border-foreground/[0.06] hover:text-foreground hover:border-foreground/10 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary outline-none"
               >
                 GitHub
               </a>

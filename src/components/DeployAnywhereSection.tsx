@@ -30,7 +30,7 @@ export function DeployAnywhereSection() {
             className="border border-foreground/[0.06] rounded-outer p-6 bg-foreground/[0.02]"
           >
             <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">Self-Hosted</div>
-            <h3 className="font-display text-base font-medium mb-2">Full data sovereignty</h3>
+            <h3 className="font-display text-base font-light mb-2">Full data sovereignty</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
               All inference runs locally. No data leaves your premises — run in air-gapped environments or on-device at the edge.
             </p>
@@ -46,7 +46,7 @@ export function DeployAnywhereSection() {
             className="border border-foreground/[0.06] rounded-outer p-6 bg-foreground/[0.02]"
           >
             <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">REST + WebSocket</div>
-            <h3 className="font-display text-base font-medium mb-2">API-first architecture</h3>
+            <h3 className="font-display text-base font-light mb-2">API-first architecture</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
               FastAPI server with REST endpoints for image inference, WebSocket streams for real-time feeds, and a built-in browser dashboard.
             </p>
@@ -62,7 +62,7 @@ export function DeployAnywhereSection() {
             className="border border-foreground/[0.06] rounded-outer p-6 bg-foreground/[0.02]"
           >
             <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">Fleet</div>
-            <h3 className="font-display text-base font-medium mb-2">Multi-device management</h3>
+            <h3 className="font-display text-base font-light mb-2">Multi-device management</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Register and monitor edge devices from the CLI. Canary deployments, rolling updates, and device configuration built in.
             </p>

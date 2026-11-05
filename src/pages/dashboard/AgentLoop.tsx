@@ -62,7 +62,7 @@ export default function AgentLoop() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Bot className="h-6 w-6 text-terminal-green" />
-          <h1 className="text-2xl font-semibold">Agent Loop</h1>
+          <h1 className="font-display text-3xl font-light">Agent Loop</h1>
           <Badge
             variant="outline"
             className="text-[10px] font-mono uppercase tracking-wider border-terminal-green/30 text-terminal-green"

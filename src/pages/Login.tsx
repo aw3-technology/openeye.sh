@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { authClient } from "@/lib/auth-client";
 import { PageMeta } from "@/components/seo/PageMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { isCloudDeployment } from "@/lib/deployment-env";
-import logoVertical from "@/assets/openeye-logo-vertical.png";
-import logoVerticalDark from "@/assets/openeye-logo-vertical-dark.png";
+import { PlayCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { DetectionField } from "@/components/DetectionField";
+import logoHorizontal from "@/assets/openeye-logo-horizontal.png";
+import logoHorizontalDark from "@/assets/openeye-logo-horizontal-dark.png";
 
 type AuthMode = "sign_in" | "sign_up";
 
@@ -69,164 +74,205 @@ export default function LoginPage() {
     setLoading(null);
   };
 
+  const fieldId = (name: string) => `login-${name}`;
+
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center px-4">
+    <main className="relative min-h-screen bg-background lg:grid lg:grid-cols-2">
       <PageMeta
         title="Sign in | OpenEye"
         description="Sign in to OpenEye to access your dashboard, manage API keys, and monitor inference usage across your perception deployments."
         path="/login"
         noindex
       />
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-        className="w-full max-w-sm"
-      >
-        <div className="text-center mb-8">
-          <img src={logoVertical} alt="OpenEye" className="h-20 mx-auto mb-6 logo-light" />
-          <img src={logoVerticalDark} alt="OpenEye" className="h-20 mx-auto mb-6 logo-dark" />
-          <h1 className="text-2xl font-semibold font-display mb-2">
-            {mode === "sign_in" ? "Sign in to OpenEye" : "Create an account"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Access the open-source perception engine.
+
+      {/* Brand panel */}
+      <aside className="relative hidden overflow-hidden border-r border-foreground/[0.07] bg-card/40 lg:flex lg:flex-col lg:justify-between lg:p-12">
+        <DetectionField />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_60%,hsl(var(--primary)/0.14),transparent_60%)]"
+        />
+        <Link to="/" className="relative inline-flex w-fit">
+          <img src={logoHorizontalDark} alt="OpenEye" className="h-6 logo-dark" />
+          <img src={logoHorizontal} alt="OpenEye" className="h-6 logo-light" />
+        </Link>
+
+        <div className="relative max-w-md">
+          <h2 className="font-display text-5xl font-light leading-[1.05] tracking-[-0.015em]">
+            See the world
+            <span className="block text-primary">the way your agents do.</span>
+          </h2>
+          <p className="mt-6 text-muted-foreground leading-relaxed">
+            Run detection, depth, and segmentation on your own hardware, stream scene graphs to your
+            agents, and manage your fleet from one dashboard.
           </p>
-        </div>
-
-        {/* Email/Password Form */}
-        <form onSubmit={handleEmailAuth} className="space-y-3 mb-4">
-          <input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full bg-card border border-foreground/[0.06] rounded-inner px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className="w-full bg-card border border-foreground/[0.06] rounded-inner px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-          />
-          <button
-            type="submit"
-            disabled={!!loading}
-            className="w-full bg-primary text-primary-foreground rounded-inner px-4 py-3 text-sm font-medium hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50"
-          >
-            {loading === "email"
-              ? "Loading..."
-              : mode === "sign_in"
-                ? "Sign In"
-                : "Create Account"}
-          </button>
-        </form>
-
-        <div className="relative my-5">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-foreground/[0.06]" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-3 text-muted-foreground tracking-widest">or</span>
+          <div className="mt-10 overflow-hidden rounded-xl border border-foreground/10 bg-background/70 backdrop-blur-sm">
+            <div className="flex items-center gap-2 border-b border-foreground/[0.07] px-4 py-2.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-foreground/15" />
+              <span className="h-2.5 w-2.5 rounded-full bg-foreground/15" />
+              <span className="h-2.5 w-2.5 rounded-full bg-foreground/15" />
+            </div>
+            <pre className="overflow-x-auto p-4 font-mono text-xs leading-relaxed">
+              <code>
+                <span className="text-muted-foreground">$</span> openeye run yolov8 frame.jpg{"\n"}
+                <span className="text-muted-foreground">{"{"}</span> <span className="text-primary">"label"</span>: "person", <span className="text-primary">"confidence"</span>: 0.97 <span className="text-muted-foreground">{"}"}</span>{"\n"}
+                <span className="text-muted-foreground">{"{"}</span> <span className="text-primary">"label"</span>: "robot_arm", <span className="text-primary">"confidence"</span>: 0.93 <span className="text-muted-foreground">{"}"}</span>
+              </code>
+            </pre>
           </div>
         </div>
 
-        {/* OAuth Buttons — cloud only, for providers configured on the server */}
-        {isCloud && (
-          <>
-            <div className="space-y-3 mb-4">
-              {OAUTH_PROVIDERS.has("google") && (
-              <button
-                onClick={() => handleOAuthSignIn("google")}
-                disabled={!!loading}
-                className="w-full flex items-center justify-center gap-3 bg-card border border-foreground/[0.06] rounded-inner px-4 py-3 text-sm font-medium hover:shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18">
-                  <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
-                  <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-                  <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-                  <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-                </svg>
-                {loading === "google" ? "Signing in..." : "Continue with Google"}
-              </button>
-              )}
+        <p className="relative font-mono text-xs text-muted-foreground/80">
+          Free and open source · Self-host or use the hosted API
+        </p>
+      </aside>
 
-              {OAUTH_PROVIDERS.has("apple") && (
-              <button
-                onClick={() => handleOAuthSignIn("apple")}
-                disabled={!!loading}
-                className="w-full flex items-center justify-center gap-3 bg-foreground text-background rounded-inner px-4 py-3 text-sm font-medium hover:bg-foreground/90 transition-all active:scale-[0.98] disabled:opacity-50"
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
-                  <path d="M14.94 9.88c-.02-2.08 1.7-3.08 1.78-3.13-0.97-1.42-2.48-1.61-3.01-1.63-1.28-0.13-2.5 0.75-3.15 0.75s-1.65-0.73-2.71-0.71c-1.39 0.02-2.68 0.81-3.4 2.06-1.45 2.51-0.37 6.24 1.04 8.28 0.69 1 1.51 2.12 2.59 2.08 1.04-0.04 1.43-0.67 2.69-0.67s1.61 0.67 2.71 0.65c1.12-0.02 1.82-1.02 2.5-2.02 0.79-1.16 1.11-2.28 1.13-2.34-0.02-0.01-2.17-0.83-2.19-3.3zM12.89 3.42c0.57-0.69 0.96-1.65 0.85-2.6-0.82 0.03-1.82 0.55-2.41 1.24-0.53 0.61-0.99 1.59-0.87 2.52 0.92 0.07 1.85-0.46 2.43-1.16z"/>
-                </svg>
-                {loading === "apple" ? "Signing in..." : "Continue with Apple"}
-              </button>
-              )}
-            </div>
-
-            <div className="relative my-5">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-foreground/[0.06]" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-3 text-muted-foreground tracking-widest">demo</span>
-              </div>
-            </div>
-          </>
-        )}
-
-        <button
-          onClick={handleDemoLogin}
-          disabled={!!loading}
-          className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white rounded-inner px-4 py-3 text-sm font-medium hover:bg-emerald-500 transition-all active:scale-[0.98] disabled:opacity-50"
+      {/* Form */}
+      <div className="relative flex min-h-screen items-center justify-center px-6 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+          className="w-full max-w-sm"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <polygon points="10 8 16 12 10 16 10 8"/>
-          </svg>
-          Continue as Demo User
-        </button>
+          <Link to="/" className="mb-10 inline-flex lg:hidden">
+            <img src={logoHorizontalDark} alt="OpenEye" className="h-6 logo-dark" />
+            <img src={logoHorizontal} alt="OpenEye" className="h-6 logo-light" />
+          </Link>
 
-        {error && (
-          <p className="mt-4 text-sm text-center text-destructive">{error}</p>
-        )}
-        {success && (
-          <p className="mt-4 text-sm text-center text-primary">{success}</p>
-        )}
+          <h1 className="font-display text-4xl font-light tracking-[-0.015em]">
+            {mode === "sign_in" ? "Welcome back" : "Create your account"}
+          </h1>
+          <p className="mt-2 mb-8 text-sm text-muted-foreground">
+            {mode === "sign_in"
+              ? "Sign in to your OpenEye dashboard."
+              : "Start running perception in a few minutes."}
+          </p>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          {mode === "sign_in" ? (
+          {/* OAuth Buttons — cloud only, for providers configured on the server */}
+          {isCloud && (OAUTH_PROVIDERS.has("google") || OAUTH_PROVIDERS.has("apple")) && (
             <>
-              Don't have an account?{" "}
-              <button
-                onClick={() => { setMode("sign_up"); setError(null); setSuccess(null); }}
-                className="text-primary hover:underline font-medium"
-              >
-                Sign up
-              </button>
-            </>
-          ) : (
-            <>
-              Already have an account?{" "}
-              <button
-                onClick={() => { setMode("sign_in"); setError(null); setSuccess(null); }}
-                className="text-primary hover:underline font-medium"
-              >
-                Sign in
-              </button>
+              <div className="space-y-3">
+                {OAUTH_PROVIDERS.has("google") && (
+                  <Button
+                    variant="outline"
+                    className="w-full h-11"
+                    onClick={() => handleOAuthSignIn("google")}
+                    disabled={!!loading}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+                      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+                      <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+                    </svg>
+                    {loading === "google" ? "Signing in..." : "Continue with Google"}
+                  </Button>
+                )}
+                {OAUTH_PROVIDERS.has("apple") && (
+                  <Button
+                    variant="outline"
+                    className="w-full h-11"
+                    onClick={() => handleOAuthSignIn("apple")}
+                    disabled={!!loading}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+                      <path d="M14.94 9.88c-.02-2.08 1.7-3.08 1.78-3.13-0.97-1.42-2.48-1.61-3.01-1.63-1.28-0.13-2.5 0.75-3.15 0.75s-1.65-0.73-2.71-0.71c-1.39 0.02-2.68 0.81-3.4 2.06-1.45 2.51-0.37 6.24 1.04 8.28 0.69 1 1.51 2.12 2.59 2.08 1.04-0.04 1.43-0.67 2.69-0.67s1.61 0.67 2.71 0.65c1.12-0.02 1.82-1.02 2.5-2.02 0.79-1.16 1.11-2.28 1.13-2.34-0.02-0.01-2.17-0.83-2.19-3.3zM12.89 3.42c0.57-0.69 0.96-1.65 0.85-2.6-0.82 0.03-1.82 0.55-2.41 1.24-0.53 0.61-0.99 1.59-0.87 2.52 0.92 0.07 1.85-0.46 2.43-1.16z"/>
+                    </svg>
+                    {loading === "apple" ? "Signing in..." : "Continue with Apple"}
+                  </Button>
+                )}
+              </div>
+              <Divider label="or with email" />
             </>
           )}
-        </p>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          {isCloud ? "By signing in, you agree to OpenEye's open-source terms." : "Running locally — use email/password or demo login."}
-        </p>
-      </motion.div>
+          {/* Email/Password Form */}
+          <form onSubmit={handleEmailAuth} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor={fieldId("email")}>Email</Label>
+              <Input
+                id={fieldId("email")}
+                type="email"
+                autoComplete="email"
+                placeholder="you@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={fieldId("password")}>Password</Label>
+              <Input
+                id={fieldId("password")}
+                type="password"
+                autoComplete={mode === "sign_in" ? "current-password" : "new-password"}
+                placeholder={mode === "sign_in" ? "Your password" : "At least 6 characters"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="h-11"
+              />
+            </div>
+            <Button type="submit" disabled={!!loading} className="w-full h-11">
+              {loading === "email"
+                ? "One moment…"
+                : mode === "sign_in"
+                  ? "Sign in"
+                  : "Create account"}
+            </Button>
+          </form>
+
+          {error && (
+            <p role="alert" className="mt-4 text-sm text-center text-destructive">{error}</p>
+          )}
+          {success && (
+            <p className="mt-4 text-sm text-center text-primary">{success}</p>
+          )}
+
+          <Divider label="or" />
+
+          <Button variant="outline" className="w-full h-11" onClick={handleDemoLogin} disabled={!!loading}>
+            <PlayCircle aria-hidden="true" />
+            Explore the demo dashboard
+          </Button>
+
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            {mode === "sign_in" ? "New to OpenEye?" : "Already have an account?"}{" "}
+            <button
+              type="button"
+              onClick={() => { setMode(mode === "sign_in" ? "sign_up" : "sign_in"); setError(null); setSuccess(null); }}
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              {mode === "sign_in" ? "Create an account" : "Sign in"}
+            </button>
+          </p>
+
+          <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground/80">
+            {isCloud ? (
+              <>
+                By continuing you agree to the{" "}
+                <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms</Link> and{" "}
+                <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</Link>.
+              </>
+            ) : (
+              "Running locally — use email/password or the demo dashboard."
+            )}
+          </p>
+        </motion.div>
+      </div>
     </main>
+  );
+}
+
+function Divider({ label }: { label: string }) {
+  return (
+    <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+      <div className="h-px flex-1 bg-foreground/[0.07]" />
+      {label}
+      <div className="h-px flex-1 bg-foreground/[0.07]" />
+    </div>
   );
 }

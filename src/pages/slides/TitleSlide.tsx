@@ -24,7 +24,7 @@ export function TitleSlide() {
           <img src={logoVertical} alt="OpenEye" className="h-64 logo-light" />
         </motion.div>
         <motion.h1
-          className="text-[96px] font-semibold font-display leading-[1] text-center tracking-tight mb-8"
+          className="text-[96px] font-light font-display leading-[1] text-center tracking-tight mb-8"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}

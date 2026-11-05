@@ -20,10 +20,10 @@ export function FaqSection() {
           transition={{ duration: 0.3, ease }}
           className="text-center mb-12"
         >
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+          <div className="font-mono text-xs text-muted-foreground mb-4">
             FAQ
           </div>
-          <h2 className="text-3xl font-semibold font-display">
+          <h2 className="text-3xl font-light font-display">
             Frequently asked questions
           </h2>
         </motion.div>

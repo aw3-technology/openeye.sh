@@ -17,9 +17,9 @@ export function EcosystemCard({ name, creator, description, integrated }: Ecosys
       className="bg-card border rounded-inner p-3 flex flex-col gap-1"
     >
       <div className="flex items-center gap-2 min-w-0">
-        <span className="font-mono text-sm text-terminal-green font-medium truncate min-w-0">{name}</span>
+        <span className="font-mono text-sm text-primary font-medium truncate min-w-0">{name}</span>
         {integrated && (
-          <span className="font-mono text-[9px] uppercase tracking-wider bg-terminal-green/15 text-terminal-green px-1.5 py-0.5 rounded-sm whitespace-nowrap">
+          <span className="font-mono text-[9px] uppercase tracking-wider bg-primary/15 text-primary px-1.5 py-0.5 rounded-sm whitespace-nowrap">
             Integrated
           </span>
         )}

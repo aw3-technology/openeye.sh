@@ -13,10 +13,10 @@ export function TimelineSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.3, ease }}
         >
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+          <div className="font-mono text-xs text-muted-foreground mb-4">
             Timeline
           </div>
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-12">
+          <h2 className="text-3xl md:text-4xl font-light font-display mb-12">
             Where we've been. Where we're going.
           </h2>
         </motion.div>
@@ -35,12 +35,12 @@ export function TimelineSection() {
               }}
               className="flex items-start gap-6 py-4 border-b border-foreground/[0.06] last:border-0"
             >
-              <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground w-24 flex-shrink-0 pt-0.5">
+              <div className="font-mono text-xs text-muted-foreground w-24 flex-shrink-0 pt-0.5">
                 {milestone.date}
               </div>
               <div className="flex items-start gap-3">
                 <span
-                  className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${milestone.date === "Next" ? "bg-terminal-amber" : "bg-terminal-green"}`}
+                  className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${milestone.date === "Next" ? "bg-terminal-amber" : "bg-primary"}`}
                 />
                 <span className="text-sm">{milestone.event}</span>
               </div>

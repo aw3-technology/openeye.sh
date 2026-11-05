@@ -13,10 +13,10 @@ export function ValuesSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.3, ease }}
         >
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+          <div className="font-mono text-xs text-muted-foreground mb-4">
             Principles
           </div>
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-12">
+          <h2 className="text-3xl md:text-4xl font-light font-display mb-12">
             What we believe.
           </h2>
         </motion.div>

@@ -25,7 +25,7 @@ export function CTASlide() {
           <img src={logoVertical} alt="OpenEye" className="h-48 logo-light" />
         </motion.div>
         <motion.h2
-          className="text-[80px] font-semibold font-display leading-[1.05] text-center mb-10"
+          className="text-[80px] font-light font-display leading-[1.05] text-center mb-10"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}

@@ -65,7 +65,7 @@ export default function MLOps() {
         <div className="flex items-center gap-3">
           <FlaskConical className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-2xl font-semibold">Model Lifecycle & MLOps</h1>
+            <h1 className="font-display text-3xl font-light">Model Lifecycle & MLOps</h1>
             <p className="text-sm text-muted-foreground">
               Registry, A/B testing, shadow deployments, retraining, and model lineage
             </p>

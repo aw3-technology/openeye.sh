@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/PageHero";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -26,19 +27,19 @@ function PricingCard({ tier }: { tier: PricingPlanTier }) {
     <div
       className={`relative flex flex-col rounded-outer p-8 ${
         tier.highlighted
-          ? "border-2 border-terminal-green/30 bg-terminal-green/[0.03]"
+          ? "border-2 border-primary/30 bg-primary/[0.03]"
           : "border border-foreground/[0.06]"
       }`}
     >
       {tier.badge && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-terminal-green text-background text-xs font-mono uppercase tracking-widest rounded-full">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-background text-xs font-mono uppercase tracking-widest rounded-full">
           {tier.badge}
         </div>
       )}
 
       <div className="mb-6">
-        <h3 className="text-xl font-semibold font-display mb-1">{tier.name}</h3>
-        <div className="text-2xl font-semibold font-display text-foreground mb-3">
+        <h3 className="text-xl font-light font-display mb-1">{tier.name}</h3>
+        <div className="text-2xl font-light font-display text-foreground mb-3">
           {tier.price}
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
@@ -58,7 +59,7 @@ function PricingCard({ tier }: { tier: PricingPlanTier }) {
           >
             <span
               className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${
-                feature.included ? "bg-terminal-green" : "bg-foreground/10"
+                feature.included ? "bg-primary" : "bg-foreground/10"
               }`}
             />
             {feature.text}
@@ -104,7 +105,7 @@ function ComparisonCell({
     return (
       <span
         className={`inline-block w-2 h-2 rounded-full ${
-          highlighted ? "bg-terminal-green" : "bg-terminal-green/70"
+          highlighted ? "bg-primary" : "bg-primary/70"
         }`}
         aria-label="Yes"
       />
@@ -118,7 +119,7 @@ function ComparisonCell({
   return (
     <span
       className={`text-xs font-mono ${
-        highlighted ? "text-terminal-green" : "text-muted-foreground"
+        highlighted ? "text-primary" : "text-muted-foreground"
       }`}
     >
       {value}
@@ -152,23 +153,12 @@ export default function Pricing() {
       <Navbar />
       <main>
 
-      {/* Hero */}
-      <section className="pt-28 pb-16 px-4">
-        <div className="container max-w-6xl mx-auto text-center">
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-            Pricing
-          </div>
-          <h1 className="text-4xl md:text-5xl font-semibold font-display mb-4">
-            Open source. Self-hosted.
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Start with the free CLI. Hosted inference coming soon.
-          </p>
-        </div>
-      </section>
+      <PageHero eyebrow="Pricing" title="Open source." accent="Self-hosted.">
+        Start with the free CLI. Hosted inference coming soon.
+      </PageHero>
 
       {/* Pricing cards */}
-      <section className="pb-20 px-4">
+      <section className="pt-16 pb-20 px-4">
         <div className="container max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-6">
             {pricingTiers.map((tier) => (
@@ -182,10 +172,10 @@ export default function Pricing() {
       <section className="py-20 px-4 border-t border-foreground/[0.06]">
         <div className="container max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+            <div className="font-mono text-xs text-muted-foreground mb-4">
               Comparison
             </div>
-            <h2 className="text-3xl font-semibold font-display mb-3">
+            <h2 className="text-3xl font-light font-display mb-3">
               How OpenEye stacks up
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-sm">
@@ -197,16 +187,16 @@ export default function Pricing() {
             <table className="w-full text-sm border-collapse min-w-[640px]">
               <thead>
                 <tr className="border-b border-foreground/[0.06]">
-                  <th className="text-left py-3 pr-4 font-mono text-xs uppercase tracking-widest text-muted-foreground w-[200px]">
+                  <th className="text-left py-3 pr-4 font-mono text-xs text-muted-foreground w-[200px]">
                     Feature
                   </th>
-                  <th className="py-3 px-3 text-center font-mono text-xs uppercase tracking-widest text-terminal-green w-[100px]">
+                  <th className="py-3 px-3 text-center font-mono text-xs text-primary w-[100px]">
                     OpenEye
                   </th>
                   {competitorNames.map((name) => (
                     <th
                       key={name}
-                      className="py-3 px-3 text-center font-mono text-xs uppercase tracking-widest text-muted-foreground w-[100px]"
+                      className="py-3 px-3 text-center font-mono text-xs text-muted-foreground w-[100px]"
                     >
                       {name}
                     </th>
@@ -240,10 +230,10 @@ export default function Pricing() {
       <section className="py-20 px-4 border-t border-foreground/[0.06]">
         <div className="container max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+            <div className="font-mono text-xs text-muted-foreground mb-4">
               FAQ
             </div>
-            <h2 className="text-3xl font-semibold font-display">
+            <h2 className="text-3xl font-light font-display">
               Frequently asked questions
             </h2>
           </div>
@@ -270,7 +260,7 @@ export default function Pricing() {
       {/* CTA */}
       <section className="py-20 px-4 border-t border-foreground/[0.06]">
         <div className="container max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl font-semibold font-display mb-4">
+          <h2 className="text-3xl font-light font-display mb-4">
             Ready to get started?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">

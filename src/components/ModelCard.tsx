@@ -23,7 +23,7 @@ export function ModelCard({ model, index }: ModelCardProps) {
       <div className="flex items-center justify-between mb-3">
         <div>
           {slug ? (
-            <Link to={`/models/${slug}`} className="font-medium hover:text-terminal-green transition-colors">
+            <Link to={`/models/${slug}`} className="font-medium hover:text-primary transition-colors">
               {model.name}
             </Link>
           ) : (
@@ -36,7 +36,7 @@ export function ModelCard({ model, index }: ModelCardProps) {
         <span
           className={`font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 border rounded-inner ${
             model.status === "integrated"
-              ? "text-terminal-green border-terminal-green/20"
+              ? "text-primary border-primary/20"
               : "text-muted-foreground border-foreground/10"
           }`}
         >
@@ -48,7 +48,7 @@ export function ModelCard({ model, index }: ModelCardProps) {
         {model.description}
       </p>
       {model.performance && (
-        <div className="mt-4 font-mono text-xs text-terminal-green">
+        <div className="mt-4 font-mono text-xs text-primary">
           {model.performance}
         </div>
       )}

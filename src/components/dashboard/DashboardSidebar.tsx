@@ -99,7 +99,7 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
+      <SidebarHeader className="h-14 justify-center border-b border-sidebar-border">
         <Link to="/" className="flex items-center gap-2 px-2 py-1">
           <img src={logoDark} alt="OpenEye" className="h-5 logo-dark group-data-[collapsible=icon]:hidden" />
           <img src={logoLight} alt="OpenEye" className="h-5 logo-light group-data-[collapsible=icon]:hidden" />

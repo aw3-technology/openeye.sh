@@ -17,7 +17,7 @@ export default function DeviceGroups() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Device Groups</h1>
+          <h1 className="font-display text-3xl font-light">Device Groups</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Organize devices into logical groups for batch operations and auto-scaling
           </p>

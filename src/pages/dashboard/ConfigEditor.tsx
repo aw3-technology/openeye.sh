@@ -48,7 +48,7 @@ export default function ConfigEditor() {
   if (!isConnected) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold">Config Editor</h1>
+        <h1 className="font-display text-3xl font-light">Config Editor</h1>
         <Card>
           <CardContent className="py-8 text-center">
             <Settings2 className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
@@ -84,7 +84,7 @@ export default function ConfigEditor() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">Config Editor</h1>
+          <h1 className="font-display text-3xl font-light">Config Editor</h1>
           <Badge variant="outline" className="text-[10px] font-mono border-terminal-green/30 text-terminal-green">
             HOT-RELOAD
           </Badge>

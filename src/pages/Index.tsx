@@ -53,7 +53,6 @@ export default function Index() {
             url: "https://openeye.sh",
             applicationCategory: "DeveloperApplication",
             operatingSystem: "macOS, Linux, Windows",
-            license: "https://opensource.org/licenses/MIT",
             downloadUrl: "https://pypi.org/project/openeye-sh/",
             installUrl: "https://openeye.sh/docs/installation",
             codeRepository: "https://github.com/aw3-technology/openeye.sh",

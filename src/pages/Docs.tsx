@@ -35,7 +35,7 @@ export default function Docs() {
           ),
         }}
       />
-      <h1 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+      <h1 className="text-3xl md:text-4xl font-light font-display mb-4">
         Documentation
       </h1>
       <p className="text-muted-foreground leading-relaxed mb-12 max-w-2xl">
@@ -46,7 +46,7 @@ export default function Docs() {
       <div className="space-y-12">
         {docsContent.map((group) => (
           <section key={group.label}>
-            <h2 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+            <h2 className="font-mono text-xs text-muted-foreground mb-4">
               {group.label}
             </h2>
             <div className="grid sm:grid-cols-2 gap-3">

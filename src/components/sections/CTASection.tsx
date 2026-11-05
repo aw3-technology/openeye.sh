@@ -5,7 +5,7 @@ export function CTASection() {
     <section className="py-[15vh] px-4 border-t border-foreground/[0.06]">
       <div className="container max-w-6xl mx-auto text-center">
         <img src={logoVertical} alt="OpenEye" className="h-24 mx-auto mb-8" />
-        <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+        <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
           The model layer for physical AI.
         </h2>
         <p className="text-muted-foreground mb-8 max-w-md mx-auto">

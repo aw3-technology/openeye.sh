@@ -12,10 +12,10 @@ export function ModelSwapSection() {
           transition={{ duration: 0.3, delay: 0.1, ease }}
           className="border border-foreground/[0.06] rounded-outer p-8 bg-foreground/[0.02]"
         >
-          <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-4">
+          <div className="font-mono text-xs text-primary mb-4">
             How It Works
           </div>
-          <h2 className="text-2xl font-semibold font-display mb-4">
+          <h2 className="text-2xl font-light font-display mb-4">
             Swap models from the CLI.
           </h2>
           <p className="text-muted-foreground mb-6 max-w-xl">

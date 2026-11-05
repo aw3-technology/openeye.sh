@@ -16,11 +16,11 @@ export function PipelineSection({ layer, index }: { layer: PipelineLayer; index:
           transition={{ duration: 0.3, ease }}
         >
           <div
-            className={`font-mono text-xs uppercase tracking-widest ${layer.overlineColor} mb-4`}
+            className={`font-mono text-xs ${layer.overlineColor} mb-4`}
           >
             {layer.overline}
           </div>
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+          <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
             {layer.title}
           </h2>
           <p className="text-muted-foreground mb-4 max-w-2xl">
@@ -43,7 +43,7 @@ export function PipelineSection({ layer, index }: { layer: PipelineLayer; index:
               key={j}
               className="flex items-start gap-3 p-4 border border-foreground/[0.06] rounded-outer bg-foreground/[0.02]"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-terminal-green mt-1.5 flex-shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
               <span className="text-sm text-muted-foreground">
                 {detail}
               </span>

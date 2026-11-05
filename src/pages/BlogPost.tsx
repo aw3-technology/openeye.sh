@@ -49,7 +49,7 @@ function renderMarkdown(content: string) {
     // H2
     if (line.startsWith("## ")) {
       blocks.push(
-        <h2 key={key++} className="text-2xl font-semibold font-display mt-12 mb-4">
+        <h2 key={key++} className="text-2xl font-light font-display mt-12 mb-4">
           {line.slice(3)}
         </h2>
       );
@@ -60,7 +60,7 @@ function renderMarkdown(content: string) {
     // H3
     if (line.startsWith("### ")) {
       blocks.push(
-        <h3 key={key++} className="text-lg font-semibold font-display mt-8 mb-3">
+        <h3 key={key++} className="text-lg font-light font-display mt-8 mb-3">
           {line.slice(4)}
         </h3>
       );
@@ -86,7 +86,7 @@ function renderMarkdown(content: string) {
         <ul key={key++} className="my-4 space-y-2">
           {items.map((item, j) => (
             <li key={j} className="flex gap-3 text-muted-foreground leading-relaxed">
-              <span className="text-terminal-green mt-1.5 shrink-0">&#x2022;</span>
+              <span className="text-primary mt-1.5 shrink-0">&#x2022;</span>
               <span>{renderInline(item)}</span>
             </li>
           ))}
@@ -241,7 +241,7 @@ export default function BlogPost() {
             {/* Back link */}
             <Link
               to="/blog"
-              className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors mb-8"
+              className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors mb-8"
             >
               <span>&larr;</span>
               <span>All Posts</span>
@@ -254,7 +254,7 @@ export default function BlogPost() {
                   {post.category}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-semibold font-display leading-[1.1] mb-6">
+              <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-light font-display leading-[1.1] mb-6">
                 {post.title}
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed mb-6">
@@ -289,7 +289,7 @@ export default function BlogPost() {
             <div className="mt-16 pt-8 border-t border-foreground/[0.06]">
               <Link
                 to="/blog"
-                className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-terminal-green transition-colors"
+                className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground hover:text-primary transition-colors"
               >
                 <span>&larr;</span>
                 <span>Back to all posts</span>

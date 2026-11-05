@@ -4,11 +4,11 @@ export function ArchitectureSection() {
       <div className="container max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           <div>
-            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+            <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground mb-4">
               <span className="w-2 h-2 rotate-45 bg-oe-blue" />
               Architecture
             </div>
-            <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+            <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
               One CLI. Every vision model.
             </h2>
             <p className="text-muted-foreground mb-8 max-w-md">

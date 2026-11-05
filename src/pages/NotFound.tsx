@@ -20,10 +20,10 @@ const NotFound = () => {
       <Navbar />
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
         <div className="text-center">
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+          <div className="font-mono text-xs text-muted-foreground mb-4">
             Error 404
           </div>
-          <h1 className="mb-4 text-4xl font-semibold font-display">Page not found</h1>
+          <h1 className="mb-4 text-4xl font-light font-display">Page not found</h1>
           <p className="mb-8 text-muted-foreground max-w-md mx-auto">
             The page <code className="font-mono text-sm bg-foreground/5 px-1.5 py-0.5 rounded">{location.pathname}</code> doesn't exist.
           </p>

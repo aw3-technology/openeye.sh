@@ -47,7 +47,7 @@ export default function Inference() {
       {/* ---- Header ---- */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">Image Inference</h1>
+          <h1 className="font-display text-3xl font-light">Image Inference</h1>
           {isConnected ? (
             <Badge
               variant="outline"

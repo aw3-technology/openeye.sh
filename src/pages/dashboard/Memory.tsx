@@ -91,7 +91,7 @@ export default function Memory() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Brain className="h-5 w-5 text-blue-400" />
-          <h1 className="text-xl font-semibold">Observation Memory</h1>
+          <h1 className="font-display text-3xl font-light">Observation Memory</h1>
           <span className="text-xs font-mono text-muted-foreground">
             {demoObservations.length} observations stored
           </span>

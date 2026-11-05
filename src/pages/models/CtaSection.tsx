@@ -13,7 +13,7 @@ export function CtaSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.3, ease }}
         >
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+          <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
             Use the right model for the job.
           </h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
@@ -22,7 +22,7 @@ export function CtaSection() {
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               to="/docs"
-              className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
+              className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
             >
               Read the Docs
             </Link>

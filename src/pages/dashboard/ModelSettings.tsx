@@ -34,7 +34,7 @@ export default function ModelSettings() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <SlidersHorizontal className="h-5 w-5 text-terminal-green" />
-          <h1 className="text-2xl font-semibold">Model Settings</h1>
+          <h1 className="font-display text-3xl font-light">Model Settings</h1>
         </div>
         <div className="flex items-center gap-2">
           <Badge

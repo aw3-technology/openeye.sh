@@ -21,7 +21,7 @@ export default function Export() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold">Export</h1>
+        <h1 className="font-display text-3xl font-light">Export</h1>
         <LoadingState message="Loading inference history..." />
       </div>
     );
@@ -30,7 +30,7 @@ export default function Export() {
   if (rows.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold">Export</h1>
+        <h1 className="font-display text-3xl font-light">Export</h1>
         <EmptyState message="No results to export. Run an inference first." />
       </div>
     );
@@ -39,7 +39,7 @@ export default function Export() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Export</h1>
+        <h1 className="font-display text-3xl font-light">Export</h1>
         <Badge variant="secondary" className="font-mono text-xs">
           {rows.length} results
         </Badge>

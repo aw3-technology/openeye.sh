@@ -12,10 +12,10 @@ export function SafetySection() {
           viewport={{ once: true }}
           transition={{ duration: 0.3, ease }}
         >
-          <div className="font-mono text-xs uppercase tracking-widest text-terminal-red mb-4">
+          <div className="font-mono text-xs text-terminal-red mb-4">
             Safety Architecture
           </div>
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+          <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
             Dual-layer safety by design.
           </h2>
           <p className="text-muted-foreground mb-12 max-w-2xl">
@@ -33,10 +33,10 @@ export function SafetySection() {
             transition={{ duration: 0.3, delay: 0.05, ease }}
             className="border border-foreground/[0.06] rounded-outer p-8 bg-foreground/[0.02]"
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-4">
+            <div className="font-mono text-xs text-primary mb-4">
               Fast Layer
             </div>
-            <h3 className="text-xl font-semibold font-display mb-3">
+            <h3 className="text-xl font-light font-display mb-3">
               Geometry-based detection
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
@@ -46,15 +46,15 @@ export function SafetySection() {
             </p>
             <div className="space-y-2 font-mono text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-terminal-green" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                 30fps continuous detection
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-terminal-green" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                 Sub-100ms halt latency
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-terminal-green" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                 Works fully offline
               </div>
             </div>
@@ -67,10 +67,10 @@ export function SafetySection() {
             transition={{ duration: 0.3, delay: 0.1, ease }}
             className="border border-foreground/[0.06] rounded-outer p-8 bg-foreground/[0.02]"
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-terminal-amber mb-4">
+            <div className="font-mono text-xs text-terminal-amber mb-4">
               Smart Layer
             </div>
-            <h3 className="text-xl font-semibold font-display mb-3">
+            <h3 className="text-xl font-light font-display mb-3">
               Context-aware reasoning
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">

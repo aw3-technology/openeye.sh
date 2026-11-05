@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/PageHero";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageMeta } from "@/components/seo/PageMeta";
@@ -11,17 +12,11 @@ export default function PrivacyPolicy() {
         path="/privacy"
       />
       <Navbar />
-      <main className="pt-28 pb-20 px-4">
-        <div className="container max-w-3xl mx-auto">
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-            Legal
-          </div>
-          <h1 className="text-3xl md:text-4xl font-semibold font-display mb-2">
-            Privacy Policy
-          </h1>
-          <p className="text-sm text-muted-foreground mb-12">
-            Last updated: March 15, 2026
-          </p>
+      <main>
+        <PageHero size="sm" eyebrow="Legal" title="Privacy Policy">
+          <span className="text-sm">Last updated: March 15, 2026</span>
+        </PageHero>
+        <div className="container max-w-3xl mx-auto px-4 pt-12 pb-20">
 
           <div className="prose-legal space-y-8 text-muted-foreground leading-relaxed">
             <section>

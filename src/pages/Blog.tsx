@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/PageHero";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -40,28 +41,12 @@ export default function Blog() {
       <Navbar />
 
       <main>
-      <section className="pt-28 pb-16 px-4">
-        <div className="container max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-          >
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-              Blog
-            </div>
-            <h1 className="text-4xl md:text-5xl font-semibold font-display leading-[1.05] mb-4">
-              Thinking about perception.
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              Technical writing on robot perception, safety systems, open-source infrastructure, and the future of autonomous agents.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero eyebrow="Blog" title="Thinking about" accent="perception.">
+        Technical writing on robot perception, safety systems, open-source infrastructure, and the future of autonomous agents.
+      </PageHero>
 
       {/* Featured Post */}
-      <section className="px-4 pb-16">
+      <section className="pt-16 px-4 pb-16">
         <div className="container max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -70,7 +55,7 @@ export default function Blog() {
           >
             <Link
               to={`/blog/${featured.slug}`}
-              className="block group rounded-outer focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
+              className="block group rounded-outer focus-visible:ring-2 focus-visible:ring-primary outline-none"
             >
               <div className="border border-foreground/[0.06] rounded-outer overflow-hidden bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-colors">
                 {blogHeroImages[featured.slug] && (
@@ -92,7 +77,7 @@ export default function Blog() {
                     Featured
                   </span>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-semibold font-display leading-tight mb-4 group-hover:text-terminal-green transition-colors">
+                <h2 className="text-2xl md:text-3xl font-light font-display leading-tight mb-4 group-hover:text-primary transition-colors">
                   {featured.title}
                 </h2>
                 <p className="text-muted-foreground leading-relaxed mb-6 max-w-3xl">
@@ -127,7 +112,7 @@ export default function Blog() {
               >
                 <Link
                   to={`/blog/${post.slug}`}
-                  className="block group h-full rounded-outer focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
+                  className="block group h-full rounded-outer focus-visible:ring-2 focus-visible:ring-primary outline-none"
                 >
                   <div className="border border-foreground/[0.06] rounded-outer overflow-hidden h-full bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-colors flex flex-col">
                     {blogHeroImages[post.slug] && (
@@ -146,7 +131,7 @@ export default function Blog() {
                         {post.category}
                       </span>
                     </div>
-                    <h3 className="text-lg font-semibold font-display leading-snug mb-3 group-hover:text-terminal-green transition-colors">
+                    <h3 className="text-lg font-light font-display leading-snug mb-3 group-hover:text-primary transition-colors">
                       {post.title}
                     </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">

@@ -13,7 +13,7 @@ export function CtaSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.3, ease }}
         >
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+          <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
             The perception layer is open.
           </h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">

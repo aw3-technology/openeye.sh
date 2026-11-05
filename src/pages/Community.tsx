@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/PageHero";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
@@ -67,31 +68,14 @@ export default function Community() {
       <Navbar />
       <main>
 
-      {/* Header */}
-      <section className="pt-28 pb-16 px-4">
-        <div className="container max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-          >
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-              Community
-            </div>
-            <h1 className="text-4xl md:text-5xl font-semibold font-display leading-[1.05] mb-4">
-              Build with us.
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              OpenEye is open-source and community-driven. Whether you&apos;re
-              reporting a bug, requesting a feature, or shipping a PR — you&apos;re
-              part of this.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero eyebrow="Community" title="Build" accent="with us.">
+        OpenEye is open-source and community-driven. Whether you&apos;re
+        reporting a bug, requesting a feature, or shipping a PR — you&apos;re
+        part of this.
+      </PageHero>
 
       {/* Channels */}
-      <section className="px-4 pb-16">
+      <section className="pt-16 px-4 pb-16">
         <div className="container max-w-6xl mx-auto">
           <div className="grid md:grid-cols-3 gap-6">
             {channels.map((channel, i) => (
@@ -100,7 +84,7 @@ export default function Community() {
                 href={channel.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block group rounded-outer focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
+                className="block group rounded-outer focus-visible:ring-2 focus-visible:ring-primary outline-none"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -113,13 +97,13 @@ export default function Community() {
                   <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-4">
                     {channel.mono}
                   </div>
-                  <h3 className="text-lg font-semibold font-display leading-snug mb-3 group-hover:text-terminal-green transition-colors">
+                  <h3 className="text-lg font-light font-display leading-snug mb-3 group-hover:text-primary transition-colors">
                     {channel.label}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">
                     {channel.description}
                   </p>
-                  <span className="font-mono text-xs text-terminal-green group-hover:underline underline-offset-4">
+                  <span className="font-mono text-xs text-primary group-hover:underline underline-offset-4">
                     {channel.cta} &rarr;
                   </span>
                 </div>
@@ -138,10 +122,10 @@ export default function Community() {
             transition={{ duration: 0.3, delay: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
           >
             <div className="border border-foreground/[0.06] rounded-outer p-8 md:p-12 bg-foreground/[0.02]">
-              <div className="font-mono text-[10px] uppercase tracking-widest text-terminal-green mb-4">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-primary mb-4">
                 Adapter Plugin System
               </div>
-              <h2 className="text-2xl md:text-3xl font-semibold font-display leading-tight mb-4">
+              <h2 className="text-2xl md:text-3xl font-light font-display leading-tight mb-4">
                 Add a model. Never touch core code.
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-8 max-w-2xl">
@@ -150,19 +134,19 @@ export default function Community() {
 
               <div className="grid md:grid-cols-3 gap-6 mb-8">
                 <div className="space-y-2">
-                  <div className="font-mono text-xs uppercase tracking-widest text-terminal-green">Model Adapters</div>
+                  <div className="font-mono text-xs text-primary">Model Adapters</div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Add a new detection or segmentation model. Implement detect() and load(), register it — done. YOLO, DETR, SAM, or your own custom model.
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="font-mono text-xs uppercase tracking-widest text-terminal-amber">Robot Adapters</div>
+                  <div className="font-mono text-xs text-terminal-amber">Robot Adapters</div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Connect OpenEye to any robot framework. The Unitree G1 connector ships built-in with SDK, HTTP, and dry-run modes. ROS 2 coming soon.
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Output Adapters</div>
+                  <div className="font-mono text-xs text-muted-foreground">Output Adapters</div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Stream perception data as JSON, protobuf, ROS messages, or your custom format. The output layer is pluggable too.
                   </p>
@@ -173,13 +157,13 @@ export default function Community() {
                 <div className="text-terminal-muted"># Example: Add a new model adapter</div>
                 <div className="text-terminal-amber">from openeye.adapters import ModelAdapter</div>
                 <div className="h-3" />
-                <div className="text-terminal-green">class MyCustomModel(ModelAdapter):</div>
+                <div className="text-primary">class MyCustomModel(ModelAdapter):</div>
                 <div className="text-terminal-fg pl-4">name = "my-model-v1"</div>
                 <div className="h-3" />
-                <div className="text-terminal-green pl-4">def load(self):</div>
+                <div className="text-primary pl-4">def load(self):</div>
                 <div className="text-terminal-fg pl-8">self.model = load_weights("my-model.pt")</div>
                 <div className="h-3" />
-                <div className="text-terminal-green pl-4">def detect(self, frame):</div>
+                <div className="text-primary pl-4">def detect(self, frame):</div>
                 <div className="text-terminal-fg pl-8">return self.model.predict(frame)</div>
                 <div className="h-3" />
                 <div className="text-terminal-muted"># Register it — now available via CLI and API</div>
@@ -202,7 +186,7 @@ export default function Community() {
               <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-4">
                 Contributing
               </div>
-              <h2 className="text-2xl md:text-3xl font-semibold font-display leading-tight mb-4">
+              <h2 className="text-2xl md:text-3xl font-light font-display leading-tight mb-4">
                 Start contributing in 3 steps.
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-8 max-w-2xl">
@@ -212,7 +196,7 @@ export default function Community() {
                   href="https://github.com/aw3-technology/openeye.sh/blob/main/CONTRIBUTING.md"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-foreground hover:text-terminal-green transition-colors underline underline-offset-4 decoration-foreground/20 rounded-sm focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
+                  className="text-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-foreground/20 rounded-sm focus-visible:ring-2 focus-visible:ring-primary outline-none"
                 >
                   contributor guide
                 </a>{" "}
@@ -225,7 +209,7 @@ export default function Community() {
                     <div className="font-mono text-2xl font-medium text-foreground/10 mb-3">
                       {step.step}
                     </div>
-                    <h3 className="text-sm font-semibold font-display mb-2">
+                    <h3 className="text-sm font-light font-display mb-2">
                       {step.title}
                     </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
@@ -252,7 +236,7 @@ export default function Community() {
               href="https://github.com/aw3-technology/openeye.sh"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-foreground text-background px-6 py-3 rounded-inner font-mono text-xs uppercase tracking-widest hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-terminal-green focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
+              className="inline-block bg-foreground text-background px-6 py-3 rounded-inner font-mono text-xs hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
             >
               View on GitHub
             </a>

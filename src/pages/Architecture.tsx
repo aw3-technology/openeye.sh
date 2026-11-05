@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/PageHero";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -34,7 +35,7 @@ const pipelineLayers: PipelineLayer[] = [
   },
   {
     overline: "Layer 2 — Vision Engine",
-    overlineColor: "text-terminal-green",
+    overlineColor: "text-primary",
     title: "YOLO26 runs every frame.",
     description:
       "The fast detection layer processes every frame at 30fps using YOLO26. Model adapters let you swap to any supported detector without code changes. This is the safety-critical path — pure geometry, no LLM latency.",
@@ -48,7 +49,7 @@ const pipelineLayers: PipelineLayer[] = [
   },
   {
     overline: "Layer 3 — Scene Understanding",
-    overlineColor: "text-terminal-green",
+    overlineColor: "text-primary",
     title: "Objects become a world model.",
     description:
       "Raw detections are composed into a structured scene graph with spatial relationships, hazard classifications, and environment context. This is the representation that downstream systems consume.",
@@ -90,7 +91,7 @@ const pipelineLayers: PipelineLayer[] = [
   },
   {
     overline: "Layer 6 — Robot Adapter",
-    overlineColor: "text-terminal-green",
+    overlineColor: "text-primary",
     title: "Plans become robot actions.",
     description:
       "The adapter layer translates action plans into robot-specific commands. Unitree G1 connector with SDK, HTTP, and dry-run modes. Halt signals bypass the full pipeline for sub-100ms emergency stops.",
@@ -119,31 +120,14 @@ export default function Architecture() {
       <Navbar />
       <main>
 
-      {/* Hero */}
-      <section className="pt-28 pb-16 px-4">
-        <div className="container max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease }}
-          >
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-              Architecture
-            </div>
-            <h1 className="text-4xl md:text-5xl font-semibold font-display leading-[1.05] mb-4">
-              Six layers. One pipeline.
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              Camera feed to robot action in a single, modular pipeline. Every
-              layer is swappable, every interface is open, and safety is built
-              into the architecture — not bolted on.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero eyebrow="Architecture" title="Six layers." accent="One pipeline.">
+        Camera feed to robot action in a single, modular pipeline. Every
+        layer is swappable, every interface is open, and safety is built
+        into the architecture — not bolted on.
+      </PageHero>
 
       {/* Pipeline Overview */}
-      <section className="px-4 pb-16">
+      <section className="pt-16 px-4 pb-16">
         <div className="container max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -152,10 +136,10 @@ export default function Architecture() {
             className="grid lg:grid-cols-2 gap-16 items-start"
           >
             <div>
-              <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-4">
+              <div className="font-mono text-xs text-primary mb-4">
                 Pipeline Overview
               </div>
-              <h2 className="text-3xl font-semibold font-display mb-4">
+              <h2 className="text-3xl font-light font-display mb-4">
                 From pixels to actions.
               </h2>
               <p className="text-muted-foreground mb-8">
@@ -165,15 +149,15 @@ export default function Architecture() {
               </p>
               <div className="space-y-3 font-mono text-sm text-muted-foreground">
                 <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full bg-terminal-green" />
+                  <span className="w-2 h-2 rounded-full bg-primary" />
                   Hardware-agnostic: USB, RTSP, video files
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full bg-terminal-green" />
+                  <span className="w-2 h-2 rounded-full bg-primary" />
                   Model-agnostic: swap any detection or VLM
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full bg-terminal-green" />
+                  <span className="w-2 h-2 rounded-full bg-primary" />
                   Adapter-ready: Unitree G1, ROS (soon)
                 </div>
                 <div className="flex items-center gap-3">
@@ -201,11 +185,11 @@ export default function Architecture() {
               transition={{ duration: 0.3, ease }}
             >
               <div
-                className={`font-mono text-xs uppercase tracking-widest ${layer.overlineColor} mb-4`}
+                className={`font-mono text-xs ${layer.overlineColor} mb-4`}
               >
                 {layer.overline}
               </div>
-              <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+              <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
                 {layer.title}
               </h2>
               <p className="text-muted-foreground mb-4 max-w-2xl">
@@ -228,7 +212,7 @@ export default function Architecture() {
                   key={j}
                   className="flex items-start gap-3 p-4 border border-foreground/[0.06] rounded-outer bg-foreground/[0.02]"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-terminal-green mt-1.5 flex-shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
                   <span className="text-sm text-muted-foreground">
                     {detail}
                   </span>
@@ -248,10 +232,10 @@ export default function Architecture() {
             viewport={{ once: true }}
             transition={{ duration: 0.3, ease }}
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-terminal-red mb-4">
+            <div className="font-mono text-xs text-terminal-red mb-4">
               Safety Architecture
             </div>
-            <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+            <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
               Dual-layer safety by design.
             </h2>
             <p className="text-muted-foreground mb-12 max-w-2xl">
@@ -269,10 +253,10 @@ export default function Architecture() {
               transition={{ duration: 0.3, delay: 0.05, ease }}
               className="border border-foreground/[0.06] rounded-outer p-8 bg-foreground/[0.02]"
             >
-              <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-4">
+              <div className="font-mono text-xs text-primary mb-4">
                 Fast Layer
               </div>
-              <h3 className="text-xl font-semibold font-display mb-3">
+              <h3 className="text-xl font-light font-display mb-3">
                 Geometry-based detection
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
@@ -282,15 +266,15 @@ export default function Architecture() {
               </p>
               <div className="space-y-2 font-mono text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-terminal-green" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                   30fps continuous detection
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-terminal-green" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                   Sub-100ms halt latency
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-terminal-green" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                   Works fully offline
                 </div>
               </div>
@@ -303,10 +287,10 @@ export default function Architecture() {
               transition={{ duration: 0.3, delay: 0.1, ease }}
               className="border border-foreground/[0.06] rounded-outer p-8 bg-foreground/[0.02]"
             >
-              <div className="font-mono text-xs uppercase tracking-widest text-terminal-amber mb-4">
+              <div className="font-mono text-xs text-terminal-amber mb-4">
                 Smart Layer
               </div>
-              <h3 className="text-xl font-semibold font-display mb-3">
+              <h3 className="text-xl font-light font-display mb-3">
                 Context-aware reasoning
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
@@ -342,7 +326,7 @@ export default function Architecture() {
             viewport={{ once: true }}
             transition={{ duration: 0.3, ease }}
           >
-            <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+            <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
               Explore the full pipeline.
             </h2>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto">

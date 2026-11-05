@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/PageHero";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
@@ -56,40 +57,23 @@ export default function Changelog() {
       <Navbar />
       <main>
 
-      {/* Header */}
-      <section className="pt-28 pb-12 px-4">
-        <div className="container max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
-          >
-            <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
-              Changelog
-            </div>
-            <h1 className="text-4xl md:text-5xl font-semibold font-display leading-[1.05] mb-4">
-              What&apos;s new in OpenEye.
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              Release history, breaking changes, and everything shipped. Follow
-              along on{" "}
-              <a
-                href="https://github.com/aw3-technology/openeye.sh"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-foreground hover:text-terminal-green transition-colors underline underline-offset-4 decoration-foreground/20"
-              >
-                GitHub
-              </a>{" "}
-              for the full commit log.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero eyebrow="Changelog" title={"What's new"} accent="in OpenEye.">
+        Release history, breaking changes, and everything shipped. Follow
+        along on{" "}
+        <a
+          href="https://github.com/aw3-technology/openeye.sh"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-foreground hover:text-primary transition-colors underline underline-offset-4 decoration-foreground/20"
+        >
+          GitHub
+        </a>{" "}
+        for the full commit log.
+      </PageHero>
 
       {/* Version index */}
       {changelog.length > 0 && (
-        <section className="px-4 pb-10">
+        <section className="pt-16 px-4 pb-10">
           <div className="container max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
@@ -101,7 +85,7 @@ export default function Changelog() {
                 <a
                   key={entry.version}
                   href={`#v${entry.version}`}
-                  className="font-mono text-xs px-2.5 py-1 border border-foreground/[0.08] rounded-inner text-muted-foreground hover:text-terminal-green hover:border-terminal-green/20 transition-colors focus-visible:ring-2 focus-visible:ring-terminal-green outline-none"
+                  className="font-mono text-xs px-2.5 py-1 border border-foreground/[0.08] rounded-inner text-muted-foreground hover:text-primary hover:border-primary/20 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
                 >
                   v{entry.version}
                 </a>
@@ -138,12 +122,12 @@ export default function Changelog() {
                     <div className="flex flex-wrap items-center gap-3 mb-4">
                       <a
                         href={`#v${entry.version}`}
-                        className="font-mono text-sm font-medium text-foreground hover:text-terminal-green transition-colors"
+                        className="font-mono text-sm font-medium text-foreground hover:text-primary transition-colors"
                       >
                         v{entry.version}
                       </a>
                       {entry.tag === "latest" && (
-                        <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 border rounded-inner text-terminal-green border-terminal-green/20">
+                        <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 border rounded-inner text-primary border-primary/20">
                           Latest
                         </span>
                       )}
@@ -157,7 +141,7 @@ export default function Changelog() {
                       </span>
                     </div>
 
-                    <h2 className="text-xl font-semibold font-display leading-tight mb-2">
+                    <h2 className="text-xl font-light font-display leading-tight mb-2">
                       {entry.title}
                     </h2>
                     <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-3xl">

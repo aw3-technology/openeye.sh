@@ -116,7 +116,7 @@ const llms = `# OpenEye
 
 > Open-source "Ollama for vision": a CLI-first perception engine that turns raw video into structured world models for robots, VLA models, and autonomous agents. Install with \`pipx install openeye-sh\`.
 
-OpenEye runs vision models (YOLO, RF-DETR, Grounding DINO, Depth Anything V2, SAM 2, SmolVLA) locally on CPU, NVIDIA CUDA, or Apple Silicon. \`openeye pull <model>\` downloads weights, \`openeye run <model> <image>\` prints JSON, and \`openeye serve <model>\` exposes REST and WebSocket APIs. It also ships an MCP server (\`openeye-mcp\`) for AI agents. MIT licensed; source at https://github.com/aw3-technology/openeye.sh. Full docs as one file: ${SITE}/llms-full.txt
+OpenEye runs vision models (YOLO, RF-DETR, Grounding DINO, Depth Anything V2, SAM 2, SmolVLA) locally on CPU, NVIDIA CUDA, or Apple Silicon. \`openeye pull <model>\` downloads weights, \`openeye run <model> <image>\` prints JSON, and \`openeye serve <model>\` exposes REST and WebSocket APIs. It also ships an MCP server (\`openeye-mcp\`) for AI agents. Source at https://github.com/aw3-technology/openeye.sh. Full docs as one file: ${SITE}/llms-full.txt
 
 ${groups
   .map(

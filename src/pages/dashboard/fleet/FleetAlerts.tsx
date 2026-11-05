@@ -169,7 +169,7 @@ export default function FleetAlerts() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Fleet Alerts</h1>
+        <h1 className="font-display text-3xl font-light">Fleet Alerts</h1>
         {counts.unresolved > 0 && (
           <span className="text-sm text-muted-foreground">
             {counts.unresolved} unresolved alert{counts.unresolved !== 1 ? "s" : ""}

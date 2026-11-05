@@ -96,7 +96,7 @@ export default function Profile() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Profile</h1>
+      <h1 className="font-display text-3xl font-light">Profile</h1>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Avatar & identity card */}

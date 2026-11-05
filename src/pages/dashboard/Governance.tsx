@@ -51,7 +51,7 @@ export default function Governance() {
         <div className="flex items-center gap-3">
           <Shield className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-2xl font-semibold">Governance</h1>
+            <h1 className="font-display text-3xl font-light">Governance</h1>
             {status && (
               <div className="flex items-center gap-2 mt-0.5">
                 {status.config_name && (

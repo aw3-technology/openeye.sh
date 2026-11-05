@@ -55,7 +55,7 @@ export default function DeviceDetail() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold">{device.name}</h1>
+          <h1 className="font-display text-3xl font-light">{device.name}</h1>
           <p className="text-sm text-muted-foreground">{device.device_type} &middot; {device.id}</p>
         </div>
         <DeviceStatusBadge status={device.status} />

@@ -18,7 +18,7 @@ export default function DocPage() {
   const description = docDescription(entry);
 
   return (
-    <DocsLayout activeId={entry.id}>
+    <DocsLayout activeId={entry.id} showHeader={false}>
       <PageMeta
         title={`${entry.title} | OpenEye Docs`}
         description={description}

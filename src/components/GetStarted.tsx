@@ -63,7 +63,7 @@ export function GetStarted() {
                   <span className="font-mono text-sm text-terminal-green font-medium">{item.step}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display text-base font-medium mb-2">{item.title}</h3>
+                  <h3 className="font-display text-base font-light mb-2">{item.title}</h3>
                   <div className="font-mono text-sm bg-secondary text-oe-green px-3 py-2 rounded-inner border mb-3 overflow-x-auto">
                     $ {item.command}
                   </div>
@@ -89,7 +89,7 @@ export function GetStarted() {
               <span className="font-mono text-sm text-terminal-amber font-medium">API</span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-display text-base font-medium mb-2">Want an API? Start the server.</h3>
+              <h3 className="font-display text-base font-light mb-2">Want an API? Start the server.</h3>
               <div className="font-mono text-xs sm:text-sm bg-secondary text-oe-green px-3 py-2 rounded-inner border mb-3 overflow-x-auto whitespace-nowrap">
                 $ openeye serve yolov8 --port 8000
               </div>

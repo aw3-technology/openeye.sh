@@ -14,10 +14,10 @@ export function MissionSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.3, ease }}
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-4">
+            <div className="font-mono text-xs text-primary mb-4">
               Mission
             </div>
-            <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+            <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
               Who watches the robots?
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-6">

@@ -37,7 +37,7 @@ export default function LiveDemo() {
               <span className="w-2 h-2 rotate-45 bg-foreground" />
               <span className="ml-1">Live Demo</span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold font-display leading-[1.05] mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-light font-display leading-[1.05] mb-6">
               Try OpenEye. <span className="text-primary">Right now.</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
@@ -103,7 +103,7 @@ export default function LiveDemo() {
             className="mt-20 text-center"
           >
             <div className="bg-card border rounded-2xl p-10 max-w-2xl mx-auto">
-              <h3 className="text-2xl font-semibold font-display mb-4">
+              <h3 className="text-2xl font-light font-display mb-4">
                 Ready to run it for real?
               </h3>
               <p className="text-muted-foreground mb-6">

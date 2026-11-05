@@ -51,8 +51,9 @@
     --muted: 200 12% 22%;
     --muted-foreground: 200 8% 58%;
 
-    --accent: 358 75% 59%;
-    --accent-foreground: 0 0% 100%;
+    /* Neutral hover/selection surface; red stays on --destructive / --oe-red */
+    --accent: 200 18% 12%;
+    --accent-foreground: 200 15% 94%;
 
     --destructive: 358 75% 59%;
     --destructive-foreground: 0 0% 100%;
@@ -66,11 +67,11 @@
     --oe-blue: 199 64% 57%;
     --oe-red: 358 75% 59%;
     --oe-black: 200 25% 7%;
-    --oe-green: 153 100% 50%;
+    --oe-green: 158 58% 62%;
 
     --terminal-bg: 200 30% 5%;
     --terminal-fg: 0 0% 75%;
-    --terminal-green: 153 100% 50%;
+    --terminal-green: 158 58% 52%;
     --terminal-amber: 199 58% 55%;
     --terminal-red: 358 75% 59%;
     --terminal-muted: 200 8% 38%;
@@ -84,6 +85,15 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow-md: 0 4px 16px -4px rgb(0 0 0 / 0.3);
     --shadow-lg: 0 10px 30px -10px rgb(0 0 0 / 0.4);
+
+    --sidebar-background: 200 33% 4%;
+    --sidebar-foreground: 200 8% 70%;
+    --sidebar-primary: 199 64% 57%;
+    --sidebar-primary-foreground: 200 33% 4%;
+    --sidebar-accent: 200 18% 10%;
+    --sidebar-accent-foreground: 200 15% 94%;
+    --sidebar-border: 0 0% 100% / 0.07;
+    --sidebar-ring: 199 64% 57%;
   }
 
   .light {
@@ -105,8 +115,8 @@
     --muted: 0 0% 80%;
     --muted-foreground: 0 0% 40%;
 
-    --accent: 0 72% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 210 20% 95%;
+    --accent-foreground: 0 0% 8%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -136,6 +146,15 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
     --shadow-md: 0 4px 16px -4px rgb(0 0 0 / 0.06);
     --shadow-lg: 0 10px 30px -10px rgb(0 0 0 / 0.08);
+
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 0 0% 35%;
+    --sidebar-primary: 199 58% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 94%;
+    --sidebar-accent-foreground: 0 0% 8%;
+    --sidebar-border: 0 0% 0% / 0.08;
+    --sidebar-ring: 199 58% 40%;
   }
 }
 
@@ -153,6 +172,11 @@
     font-family: 'Inter', system-ui, sans-serif;
     letter-spacing: -0.03em;
     text-wrap: balance;
+  }
+
+  /* Newsreader display headings run light with gentle tracking (house style) */
+  .font-display {
+    letter-spacing: -0.012em;
   }
 
   code, pre, .font-mono {

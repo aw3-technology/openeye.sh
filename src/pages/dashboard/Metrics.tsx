@@ -92,7 +92,7 @@ function MetricsInner() {
         <div className="flex items-center gap-3">
           <BarChart3 className="h-5 w-5 text-terminal-green" />
           <div>
-            <h1 className="text-2xl font-semibold">Performance Metrics</h1>
+            <h1 className="font-display text-3xl font-light">Performance Metrics</h1>
             <p className="text-sm text-muted-foreground">
               Real-time inference pipeline telemetry
             </p>

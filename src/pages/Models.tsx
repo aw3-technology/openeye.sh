@@ -50,11 +50,11 @@ export default function Models() {
               transition={{ duration: 0.3, ease }}
             >
               <div
-                className={`font-mono text-xs uppercase tracking-widest ${group.color} mb-4`}
+                className={`font-mono text-xs ${group.color} mb-4`}
               >
                 {group.category}
               </div>
-              <h2 className="text-3xl md:text-4xl font-semibold font-display mb-12">
+              <h2 className="text-3xl md:text-4xl font-light font-display mb-12">
                 {group.heading}
               </h2>
             </motion.div>

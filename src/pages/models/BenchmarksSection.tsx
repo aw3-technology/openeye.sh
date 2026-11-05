@@ -13,10 +13,10 @@ export function BenchmarksSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.3, ease }}
         >
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+          <div className="font-mono text-xs text-muted-foreground mb-4">
             Benchmarks
           </div>
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+          <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
             Performance at a glance.
           </h2>
           <p className="text-muted-foreground mb-12 max-w-xl">
@@ -35,22 +35,22 @@ export function BenchmarksSection() {
           <table className="w-full text-sm border-collapse min-w-[700px]">
             <thead>
               <tr className="border-b border-foreground/[0.06]">
-                <th className="text-left py-3 pr-4 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                <th className="text-left py-3 pr-4 font-mono text-xs text-muted-foreground">
                   Model
                 </th>
-                <th className="text-left py-3 px-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                <th className="text-left py-3 px-3 font-mono text-xs text-muted-foreground">
                   Task
                 </th>
-                <th className="text-left py-3 px-3 font-mono text-xs uppercase tracking-widest text-terminal-green">
+                <th className="text-left py-3 px-3 font-mono text-xs text-primary">
                   Speed
                 </th>
-                <th className="text-left py-3 px-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                <th className="text-left py-3 px-3 font-mono text-xs text-muted-foreground">
                   Accuracy
                 </th>
-                <th className="text-left py-3 px-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                <th className="text-left py-3 px-3 font-mono text-xs text-muted-foreground">
                   Size
                 </th>
-                <th className="text-left py-3 px-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                <th className="text-left py-3 px-3 font-mono text-xs text-muted-foreground">
                   Backend
                 </th>
               </tr>
@@ -65,7 +65,7 @@ export function BenchmarksSection() {
                   <td className="py-3 px-3 text-muted-foreground">
                     {row.task}
                   </td>
-                  <td className="py-3 px-3 font-mono text-terminal-green">
+                  <td className="py-3 px-3 font-mono text-primary">
                     {row.speed}
                   </td>
                   <td className="py-3 px-3 font-mono text-xs text-muted-foreground">

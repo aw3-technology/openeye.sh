@@ -86,7 +86,7 @@ export default function History() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Inference History</h1>
+      <h1 className="font-display text-3xl font-light">Inference History</h1>
 
       {stats && <HistoryStatsCards stats={stats} />}
 

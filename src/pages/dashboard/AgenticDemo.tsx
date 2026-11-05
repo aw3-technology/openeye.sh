@@ -34,7 +34,7 @@ function AgenticDemoInner() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold flex items-center gap-2">
+          <h1 className="font-display text-3xl font-light flex items-center gap-2">
             <Brain className="h-6 w-6 text-terminal-green" />
             Agentic Loop
           </h1>

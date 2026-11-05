@@ -36,7 +36,7 @@ function SceneGraphInner() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">Scene Graph</h1>
+          <h1 className="font-display text-3xl font-light">Scene Graph</h1>
           {isStreaming && (
             <Badge
               variant="outline"

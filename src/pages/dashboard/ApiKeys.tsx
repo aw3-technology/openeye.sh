@@ -47,7 +47,7 @@ export default function ApiKeys() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">API Keys</h1>
+          <h1 className="font-display text-3xl font-light">API Keys</h1>
           <p className="text-sm text-muted-foreground">
             Manage keys for authenticating with the OpenEye inference API.
           </p>

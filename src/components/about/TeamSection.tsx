@@ -14,10 +14,10 @@ export function TeamSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.3, ease }}
         >
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+          <div className="font-mono text-xs text-muted-foreground mb-4">
             Team
           </div>
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+          <h2 className="text-3xl md:text-4xl font-light font-display mb-4">
             The people behind OpenEye.
           </h2>
           <p className="text-muted-foreground mb-12 max-w-xl">
@@ -41,7 +41,7 @@ export function TeamSection() {
               className="border border-foreground/[0.06] rounded-outer p-6 bg-background/50"
             >
               <div className="w-12 h-12 rounded-full bg-foreground/[0.06] flex items-center justify-center mb-4">
-                <span className="text-lg font-display font-semibold text-muted-foreground">
+                <span className="text-lg font-display font-light text-muted-foreground">
                   {member.name
                     .split(" ")
                     .map((n) => n[0])
@@ -98,7 +98,7 @@ export function TeamSection() {
             <div className="w-12 h-12 rounded-full bg-foreground/[0.04] flex items-center justify-center mb-4 group-hover:bg-foreground/[0.06] transition-colors">
               <span className="text-2xl text-muted-foreground">+</span>
             </div>
-            <div className="font-medium mb-1 group-hover:text-terminal-green transition-colors">
+            <div className="font-medium mb-1 group-hover:text-primary transition-colors">
               Contribute
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">

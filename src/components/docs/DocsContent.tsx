@@ -89,7 +89,7 @@ function TableBlock({ block }: { block: DocBlock }) {
 
 function NoteBlock({ block }: { block: DocBlock }) {
   const variantStyles = {
-    info: "border-terminal-green/40 bg-terminal-green/[0.03]",
+    info: "border-primary/40 bg-primary/[0.03]",
     warning: "border-terminal-amber/40 bg-terminal-amber/[0.03]",
     danger: "border-terminal-red/40 bg-terminal-red/[0.03]",
   };
@@ -111,7 +111,7 @@ function renderBlock(block: DocBlock, index: number) {
         return (
           <h3
             key={index}
-            className="text-lg font-semibold font-display mt-6 mb-2"
+            className="text-lg font-light font-display mt-6 mb-2"
           >
             {block.content}
           </h3>
@@ -120,7 +120,7 @@ function renderBlock(block: DocBlock, index: number) {
       return (
         <h2
           key={index}
-          className="text-2xl font-semibold font-display mt-8 mb-3"
+          className="text-2xl font-light font-display mt-8 mb-3"
         >
           {block.content}
         </h2>
@@ -144,7 +144,7 @@ function renderBlock(block: DocBlock, index: number) {
         <ul key={index} className="space-y-1.5">
           {block.items?.map((item, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-terminal-green mt-1.5 flex-shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
               {item}
             </li>
           ))}
@@ -162,7 +162,7 @@ function renderBlock(block: DocBlock, index: number) {
 export function DocsContent({ section }: { section: DocSection }) {
   return (
     <article>
-      <h1 className="text-3xl md:text-4xl font-semibold font-display mb-6 pb-3 border-b border-foreground/[0.06]">
+      <h1 className="text-3xl md:text-4xl font-light font-display mb-6 pb-3 border-b border-foreground/[0.06]">
         {section.title}
       </h1>
       <div className="space-y-4">

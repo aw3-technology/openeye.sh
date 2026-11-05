@@ -26,15 +26,17 @@ export function DashboardLayout() {
     <SidebarProvider>
       <DashboardSidebar />
       <SidebarInset>
-        <header className="flex h-12 items-center gap-2 border-b px-4">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-foreground/[0.07] bg-background/80 px-4 backdrop-blur-sm">
           <SidebarTrigger />
           <div className="flex-1" />
           <ThemeToggle />
           <CreditBalanceBadge />
           <ConnectionStatus />
         </header>
-        <div className="flex-1 overflow-auto p-4 md:p-6">
-          <Outlet />
+        <div className="flex-1 overflow-auto px-4 py-6 md:px-8 md:py-8">
+          <div className="mx-auto w-full max-w-7xl">
+            <Outlet />
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
