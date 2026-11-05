@@ -1,6 +1,10 @@
 /**
- * Proxy to the Cred credits API (ported from the Supabase `cred-proxy` edge
- * function). Injects the signed-in user's identity and the server-side API key.
+ * Proxy to the Cred credits API for the dashboard. Injects the signed-in
+ * user's identity and the server-side API key.
+ *
+ * Only read and purchase routes are exposed. Credits are deducted and
+ * refunded server-side by the hosted API (api/_lib/credits.ts), never from
+ * the browser — otherwise anyone could `issue` themselves credits.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { handleError, pathSegments, readRawBody, requireUser, restoreRewrittenUrl, sendJson } from "./_lib/http.js";
@@ -9,6 +13,16 @@ const CRED_API_BASE = process.env.CRED_API_BASE || "https://eutdgemlrpvnxfkkpvlu
 
 /** App origin used for Cred first-touch attribution. */
 const APP_ORIGIN = process.env.CRED_APP_ORIGIN || "https://openeye.sh";
+
+/** Allowed proxy routes and their method. */
+const ROUTES: Record<string, "GET" | "POST"> = {
+  balance: "GET",
+  transactions: "GET",
+  "pricing-tiers": "GET",
+  users: "POST",
+  checkout: "POST",
+  "presale-checkout": "POST",
+};
 
 function targetUrl(path: string, search: URLSearchParams) {
   const qs = search.toString();
@@ -36,20 +50,26 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const method = req.method || "GET";
     const userEmail = user.email || undefined;
 
-    // For balance requests, auto-inject user identity as query params
-    if (path === "balance" && method === "GET" && !search.has("user_id") && !search.has("email")) {
+    if (ROUTES[path] !== method) {
+      return sendJson(res, ROUTES[path] ? 405 : 404, { error: "Not available" });
+    }
+
+    // Identity always comes from the session: drop any the client sent.
+    search.delete("user_id");
+    search.delete("email");
+    if (path === "balance" || path === "transactions") {
       if (userEmail) search.set("email", userEmail);
       else search.set("user_id", user.id);
     }
 
     let body: string | undefined;
-    if (method !== "GET" && method !== "HEAD") {
+    if (method === "POST") {
       const rawBody = (await readRawBody(req, 100_000)).toString("utf8");
       const signupUrl = (req.headers["x-signup-url"] as string | undefined) || APP_ORIGIN;
       try {
         const parsed = rawBody ? JSON.parse(rawBody) : {};
-        if (path === "users" && !parsed.external_id) parsed.external_id = user.id;
         // Identity always comes from the session, never from the client.
+        if (path === "users") parsed.external_id = user.id;
         parsed.user_id = user.id;
         if (userEmail) {
           parsed.user_email = userEmail;
