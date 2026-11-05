@@ -1,13 +1,14 @@
 import { useEffect } from "react";
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { PageMeta } from "@/components/seo/PageMeta";
+import { PageMeta, absoluteUrl } from "@/components/seo/PageMeta";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getBlogPost, formatDate } from "@/data/blogPosts";
 import { categoryColors } from "@/data/categoryColors";
 import { blogHeroImages } from "@/data/blogHeroImages";
+import NotFound from "./NotFound";
 
 function renderMarkdown(content: string) {
   const blocks: React.ReactNode[] = [];
@@ -195,13 +196,10 @@ export default function BlogPost() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (post) {
-      document.title = `${post.title} | OpenEye Blog`;
-    }
-  }, [slug, post]);
+  }, [slug]);
 
   if (!post) {
-    return <Navigate to="/blog" replace />;
+    return <NotFound />;
   }
 
   return (
@@ -210,6 +208,8 @@ export default function BlogPost() {
         title={`${post.title} | OpenEye Blog`}
         description={post.excerpt || `Read “${post.title}” on the OpenEye blog — engineering notes and updates from the open-source perception team.`}
         path={`/blog/${post.slug}`}
+        type="article"
+        image={blogHeroImages[post.slug]}
       />
       <JsonLd
         data={{
@@ -225,7 +225,7 @@ export default function BlogPost() {
             logo: { "@type": "ImageObject", url: "https://openeye.sh/favicon.ico" },
           },
           mainEntityOfPage: `https://openeye.sh/blog/${post.slug}`,
-          ...(blogHeroImages[post.slug] ? { image: blogHeroImages[post.slug] } : {}),
+          ...(blogHeroImages[post.slug] ? { image: absoluteUrl(blogHeroImages[post.slug]) } : {}),
         }}
       />
       <Navbar />

@@ -219,5 +219,5 @@ echo -e "    ${DIM}openeye g1-demo              — Unitree G1 robot safety demo
 echo -e "    ${DIM}openeye agent run            — Agentic perception loop${RESET}"
 echo -e "    ${DIM}openeye fleet                — Edge device fleet management${RESET}"
 echo ""
-echo -e "    ${CYAN}${BOLD}https://perceptify.dev${RESET}"
+echo -e "    ${CYAN}${BOLD}https://openeye.sh${RESET}"
 echo ""

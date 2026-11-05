@@ -32,7 +32,7 @@ export const pricingTiers: PricingPlanTier[] = [
     description:
       "Self-hosted CLI with the full perception stack. Run on your own hardware, no strings attached.",
     cta: "Get Started",
-    ctaHref: "/docs#installation",
+    ctaHref: "/docs/installation",
     highlighted: true,
     badge: "Available Now",
     features: [

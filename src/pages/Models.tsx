@@ -19,7 +19,6 @@ const ease = [0.2, 0.8, 0.2, 1] as const;
 export default function Models() {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Models | OpenEye";
   }, []);
 
   return (

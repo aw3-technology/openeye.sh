@@ -1,128 +1,71 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { PageMeta } from "@/components/seo/PageMeta";
-import { DocsSidebar, SidebarNav } from "@/components/docs/DocsSidebar";
-import { DocsContent } from "@/components/docs/DocsContent";
-import { useScrollSpy } from "@/hooks/useScrollSpy";
-import { docsContent } from "@/data/docsContent";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { DocsLayout } from "@/components/docs/DocsLayout";
+import { docsContent, docDescription, getDocEntry } from "@/data/docsContent";
 
 export default function Docs() {
-  const [sheetOpen, setSheetOpen] = useState(false);
   const location = useLocation();
 
-  useEffect(() => {
-    document.title = "Documentation | OpenEye";
-  }, []);
-
-  const sectionIds = useMemo(
-    () => docsContent.flatMap((g) => g.sections.map((s) => s.id)),
-    []
-  );
-
-  const activeId = useScrollSpy(sectionIds);
-
-  // Handle deep linking on mount and hash changes
-  useEffect(() => {
-    const hash = location.hash.slice(1);
-    if (hash) {
-      // Double rAF to ensure content is painted before scrolling
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const el = document.getElementById(hash);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-        });
-      });
-    }
-  }, [location.hash]);
+  // Old single-page docs linked sections as /docs#<id>; send those to /docs/<id>.
+  const legacyId = location.hash.slice(1);
+  if (legacyId && getDocEntry(legacyId)) {
+    return <Navigate to={`/docs/${legacyId}`} replace />;
+  }
 
   return (
-    <div className="min-h-screen bg-background">
+    <DocsLayout>
       <PageMeta
         title="Docs | OpenEye"
         description="OpenEye documentation: installation, CLI reference, model catalog, scene-graph API, and self-hosted deployment guides."
         path="/docs"
       />
-      <Navbar />
-      <main>
-
-      {/* Header */}
-      <div className="pt-20 pb-8 px-4 border-b border-foreground/[0.06]">
-        <div className="container max-w-6xl mx-auto">
-          <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-3">
-            Documentation
-          </div>
-          <h1 className="text-3xl md:text-4xl font-semibold font-display">
-            OpenEye Docs
-          </h1>
-          <p className="text-muted-foreground mt-2 max-w-xl">
-            Everything you need to install, configure, and build with OpenEye.
-          </p>
-        </div>
-      </div>
-
-      {/* Mobile sidebar trigger */}
-      <div className="lg:hidden sticky top-14 z-40 bg-background/80 backdrop-blur-sm border-b border-foreground/[0.06]">
-        <div className="container max-w-6xl mx-auto px-4 py-2">
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            <SheetTrigger asChild>
-              <button className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="text-current"
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "OpenEye Documentation",
+          url: "https://openeye.sh/docs",
+          hasPart: docsContent.flatMap((g) =>
+            g.sections.map((s) => ({
+              "@type": "TechArticle",
+              headline: s.title,
+              url: `https://openeye.sh/docs/${s.id}`,
+            })),
+          ),
+        }}
+      />
+      <h1 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+        Documentation
+      </h1>
+      <p className="text-muted-foreground leading-relaxed mb-12 max-w-2xl">
+        OpenEye is an open-source, CLI-first perception engine: install it with{" "}
+        <code className="font-mono text-sm text-oe-green">pipx install openeye-sh</code>, pull a
+        vision model, and get structured JSON from images, video, and live cameras.
+      </p>
+      <div className="space-y-12">
+        {docsContent.map((group) => (
+          <section key={group.label}>
+            <h2 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+              {group.label}
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {group.sections.map((section) => (
+                <Link
+                  key={section.id}
+                  to={`/docs/${section.id}`}
+                  className="block border border-foreground/[0.06] rounded-outer p-4 bg-foreground/[0.02] hover:bg-foreground/[0.04] transition-colors"
                 >
-                  <path
-                    d="M2 4h12M2 8h12M2 12h12"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                Navigation
-              </button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72 pt-12">
-              <SheetTitle className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-6">
-                Documentation
-              </SheetTitle>
-              <SidebarNav
-                activeId={activeId}
-                onSelect={() => setSheetOpen(false)}
-              />
-            </SheetContent>
-          </Sheet>
-        </div>
+                  <div className="font-medium mb-1">{section.title}</div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {docDescription(section)}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
-
-      {/* Main content */}
-      <div className="container max-w-6xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-[240px_1fr] gap-12">
-          {/* Desktop sidebar */}
-          <div className="hidden lg:block">
-            <DocsSidebar activeId={activeId} />
-          </div>
-
-          {/* Content */}
-          <div className="min-w-0">
-            <DocsContent />
-          </div>
-        </div>
-      </div>
-
-      </main>
-      <Footer />
-    </div>
+    </DocsLayout>
   );
 }

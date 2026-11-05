@@ -5,9 +5,46 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/auth/:path*", "destination": "/api/auth?__path=:path*" },
-    { "source": "/api/data/:path*", "destination": "/api/data?__path=:path*" },
-    { "source": "/api/cred/:path*", "destination": "/api/cred?__path=:path*" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
-  ]
+    {
+      "source": "/api/auth/:path*",
+      "destination": "/api/auth?__path=:path*"
+    },
+    {
+      "source": "/api/data/:path*",
+      "destination": "/api/data?__path=:path*"
+    },
+    {
+      "source": "/api/cred/:path*",
+      "destination": "/api/cred?__path=:path*"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/dashboard/:path*",
+      "destination": "/app.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(llms.txt|llms-full.txt|docs/(.*).md)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/(dashboard|app.html)(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ],
+  "trailingSlash": false
 }

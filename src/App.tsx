@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,8 +20,10 @@ import Community from "./pages/Community.tsx";
 import UseCases from "./pages/UseCases.tsx";
 import About from "./pages/About.tsx";
 import Docs from "./pages/Docs.tsx";
+import DocPage from "./pages/DocPage.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import Models from "./pages/Models.tsx";
+import ModelPage from "./pages/ModelPage.tsx";
 import Architecture from "./pages/Architecture.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import TermsOfService from "./pages/TermsOfService.tsx";
@@ -61,85 +64,103 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
+/**
+ * Everything inside the router. Shared by the browser entry (BrowserRouter)
+ * and the build-time prerender (StaticRouter, see entry-server.tsx).
+ */
+export const AppRoutes = () => (
+  <>
+    <ScrollToTop />
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/changelog" element={<Changelog />} />
+        <Route path="/community" element={<Community />} />
+        <Route path="/use-cases" element={<UseCases />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/docs" element={<Docs />} />
+        <Route path="/docs/:slug" element={<DocPage />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/models" element={<Models />} />
+        <Route path="/models/:slug" element={<ModelPage />} />
+        <Route path="/architecture" element={<Architecture />} />
+        <Route path="/presentation" element={<Presentation />} />
+        <Route path="/demo" element={<LiveDemo />} />
+        <Route path="/hackathon" element={<HackathonDemo />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardErrorBoundary>
+                <OpenEyeConnectionProvider>
+                  <DashboardLayout />
+                </OpenEyeConnectionProvider>
+              </DashboardErrorBoundary>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Overview />} />
+          <Route path="demo" element={<Demo />} />
+          <Route path="inference" element={<Inference />} />
+          <Route path="live" element={<LiveStream />} />
+          <Route path="history" element={<History />} />
+          <Route path="models" element={<ModelsHub />} />
+          <Route path="models/settings" element={<ModelsHub />} />
+          <Route path="models/benchmark" element={<ModelsHub />} />
+          <Route path="metrics" element={<Metrics />} />
+          <Route path="scene-graph" element={<SceneGraphPage />} />
+          <Route path="export" element={<Export />} />
+          <Route path="settings" element={<SettingsHub />} />
+          <Route path="settings/api-keys" element={<SettingsHub />} />
+          <Route path="settings/credits" element={<SettingsHub />} />
+          <Route path="credits" element={<Navigate to="/dashboard/settings/credits" replace />} />
+          <Route path="mlops" element={<MLOps />} />
+          <Route path="agent" element={<AgentLoop />} />
+          <Route path="memory" element={<MemoryPage />} />
+          <Route path="agentic" element={<AgenticDemo />} />
+          <Route path="fleet" element={<FleetDashboard />} />
+          <Route path="fleet/devices/:deviceId" element={<DeviceDetail />} />
+          <Route path="fleet/deployments" element={<Deployments />} />
+          <Route path="fleet/deployments/:id" element={<DeploymentDetail />} />
+          <Route path="fleet/groups" element={<DeviceGroups />} />
+          <Route path="fleet/maintenance" element={<MaintenancePage />} />
+          <Route path="fleet/alerts" element={<FleetAlerts />} />
+          <Route path="governance" element={<Governance />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AuthProvider>
+  </>
+);
+
+export const AppProviders = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/changelog" element={<Changelog />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/use-cases" element={<UseCases />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/docs" element={<Docs />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/models" element={<Models />} />
-            <Route path="/architecture" element={<Architecture />} />
-            <Route path="/presentation" element={<Presentation />} />
-            <Route path="/demo" element={<LiveDemo />} />
-            <Route path="/hackathon" element={<HackathonDemo />} />
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardErrorBoundary>
-                    <OpenEyeConnectionProvider>
-                      <DashboardLayout />
-                    </OpenEyeConnectionProvider>
-                  </DashboardErrorBoundary>
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Overview />} />
-              <Route path="demo" element={<Demo />} />
-              <Route path="inference" element={<Inference />} />
-              <Route path="live" element={<LiveStream />} />
-              <Route path="history" element={<History />} />
-              <Route path="models" element={<ModelsHub />} />
-              <Route path="models/settings" element={<ModelsHub />} />
-              <Route path="models/benchmark" element={<ModelsHub />} />
-              <Route path="metrics" element={<Metrics />} />
-              <Route path="scene-graph" element={<SceneGraphPage />} />
-              <Route path="export" element={<Export />} />
-              <Route path="settings" element={<SettingsHub />} />
-              <Route path="settings/api-keys" element={<SettingsHub />} />
-              <Route path="settings/credits" element={<SettingsHub />} />
-              <Route path="credits" element={<Navigate to="/dashboard/settings/credits" replace />} />
-              <Route path="mlops" element={<MLOps />} />
-              <Route path="agent" element={<AgentLoop />} />
-              <Route path="memory" element={<MemoryPage />} />
-              <Route path="agentic" element={<AgenticDemo />} />
-              <Route path="fleet" element={<FleetDashboard />} />
-              <Route path="fleet/devices/:deviceId" element={<DeviceDetail />} />
-              <Route path="fleet/deployments" element={<Deployments />} />
-              <Route path="fleet/deployments/:id" element={<DeploymentDetail />} />
-              <Route path="fleet/groups" element={<DeviceGroups />} />
-              <Route path="fleet/maintenance" element={<MaintenancePage />} />
-              <Route path="fleet/alerts" element={<FleetAlerts />} />
-              <Route path="governance" element={<Governance />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+      {children}
     </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
+);
+
+const App = () => (
+  <AppProviders>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  </AppProviders>
 );
 
 export default App;

@@ -1,22 +1,12 @@
+import { Link } from "react-router-dom";
 import { docsContent, type DocGroup } from "@/data/docsContent";
 
 interface DocsSidebarProps {
-  activeId: string;
+  activeId?: string;
   onSelect?: (id: string) => void;
 }
 
 function SidebarNav({ activeId, onSelect }: DocsSidebarProps) {
-  const handleClick = (id: string) => {
-    // Close sheet first (if mobile), then scroll after animation settles
-    onSelect?.(id);
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, onSelect ? 350 : 0);
-  };
-
   return (
     <nav className="space-y-6">
       {docsContent.map((group: DocGroup) => (
@@ -27,8 +17,10 @@ function SidebarNav({ activeId, onSelect }: DocsSidebarProps) {
           <ul className="space-y-0.5">
             {group.sections.map((section) => (
               <li key={section.id}>
-                <button
-                  onClick={() => handleClick(section.id)}
+                <Link
+                  to={`/docs/${section.id}`}
+                  onClick={() => onSelect?.(section.id)}
+                  aria-current={activeId === section.id ? "page" : undefined}
                   className={`block w-full text-left px-2 py-1.5 rounded-inner text-sm transition-colors ${
                     activeId === section.id
                       ? "text-terminal-green bg-terminal-green/5"
@@ -36,7 +28,7 @@ function SidebarNav({ activeId, onSelect }: DocsSidebarProps) {
                   }`}
                 >
                   {section.title}
-                </button>
+                </Link>
               </li>
             ))}
           </ul>

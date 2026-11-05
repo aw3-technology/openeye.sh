@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
 authors = [{ name = "OpenEye Team" }]
-keywords = ["vision", "ai", "cli", "yolo", "depth", "detection"]
+keywords = ["vision", "ai", "cli", "yolo", "depth", "detection", "computer-vision", "perception", "robotics", "segmentation", "object-detection", "ollama", "mcp", "agents"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -64,8 +64,10 @@ openeye = "openeye_ai.cli:app"
 openeye-mcp = "openeye_ai.mcp.server:main"
 
 [project.urls]
-Homepage = "https://perceptify.dev"
+Homepage = "https://openeye.sh"
+Documentation = "https://openeye.sh/docs"
 Repository = "https://github.com/aw3-technology/openeye.sh"
+Changelog = "https://openeye.sh/changelog"
 
 [tool.hatch.build.targets.wheel]
 packages = ["openeye_ai"]

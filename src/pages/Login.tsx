@@ -75,6 +75,7 @@ export default function LoginPage() {
         title="Sign in | OpenEye"
         description="Sign in to OpenEye to access your dashboard, manage API keys, and monitor inference usage across your perception deployments."
         path="/login"
+        noindex
       />
       <motion.div
         initial={{ opacity: 0, y: 12 }}

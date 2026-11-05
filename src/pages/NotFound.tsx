@@ -2,17 +2,21 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { Helmet } from "react-helmet-async";
 
 const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-    document.title = "404 | OpenEye";
   }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>404 | OpenEye</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <Navbar />
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
         <div className="text-center">

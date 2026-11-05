@@ -12,7 +12,6 @@ import { CtaSection } from "@/components/about/CtaSection";
 export default function About() {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "About | OpenEye";
   }, []);
 
   return (

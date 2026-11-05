@@ -3,39 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="OpenEye" />
+    <meta name="google-site-verification" content="f4jEOR7ZOG7XREGOSJii8c2GumLvnCkO2bJ43Sm-sqY" />
+    <link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt" />
+    <script>
+      // Apply the saved theme before prerendered content paints (mirrors useTheme).
+      try {
+        var t = localStorage.getItem("openeye-theme") || localStorage.getItem("oe-theme");
+        document.documentElement.classList.add(t === "light" ? "light" : "dark");
+      } catch (e) {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
+    <!--page-head-->
     <title>OpenEye — Open-Source Perception for Agents &amp; Robots</title>
     <meta name="description" content="A CLI-first perception engine that turns raw video into structured world models for robots and autonomous agents.">
-    <meta name="author" content="OpenEye" />
-
-    <meta name="google-site-verification" content="f4jEOR7ZOG7XREGOSJii8c2GumLvnCkO2bJ43Sm-sqY" />
-
-    
-    
     <meta property="og:type" content="website" />
-
+    <meta property="og:title" content="OpenEye — Open-Source Perception for Agents &amp; Robots">
+    <meta property="og:description" content="A CLI-first perception engine that turns raw video into structured world models for robots and autonomous agents.">
+    <meta property="og:image" content="https://openeye.sh/og-image.webp">
     <meta name="twitter:card" content="summary_large_image" />
-    
-  
-  
-  
-  <meta property="og:image" content="https://openeye.sh/og-image.webp">
-  <meta name="twitter:image" content="https://openeye.sh/og-image.webp">
-  
-  
-  
-  
-  
-  
-  
-  
-  <meta property="og:title" content="OpenEye — Open-Source Perception for Agents &amp; Robots">
-  <meta name="twitter:title" content="OpenEye — Open-Source Perception for Agents &amp; Robots">
-  <meta property="og:description" content="A CLI-first perception engine that turns raw video into structured world models for robots and autonomous agents.">
-  <meta name="twitter:description" content="A CLI-first perception engine that turns raw video into structured world models for robots and autonomous agents.">
-</head>
+    <meta name="twitter:title" content="OpenEye — Open-Source Perception for Agents &amp; Robots">
+    <meta name="twitter:description" content="A CLI-first perception engine that turns raw video into structured world models for robots and autonomous agents.">
+    <meta name="twitter:image" content="https://openeye.sh/og-image.webp">
+    <!--/page-head-->
+  </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root"><!--app-html--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

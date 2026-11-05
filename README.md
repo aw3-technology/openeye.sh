@@ -2,6 +2,8 @@
 
 **Open-source eyes for the agent era.**
 
+[Website](https://openeye.sh) · [Docs](https://openeye.sh/docs) · [Models](https://openeye.sh/models) · [Blog](https://openeye.sh/blog) · [PyPI](https://pypi.org/project/openeye-sh/)
+
 OpenEye is a CLI-first perception engine that turns raw video into structured world models for robots and autonomous agents. Pull, run, and serve computer-vision models from your terminal — like Ollama, but for vision AI.
 
 ## Features

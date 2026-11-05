@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { docsContent, type DocBlock, type DocGroup } from "@/data/docsContent";
+import type { DocBlock, DocSection } from "@/data/docsContent";
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -159,21 +159,15 @@ function renderBlock(block: DocBlock, index: number) {
   }
 }
 
-export function DocsContent() {
+export function DocsContent({ section }: { section: DocSection }) {
   return (
-    <div className="space-y-16">
-      {docsContent.map((group: DocGroup) =>
-        group.sections.map((section) => (
-          <section key={section.id} id={section.id} className="scroll-mt-24">
-            <h2 className="text-2xl font-semibold font-display mb-6 pb-3 border-b border-foreground/[0.06]">
-              {section.title}
-            </h2>
-            <div className="space-y-4">
-              {section.blocks.map((block, i) => renderBlock(block, i))}
-            </div>
-          </section>
-        ))
-      )}
-    </div>
+    <article>
+      <h1 className="text-3xl md:text-4xl font-semibold font-display mb-6 pb-3 border-b border-foreground/[0.06]">
+        {section.title}
+      </h1>
+      <div className="space-y-4">
+        {section.blocks.map((block, i) => renderBlock(block, i))}
+      </div>
+    </article>
   );
 }

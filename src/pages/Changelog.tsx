@@ -30,7 +30,6 @@ function renderChangeText(text: string) {
 export default function Changelog() {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Changelog | OpenEye";
   }, []);
 
   // Scroll to hash on mount — waits for framer-motion animations to settle

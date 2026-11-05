@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageMeta } from "@/components/seo/PageMeta";
@@ -20,9 +19,6 @@ import { UseCasesSection } from "@/components/UseCasesSection";
 import { FinalCTA } from "@/components/FinalCTA";
 
 export default function Index() {
-  useEffect(() => {
-    document.title = "OpenEye | Open-Source Perception Engine";
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -46,11 +42,22 @@ export default function Index() {
             "@type": "WebSite",
             name: "OpenEye",
             url: "https://openeye.sh",
-            potentialAction: {
-              "@type": "SearchAction",
-              target: "https://openeye.sh/docs?q={search_term_string}",
-              "query-input": "required name=search_term_string",
-            },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "OpenEye",
+            alternateName: "openeye-sh",
+            description:
+              "Open-source, CLI-first perception engine that turns raw video into structured world models for robots, VLA models, and autonomous agents.",
+            url: "https://openeye.sh",
+            applicationCategory: "DeveloperApplication",
+            operatingSystem: "macOS, Linux, Windows",
+            license: "https://opensource.org/licenses/MIT",
+            downloadUrl: "https://pypi.org/project/openeye-sh/",
+            installUrl: "https://openeye.sh/docs/installation",
+            codeRepository: "https://github.com/aw3-technology/openeye.sh",
+            offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
           },
         ]}
       />

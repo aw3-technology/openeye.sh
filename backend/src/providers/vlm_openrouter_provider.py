@@ -19,7 +19,7 @@ class VLMOpenRouterProvider:
         model: str = "qwen/qwen3-vl-235b:free",
         fps: int = 10,
         camera_index: int = 0,
-        site_url: str = "https://perceptify.dev",
+        site_url: str = "https://openeye.sh",
         site_name: str = "OpenEye",
     ):
         self.running: bool = False

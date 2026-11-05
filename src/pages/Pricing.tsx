@@ -129,7 +129,6 @@ function ComparisonCell({
 export default function Pricing() {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Pricing | OpenEye";
   }, []);
 
   return (
@@ -279,7 +278,7 @@ export default function Pricing() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              to="/docs#installation"
+              to="/docs/installation"
               className="font-mono text-sm bg-foreground text-background px-5 py-2.5 rounded-inner hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
             >
               Read the Docs

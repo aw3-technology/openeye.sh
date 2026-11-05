@@ -107,7 +107,6 @@ const pipelineLayers: PipelineLayer[] = [
 export default function Architecture() {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Architecture | OpenEye";
   }, []);
 
   return (

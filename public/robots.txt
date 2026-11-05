@@ -1,16 +1,22 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
+# Search and AI crawlers are welcome on all public pages.
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /api/
+
+# AI search / assistant crawlers (explicit for clarity)
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /dashboard
+Disallow: /api/
 
 Sitemap: https://openeye.sh/sitemap.xml

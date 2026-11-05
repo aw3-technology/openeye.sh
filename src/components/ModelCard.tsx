@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import type { Model } from "@/data/modelsData";
+import { slugForModelName } from "@/data/modelRegistry";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 
@@ -9,6 +11,7 @@ interface ModelCardProps {
 }
 
 export function ModelCard({ model, index }: ModelCardProps) {
+  const slug = slugForModelName(model.name);
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -19,7 +22,13 @@ export function ModelCard({ model, index }: ModelCardProps) {
     >
       <div className="flex items-center justify-between mb-3">
         <div>
-          <div className="font-medium">{model.name}</div>
+          {slug ? (
+            <Link to={`/models/${slug}`} className="font-medium hover:text-terminal-green transition-colors">
+              {model.name}
+            </Link>
+          ) : (
+            <div className="font-medium">{model.name}</div>
+          )}
           <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             {model.creator}
           </div>

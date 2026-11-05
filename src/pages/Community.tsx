@@ -55,7 +55,6 @@ const contributeSteps = [
 export default function Community() {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Community | OpenEye";
   }, []);
 
   return (

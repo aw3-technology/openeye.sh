@@ -32,3 +32,23 @@ export interface DocGroup {
 }
 
 export const docsContent: DocGroup[] = loadDocs();
+
+export interface DocEntry extends DocSection {
+  group: string;
+}
+
+/** Every docs section in sidebar order, each served at /docs/:id. */
+export const docEntries: DocEntry[] = docsContent.flatMap((g) =>
+  g.sections.map((s) => ({ ...s, group: g.label })),
+);
+
+export function getDocEntry(id: string): DocEntry | undefined {
+  return docEntries.find((d) => d.id === id);
+}
+
+/** First paragraph of a section, trimmed to a meta-description length. */
+export function docDescription(entry: DocSection): string {
+  const first = entry.blocks.find((b) => b.type === "paragraph")?.content ?? "";
+  const text = first.replace(/`/g, "").trim() || `${entry.title} — OpenEye documentation.`;
+  return text.length > 158 ? `${text.slice(0, 155).replace(/\s+\S*$/, "")}…` : text;
+}

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const productLinks = [
   { label: "Use Cases", to: "/use-cases" },
   { label: "Docs", to: "/docs" },
-  { label: "API Reference", to: "/docs#hosted-authentication" },
+  { label: "API Reference", to: "/docs/hosted-authentication" },
   { label: "Pricing", to: "/pricing" },
 ];
 

@@ -13,7 +13,6 @@ const ease = [0.2, 0.8, 0.2, 1] as const;
 export default function UseCases() {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Use Cases | OpenEye";
   }, []);
 
   return (

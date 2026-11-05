@@ -12,6 +12,11 @@ export default defineConfig(() => ({
     },
   },
   plugins: [react()],
+  ssr: {
+    // CJS packages whose named exports Node can't resolve; bundle them into
+    // the prerender build (scripts/prerender.mjs) instead.
+    noExternal: ["react-helmet-async"],
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
