@@ -242,7 +242,7 @@ class TestGroundingDINOAdapter:
             mod = importlib.import_module("openeye_ai.adapters.grounding_dino")
             importlib.reload(mod)
             adapter = mod.Adapter()
-            adapter._do_load(tmp_path)
+            adapter.load(tmp_path)
         return adapter
 
     def test_do_predict_returns_detections(self, tmp_path):
