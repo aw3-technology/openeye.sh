@@ -32,7 +32,7 @@ function call(method: string, url: string, body?: unknown) {
 }
 
 describe("cred proxy", () => {
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify({ ok: true }), { status: 200 }));
+  const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => new Response(JSON.stringify({ ok: true }), { status: 200 }));
 
   beforeEach(() => {
     process.env.CRED_API_KEY = "server-key";
