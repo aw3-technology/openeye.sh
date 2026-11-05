@@ -15,48 +15,7 @@ export function useCreditBalance() {
   });
 }
 
-export function useDeductCredits() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ amount, description }: { amount: number; description: string }) =>
-      credApi.deduct(amount, description),
-    onMutate: async ({ amount }) => {
-      await qc.cancelQueries({ queryKey: ["credits", "balance"] });
-      const prev = qc.getQueryData<Record<string, unknown>>(["credits", "balance"]);
-      if (prev && Array.isArray((prev as { balances?: unknown[] }).balances)) {
-        const updated = {
-          ...prev,
-          balances: ((prev as { balances: Array<{ balance: number }> }).balances).map(
-            (b) => ({ ...b, balance: Math.max(0, b.balance - amount) })
-          ),
-        };
-        qc.setQueryData(["credits", "balance"], updated);
-      }
-      return { prev };
-    },
-    onError: (_err, _vars, context) => {
-      if (context?.prev) {
-        qc.setQueryData(["credits", "balance"], context.prev);
-      }
-    },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["credits", "balance"] });
-      qc.invalidateQueries({ queryKey: ["credits", "transactions"] });
-    },
-  });
-}
 
-export function useIssueCredits() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ amount, description }: { amount: number; description: string }) =>
-      credApi.issue(amount, description),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["credits", "balance"] });
-      qc.invalidateQueries({ queryKey: ["credits", "transactions"] });
-    },
-  });
-}
 
 export function useCreateCheckout() {
   return useMutation({

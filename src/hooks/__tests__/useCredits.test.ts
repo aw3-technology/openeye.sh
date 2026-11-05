@@ -20,8 +20,6 @@ vi.mock("@/lib/utils", () => ({
 const { mockCredApi } = vi.hoisted(() => ({
   mockCredApi: {
     getBalance: vi.fn(),
-    deduct: vi.fn(),
-    issue: vi.fn(),
     createCheckout: vi.fn(),
     getPricingTiers: vi.fn(),
     getTransactions: vi.fn(),
@@ -35,8 +33,6 @@ vi.mock("@/lib/cred-api", () => ({
 
 import {
   useCreditBalance,
-  useDeductCredits,
-  useIssueCredits,
   useCreateCheckout,
   usePricingTiers,
   useCreditTransactions,
@@ -83,27 +79,7 @@ describe("useCredits hooks", () => {
     });
   });
 
-  describe("useDeductCredits", () => {
-    it("calls credApi.deduct with amount and description", async () => {
-      mockCredApi.deduct.mockResolvedValue({ new_balance: 90 });
-      const { result } = renderHook(() => useDeductCredits(), { wrapper: createWrapper() });
 
-      result.current.mutate({ amount: 10, description: "inference" });
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-      expect(mockCredApi.deduct).toHaveBeenCalledWith(10, "inference");
-    });
-  });
-
-  describe("useIssueCredits", () => {
-    it("calls credApi.issue with amount and description", async () => {
-      mockCredApi.issue.mockResolvedValue({ new_balance: 200 });
-      const { result } = renderHook(() => useIssueCredits(), { wrapper: createWrapper() });
-
-      result.current.mutate({ amount: 100, description: "top-up" });
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-      expect(mockCredApi.issue).toHaveBeenCalledWith(100, "top-up");
-    });
-  });
 
   describe("useCreateCheckout", () => {
     it("calls credApi.createCheckout with tier and URLs", async () => {
