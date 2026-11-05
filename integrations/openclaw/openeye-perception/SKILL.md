@@ -1,68 +1,80 @@
 ---
 name: openeye-perception
-description: Call the OpenEye Hosted Inference API for object detection, depth estimation, and scene description. Use when the user asks about detecting objects in images, estimating depth, describing scenes, checking API credits, listing vision models, or querying a device fleet. Triggers on phrases like "detect objects", "what's in this image", "depth map", "describe scene", "check credits", "list models", "fleet devices", "device alerts", "perception API", "vision API".
-version: 0.1.0
+description: Call the OpenEye hosted inference API (https://openeye.sh/v1) for object detection, check credits and list models, or query a self-hosted OpenEye fleet. Use when the user asks about detecting objects in images, describing scenes, checking API credits, listing vision models, or querying a device fleet. Triggers on phrases like "detect objects", "what's in this image", "describe scene", "check credits", "list models", "fleet devices", "device alerts", "perception API", "vision API".
+version: 0.2.0
 env:
   OPENEYE_API_KEY:
     required: true
-    description: API key starting with oe_ from the OpenEye dashboard
+    description: API key starting with oe_, created at https://openeye.sh/dashboard/settings/api-keys
   OPENEYE_API_URL:
     required: false
-    description: Base URL for the hosted API (default https://api.openeye.ai)
+    description: Base URL for the API (default https://openeye.sh; use http://localhost:8000 for a local `openeye serve`)
+  OPENEYE_FLEET_URL:
+    required: false
+    description: Self-hosted fleet control plane URL (default http://localhost:8001)
   OPENEYE_FLEET_TOKEN:
     required: false
-    description: JWT token for fleet management endpoints
+    description: OpenEye (Better Auth) session token for the fleet control plane
 bins:
   - python3
 ---
 
 # OpenEye Hosted Perception API
 
-Call OpenEye's cloud inference API — no local GPU, model downloads, or Python ML libraries needed. Just an API key and `python3` with `requests`.
+Call OpenEye's hosted inference API at `https://openeye.sh/v1` — no local GPU, model downloads, or ML libraries. Needs an API key, credits, and `python3` with `requests`.
+
+The user gets a key at https://openeye.sh/dashboard/settings/api-keys and buys credits at https://openeye.sh/dashboard/settings/credits.
 
 ## Quick Start
 
 ```bash
 export OPENEYE_API_KEY="oe_..."
+python3 scripts/usage.py models      # what's available right now
 python3 scripts/detect.py photo.jpg
+```
+
+If the OpenEye CLI is installed, the same calls are `openeye api models`, `openeye api detect photo.jpg`, and `openeye api usage`. With plain curl:
+
+```bash
+curl -s https://openeye.sh/v1/detect -H "Authorization: Bearer $OPENEYE_API_KEY" -F file=@photo.jpg
 ```
 
 ## Commands
 
-### Detect Objects
+### Detect Objects (1 credit)
 
 ```bash
 python3 scripts/detect.py <image> [--confidence 0.3]
 ```
 
-Runs YOLOv8 object detection. Returns JSON with `objects` array (each has `label`, `confidence`, `bbox`), `image` dimensions, and `inference_ms`.
+YOLOv8 (80 COCO classes). Returns JSON with `objects` (each has `label`, `confidence`, normalized `bbox {x,y,w,h}`), `image` dimensions, `inference_ms`, `credits_used`.
 
-### Estimate Depth
-
-```bash
-python3 scripts/depth.py <image> [--save-depth-map out.png]
-```
-
-Runs Depth Anything V2. Returns JSON with `depth_map` (base64 PNG), `image` dimensions, and `inference_ms`. Use `--save-depth-map` to write the depth map to a file (base64 is truncated in stdout when this flag is used).
-
-### Describe Scene
+### Describe Scene (3 credits — not enabled on hosted yet)
 
 ```bash
 python3 scripts/describe.py <image> [--prompt "How many people are visible?"]
 ```
 
-Runs GPT-4o vision. Returns JSON with `description` (natural language), `image` dimensions, and `inference_ms`. Default prompt: "Describe what you see in this image."
+Vision-language model (Qwen2.5-VL). The hosted API currently answers **503** ("isn't enabled yet"); check `usage.py models` — the `qwen2.5-vl` entry has `available: true` once it is. Works against a local `openeye serve` (set `OPENEYE_API_URL=http://localhost:8000`) when that server has a VLM key configured.
+
+### Estimate Depth (self-hosted only)
+
+```bash
+python3 scripts/depth.py <image> [--save-depth-map out.png]
+```
+
+The hosted API returns **501** for depth. To get depth, run `openeye serve depth-anything` locally and set `OPENEYE_API_URL=http://localhost:8000`.
 
 ### Check Usage & Models
 
 ```bash
-python3 scripts/usage.py balance [--days 30]   # credit balance + usage stats
-python3 scripts/usage.py models                 # list available models + costs
+python3 scripts/usage.py balance [--days 30]   # balance + usage stats
+python3 scripts/usage.py models                 # models, credit costs, availability
 ```
 
-### Query Fleet
+### Query Fleet (self-hosted control plane)
 
-Requires `OPENEYE_FLEET_TOKEN` environment variable (JWT).
+The fleet control plane is not hosted at openeye.sh. Use this only if the user runs one; set `OPENEYE_FLEET_URL` (default `http://localhost:8001`) and `OPENEYE_FLEET_TOKEN`.
 
 ```bash
 python3 scripts/fleet_query.py list [--status online] [--type camera]
@@ -70,39 +82,40 @@ python3 scripts/fleet_query.py get <device-id>
 python3 scripts/fleet_query.py alerts [--severity critical] [--unresolved]
 ```
 
-## Credit Costs
+## Limits and costs
 
-| Endpoint | Credits |
-|---|---|
-| `/v1/detect` | 1 |
-| `/v1/depth` | 2 |
-| `/v1/describe` | 3 |
-| `/v1/stream` (per frame) | 1 |
+| Endpoint | Credits | Hosted status |
+|---|---|---|
+| `POST /v1/detect` | 1 | live |
+| `POST /v1/describe` | 3 | 503 until enabled |
+| `POST /v1/depth` | 2 | 501 (self-hosted only) |
+| `GET /v1/models`, `GET /v1/usage` | 0 | live |
 
-Always check the user's balance with `usage.py balance` before running multiple inference calls. If the balance is low, warn the user.
+- Images: JPEG or PNG, under 4 MB.
+- Rate limit: 60 requests/minute per key by default.
+- No WebSocket streaming on the hosted API.
 
 ## Error Handling
 
-All scripts output structured JSON to stdout on success and structured JSON to stderr on failure. Exit codes:
+Scripts print JSON to stdout on success and `{"error": "..."}` to stderr on failure. Exit codes:
 
 | Exit Code | Meaning |
 |---|---|
 | 0 | Success |
-| 1 | Client error (bad args, missing env, file not found) |
+| 1 | Client error (bad args, missing env, file not found, 413 too large, 415 not JPEG/PNG) |
 | 2 | Auth error (401 — invalid API key) |
-| 3 | Payment error (402 — insufficient credits) |
-| 4 | Rate limit (429 — try again later) |
-| 5 | Server error (5xx) |
+| 3 | Payment error (402 — not enough credits) |
+| 4 | Rate limit (429 — wait and retry) |
+| 5 | Server error (5xx, including 501 depth and 503 describe on hosted) |
 
 ## Guardrails
 
-- **Check credits first** — run `usage.py balance` before batch inference.
-- **Handle 402/429** — if credits are low or rate-limited, tell the user and stop.
-- **Never log API keys** — do not echo `OPENEYE_API_KEY` or `OPENEYE_FLEET_TOKEN` in output.
-- **Image size limit** — max 20 MB per image upload.
+- **Check credits first** — run `usage.py balance` before batch inference; warn if low.
+- **Handle 402/429** — tell the user and stop; for 402 point them to the credits page.
+- **Never log keys** — do not echo `OPENEYE_API_KEY` or `OPENEYE_FLEET_TOKEN`.
 - **Prompt length** — max 2000 characters for describe prompts.
 
 ## References
 
-- `references/api-reference.md` — full endpoint documentation
+- `references/api-reference.md` — endpoint documentation
 - `references/response-schemas.md` — example JSON responses

@@ -1,4 +1,4 @@
-"""Shared API client for OpenEye Hosted Inference API."""
+"""Shared client for the OpenEye hosted inference API (https://openeye.sh/v1) and a self-hosted fleet control plane."""
 
 import json
 import os
@@ -7,7 +7,9 @@ import sys
 import requests
 
 API_KEY = os.environ.get("OPENEYE_API_KEY", "")
-API_URL = os.environ.get("OPENEYE_API_URL", "https://api.openeye.ai").rstrip("/")
+API_URL = os.environ.get("OPENEYE_API_URL", "https://openeye.sh").rstrip("/")
+# The fleet control plane is self-hosted (backend/src/fleet, port 8001); it is not served at openeye.sh.
+FLEET_URL = os.environ.get("OPENEYE_FLEET_URL", "http://localhost:8001").rstrip("/")
 FLEET_TOKEN = os.environ.get("OPENEYE_FLEET_TOKEN", "")
 
 # Exit codes
@@ -18,7 +20,7 @@ EXIT_PAYMENT = 3
 EXIT_RATE_LIMIT = 4
 EXIT_SERVER = 5
 
-_STATUS_TO_EXIT = {401: EXIT_AUTH, 402: EXIT_PAYMENT, 413: EXIT_CLIENT, 429: EXIT_RATE_LIMIT}
+_STATUS_TO_EXIT = {401: EXIT_AUTH, 402: EXIT_PAYMENT, 413: EXIT_CLIENT, 415: EXIT_CLIENT, 429: EXIT_RATE_LIMIT}
 
 
 def require_api_key():
@@ -69,8 +71,8 @@ def api_get(path: str, params: dict | None = None) -> dict:
 
 
 def fleet_get(path: str, params: dict | None = None) -> dict | list:
-    """GET with Bearer JWT auth for fleet endpoints."""
+    """GET with Bearer session-token auth against the self-hosted fleet control plane."""
     require_fleet_token()
-    url = f"{API_URL}{path}"
+    url = f"{FLEET_URL}{path}"
     resp = requests.get(url, params=params, headers={"Authorization": f"Bearer {FLEET_TOKEN}"}, timeout=30)
     return _handle_response(resp)

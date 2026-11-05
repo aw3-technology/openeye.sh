@@ -1,5 +1,63 @@
 # OpenEye Architecture
 
+## Platform Overview
+
+```
+                        https://openeye.sh  (Vercel project "openeye", main auto-deploys)
+ ┌───────────────────────────────────────────────────────────────────────────────────────┐
+ │ Vite/React SPA (dist/)  ── /dashboard/* ──┐                                           │
+ │                                           │ same-origin, Better Auth session cookie   │
+ │ api/auth.ts   /api/auth/*   Better Auth (email/password, 1Profile OIDC, opt. Google/Apple)
+ │ api/data.ts   /api/data/*   owner-scoped CRUD over api/_lib/resources.ts + avatar → Vercel Blob
+ │ api/cred.ts   /api/cred/*   proxy to Cred (cred.diy) credits API with server CRED_API_KEY
+ │ api/v1.ts     /v1/*         hosted inference: oe_ key → rate limit → Cred deduct → YOLOv8n ONNX / OpenRouter VLM
+ └──────────────────────────────┬────────────────────────────────────────────────────────┘
+                                │ pg Pool (DATABASE_URL)
+                        Neon Postgres  (db/schema.sql, `npm run db:migrate`)
+                                │ same schema
+ ┌──────────────────────────────┴───────────────┐      ┌───────────────────────────────────┐
+ │ Fleet control plane (self-hosted, :8001)      │◀────│ Device agent: `openeye fleet agent`│
+ │ backend/src/fleet, create_fleet_app()         │ oek_ │ heartbeats, pulls device_commands  │
+ └───────────────────────────────────────────────┘      └───────────────────────────────────┘
+
+ User machine:  `openeye serve <model>` (:8000)  ◀── dashboard Inference/Live/Metrics/... (CORS + Private Network Access)
+                `openeye-mcp` (stdio)            ◀── MCP clients (Claude Code/Desktop)
+                `openeye api ...`                ──▶ https://openeye.sh/v1
+```
+
+Key points:
+
+- **No Supabase, no Lovable.** Auth is Better Auth on Neon, access control is explicit `user_id` filtering in `api/data.ts`, and the website's server code is the `api/*.ts` functions. User ids are UUIDs.
+- **Routing** is `vercel.json`: rewrites for the four functions plus an SPA fallback. `api/v1.ts` gets 2 GB memory, 60 s max duration, and bundles `models/yolov8n.onnx` and the onnxruntime-web WASM.
+- **Cloud vs local mode** in the SPA (`src/lib/deployment-env.ts`): on `openeye.sh`/`*.vercel.app`, fleet pages use `/api/data`; locally they talk to the fleet server directly. Inference/live pages always talk to the user's `openeye serve` via the Server URL setting.
+- **Demo mode** (`useAuth().isDemo`): a local, account-less session that shows sample data.
+
+### Data model (`db/schema.sql`)
+
+| Group | Tables |
+|---|---|
+| Better Auth | `user`, `session`, `account`, `verification` |
+| Hosted API | `api_keys` (sha256 `key_hash`, `scopes`, `rate_limit` default 60), `api_usage_log` |
+| Dashboard | `inference_history`, `observation_memory` |
+| Fleet | `devices` (`api_key_hash` for `oek_` keys), `device_resource_history`, `device_groups`, `group_members`, `deployments`, `deployment_device_status`, `maintenance_windows`, `fleet_alerts`, `heartbeats`, `device_commands` |
+
+All app tables carry `user_id` referencing `"user"(id)`. Credits are not stored locally; Cred holds balances (`api/_lib/credits.ts`, `backend/src/fleet/services/credits_service.py`).
+
+### Hosted request flow (`POST /v1/detect`)
+
+1. `requireApiKey`: `Bearer oe_...`/`X-API-Key` → sha256 → `api_keys` join `"user"` (updates `last_used_at`).
+2. `readMultipart` (≤ 4 MB) → `decodeImage` (JPEG/PNG, ≤ 25 MP) — bad input fails before charging.
+3. `enforceRateLimit`: count `api_usage_log` rows for the key in the last 60 s.
+4. `deduct` from Cred (402 if refused) → run YOLOv8n → on error `refund` → `logUsage`.
+
+### CLI and local server
+
+- `cli/openeye_ai/cli.py` registers Typer commands from `commands/`; default URLs in `_cli_helpers.py` (`OPENEYE_SERVER_URL` :8000, `OPENEYE_API_URL` https://openeye.sh, `OPENEYE_FLEET_URL` :8001).
+- `openeye serve` → `server/app.py`: REST (`routes/rest.py`), hosted-compatible `/v1` (`routes/v1*.py`, accepts any `oe_` key unless `OPENEYE_SERVER_API_KEY` is set; in-memory credits), WebSockets (`/ws`, `/ws/perception`, `/ws/agentic`, `/ws/vlm`), `/agent`, `/mlops`, and `/governance` (imported from `backend/src/governance` when available).
+- MCP server `cli/openeye_ai/mcp/server.py` (FastMCP, stdio): local tools shell out to the `openeye` binary (`mcp/tools.py`); `openeye_api_*` tools call the hosted API with `OPENEYE_API_KEY`.
+
+---
+
 ## Backend Perception Pipeline
 
 Located in `backend/src/perception/`. Processes frames through a multi-stage pipeline:
@@ -73,13 +131,18 @@ All components use a discovery-based plugin pattern. Plugins are loaded dynamica
 
 Base class: `Sensor[ConfigType, RawType]`
 
-| Plugin | Type String | Purpose |
-|--------|-------------|---------|
-| `VLMOpenAI` | `VLMOpenAI` | Cloud vision via OpenAI GPT-4o-mini |
-| `VLMGemini` | `VLMGemini` | Google Gemini vision |
-| `VLMLocalYOLO` | `VLMLocalYOLO` | Local YOLO v8 detection |
-| `VLMVideoFile` | `VLMVideoFile` | Video file input |
-| `PerceptionPipeline` | `PerceptionPipeline` | Unified perception output |
+| Plugin (class) | File | Purpose |
+|--------|------|---------|
+| `VLMOpenAI` | `vlm_openai.py` | OpenAI vision |
+| `VLMGemini` | `vlm_gemini.py` | Google Gemini vision |
+| `VLMAnthropic` | `vlm_anthropic.py` | Anthropic Claude vision |
+| `VLMNebius` | `vlm_nebius.py` | Nebius Token Factory VLM |
+| `VLMOpenRouter` | `vlm_openrouter.py` | OpenRouter VLM routing |
+| `VLM_Local_YOLO` | `vlm_local_yolo.py` | Local YOLO detection |
+| `VLM_VideoFile` | `vlm_video_file.py` | Video file input |
+| `PerceptionPipelineSensor` | `perception_pipeline.py` | Unified perception output |
+
+Plugins live in `backend/src/inputs/plugins/` and subclass `FuserInput[ConfigType, RawType]` (configs subclass `SensorConfig`).
 
 Key methods:
 - `async _raw_to_text(raw_input)` → `Message`
@@ -91,9 +154,11 @@ Key methods:
 
 Base class: `ActionConnector[ConfigType, OutputType]`
 
-| Plugin | Name | Purpose |
+| Action dir | Connector | Purpose |
 |--------|------|---------|
-| `log_action` | `log` | Log to console |
+| `log_action` | `LogConnector` | Log to console |
+| `robot_control` | `SoloConnector` | Robot control output |
+| `safety_search` | `TavilyConnector` | Web safety lookup (`TAVILY_API_KEY`) |
 
 Key methods:
 - `async connect(output_interface)` — Execute action
@@ -107,6 +172,7 @@ Base class: `LLM[R]`
 | Plugin | Type String | Purpose |
 |--------|-------------|---------|
 | `OpenAILLM` | `OpenAILLM` | OpenAI GPT-4o-mini |
+| `AnthropicLLM` | `AnthropicLLM` | Anthropic Claude |
 | `NebiusLLM` | `NebiusLLM` | Nebius Token Factory (Qwen/Llama models) |
 | `OpenRouterLLM` | `OpenRouterLLM` | OpenRouter API (free model fallbacks: Qwen3-VL, Nemotron, Gemma-3) |
 
@@ -285,12 +351,18 @@ class ModelAdapter(ABC):
     def pull(self, model_dir: Path) → None
 ```
 
-### Adapter Map
+### Adapter Map (`cli/openeye_ai/registry.py` `_ADAPTER_MAP`)
+
+Adapter keys use underscores; model keys in `models.yaml` use hyphens (`depth-anything` → adapter `depth_anything`).
 
 ```python
 "yolov8"            → openeye_ai.adapters.yolov8
+"yolo26"            → openeye_ai.adapters.yolo26
 "depth_anything"    → openeye_ai.adapters.depth_anything
 "grounding_dino"    → openeye_ai.adapters.grounding_dino
+"sam2"              → openeye_ai.adapters.sam2
+"rfdetr"            → openeye_ai.adapters.rfdetr
+"smolvla"           → openeye_ai.adapters.smolvla
 "yolov8:onnx"       → openeye_ai.adapters.yolov8_onnx
 "onnx_generic"      → openeye_ai.adapters.onnx_runtime
 "yolov8:tensorrt"   → openeye_ai.adapters.tensorrt_runtime
@@ -309,11 +381,14 @@ Located in `backend/config/`. Format: JSON5 (supports comments, unquoted keys).
 
 Environment variable substitution: `${ENV_VAR}` or `${ENV_VAR:-default}`.
 
-Example configs:
+Configs in `backend/config/`:
 - `openeye_vlm.json5` — Cloud VLM with OpenAI
 - `openeye_vlm_gemini.json5` — Google Gemini
+- `openeye_vlm_nebius.json5`, `openeye_vlm_nebius_kimi.json5`, `openeye_nebius_full.json5` — Nebius
+- `openeye_vlm_openrouter.json5` — OpenRouter
 - `openeye_yolo.json5` — Local YOLO detection
 - `openeye_video.json5` — Video file input
+- `openeye_hackathon.json5` — Hackathon demo
 
 Schema validation: `config/schema/single_mode_schema.json`, `config/schema/multi_mode_schema.json`.
 
