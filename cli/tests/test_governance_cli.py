@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
@@ -51,8 +52,20 @@ def _make_engine(
 
 
 def _patch_engine(engine):
-    """Return a patch context that makes _get_engine() return *engine*."""
-    return patch("openeye_ai.commands.governance._get_engine", return_value=engine)
+    """Return a patch context that makes _get_engine() return *engine*.
+
+    Policy commands and audit commands each define their own ``_get_engine``,
+    so both lookup sites are patched.
+    """
+    stack = ExitStack()
+    for module in ("policy_commands", "audit_commands"):
+        stack.enter_context(
+            patch(
+                f"openeye_ai.commands.governance.{module}._get_engine",
+                return_value=engine,
+            )
+        )
+    return stack
 
 
 # ── Story 90: status shows enabled_policy_names ─────────────────────
