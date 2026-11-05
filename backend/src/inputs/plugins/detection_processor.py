@@ -46,7 +46,9 @@ class DetectionProcessor:
         threshold = self.confidence_thresholds.get(label, self.default_confidence)
         return confidence >= threshold
 
-    def extract_detections(self, results, model_names: Dict[int, str]) -> List[Dict[str, Any]]:
+    def extract_detections(
+        self, results, model_names: Dict[int, str]
+    ) -> List[Dict[str, Any]]:
         """
         Extract detection dicts from YOLO results.
 
@@ -71,15 +73,19 @@ class DetectionProcessor:
                     conf = float(box.conf[0])
                     label = model_names[cls]
                     if self.passes_threshold(label, conf):
-                        detections.append({
-                            "class": label,
-                            "confidence": round(conf, 4),
-                            "bbox": [round(x1), round(y1), round(x2), round(y2)],
-                        })
+                        detections.append(
+                            {
+                                "class": label,
+                                "confidence": round(conf, 4),
+                                "bbox": [round(x1), round(y1), round(x2), round(y2)],
+                            }
+                        )
         return detections
 
     @staticmethod
-    def get_top_detection(detections: List[Dict[str, Any]]) -> Tuple[Optional[str], Optional[list]]:
+    def get_top_detection(
+        detections: List[Dict[str, Any]],
+    ) -> Tuple[Optional[str], Optional[list]]:
         """Return (class, bbox) of the highest-confidence detection, or (None, None)."""
         if not detections:
             return None, None
@@ -98,7 +104,11 @@ class DetectionProcessor:
         source_suffix: str = "",
     ) -> None:
         """Record frame telemetry."""
-        source = f"{self.source_name}({source_suffix})" if source_suffix else self.source_name
+        source = (
+            f"{self.source_name}({source_suffix})"
+            if source_suffix
+            else self.source_name
+        )
         self.telemetry.record_frame(
             FrameTelemetry(
                 frame_index=frame_index,

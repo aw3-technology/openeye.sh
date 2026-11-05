@@ -9,13 +9,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import pytest
+from conftest import make_test_registry
+from openeye_ai.cli import app
 from PIL import Image
 from typer.testing import CliRunner
-
-from openeye_ai.cli import app
-
-from conftest import make_test_registry
 
 runner = CliRunner()
 
@@ -53,28 +50,43 @@ def _fake_mask_b64() -> str:
 
 
 class _DetectionAdapter:
-    def load(self, model_dir): pass
+    def load(self, model_dir):
+        pass
 
     def predict(self, image):
         return {
             "objects": [
-                {"label": "person", "confidence": 0.95, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}},
-                {"label": "car", "confidence": 0.72, "bbox": {"x": 0.5, "y": 0.3, "w": 0.2, "h": 0.3}},
-                {"label": "dog", "confidence": 0.45, "bbox": {"x": 0.7, "y": 0.6, "w": 0.1, "h": 0.15}},
+                {
+                    "label": "person",
+                    "confidence": 0.95,
+                    "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4},
+                },
+                {
+                    "label": "car",
+                    "confidence": 0.72,
+                    "bbox": {"x": 0.5, "y": 0.3, "w": 0.2, "h": 0.3},
+                },
+                {
+                    "label": "dog",
+                    "confidence": 0.45,
+                    "bbox": {"x": 0.7, "y": 0.6, "w": 0.1, "h": 0.15},
+                },
             ],
             "inference_ms": 12.3,
         }
 
 
 class _DepthAdapter:
-    def load(self, model_dir): pass
+    def load(self, model_dir):
+        pass
 
     def predict(self, image):
         return {"depth_map": _fake_depth_b64(), "inference_ms": 8.5}
 
 
 class _PromptAdapter:
-    def load(self, model_dir): pass
+    def load(self, model_dir):
+        pass
 
     def predict(self, image):
         return {"objects": [], "inference_ms": 5.0}
@@ -82,27 +94,41 @@ class _PromptAdapter:
     def predict_with_prompt(self, image, prompt):
         return {
             "objects": [
-                {"label": prompt, "confidence": 0.88, "bbox": {"x": 0.2, "y": 0.1, "w": 0.4, "h": 0.5}},
+                {
+                    "label": prompt,
+                    "confidence": 0.88,
+                    "bbox": {"x": 0.2, "y": 0.1, "w": 0.4, "h": 0.5},
+                },
             ],
             "inference_ms": 15.0,
         }
 
 
 class _SegmentationAdapter:
-    def load(self, model_dir): pass
+    def load(self, model_dir):
+        pass
 
     def predict(self, image):
         return {
             "segmentation_masks": [
-                {"mask": _fake_mask_b64(), "area": 500, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}, "stability_score": 0.98},
-                {"mask": _fake_mask_b64(), "area": 200, "bbox": {"x": 0.5, "y": 0.3, "w": 0.2, "h": 0.3}, "stability_score": 0.85},
+                {
+                    "mask": _fake_mask_b64(),
+                    "area": 500,
+                    "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4},
+                    "stability_score": 0.98,
+                },
+                {
+                    "mask": _fake_mask_b64(),
+                    "area": 200,
+                    "bbox": {"x": 0.5, "y": 0.3, "w": 0.2, "h": 0.3},
+                    "stability_score": 0.85,
+                },
             ],
             "inference_ms": 25.0,
         }
 
 
 def _get_run_mod():
-    import openeye_ai.commands.inference.run  # noqa: F811
     return sys.modules["openeye_ai.commands.inference.run"]
 
 
@@ -117,7 +143,9 @@ def _patch_run(monkeypatch, registry, adapter_cls, model="yolov8"):
 def _patch_run_variant(monkeypatch, registry, adapter_cls):
     run_mod = _get_run_mod()
     monkeypatch.setattr(run_mod, "get_model_info", lambda m: registry[m])
-    monkeypatch.setattr(run_mod, "get_variant_info", lambda m, v: {**registry[m], "_variant": v})
+    monkeypatch.setattr(
+        run_mod, "get_variant_info", lambda m, v: {**registry[m], "_variant": v}
+    )
     monkeypatch.setattr(run_mod, "is_downloaded", lambda m: True)
     monkeypatch.setattr(run_mod, "is_variant_downloaded", lambda m, v: True)
     monkeypatch.setattr(run_mod, "get_adapter", lambda m, variant=None: adapter_cls())
@@ -166,13 +194,21 @@ class TestStory10_StdinPipe:
         _patch_run(monkeypatch, _make_registry(), _DepthAdapter, model="depth-anything")
         img = _make_jpeg(tmp_path / "photo.jpg")
 
-        upstream = json.dumps({
-            "model": "yolov8",
-            "task": "detection",
-            "image": {"width": 100, "height": 100, "source": str(img)},
-            "objects": [{"label": "person", "confidence": 0.9, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}}],
-            "inference_ms": 5.0,
-        })
+        upstream = json.dumps(
+            {
+                "model": "yolov8",
+                "task": "detection",
+                "image": {"width": 100, "height": 100, "source": str(img)},
+                "objects": [
+                    {
+                        "label": "person",
+                        "confidence": 0.9,
+                        "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4},
+                    }
+                ],
+                "inference_ms": 5.0,
+            }
+        )
 
         result = runner.invoke(app, ["run", "depth-anything", "-"], input=upstream)
         assert result.exit_code == 0
@@ -257,7 +293,9 @@ class TestStory14_PromptDetection:
         _patch_run(monkeypatch, registry, _PromptAdapter, model="grounding-dino")
         img = _make_jpeg(tmp_path / "photo.jpg")
 
-        result = runner.invoke(app, ["run", "grounding-dino", str(img), "-p", "red forklift"])
+        result = runner.invoke(
+            app, ["run", "grounding-dino", str(img), "-p", "red forklift"]
+        )
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert data["objects"][0]["label"] == "red forklift"
@@ -331,7 +369,9 @@ class TestStory18_TensorRTBackend:
         _patch_run_variant(monkeypatch, registry, _DetectionAdapter)
         img = _make_jpeg(tmp_path / "photo.jpg")
 
-        result = runner.invoke(app, ["run", "yolov8", str(img), "--backend", "tensorrt"])
+        result = runner.invoke(
+            app, ["run", "yolov8", str(img), "--backend", "tensorrt"]
+        )
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert data["model"] == "yolov8"
@@ -347,16 +387,22 @@ class TestStory19_PipelineComposition:
         _patch_run(monkeypatch, registry, _DepthAdapter, model="depth-anything")
         img = _make_jpeg(tmp_path / "photo.jpg")
 
-        upstream = json.dumps({
-            "model": "yolov8",
-            "task": "detection",
-            "image": {"width": 100, "height": 100, "source": str(img)},
-            "objects": [
-                {"label": "person", "confidence": 0.9, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}}
-            ],
-            "depth_map": None,
-            "inference_ms": 5.0,
-        })
+        upstream = json.dumps(
+            {
+                "model": "yolov8",
+                "task": "detection",
+                "image": {"width": 100, "height": 100, "source": str(img)},
+                "objects": [
+                    {
+                        "label": "person",
+                        "confidence": 0.9,
+                        "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4},
+                    }
+                ],
+                "depth_map": None,
+                "inference_ms": 5.0,
+            }
+        )
 
         result = runner.invoke(app, ["run", "depth-anything", "-"], input=upstream)
         assert result.exit_code == 0
@@ -368,21 +414,29 @@ class TestStory19_PipelineComposition:
         # Model should show pipeline provenance
         assert "yolov8+depth-anything" in data["model"]
 
-    def test_pipeline_preserves_current_over_upstream(self, tmp_openeye_home, tmp_path, monkeypatch):
+    def test_pipeline_preserves_current_over_upstream(
+        self, tmp_openeye_home, tmp_path, monkeypatch
+    ):
         """Current model results take precedence over upstream."""
         registry = _make_registry()
         _patch_run(monkeypatch, registry, _DetectionAdapter)
         img = _make_jpeg(tmp_path / "photo.jpg")
 
-        upstream = json.dumps({
-            "model": "other",
-            "task": "detection",
-            "image": {"width": 100, "height": 100, "source": str(img)},
-            "objects": [
-                {"label": "upstream_obj", "confidence": 0.5, "bbox": {"x": 0, "y": 0, "w": 0.1, "h": 0.1}}
-            ],
-            "inference_ms": 1.0,
-        })
+        upstream = json.dumps(
+            {
+                "model": "other",
+                "task": "detection",
+                "image": {"width": 100, "height": 100, "source": str(img)},
+                "objects": [
+                    {
+                        "label": "upstream_obj",
+                        "confidence": 0.5,
+                        "bbox": {"x": 0, "y": 0, "w": 0.1, "h": 0.1},
+                    }
+                ],
+                "inference_ms": 1.0,
+            }
+        )
 
         result = runner.invoke(app, ["run", "yolov8", "-"], input=upstream)
         assert result.exit_code == 0
@@ -411,7 +465,8 @@ class TestStory20_UnpulledModelError:
     def test_unknown_model_error(self, tmp_openeye_home, monkeypatch):
         run_mod = _get_run_mod()
         monkeypatch.setattr(
-            run_mod, "get_model_info",
+            run_mod,
+            "get_model_info",
             lambda m: (_ for _ in ()).throw(KeyError(f"Unknown model '{m}'")),
         )
 
@@ -423,11 +478,15 @@ class TestStory20_UnpulledModelError:
         run_mod = _get_run_mod()
         registry = _make_registry()
         monkeypatch.setattr(run_mod, "get_model_info", lambda m: registry[m])
-        monkeypatch.setattr(run_mod, "get_variant_info", lambda m, v: {**registry[m], "_variant": v})
+        monkeypatch.setattr(
+            run_mod, "get_variant_info", lambda m, v: {**registry[m], "_variant": v}
+        )
         monkeypatch.setattr(run_mod, "is_variant_downloaded", lambda m, v: False)
         monkeypatch.setattr(run_mod, "MODELS_DIR", Path("/tmp/fake_models"))
 
-        result = runner.invoke(app, ["run", "yolov8", "/tmp/fake.jpg", "--backend", "onnx"])
+        result = runner.invoke(
+            app, ["run", "yolov8", "/tmp/fake.jpg", "--backend", "onnx"]
+        )
         assert result.exit_code == 1
         assert "not downloaded" in result.output
         assert "openeye pull yolov8 --variant onnx" in result.output
@@ -508,7 +567,9 @@ class TestStory21_BatchDirectory:
         _make_jpeg(img_dir / "b.jpg")
         out_file = tmp_path / "batch.json"
 
-        result = runner.invoke(app, ["run", "yolov8", str(img_dir), "-o", str(out_file)])
+        result = runner.invoke(
+            app, ["run", "yolov8", str(img_dir), "-o", str(out_file)]
+        )
         assert result.exit_code == 0
         assert out_file.exists()
         data = json.loads(out_file.read_text())
@@ -543,7 +604,9 @@ class TestStory22_ConfidenceFilter:
         data = json.loads(result.output)
         assert len(data["objects"]) == 0
 
-    def test_confidence_filter_none_filtered(self, tmp_openeye_home, tmp_path, monkeypatch):
+    def test_confidence_filter_none_filtered(
+        self, tmp_openeye_home, tmp_path, monkeypatch
+    ):
         _patch_run(monkeypatch, _make_registry(), _DetectionAdapter)
         img = _make_jpeg(tmp_path / "photo.jpg")
 
@@ -568,18 +631,29 @@ class TestStory22_ConfidenceFilter:
 class TestVisualization:
     def test_draw_boxes(self, tmp_path):
         from openeye_ai.utils.visualize import draw_boxes
+
         img = Image.new("RGB", (100, 100), "white")
         objects = [
-            {"label": "test", "confidence": 0.9, "bbox": {"x": 0.1, "y": 0.1, "w": 0.5, "h": 0.5}},
+            {
+                "label": "test",
+                "confidence": 0.9,
+                "bbox": {"x": 0.1, "y": 0.1, "w": 0.5, "h": 0.5},
+            },
         ]
         result = draw_boxes(img, objects)
         assert result.size == (100, 100)
 
     def test_draw_masks(self, tmp_path):
         from openeye_ai.utils.visualize import draw_masks
+
         img = Image.new("RGB", (10, 10), "white")
         masks = [
-            {"mask": _fake_mask_b64(), "area": 100, "bbox": {"x": 0, "y": 0, "w": 1, "h": 1}, "stability_score": 0.9},
+            {
+                "mask": _fake_mask_b64(),
+                "area": 100,
+                "bbox": {"x": 0, "y": 0, "w": 1, "h": 1},
+                "stability_score": 0.9,
+            },
         ]
         result = draw_masks(img, masks)
         assert result.size == (10, 10)
@@ -587,6 +661,7 @@ class TestVisualization:
 
     def test_save_depth_map(self, tmp_path):
         from openeye_ai.utils.visualize import save_depth_map
+
         out = tmp_path / "depth.png"
         save_depth_map(_fake_depth_b64(), out)
         assert out.exists()
@@ -603,7 +678,9 @@ class TestEdgeCases:
         # CliRunner provides empty stdin (not a tty), so we get the empty-stdin error
         result = runner.invoke(app, ["run", "yolov8"])
         assert result.exit_code == 1
-        assert "No data received" in result.output or "No image provided" in result.output
+        assert (
+            "No data received" in result.output or "No image provided" in result.output
+        )
 
     def test_image_not_found(self, tmp_openeye_home, monkeypatch):
         _patch_run(monkeypatch, _make_registry(), _DetectionAdapter)

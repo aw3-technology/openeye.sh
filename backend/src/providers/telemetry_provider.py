@@ -9,8 +9,8 @@ import logging
 import threading
 import time
 from collections import deque
-from dataclasses import dataclass, field
-from typing import Any, Deque, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Deque, Dict, List
 
 from .singleton import singleton
 
@@ -97,7 +97,9 @@ class TelemetryProvider:
         with self._lock:
             self._error_history.append(record)
             self._counters["errors_total"] += 1
-        logging.warning(f"[telemetry] error source={source} type={error_type}: {message}")
+        logging.warning(
+            f"[telemetry] error source={source} type={error_type}: {message}"
+        )
 
     def record_camera_reconnect(self) -> None:
         """Record a camera reconnect event."""

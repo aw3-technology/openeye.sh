@@ -105,7 +105,7 @@ def estimate_floor_plane(
     if len(grounded) < 2:
         # Fallback: use bottom row of depth map
         h, w = depth_map.shape[:2]
-        bottom_strip = depth_map[int(h * 0.85):, :]
+        bottom_strip = depth_map[int(h * 0.85) :, :]
         valid = bottom_strip[bottom_strip > 0]
         if len(valid) == 0:
             return None

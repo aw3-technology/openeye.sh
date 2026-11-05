@@ -1,10 +1,8 @@
 """OTA firmware update endpoint."""
 
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..deps import get_current_user_id, get_supabase
+from ..deps import get_current_user_id, get_db
 from ..models import OTAUpdateRequest
 from ..services.ota_service import OTAService
 
@@ -15,9 +13,9 @@ router = APIRouter()
 async def push_ota_update(
     req: OTAUpdateRequest,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = OTAService(sb)
+    svc = OTAService(db)
     try:
         commands = svc.push_update(user_id, req)
     except PermissionError as exc:

@@ -3,7 +3,7 @@
 import logging
 from typing import Any, Dict, List
 
-from supabase import Client
+from ..db import Database
 
 from ..models import CommandType, OTAUpdateRequest
 
@@ -11,13 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 class OTAService:
-    def __init__(self, sb: Client):
-        self.sb = sb
+    def __init__(self, db: Database):
+        self.db = db
 
     def push_update(self, user_id: str, req: OTAUpdateRequest) -> List[Dict[str, Any]]:
         """Enqueue OTA update commands for each target device."""
         # Validate firmware URL at control plane level (defense in depth)
         from urllib.parse import urlparse
+
         parsed = urlparse(req.firmware_url)
         if parsed.scheme != "https":
             raise ValueError(f"Firmware URL must use HTTPS, got: {parsed.scheme!r}")
@@ -26,7 +27,7 @@ class OTAService:
 
         # Verify user owns all target devices
         owned = (
-            self.sb.table("devices")
+            self.db.table("devices")
             .select("id")
             .eq("user_id", user_id)
             .in_("id", req.device_ids)
@@ -52,7 +53,7 @@ class OTAService:
                 },
                 "status": "pending",
             }
-            result = self.sb.table("device_commands").insert(row).execute()
+            result = self.db.table("device_commands").insert(row).execute()
             commands.append(result.data[0])
         logger.info("OTA update queued for %d devices", len(req.device_ids))
         return commands

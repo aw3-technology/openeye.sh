@@ -146,7 +146,11 @@ class PerceptionPipeline:
             working_frame = normalize_lighting(working_frame)
 
         # --- Detection ---
-        if detections is None and self.detector is not None and working_frame is not None:
+        if (
+            detections is None
+            and self.detector is not None
+            and working_frame is not None
+        ):
             detections = self.detector(working_frame)
         if detections is None:
             detections = []
@@ -189,6 +193,7 @@ class PerceptionPipeline:
         if self.governance_engine is not None:
             try:
                 from governance.context import GovernanceContext, RoboticsContext
+
                 gov_context = GovernanceContext(
                     frame_id=self._frame_counter,
                     timestamp=time.time(),
@@ -207,8 +212,7 @@ class PerceptionPipeline:
                 if verdict.denied_actions:
                     denied_set = set(verdict.denied_actions)
                     action_suggestions = [
-                        a for a in action_suggestions
-                        if a.target_id not in denied_set
+                        a for a in action_suggestions if a.target_id not in denied_set
                     ]
             except Exception as exc:
                 logging.error("Governance evaluation error: %s", exc)
@@ -217,7 +221,9 @@ class PerceptionPipeline:
         elapsed_ms = (time.perf_counter() - t0) * 1000
 
         if elapsed_ms > 100:
-            logging.warning(f"Perception latency {elapsed_ms:.1f}ms exceeds 100ms target")
+            logging.warning(
+                f"Perception latency {elapsed_ms:.1f}ms exceeds 100ms target"
+            )
 
         result = PerceptionFrame(
             frame_id=self._frame_counter,

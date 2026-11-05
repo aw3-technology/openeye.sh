@@ -1,13 +1,11 @@
 """Tests for the DetectionProcessor shared utility."""
 
-import time
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock
 
 import pytest
 
 from inputs.plugins.detection_processor import DetectionProcessor
-from providers.event_bus import DetectionEvent, EventType
-from providers.telemetry_provider import FrameTelemetry
+from providers.event_bus import DetectionEvent
 
 
 # ---------------------------------------------------------------------------
@@ -93,7 +91,7 @@ class TestPassesThreshold:
 class TestExtractDetections:
     def test_extracts_from_yolo_results(self, processor):
         try:
-            import torch
+            import torch  # noqa: F401
         except ImportError:
             pytest.skip("torch not installed")
 
@@ -109,7 +107,7 @@ class TestExtractDetections:
 
     def test_filters_below_threshold(self, processor):
         try:
-            import torch
+            import torch  # noqa: F401
         except ImportError:
             pytest.skip("torch not installed")
 

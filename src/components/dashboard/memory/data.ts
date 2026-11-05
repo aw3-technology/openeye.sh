@@ -7,12 +7,12 @@ export const demoObservations: Observation[] = agentDemoTicks
   .map((t) => t.observation!)
   .filter((obs, i, arr) => arr.findIndex((o) => o.id === obs.id) === i);
 
-// Pre-compute all unique tags
-export const allTags = Array.from(
-  new Set(demoObservations.flatMap((obs) => obs.tags))
-).sort();
+/** Unique tags across observations, sorted. */
+export function tagsOf(observations: Observation[]): string[] {
+  return Array.from(new Set(observations.flatMap((obs) => obs.tags))).sort();
+}
 
-// Pre-compute all unique detected object labels
-export const allLabels = Array.from(
-  new Set(demoObservations.flatMap((obs) => obs.detections.map((d) => d.label)))
-).sort();
+/** Unique detected object labels across observations, sorted. */
+export function labelsOf(observations: Observation[]): string[] {
+  return Array.from(new Set(observations.flatMap((obs) => obs.detections.map((d) => d.label)))).sort();
+}

@@ -6,11 +6,22 @@ import os
 import time
 from collections import defaultdict
 
+import psycopg
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .routers import alerts, commands, deployments, device_groups, devices, heartbeats, maintenance, ota, v1_api
+from .routers import (
+    alerts,
+    commands,
+    deployments,
+    device_groups,
+    devices,
+    heartbeats,
+    maintenance,
+    ota,
+    v1_api,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +53,12 @@ def create_fleet_app() -> FastAPI:
         allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization", "X-API-Key", "X-Device-API-Key"],
+        allow_headers=[
+            "Content-Type",
+            "Authorization",
+            "X-API-Key",
+            "X-Device-API-Key",
+        ],
     )
 
     @app.middleware("http")
@@ -85,16 +101,25 @@ def create_fleet_app() -> FastAPI:
     app.include_router(commands.router, prefix="/commands", tags=["Commands"])
     app.include_router(v1_api.router, prefix="/v1", tags=["Hosted API"])
 
+    @app.exception_handler(psycopg.errors.DataError)
+    async def _db_data_error(request: Request, exc: psycopg.errors.DataError):
+        # e.g. a malformed UUID in a path/body ("invalid input syntax for type uuid")
+        logger.info("Rejected bad value on %s: %s", request.url.path, exc)
+        return JSONResponse(
+            status_code=400, content={"detail": "Invalid identifier or value"}
+        )
+
     @app.get("/health")
     async def health():
         return {"status": "ok", "service": "fleet-control-plane"}
 
     @app.on_event("shutdown")
     async def shutdown_services():
-        from .routers.v1_api import _credits_svc
-        from .routers.v1_stream import _credits_svc as _stream_credits_svc
-        await _credits_svc.close()
-        await _stream_credits_svc.close()
+        from .db import close_database
+        from .deps import close_fallback_services
+
+        await close_fallback_services()
+        close_database()
 
     logger.info("Fleet control plane app created")
     return app

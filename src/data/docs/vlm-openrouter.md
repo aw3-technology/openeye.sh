@@ -80,5 +80,5 @@ The `vlm-demo` command isolates step 2 for testing and prompt iteration.
 
 Requests use the OpenAI-compatible chat completions endpoint at `https://openrouter.ai/api/v1`. Images are resized to max 1024px and sent as base64 JPEG with `detail: "low"` to keep payloads small. Required headers:
 
-- `HTTP-Referer: https://perceptify.dev`
+- `HTTP-Referer: https://openeye.sh`
 - `X-Title: OpenEye`

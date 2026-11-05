@@ -33,17 +33,22 @@ async def websocket_perception(ws: WebSocket):
                 def run_basic():
                     t0 = time.time()
                     result = state.adapter.predict(img)
-                    INFERENCE_LATENCY.labels(model=state.model_name).observe(time.time() - t0)
+                    INFERENCE_LATENCY.labels(model=state.model_name).observe(
+                        time.time() - t0
+                    )
                     return result
 
                 result_data = await submit_inference(
-                    state.inference_queue, run_basic, ws,
+                    state.inference_queue,
+                    run_basic,
+                    ws,
                     error_msg="Server busy.",
                 )
                 if result_data is None:
                     continue
                 result = PredictionResult(
-                    model=state.model_name, task=state.model_info["task"],
+                    model=state.model_name,
+                    task=state.model_info["task"],
                     image=ImageInfo(width=img_w, height=img_h, source="ws-perception"),
                     **result_data,
                 )
@@ -55,11 +60,15 @@ async def websocket_perception(ws: WebSocket):
             def run_pipeline():
                 t0 = time.time()
                 result = pipeline.process_frame(frame=frame_np)
-                INFERENCE_LATENCY.labels(model=state.model_name).observe(time.time() - t0)
+                INFERENCE_LATENCY.labels(model=state.model_name).observe(
+                    time.time() - t0
+                )
                 return result
 
             perception_frame = await submit_inference(
-                state.inference_queue, run_pipeline, ws,
+                state.inference_queue,
+                run_pipeline,
+                ws,
                 error_msg="Server busy.",
             )
             if perception_frame is None:

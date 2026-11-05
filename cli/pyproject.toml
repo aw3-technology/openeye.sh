@@ -84,3 +84,12 @@ markers = [
 line-length = 88
 indent-width = 4
 src = ["openeye_ai"]
+
+[tool.ruff.lint]
+# Pinned so CI doesn't change behaviour when a newer ruff widens its defaults.
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# cli.py registers sub-apps after the root app exists; tests patch before importing.
+"openeye_ai/cli.py" = ["E402"]
+"tests/**" = ["E402"]

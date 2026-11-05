@@ -36,9 +36,7 @@ class TransitionHandler:
         self._pending_mode_transition = new_mode
         self._pending_transition_reason = reason
         self._mode_transition_event.set()
-        logging.info(
-            f"Scheduled mode transition to: {new_mode} (reason: {reason})"
-        )
+        logging.info(f"Scheduled mode transition to: {new_mode} (reason: {reason})")
 
     async def handle_mode_transitions(self) -> None:
         while True:
@@ -101,9 +99,13 @@ class TransitionHandler:
 
         except Exception as e:
             logging.error(f"Error during mode transition {from_mode} -> {to_mode}: {e}")
-            logging.info(f"Attempting recovery by falling back to previous mode: {from_mode}")
+            logging.info(
+                f"Attempting recovery by falling back to previous mode: {from_mode}"
+            )
             try:
-                await self.lifecycle.initialize_mode(from_mode, self.mode_manager.config)
+                await self.lifecycle.initialize_mode(
+                    from_mode, self.mode_manager.config
+                )
                 if rt:
                     await self.lifecycle.start_orchestrators(
                         rt._run_cortex_loop, self.ensure_task_running

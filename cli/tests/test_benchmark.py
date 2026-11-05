@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from typer.testing import CliRunner
-
 from openeye_ai.cli import app
 from openeye_ai.utils.benchmark import BenchmarkResult, run_benchmark
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -184,17 +182,22 @@ def _make_registry() -> dict[str, dict[str, Any]]:
     return make_test_registry(variant_style="quantized")
 
 
-def _patch_bench(monkeypatch, tmp_openeye_home, downloaded=True, variant_downloaded=False):
+def _patch_bench(
+    monkeypatch, tmp_openeye_home, downloaded=True, variant_downloaded=False
+):
     """Patch bench command dependencies."""
-    import openeye_ai.commands.inference.bench  # noqa: F811
 
     bench_mod = sys.modules["openeye_ai.commands.inference.bench"]
     registry = _make_registry()
     monkeypatch.setattr(bench_mod, "get_model_info", lambda m: registry[m])
     monkeypatch.setattr(bench_mod, "get_variant_info", lambda m, v: registry[m])
     monkeypatch.setattr(bench_mod, "is_downloaded", lambda m: downloaded)
-    monkeypatch.setattr(bench_mod, "is_variant_downloaded", lambda m, v: variant_downloaded)
-    monkeypatch.setattr(bench_mod, "get_adapter", lambda m, variant=None: StubAdapter(detections=[]))
+    monkeypatch.setattr(
+        bench_mod, "is_variant_downloaded", lambda m, v: variant_downloaded
+    )
+    monkeypatch.setattr(
+        bench_mod, "get_adapter", lambda m, variant=None: StubAdapter(detections=[])
+    )
     monkeypatch.setattr(bench_mod, "MODELS_DIR", tmp_openeye_home / "models")
 
 
@@ -231,7 +234,9 @@ class TestBenchCLI:
     def test_custom_resolution(self, tmp_openeye_home, monkeypatch):
         """Story 26: --width and --height."""
         _patch_bench(monkeypatch, tmp_openeye_home)
-        result = runner.invoke(app, ["bench", "yolov8", "--width", "1920", "--height", "1080"])
+        result = runner.invoke(
+            app, ["bench", "yolov8", "--width", "1920", "--height", "1080"]
+        )
         assert result.exit_code == 0
         assert "1920x1080" in result.output
 
@@ -252,7 +257,17 @@ class TestBenchCLI:
         assert result1.exit_code == 0
 
         # Verify the output contains all standard metric labels
-        for metric in ["Mean", "Median", "P95", "FPS", "Std Dev", "Min", "Max", "Runs", "Image Size"]:
+        for metric in [
+            "Mean",
+            "Median",
+            "P95",
+            "FPS",
+            "Std Dev",
+            "Min",
+            "Max",
+            "Runs",
+            "Image Size",
+        ]:
             assert metric in result1.output
 
     def test_model_not_downloaded(self, tmp_openeye_home, monkeypatch):

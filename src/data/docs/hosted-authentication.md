@@ -2,20 +2,23 @@
 title: Authentication
 ---
 
-> [!warning] The hosted API with API key authentication is not yet available. This page describes planned functionality.
+The hosted API lives at `https://openeye.sh/v1`. Every request needs an API key.
 
-### Self-Hosted Server
+### Get a key
 
-The self-hosted server (`openeye serve`) does not require authentication by default. To add authentication to your self-hosted deployment, configure it in your reverse proxy or application layer.
+Create one in the dashboard under **Settings → API Keys**. Keys start with `oe_` and are shown once; OpenEye stores only a hash.
+
+### Send it
+
+Pass the key as a Bearer token:
 
 ```bash
-# Start the server (no auth required)
-openeye serve yolov8 --port 8000
-
-# Query it directly
-curl -X POST http://localhost:8000/predict -F "file=@photo.jpg"
+curl https://openeye.sh/v1/models \
+  -H "Authorization: Bearer oe_your_key_here"
 ```
 
-### Planned Hosted API Authentication
+`X-API-Key: oe_...` is also accepted. Requests without a valid key get `401`.
 
-When the hosted API launches, API keys will be prefixed with `oe_` and passed via the `X-API-Key` or `Authorization` header.
+### Self-hosted server
+
+`openeye serve` exposes the same `/v1` routes on your machine. It accepts any key starting with `oe_`, or only the value of `OPENEYE_SERVER_API_KEY` when that is set.

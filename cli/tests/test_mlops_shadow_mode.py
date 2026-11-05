@@ -7,12 +7,17 @@ import pytest
 
 class TestShadowMode:
     def test_create_and_list(self):
-        from openeye_ai.mlops.shadow_mode import create_shadow_deployment, list_shadow_deployments
         from openeye_ai.mlops.schemas import ShadowDeploymentConfig
+        from openeye_ai.mlops.shadow_mode import (
+            create_shadow_deployment,
+            list_shadow_deployments,
+        )
 
         config = ShadowDeploymentConfig(
-            name="s1", model_key="m",
-            production_version="v1", shadow_version="v2",
+            name="s1",
+            model_key="m",
+            production_version="v1",
+            shadow_version="v2",
         )
         dep = create_shadow_deployment(config)
         assert dep.id.startswith("shadow-")
@@ -24,15 +29,17 @@ class TestShadowMode:
         assert list_shadow_deployments(model_key="other") == []
 
     def test_complete_shadow_deployment(self):
+        from openeye_ai.mlops.schemas import ShadowDeploymentConfig, ShadowStatus
         from openeye_ai.mlops.shadow_mode import (
             complete_shadow_deployment,
             create_shadow_deployment,
         )
-        from openeye_ai.mlops.schemas import ShadowDeploymentConfig, ShadowStatus
 
         config = ShadowDeploymentConfig(
-            name="s2", model_key="m",
-            production_version="v1", shadow_version="v2",
+            name="s2",
+            model_key="m",
+            production_version="v1",
+            shadow_version="v2",
         )
         dep = create_shadow_deployment(config)
         completed = complete_shadow_deployment(dep.id)
@@ -52,12 +59,17 @@ class TestShadowMode:
             get_shadow_deployment("shadow-nonexistent")
 
     def test_get_shadow_deployment_success(self):
-        from openeye_ai.mlops.shadow_mode import create_shadow_deployment, get_shadow_deployment
         from openeye_ai.mlops.schemas import ShadowDeploymentConfig
+        from openeye_ai.mlops.shadow_mode import (
+            create_shadow_deployment,
+            get_shadow_deployment,
+        )
 
         config = ShadowDeploymentConfig(
-            name="get-test", model_key="m",
-            production_version="v1", shadow_version="v2",
+            name="get-test",
+            model_key="m",
+            production_version="v1",
+            shadow_version="v2",
         )
         dep = create_shadow_deployment(config)
         fetched = get_shadow_deployment(dep.id)

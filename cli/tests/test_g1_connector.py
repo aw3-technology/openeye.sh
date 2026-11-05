@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 
 import pytest
-
 from openeye_ai.connectors.unitree_g1 import (
     G1Connector,
     G1ControlMode,

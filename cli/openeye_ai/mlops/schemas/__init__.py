@@ -5,6 +5,7 @@ All public names are re-exported here for backward compatibility.
 """
 
 from .base import (
+    _SAFE_KEY_RE,
     ABTestStatus,
     AnnotationLabel,
     ApprovalStatus,
@@ -19,7 +20,6 @@ from .base import (
     ShadowStatus,
     StorageBackend,
     TrainingMetrics,
-    _SAFE_KEY_RE,
 )
 from .governance import (
     ApprovalGate,

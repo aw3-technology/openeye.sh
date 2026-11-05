@@ -20,7 +20,16 @@ export interface Resource {
   refs?: Record<string, string>;
   /** Rows are created server-side only (e.g. by the fleet control plane). */
   noCreate?: boolean;
+  /** Columns never returned to the browser (e.g. secret hashes). */
+  hidden?: string[];
+  /** Writable columns restricted to a fixed set of values. */
+  enums?: Record<string, readonly string[]>;
 }
+
+/** Command types the device agent understands (backend/src/fleet command_service). */
+export const COMMAND_TYPES = [
+  "restart", "update_config", "deploy_model", "rollback_model", "ota_update", "decommission", "collect_logs",
+] as const;
 
 export const resources: Record<string, Resource> = {
   devices: {
@@ -32,6 +41,7 @@ export const resources: Record<string, Resource> = {
     json: ["hardware_specs", "tags", "config_overrides", "metadata"],
     filters: ["status", "device_type"],
     order: "created_at desc",
+    hidden: ["api_key_hash"],
   },
   device_resource_history: {
     table: "device_resource_history",
@@ -40,6 +50,15 @@ export const resources: Record<string, Resource> = {
     filters: ["device_id"],
     order: "created_at desc",
     refs: { device_id: "devices" },
+  },
+  device_commands: {
+    table: "device_commands",
+    writable: ["device_id", "command_type", "payload"],
+    json: ["payload"],
+    filters: ["device_id", "status"],
+    order: "issued_at desc",
+    refs: { device_id: "devices" },
+    enums: { command_type: COMMAND_TYPES },
   },
   deployments: {
     table: "deployments",
@@ -102,10 +121,21 @@ export const resources: Record<string, Resource> = {
     filters: [],
     order: "created_at desc",
   },
+  observation_memory: {
+    table: "observation_memory",
+    writable: [
+      "tick", "timestamp", "detections_json", "scene_summary", "change_description",
+      "significance", "tags", "session_id",
+    ],
+    json: ["detections_json"],
+    filters: ["session_id"],
+    order: "timestamp desc",
+  },
   api_keys: {
     table: "api_keys",
     writable: ["name", "key_prefix", "key_hash"],
     filters: [],
     order: "created_at desc",
+    hidden: ["key_hash"],
   },
 };

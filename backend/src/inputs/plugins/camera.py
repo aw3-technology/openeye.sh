@@ -28,7 +28,9 @@ def set_best_resolution(cap: cv2.VideoCapture, resolutions: List[tuple]) -> tupl
             logging.info(f"Resolution set to: {width}x{height}")
             return width, height
     logging.info("Could not set preferred resolution. Using default.")
-    return int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    return int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(
+        cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    )
 
 
 def check_webcam(index_to_check):
@@ -46,8 +48,14 @@ def check_webcam(index_to_check):
 class CameraManager:
     """Manages camera lifecycle: open, read, reconnect."""
 
-    def __init__(self, camera_index: int, reconnect_attempts: int = 5, reconnect_delay: float = 2.0,
-                 telemetry=None, event_bus=None):
+    def __init__(
+        self,
+        camera_index: int,
+        reconnect_attempts: int = 5,
+        reconnect_delay: float = 2.0,
+        telemetry=None,
+        event_bus=None,
+    ):
         self.camera_index = camera_index
         self.reconnect_attempts = reconnect_attempts
         self.reconnect_delay = reconnect_delay
@@ -76,7 +84,9 @@ class CameraManager:
             self.cam_third = int(self.width / 3)
             self.have_cam = True
             self._camera_disconnected = False
-            logging.info(f"Camera {self.camera_index} opened: {self.width}x{self.height}")
+            logging.info(
+                f"Camera {self.camera_index} opened: {self.width}x{self.height}"
+            )
             return True
         except Exception as e:
             logging.error(f"Error opening camera: {e}")
@@ -96,6 +106,7 @@ class CameraManager:
         )
         if self.event_bus:
             from providers.event_bus import EventType, PerceptionEvent
+
             self.event_bus.publish(
                 PerceptionEvent(
                     event_type=EventType.CAMERA_STATUS,
@@ -119,6 +130,7 @@ class CameraManager:
                     self.telemetry.record_camera_reconnect()
                 if self.event_bus:
                     from providers.event_bus import EventType, PerceptionEvent
+
                     self.event_bus.publish(
                         PerceptionEvent(
                             event_type=EventType.CAMERA_STATUS,

@@ -5,6 +5,7 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel, Field
 
+
 class AutoScalingPolicy(BaseModel):
     enabled: bool = Field(default=False)
     min_devices: int = Field(default=1, ge=1)
@@ -18,7 +19,9 @@ class AutoScalingPolicy(BaseModel):
 class DeviceGroupCreateRequest(BaseModel):
     name: str = Field(description="Group name")
     description: str = Field(default="", description="Group description")
-    tag_filter: Dict[str, str] = Field(default_factory=dict, description="Auto-match devices by tags")
+    tag_filter: Dict[str, str] = Field(
+        default_factory=dict, description="Auto-match devices by tags"
+    )
 
 
 class DeviceGroupResponse(BaseModel):

@@ -4,7 +4,6 @@ import hashlib
 import ipaddress
 import logging
 import socket
-import tempfile
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse
@@ -20,14 +19,14 @@ _ALLOWED_SCHEMES = {"https"}
 
 # Blocked IP ranges (link-local, metadata, private)
 _BLOCKED_NETWORKS = [
-    ipaddress.ip_network("169.254.0.0/16"),   # Link-local / cloud metadata
-    ipaddress.ip_network("127.0.0.0/8"),       # Loopback
-    ipaddress.ip_network("10.0.0.0/8"),        # Private
-    ipaddress.ip_network("172.16.0.0/12"),     # Private
-    ipaddress.ip_network("192.168.0.0/16"),    # Private
-    ipaddress.ip_network("::1/128"),           # IPv6 loopback
-    ipaddress.ip_network("fe80::/10"),         # IPv6 link-local
-    ipaddress.ip_network("fd00::/8"),          # IPv6 ULA
+    ipaddress.ip_network("169.254.0.0/16"),  # Link-local / cloud metadata
+    ipaddress.ip_network("127.0.0.0/8"),  # Loopback
+    ipaddress.ip_network("10.0.0.0/8"),  # Private
+    ipaddress.ip_network("172.16.0.0/12"),  # Private
+    ipaddress.ip_network("192.168.0.0/16"),  # Private
+    ipaddress.ip_network("::1/128"),  # IPv6 loopback
+    ipaddress.ip_network("fe80::/10"),  # IPv6 link-local
+    ipaddress.ip_network("fd00::/8"),  # IPv6 ULA
 ]
 
 
@@ -90,7 +89,9 @@ class OTAUpdater:
         # Verify checksum
         actual = hashlib.sha256(data).hexdigest()
         if actual != expected_checksum:
-            raise ValueError(f"Firmware checksum mismatch: expected {expected_checksum}, got {actual}")
+            raise ValueError(
+                f"Firmware checksum mismatch: expected {expected_checksum}, got {actual}"
+            )
 
         # Rate-limit write (simulates throttled download for real streaming)
         dest = self.firmware_dir / version
@@ -101,7 +102,9 @@ class OTAUpdater:
             for chunk in limiter.throttled_read(data):
                 f.write(chunk)
 
-        logger.info("Firmware %s downloaded and verified (%d bytes)", version, len(data))
+        logger.info(
+            "Firmware %s downloaded and verified (%d bytes)", version, len(data)
+        )
         return dest
 
     def apply(self, version: str) -> bool:

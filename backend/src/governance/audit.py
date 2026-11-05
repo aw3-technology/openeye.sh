@@ -30,7 +30,9 @@ class AuditLog:
         self.total_violations = 0
         self.total_warnings = 0
 
-    def record_verdict(self, verdict: GovernanceVerdict, frame_id: int | None = None) -> None:
+    def record_verdict(
+        self, verdict: GovernanceVerdict, frame_id: int | None = None
+    ) -> None:
         """Record all results from a governance verdict."""
         self.total_evaluations += 1
         self.total_violations += len(verdict.violations)
@@ -52,7 +54,9 @@ class AuditLog:
                 )
             )
 
-    def record_result(self, result: GovernanceResult, frame_id: int | None = None) -> None:
+    def record_result(
+        self, result: GovernanceResult, frame_id: int | None = None
+    ) -> None:
         """Record a single governance result."""
         self._entries.append(
             AuditEntry(

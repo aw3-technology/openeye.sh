@@ -34,11 +34,17 @@ class ObjectRestrictionPolicy(GovernancePolicy):
             for action in context.robotics.action_suggestions:
                 if action.target_id:
                     target_obj = next(
-                        (o for o in context.robotics.objects if o.track_id == action.target_id),
+                        (
+                            o
+                            for o in context.robotics.objects
+                            if o.track_id == action.target_id
+                        ),
                         None,
                     )
                     if target_obj:
-                        result = self._check_label(target_obj.label, target_obj.track_id)
+                        result = self._check_label(
+                            target_obj.label, target_obj.track_id
+                        )
                         if result:
                             result.affected_objects.append(f"action:{action.action}")
                             results.append(result)
@@ -52,7 +58,9 @@ class ObjectRestrictionPolicy(GovernancePolicy):
         if any(d.lower() == label_lower for d in self.deny_labels):
             return GovernanceResult(
                 policy_name=self.config.name,
-                decision=PolicyDecision.DENY if self.on_violation == "deny" else PolicyDecision.WARN,
+                decision=PolicyDecision.DENY
+                if self.on_violation == "deny"
+                else PolicyDecision.WARN,
                 reason=f"Object '{label}' is on the deny list",
                 severity=self.config.severity,
                 affected_objects=[track_id],
@@ -63,14 +71,18 @@ class ObjectRestrictionPolicy(GovernancePolicy):
             if re.search(pattern, label_lower):
                 return GovernanceResult(
                     policy_name=self.config.name,
-                    decision=PolicyDecision.DENY if self.on_violation == "deny" else PolicyDecision.WARN,
+                    decision=PolicyDecision.DENY
+                    if self.on_violation == "deny"
+                    else PolicyDecision.WARN,
                     reason=f"Object '{label}' matches deny pattern '{pattern}'",
                     severity=self.config.severity,
                     affected_objects=[track_id],
                 )
 
         # Allow list (if set, only allowed labels pass)
-        if self.allow_labels and not any(a.lower() == label_lower for a in self.allow_labels):
+        if self.allow_labels and not any(
+            a.lower() == label_lower for a in self.allow_labels
+        ):
             return GovernanceResult(
                 policy_name=self.config.name,
                 decision=PolicyDecision.WARN,

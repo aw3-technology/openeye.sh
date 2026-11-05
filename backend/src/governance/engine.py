@@ -151,7 +151,10 @@ class GovernanceEngine:
                 # Downgrade to warn/audit based on enforcement mode
                 if pc.enforcement == Enforcement.AUDIT_ONLY:
                     result.decision = PolicyDecision.AUDIT_ONLY
-                elif pc.enforcement == Enforcement.WARN_ONLY and result.decision == PolicyDecision.DENY:
+                elif (
+                    pc.enforcement == Enforcement.WARN_ONLY
+                    and result.decision == PolicyDecision.DENY
+                ):
                     result.decision = PolicyDecision.WARN
 
                 all_results.append(result)
@@ -168,7 +171,9 @@ class GovernanceEngine:
         # Most restrictive wins
         overall = PolicyDecision.ALLOW
         for r in all_results:
-            if _DECISION_SEVERITY.get(r.decision, 0) > _DECISION_SEVERITY.get(overall, 0):
+            if _DECISION_SEVERITY.get(r.decision, 0) > _DECISION_SEVERITY.get(
+                overall, 0
+            ):
                 overall = r.decision
 
         elapsed_ms = (time.perf_counter() - t0) * 1000
@@ -238,7 +243,9 @@ class GovernanceEngine:
             policies=list(self._configs.values()),
             settings=self._settings,
         )
-        return yaml.dump(config.model_dump(mode="json"), default_flow_style=False, sort_keys=False)
+        return yaml.dump(
+            config.model_dump(mode="json"), default_flow_style=False, sort_keys=False
+        )
 
     def update_config_yaml(self, yaml_str: str) -> None:
         """Parse and apply a YAML string as new governance config."""

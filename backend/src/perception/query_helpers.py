@@ -3,11 +3,14 @@ from __future__ import annotations
 from perception.models import DetectedObject3D
 
 
-def find_objects(label_query: str, objects: list[DetectedObject3D]) -> list[DetectedObject3D]:
+def find_objects(
+    label_query: str, objects: list[DetectedObject3D]
+) -> list[DetectedObject3D]:
     parts = label_query.split()
     target_label = parts[-1] if parts else label_query
     return [
-        o for o in objects
+        o
+        for o in objects
         if target_label in o.label.lower() or o.label.lower() in target_label
     ]
 

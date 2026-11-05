@@ -30,7 +30,15 @@ def draw_boxes(image: PILImage.Image, objects: list[dict]) -> PILImage.Image:
     except OSError:
         font = ImageFont.load_default()
 
-    colors = ["#FF3B30", "#FF9500", "#FFCC00", "#34C759", "#007AFF", "#5856D6", "#AF52DE"]
+    colors = [
+        "#FF3B30",
+        "#FF9500",
+        "#FFCC00",
+        "#34C759",
+        "#007AFF",
+        "#5856D6",
+        "#AF52DE",
+    ]
 
     for i, obj in enumerate(objects):
         bbox = obj["bbox"]
@@ -44,7 +52,10 @@ def draw_boxes(image: PILImage.Image, objects: list[dict]) -> PILImage.Image:
 
         label = f"{obj['label']} {obj['confidence']:.0%}"
         text_bbox = draw.textbbox((x1, y1), label, font=font)
-        draw.rectangle([text_bbox[0] - 2, text_bbox[1] - 2, text_bbox[2] + 2, text_bbox[3] + 2], fill=color)
+        draw.rectangle(
+            [text_bbox[0] - 2, text_bbox[1] - 2, text_bbox[2] + 2, text_bbox[3] + 2],
+            fill=color,
+        )
         draw.text((x1, y1), label, fill="white", font=font)
 
     return img

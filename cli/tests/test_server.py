@@ -2,15 +2,11 @@
 
 import base64
 import io
-import json
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
-
-from PIL import Image
 
 from openeye_ai.adapters.base import ModelAdapter
-
+from PIL import Image
 
 # ── Story 38: openeye serve → REST API at /predict ──────────────────
 
@@ -84,10 +80,9 @@ def test_predict_no_filename(app_client, tiny_image_bytes):
 
 def test_predict_adapter_exception():
     """When adapter.predict raises, server returns 500."""
-    from starlette.testclient import TestClient
-
     from openeye_ai.server.app import create_app
     from openeye_ai.server.rate_limit import limiter
+    from starlette.testclient import TestClient
 
     class ErrorAdapter(ModelAdapter):
         def _do_load(self, model_dir: Path) -> None:
@@ -249,10 +244,9 @@ def test_websocket_vlm_response_shape(app_client, tiny_image_bytes):
 
 def test_vlm_model_flag_sets_runtime_config():
     """--vlm-model flag should be passed into runtime config."""
-    from starlette.testclient import TestClient
-
     from openeye_ai.server.app import create_app
     from openeye_ai.server.rate_limit import limiter
+    from starlette.testclient import TestClient
 
     from tests.conftest import FakeAdapter
 
@@ -260,7 +254,8 @@ def test_vlm_model_flag_sets_runtime_config():
     adapter = FakeAdapter()
     adapter.load(Path("/tmp/vlm"))
     app = create_app(
-        adapter, "test-model",
+        adapter,
+        "test-model",
         {"name": "Test", "task": "detection"},
         vlm_model="qwen/qwen3.5-9b",
     )
@@ -271,10 +266,14 @@ def test_vlm_model_flag_sets_runtime_config():
     assert resp.json()["vlm_model"] == "qwen/qwen3.5-9b"
 
 
-def test_vlm_model_resolve_openrouter():
-    """OpenRouter-style model IDs should be detected correctly."""
-    from openeye_ai.server.state import ServerState
+def test_vlm_model_resolve_openrouter(monkeypatch):
+    """OpenRouter-style model IDs should be detected correctly.
+
+    OpenRouter routing requires OPENROUTER_API_KEY to be set.
+    """
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-test-key")
     from openeye_ai.server.queue import InferenceQueue
+    from openeye_ai.server.state import ServerState
 
     state = ServerState(
         adapter=None,
@@ -290,8 +289,8 @@ def test_vlm_model_resolve_openrouter():
 
 def test_vlm_model_resolve_nebius():
     """Uppercase org model IDs should resolve to Nebius."""
-    from openeye_ai.server.state import ServerState
     from openeye_ai.server.queue import InferenceQueue
+    from openeye_ai.server.state import ServerState
 
     state = ServerState(
         adapter=None,
@@ -315,7 +314,10 @@ def test_metrics_endpoint_exists(app_client):
 
 def test_metrics_content_type(app_client):
     resp = app_client.get("/metrics")
-    assert "text/plain" in resp.headers["content-type"] or "text/openmetrics" in resp.headers["content-type"]
+    assert (
+        "text/plain" in resp.headers["content-type"]
+        or "text/openmetrics" in resp.headers["content-type"]
+    )
 
 
 def test_metrics_contains_openeye_metrics(app_client):
@@ -419,6 +421,7 @@ def test_nebius_stats_provider_info(app_client):
 def test_demo_flag_accepted():
     """The serve command should accept --demo flag."""
     import inspect
+
     from openeye_ai.commands.inference.serve import serve
 
     sig = inspect.signature(serve)

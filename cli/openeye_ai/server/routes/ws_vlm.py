@@ -29,18 +29,22 @@ async def websocket_vlm(ws: WebSocket):
     if vlm_client:
         nebius_stats["configured"] = True
         nebius_stats["model"] = nebius_model
-        nebius_stats["provider"] = "OpenRouter" if "openrouter.ai" in nebius_base else "Nebius Token Factory"
+        nebius_stats["provider"] = (
+            "OpenRouter" if "openrouter.ai" in nebius_base else "Nebius Token Factory"
+        )
 
     try:
         while True:
             data = await ws.receive_text()
 
             if not vlm_client:
-                await ws.send_json({
-                    "description": "VLM not configured (missing NEBIUS_API_KEY).",
-                    "reasoning": "",
-                    "latency_ms": 0,
-                })
+                await ws.send_json(
+                    {
+                        "description": "VLM not configured (missing NEBIUS_API_KEY).",
+                        "reasoning": "",
+                        "latency_ms": 0,
+                    }
+                )
                 continue
 
             t0 = time.time()
@@ -56,7 +60,7 @@ async def websocket_vlm(ws: WebSocket):
                                     "Respond in this exact format:\n\n"
                                     "SCENE: [1 sentence — what you see]\n"
                                     "OBJECTS: [comma-separated key objects with positions]\n"
-                                    "HAZARDS: [safety concerns, or \"None detected\"]\n"
+                                    'HAZARDS: [safety concerns, or "None detected"]\n'
                                     "RISK: [SAFE / CAUTION / DANGER]\n"
                                     "ACTION: [recommended action]"
                                 ),
@@ -66,9 +70,14 @@ async def websocket_vlm(ws: WebSocket):
                                 "content": [
                                     {
                                         "type": "image_url",
-                                        "image_url": {"url": f"data:image/jpeg;base64,{data}"},
+                                        "image_url": {
+                                            "url": f"data:image/jpeg;base64,{data}"
+                                        },
                                     },
-                                    {"type": "text", "text": "Analyze this workspace frame for safety."},
+                                    {
+                                        "type": "text",
+                                        "text": "Analyze this workspace frame for safety.",
+                                    },
                                 ],
                             },
                         ],
@@ -89,26 +98,32 @@ async def websocket_vlm(ws: WebSocket):
                     len(content.split()) * 2,  # rough estimate if usage not available
                 )
                 nebius_stats["last_call_at"] = time.time()
-                await ws.send_json({
-                    "description": content,
-                    "reasoning": f"Analyzed by {nebius_model}",
-                    "latency_ms": round(latency, 1),
-                })
+                await ws.send_json(
+                    {
+                        "description": content,
+                        "reasoning": f"Analyzed by {nebius_model}",
+                        "latency_ms": round(latency, 1),
+                    }
+                )
             except asyncio.TimeoutError:
                 nebius_stats["errors"] += 1
-                await ws.send_json({
-                    "description": "VLM reasoning timed out.",
-                    "reasoning": "Timeout after 10s",
-                    "latency_ms": round((time.time() - t0) * 1000, 1),
-                })
+                await ws.send_json(
+                    {
+                        "description": "VLM reasoning timed out.",
+                        "reasoning": "Timeout after 10s",
+                        "latency_ms": round((time.time() - t0) * 1000, 1),
+                    }
+                )
             except Exception as e:
                 nebius_stats["errors"] += 1
                 logger.error("VLM error: %s", e)
-                await ws.send_json({
-                    "description": "VLM reasoning failed.",
-                    "reasoning": "",
-                    "latency_ms": round((time.time() - t0) * 1000, 1),
-                })
+                await ws.send_json(
+                    {
+                        "description": "VLM reasoning failed.",
+                        "reasoning": "",
+                        "latency_ms": round((time.time() - t0) * 1000, 1),
+                    }
+                )
 
     except WebSocketDisconnect:
         pass

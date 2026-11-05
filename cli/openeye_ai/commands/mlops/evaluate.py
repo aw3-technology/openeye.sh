@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 import typer
 from rich import print as rprint
 from rich.table import Table
@@ -20,17 +19,28 @@ evaluate_app = typer.Typer()
 @evaluate_app.command("evaluate")
 def mlops_evaluate(
     model: str = typer.Argument(help="Model name"),
-    dataset: str = typer.Option(..., "--dataset", "-d", help="Path to evaluation dataset (COCO JSON, JSONL, or image dir)"),
+    dataset: str = typer.Option(
+        ...,
+        "--dataset",
+        "-d",
+        help="Path to evaluation dataset (COCO JSON, JSONL, or image dir)",
+    ),
     version: str = typer.Option("latest", "--version", "-v", help="Model version"),
-    iou_threshold: float = typer.Option(0.5, "--iou", help="IoU threshold for mAP calculation"),
-    confidence: float = typer.Option(0.25, "--confidence", "-c", help="Confidence threshold"),
+    iou_threshold: float = typer.Option(
+        0.5, "--iou", help="IoU threshold for mAP calculation"
+    ),
+    confidence: float = typer.Option(
+        0.25, "--confidence", "-c", help="Confidence threshold"
+    ),
 ) -> None:
     """Evaluate a model and get precision/recall/mAP metrics."""
     import json
     from pathlib import Path
 
     if not is_downloaded(model):
-        rprint(f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]")
+        rprint(
+            f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]"
+        )
         raise typer.Exit(code=1)
 
     try:
@@ -53,7 +63,8 @@ def mlops_evaluate(
 
     try:
         metrics = evaluate_model(
-            adapter, dataset_path,
+            adapter,
+            dataset_path,
             iou_threshold=iou_threshold,
             confidence_threshold=confidence,
         )
@@ -94,7 +105,9 @@ def mlops_benchmark(
     from openeye_ai.mlops.benchmark_matrix import run_benchmark_matrix
 
     if not is_downloaded(model):
-        rprint(f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]")
+        rprint(
+            f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]"
+        )
         raise typer.Exit(code=1)
 
     try:
@@ -107,7 +120,9 @@ def mlops_benchmark(
         adapter.load(model_dir)
 
     rprint(f"[bold]Running benchmark matrix ({runs} runs per target)...[/bold]")
-    result = run_benchmark_matrix(adapter, model, "latest", runs_per_target=runs, width=width, height=height)
+    result = run_benchmark_matrix(
+        adapter, model, "latest", runs_per_target=runs, width=width, height=height
+    )
 
     table = Table(title=f"Benchmark Matrix: {model}")
     table.add_column("Hardware", style="cyan")
@@ -173,7 +188,12 @@ def mlops_validation_create(
     name: str = typer.Option(..., "--name", "-n", help="Test name"),
     model_key: str = typer.Option(..., "--model", "-m", help="Model key"),
     dataset: str = typer.Option(..., "--dataset", "-d", help="Test dataset path"),
-    conditions: str = typer.Option(..., "--conditions", "-c", help="Comma-separated conditions, e.g. 'accuracy > 0.95,latency_ms < 50'"),
+    conditions: str = typer.Option(
+        ...,
+        "--conditions",
+        "-c",
+        help="Comma-separated conditions, e.g. 'accuracy > 0.95,latency_ms < 50'",
+    ),
     description: str = typer.Option("", "--desc", help="Test description"),
 ) -> None:
     """Create a validation test definition."""
@@ -197,7 +217,9 @@ def mlops_validation_create(
 
 @evaluate_app.command("validations")
 def mlops_validations(
-    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    model_key: str | None = typer.Option(
+        None, "--model", "-m", help="Filter by model key"
+    ),
 ) -> None:
     """List validation test definitions."""
     from openeye_ai.mlops.validation import list_validation_tests
@@ -230,7 +252,9 @@ def mlops_validations(
 @evaluate_app.command("validation-runs")
 def mlops_validation_runs(
     test_id: str | None = typer.Option(None, "--test", "-t", help="Filter by test ID"),
-    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    model_key: str | None = typer.Option(
+        None, "--model", "-m", help="Filter by model key"
+    ),
 ) -> None:
     """List validation test runs."""
     from openeye_ai.mlops.validation import list_validation_runs

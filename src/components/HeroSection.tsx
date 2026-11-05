@@ -59,7 +59,7 @@ export function HeroSection() {
         </div>
 
         <p className="mt-5 font-mono text-xs text-muted-foreground/80">
-          Free and open source · Python 3.12+ · Hosted API with pay-as-you-go credits
+          Free and open source · Python 3.12+ · Runs on CPU or GPU
         </p>
       </div>
 

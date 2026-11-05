@@ -77,9 +77,7 @@ class OpenRouterLLM(LLM[R]):
         )
         self.history_manager = LLMHistoryManager(self._config, self._client)
 
-    async def _call_model(
-        self, model: str, formatted_messages: list
-    ) -> T.Optional[R]:
+    async def _call_model(self, model: str, formatted_messages: list) -> T.Optional[R]:
         response = await self._client.chat.completions.create(
             model=model,
             messages=T.cast(T.Any, formatted_messages),

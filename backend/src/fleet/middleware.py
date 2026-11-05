@@ -20,7 +20,9 @@ logger = structlog.stdlib.get_logger("fleet.middleware")
 class CorrelationIdMiddleware(BaseHTTPMiddleware):
     """Read or generate a correlation ID and expose it via contextvars + response header."""
 
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
         request_id = request.headers.get(_HEADER) or str(uuid.uuid4())
         correlation_id_ctx.set(request_id)
         # Bind into structlog contextvars so every log in this request carries it
@@ -35,7 +37,9 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Log every HTTP request with method, path, status, and duration."""
 
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
         start = time.perf_counter()
         response = await call_next(request)
         duration_ms = round((time.perf_counter() - start) * 1000, 2)

@@ -5,11 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
+from openeye_ai.cli import app
 from PIL import Image
 from typer.testing import CliRunner
-
-from openeye_ai.cli import app
 
 runner = CliRunner()
 
@@ -254,7 +252,12 @@ def test_api_models_success(monkeypatch):
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = {
         "models": [
-            {"name": "yolov8", "task": "detection", "credits_per_call": 1, "description": "Fast detection"},
+            {
+                "name": "yolov8",
+                "task": "detection",
+                "credits_per_call": 1,
+                "description": "Fast detection",
+            },
         ]
     }
 

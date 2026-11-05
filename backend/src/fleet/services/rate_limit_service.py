@@ -4,7 +4,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 
-from supabase import Client
+from ..db import Database
 
 logger = logging.getLogger(__name__)
 
@@ -13,12 +13,14 @@ RATE_LIMIT_WINDOW_SECONDS = 60
 
 
 class RateLimitService:
-    """Rate limiting and usage logging backed by Supabase."""
+    """Rate limiting and usage logging backed by Postgres (api_usage_log)."""
 
-    def __init__(self, sb: Client) -> None:
-        self._sb = sb
+    def __init__(self, db: Database) -> None:
+        self.db = db
 
-    async def check_rate_limit(self, api_key_id: str, limit: int) -> tuple[bool, int, int]:
+    async def check_rate_limit(
+        self, api_key_id: str, limit: int
+    ) -> tuple[bool, int, int]:
         """Check if the API key is within its rate limit.
 
         Returns (allowed, remaining, reset_seconds).
@@ -28,11 +30,13 @@ class RateLimitService:
         ).isoformat()
 
         result = await asyncio.to_thread(
-            lambda: self._sb.table("api_usage_log")
-            .select("id", count="exact")
-            .eq("api_key_id", api_key_id)
-            .gte("created_at", window_start)
-            .execute()
+            lambda: (
+                self.db.table("api_usage_log")
+                .select("id", count="exact")
+                .eq("api_key_id", api_key_id)
+                .gte("created_at", window_start)
+                .execute()
+            )
         )
 
         count = result.count if result.count is not None else 0
@@ -54,51 +58,61 @@ class RateLimitService:
         """Insert a row into api_usage_log."""
         try:
             await asyncio.to_thread(
-                lambda: self._sb.table("api_usage_log").insert(
-                    {
-                        "api_key_id": api_key_id,
-                        "user_id": user_id,
-                        "endpoint": endpoint,
-                        "model": model,
-                        "credits_used": credits_used,
-                        "inference_ms": inference_ms,
-                        "status_code": status_code,
-                    }
-                ).execute()
+                lambda: (
+                    self.db.table("api_usage_log")
+                    .insert(
+                        {
+                            "api_key_id": api_key_id,
+                            "user_id": user_id,
+                            "endpoint": endpoint,
+                            "model": model,
+                            "credits_used": credits_used,
+                            "inference_ms": inference_ms,
+                            "status_code": status_code,
+                        }
+                    )
+                    .execute()
+                )
             )
         except Exception as exc:
             logger.error("Failed to log API usage: %s", exc)
 
     async def get_usage_stats(self, user_id: str, days: int = 30) -> dict:
         """Get aggregated usage stats for a user."""
-        since = (
-            datetime.now(timezone.utc) - timedelta(days=days)
-        ).isoformat()
+        since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
 
         # First get total count
         count_result = await asyncio.to_thread(
-            lambda: self._sb.table("api_usage_log")
-            .select("id", count="exact")
-            .eq("user_id", user_id)
-            .gte("created_at", since)
-            .execute()
+            lambda: (
+                self.db.table("api_usage_log")
+                .select("id", count="exact")
+                .eq("user_id", user_id)
+                .gte("created_at", since)
+                .execute()
+            )
         )
         total_requests = count_result.count if count_result.count is not None else 0
 
         result = await asyncio.to_thread(
-            lambda: self._sb.table("api_usage_log")
-            .select("endpoint, credits_used, created_at")
-            .eq("user_id", user_id)
-            .gte("created_at", since)
-            .order("created_at", desc=True)
-            .limit(1000)
-            .execute()
+            lambda: (
+                self.db.table("api_usage_log")
+                .select("endpoint, credits_used, created_at")
+                .eq("user_id", user_id)
+                .gte("created_at", since)
+                .order("created_at", desc=True)
+                .limit(1000)
+                .execute()
+            )
         )
 
         rows = result.data or []
         truncated = total_requests > 1000
         if truncated:
-            logger.warning("Usage stats for user %s truncated: %d total rows, showing 1000", user_id, total_requests)
+            logger.warning(
+                "Usage stats for user %s truncated: %d total rows, showing 1000",
+                user_id,
+                total_requests,
+            )
         total_credits = sum(r.get("credits_used", 0) for r in rows)
 
         # Group by endpoint

@@ -7,7 +7,9 @@ from pathlib import Path
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 
-def download_from_hf(repo_id: str, model_dir: Path, filename: str | None = None) -> Path:
+def download_from_hf(
+    repo_id: str, model_dir: Path, filename: str | None = None
+) -> Path:
     """Download a model from HuggingFace Hub to model_dir.
 
     Returns the path to the downloaded directory.

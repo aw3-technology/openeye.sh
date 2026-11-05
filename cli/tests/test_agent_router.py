@@ -3,22 +3,22 @@
 from __future__ import annotations
 
 import pytest
-from starlette.testclient import TestClient
-
 from openeye_ai.server import agent_router
 
 
 @pytest.fixture(autouse=True)
 def _reset_agent_state():
     """Reset module-level agent state before each test."""
-    agent_router._agent_state.update({
-        "running": False,
-        "tick_count": 0,
-        "current_plan": [],
-        "goal": "",
-        "events": [],
-        "task": None,
-    })
+    agent_router._agent_state.update(
+        {
+            "running": False,
+            "tick_count": 0,
+            "current_plan": [],
+            "goal": "",
+            "events": [],
+            "task": None,
+        }
+    )
     agent_router._memory_store.clear()
 
 
@@ -83,7 +83,11 @@ def test_memory_with_observations(app_client):
 
     obs = Observation(
         tick=1,
-        detections=[DetectedObject(label="person", confidence=0.9, bbox=BBox(x=0.1, y=0.2, w=0.3, h=0.4))],
+        detections=[
+            DetectedObject(
+                label="person", confidence=0.9, bbox=BBox(x=0.1, y=0.2, w=0.3, h=0.4)
+            )
+        ],
         scene_summary="1 object — person",
         significance=0.5,
         tags=["person"],

@@ -77,8 +77,6 @@ class NebiusEmbeddingClient(BaseEmbeddingClient):
         )
         # API may return embeddings out of order; sort by index
         sorted_data = sorted(response.data, key=lambda d: d.index)
-        matrix = np.array(
-            [d.embedding for d in sorted_data], dtype=np.float32
-        )
+        matrix = np.array([d.embedding for d in sorted_data], dtype=np.float32)
         logging.debug(f"Nebius embed_batch: n={len(queries)}, shape={matrix.shape}")
         return matrix

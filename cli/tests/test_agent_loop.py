@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 from openeye_ai.agent.loop import (
     AgentLoop,
@@ -18,7 +15,9 @@ from openeye_ai.schema import BBox, DetectedObject
 
 
 def _det(label: str, conf: float = 0.9) -> DetectedObject:
-    return DetectedObject(label=label, confidence=conf, bbox=BBox(x=0.1, y=0.2, w=0.3, h=0.4))
+    return DetectedObject(
+        label=label, confidence=conf, bbox=BBox(x=0.1, y=0.2, w=0.3, h=0.4)
+    )
 
 
 # ── _diff_detections ──────────────────────────────────────────────────
@@ -204,7 +203,9 @@ def test_agent_loop_with_llm_call(fake_adapter, memory_store):
     from tests.conftest import FakeCamera
 
     camera = FakeCamera()
-    mock_llm = MagicMock(return_value="THOUGHT: Test thought\nACTION: test action\nPLAN_CHANGED: no")
+    mock_llm = MagicMock(
+        return_value="THOUGHT: Test thought\nACTION: test action\nPLAN_CHANGED: no"
+    )
 
     loop = AgentLoop(
         adapters={"fake": fake_adapter},
@@ -276,6 +277,7 @@ def test_agent_loop_camera_returns_none(fake_adapter, memory_store):
 
     def _stop_soon():
         import time
+
         time.sleep(0.2)
         loop.stop()
 

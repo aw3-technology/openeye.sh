@@ -27,6 +27,7 @@ def load_config() -> dict[str, Any]:
             data = yaml.safe_load(f)
     except yaml.YAMLError as exc:
         import sys
+
         print(f"Warning: Failed to parse {CONFIG_PATH}: {exc}", file=sys.stderr)
         return {}
     if not isinstance(data, dict):

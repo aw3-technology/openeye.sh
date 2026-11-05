@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
-
 
 # ── Enums ─────────────────────────────────────────────────────────────
 
@@ -128,4 +127,6 @@ class EvaluationMetrics(BaseModel):
     total_images: int = 0
     total_predictions: int = 0
     total_ground_truth: int = 0
-    per_class: dict[str, float] = Field(default_factory=dict, description="Per-class AP")
+    per_class: dict[str, float] = Field(
+        default_factory=dict, description="Per-class AP"
+    )

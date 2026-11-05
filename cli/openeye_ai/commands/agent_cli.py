@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import signal
-import sys
-import time
 
 import typer
 from rich import print as rprint
-from rich.live import Live
-from rich.panel import Panel
 from rich.table import Table
 
-from openeye_ai._cli_helpers import SERVER_URL as _SERVER_URL, err_console as console, http_request
+from openeye_ai._cli_helpers import SERVER_URL as _SERVER_URL
+from openeye_ai._cli_helpers import err_console as console
+from openeye_ai._cli_helpers import http_request
 
 agent_app = typer.Typer(help="Agentic perception loop — perceive, reason, act.")
 
@@ -29,8 +27,12 @@ def agent_run(
     model: str = typer.Option("yolov8", "--model", "-m", help="Detection model to use"),
     goal: str = typer.Option("monitor the scene", "--goal", "-g", help="Agent goal"),
     hz: float = typer.Option(1.0, "--hz", help="Loop frequency in Hz"),
-    video: str | None = typer.Option(None, "--video", help="Video file path (fallback if no camera)"),
-    max_ticks: int | None = typer.Option(None, "--max-ticks", help="Stop after N ticks"),
+    video: str | None = typer.Option(
+        None, "--video", help="Video file path (fallback if no camera)"
+    ),
+    max_ticks: int | None = typer.Option(
+        None, "--max-ticks", help="Stop after N ticks"
+    ),
     vlm: bool = typer.Option(False, "--vlm", help="Enable VLM reasoning via Nebius"),
 ) -> None:
     """Run the agentic perception loop locally on camera or video."""
@@ -38,13 +40,16 @@ def agent_run(
     from openeye_ai.registry import get_adapter, is_downloaded
 
     if not is_downloaded(model):
-        rprint(f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]")
+        rprint(
+            f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]"
+        )
         raise typer.Exit(code=1)
 
     try:
         adapter = get_adapter(model)
     except ImportError as e:
         from openeye_ai._cli_helpers import dependency_error
+
         dependency_error(model, e)
 
     model_dir = MODELS_DIR / model
@@ -55,14 +60,18 @@ def agent_run(
     camera = None
     if video:
         from openeye_ai.utils.video_player import VideoPlayer
+
         camera = VideoPlayer(video)
     else:
         try:
             from openeye_ai.utils.camera import Camera
+
             camera = Camera()
         except Exception:
             if video is None:
-                rprint("[red]No camera available. Use --video <path> for a video file.[/red]")
+                rprint(
+                    "[red]No camera available. Use --video <path> for a video file.[/red]"
+                )
                 raise typer.Exit(code=1)
 
     # Optional VLM
@@ -70,6 +79,7 @@ def agent_run(
     if vlm:
         try:
             from openeye_ai.vlm.nebius import create_vlm_caller
+
             llm_call = create_vlm_caller()
             rprint("[green]VLM reasoning enabled[/green]")
         except Exception as e:
@@ -91,7 +101,12 @@ def agent_run(
         nonlocal tick_count
         if event.phase == "act":
             tick_count += 1
-            phase_style = {"perceive": "cyan", "recall": "blue", "reason": "yellow", "act": "green"}.get(event.phase, "white")
+            phase_style = {
+                "perceive": "cyan",
+                "recall": "blue",
+                "reason": "yellow",
+                "act": "green",
+            }.get(event.phase, "white")
             rprint(
                 f"[dim]tick {event.tick:>4}[/dim] "
                 f"[{phase_style}]{event.phase:>8}[/{phase_style}] "
@@ -100,7 +115,9 @@ def agent_run(
             if event.observation:
                 rprint(f"         [dim]{event.observation.scene_summary}[/dim]")
             if event.reasoning and event.reasoning.chain_of_thought:
-                rprint(f"         [dim yellow]thought: {event.reasoning.chain_of_thought[:120]}[/dim yellow]")
+                rprint(
+                    f"         [dim yellow]thought: {event.reasoning.chain_of_thought[:120]}[/dim yellow]"
+                )
 
             if max_ticks and tick_count >= max_ticks:
                 loop.stop()
@@ -112,7 +129,9 @@ def agent_run(
 
     signal.signal(signal.SIGTERM, _sigterm)
 
-    rprint(f"[bold green]Agent started[/bold green] | model={model} | goal=\"{goal}\" | hz={hz}")
+    rprint(
+        f'[bold green]Agent started[/bold green] | model={model} | goal="{goal}" | hz={hz}'
+    )
     rprint("[dim]Press Ctrl+C to stop[/dim]")
 
     try:
@@ -175,7 +194,7 @@ def agent_status(
 
     plan = data.get("current_plan", [])
     if plan:
-        plan_str = "\n".join(f"  {i+1}. {s}" for i, s in enumerate(plan))
+        plan_str = "\n".join(f"  {i + 1}. {s}" for i, s in enumerate(plan))
         table.add_row("Plan", plan_str)
     else:
         table.add_row("Plan", "[dim]No plan[/dim]")
@@ -188,7 +207,9 @@ def agent_status(
 
 @agent_app.command("memory")
 def agent_memory(
-    limit: int = typer.Option(10, "--limit", "-n", help="Number of recent observations"),
+    limit: int = typer.Option(
+        10, "--limit", "-n", help="Number of recent observations"
+    ),
     server: str | None = typer.Option(None, "--server", "-s", help="Server URL"),
 ) -> None:
     """Show recent observations from the agent's memory."""

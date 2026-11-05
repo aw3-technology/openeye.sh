@@ -22,6 +22,7 @@ console = Console()
 
 def _get_engine():
     from governance.engine import GovernanceEngine
+
     return GovernanceEngine()
 
 
@@ -34,7 +35,10 @@ def _print_status(data: dict) -> None:
     table.add_row("Active", "[green]Yes[/green]" if active else "[red]No[/red]")
     table.add_row("Config", data.get("config_name", "none"))
     table.add_row("Domain", data.get("domain", "universal"))
-    table.add_row("Policies", f"{data.get('enabled_policies', 0)}/{data.get('total_policies', 0)} enabled")
+    table.add_row(
+        "Policies",
+        f"{data.get('enabled_policies', 0)}/{data.get('total_policies', 0)} enabled",
+    )
     table.add_row("Evaluations", str(data.get("total_evaluations", 0)))
     table.add_row("Violations", str(data.get("total_violations", 0)))
     table.add_row("Warnings", str(data.get("total_warnings", 0)))
@@ -50,7 +54,9 @@ def _print_status(data: dict) -> None:
 
 
 def status(
-    server: str | None = typer.Option(None, "--server", "-s", help="Server URL to query"),
+    server: str | None = typer.Option(
+        None, "--server", "-s", help="Server URL to query"
+    ),
 ) -> None:
     """Show current governance status."""
     if server:
@@ -154,17 +160,23 @@ def load(
         path = Path(target)
         if path.is_file():
             from governance.loader import load_yaml
+
             try:
                 config = load_yaml(path)
-                rprint(f"[green]Valid config:[/green] {config.name} ({len(config.policies)} policies)")
+                rprint(
+                    f"[green]Valid config:[/green] {config.name} ({len(config.policies)} policies)"
+                )
             except Exception as e:
                 rprint(f"[red]Invalid config:[/red] {e}")
                 raise typer.Exit(1)
         else:
             from governance.loader import load_preset as _load_preset
+
             try:
                 config = _load_preset(target)
-                rprint(f"[green]Valid preset:[/green] {config.name} ({len(config.policies)} policies)")
+                rprint(
+                    f"[green]Valid preset:[/green] {config.name} ({len(config.policies)} policies)"
+                )
             except Exception as e:
                 rprint(f"[red]Error:[/red] {e}")
                 raise typer.Exit(1)

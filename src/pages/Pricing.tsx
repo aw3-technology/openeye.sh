@@ -136,7 +136,7 @@ export default function Pricing() {
     <div className="min-h-screen bg-background">
       <PageMeta
         title="Pricing | OpenEye"
-        description="Compare OpenEye plans for self-hosted, hosted inference, and team usage. Transparent per-call credits with no surprise overage."
+        description="OpenEye is free and open source to self-host. The hosted API at openeye.sh charges per call in credits; enterprise deployments are available on request."
         path="/pricing"
       />
       <JsonLd
@@ -154,7 +154,7 @@ export default function Pricing() {
       <main>
 
       <PageHero eyebrow="Pricing" title="Open source." accent="Self-hosted.">
-        Start with the free CLI. Hosted inference coming soon.
+        Self-host for free, or call the hosted API and pay per request.
       </PageHero>
 
       {/* Pricing cards */}

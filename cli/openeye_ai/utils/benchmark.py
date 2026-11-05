@@ -5,7 +5,6 @@ from __future__ import annotations
 import statistics
 import time
 from dataclasses import dataclass, field
-from typing import Any
 
 from openeye_ai.adapters.base import ModelAdapter
 
@@ -76,10 +75,10 @@ def run_benchmark(
     if width <= 0 or height <= 0:
         raise ValueError("width and height must be positive integers")
 
-    from openeye_ai.utils.hardware import get_hardware_summary
-
     import numpy as np
     from PIL import Image
+
+    from openeye_ai.utils.hardware import get_hardware_summary
 
     # Create a random test image
     arr = np.random.randint(0, 255, (height, width, 3), dtype=np.uint8)

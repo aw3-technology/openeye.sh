@@ -89,8 +89,15 @@ _DOMAIN_STARTERS: dict[str, list[dict]] = {
 
 
 def init(
-    domain: str = typer.Option("robotics", "--domain", "-d", help="Domain: robotics | desktop_agent | universal"),
-    output: str = typer.Option("governance.yaml", "--output", "-o", help="Output file path"),
+    domain: str = typer.Option(
+        "robotics",
+        "--domain",
+        "-d",
+        help="Domain: robotics | desktop_agent | universal",
+    ),
+    output: str = typer.Option(
+        "governance.yaml", "--output", "-o", help="Output file path"
+    ),
 ) -> None:
     """Generate a starter YAML governance config."""
     import yaml
@@ -115,4 +122,6 @@ def init(
         yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
     rprint(f"[green]Generated governance config:[/green] {path}")
-    rprint(f"[dim]Edit the file to customize, then run: openeye govern validate {path}[/dim]")
+    rprint(
+        f"[dim]Edit the file to customize, then run: openeye govern validate {path}[/dim]"
+    )

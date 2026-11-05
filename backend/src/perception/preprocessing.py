@@ -73,6 +73,7 @@ def normalize_lighting(frame: np.ndarray) -> np.ndarray:
     """
     try:
         import cv2
+
         lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
         l_channel = lab[:, :, 0]
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))

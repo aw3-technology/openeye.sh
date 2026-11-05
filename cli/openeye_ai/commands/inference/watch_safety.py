@@ -13,7 +13,9 @@ from openeye_ai._cli_helpers import console
 from openeye_ai.utils.safety_helpers import count_humans, detections_to_3d
 
 
-def build_safety_panel(guardian, all_objects, DetectedObject3D, BBox2D, Position3D, Group):
+def build_safety_panel(
+    guardian, all_objects, DetectedObject3D, BBox2D, Position3D, Group
+):
     """Build the Safety Guardian Rich panel.
 
     Returns ``(panel, n_danger, n_caution)``.
@@ -23,7 +25,10 @@ def build_safety_panel(guardian, all_objects, DetectedObject3D, BBox2D, Position
 
     # Convert flat detections → 3-D objects
     objects_3d = detections_to_3d(
-        {"objects": all_objects}, BBox2D, DetectedObject3D, Position3D,
+        {"objects": all_objects},
+        BBox2D,
+        DetectedObject3D,
+        Position3D,
     )
 
     alerts, zones = guardian.evaluate(objects_3d)

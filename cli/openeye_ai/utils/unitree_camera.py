@@ -100,7 +100,7 @@ class G1Camera:
     def _init_sdk(self) -> None:
         """Connect via Unitree SDK2 video channel."""
         try:
-            from unitree_sdk2py.core.channel import ChannelFactory
+            from unitree_sdk2py.core.channel import ChannelFactory  # noqa: F401  (SDK presence check)
             from unitree_sdk2py.go2.video import VideoClient
         except ImportError:
             raise ImportError(
@@ -199,8 +199,12 @@ class G1Camera:
         if self._transport is None:
             return
         for attempt in range(1, self._reconnect_attempts + 1):
-            logger.info("G1 camera reconnect attempt %d/%d via %s",
-                        attempt, self._reconnect_attempts, self._transport.value)
+            logger.info(
+                "G1 camera reconnect attempt %d/%d via %s",
+                attempt,
+                self._reconnect_attempts,
+                self._transport.value,
+            )
             try:
                 # Release old resources
                 if self._cap is not None:
@@ -212,7 +216,9 @@ class G1Camera:
             except Exception as e:
                 logger.warning("Reconnect attempt %d failed: %s", attempt, e)
                 time.sleep(min(attempt, 3))  # Brief backoff, capped at 3s
-        logger.error("G1 camera reconnection failed after %d attempts", self._reconnect_attempts)
+        logger.error(
+            "G1 camera reconnection failed after %d attempts", self._reconnect_attempts
+        )
 
     @property
     def transport_name(self) -> str:

@@ -37,7 +37,9 @@ class ExecutionStrategy(ABC):
 class ConcurrentStrategy(ExecutionStrategy):
     """All actions execute simultaneously."""
 
-    async def execute(self, actions, promise_queue, create_action_task, completed_actions):
+    async def execute(
+        self, actions, promise_queue, create_action_task, completed_actions
+    ):
         for action in actions:
             logging.debug(f"Sending command: {action}")
             task = create_action_task(action)
@@ -48,7 +50,9 @@ class ConcurrentStrategy(ExecutionStrategy):
 class SequentialStrategy(ExecutionStrategy):
     """Actions execute one after another in order."""
 
-    async def execute(self, actions, promise_queue, create_action_task, completed_actions):
+    async def execute(
+        self, actions, promise_queue, create_action_task, completed_actions
+    ):
         for action in actions:
             logging.debug(f"Sending command (sequential): {action}")
             task = create_action_task(action)
@@ -69,7 +73,9 @@ class DependencyStrategy(ExecutionStrategy):
     def __init__(self, action_dependencies: T.Dict[str, T.List[str]]):
         self._action_dependencies = action_dependencies
 
-    async def execute(self, actions, promise_queue, create_action_task, completed_actions):
+    async def execute(
+        self, actions, promise_queue, create_action_task, completed_actions
+    ):
         for action in actions:
             logging.debug(f"Sending command (with dependencies): {action}")
             task = asyncio.create_task(

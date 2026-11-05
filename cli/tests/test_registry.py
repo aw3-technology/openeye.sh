@@ -1,7 +1,6 @@
 """Tests for model registry."""
 
 import pytest
-
 from openeye_ai.registry import (
     get_model_info,
     get_variant_info,

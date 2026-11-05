@@ -33,9 +33,13 @@ def mlops_retrain(
 def mlops_pipeline_create(
     name: str = typer.Option(..., "--name", "-n", help="Pipeline name"),
     model_key: str = typer.Option("default", "--model", "-m", help="Model key"),
-    training_script: str = typer.Option("train.py", "--script", help="Training script path"),
+    training_script: str = typer.Option(
+        "train.py", "--script", help="Training script path"
+    ),
     dataset_path: str = typer.Option("", "--dataset", "-d", help="Dataset path"),
-    schedule: str | None = typer.Option(None, "--schedule", help="Cron schedule, e.g. '0 2 * * *'"),
+    schedule: str | None = typer.Option(
+        None, "--schedule", help="Cron schedule, e.g. '0 2 * * *'"
+    ),
 ) -> None:
     """Create a retraining pipeline with optional cron schedule."""
     from openeye_ai.mlops.retraining import create_pipeline
@@ -61,7 +65,9 @@ def mlops_pipeline_create(
 
 
 def mlops_pipelines(
-    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    model_key: str | None = typer.Option(
+        None, "--model", "-m", help="Filter by model key"
+    ),
 ) -> None:
     """List retraining pipelines."""
     from openeye_ai.mlops.retraining import list_pipelines
@@ -90,8 +96,12 @@ def mlops_pipelines(
 
 
 def mlops_runs(
-    pipeline: str | None = typer.Option(None, "--pipeline", "-p", help="Filter by pipeline name"),
-    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    pipeline: str | None = typer.Option(
+        None, "--pipeline", "-p", help="Filter by pipeline name"
+    ),
+    model_key: str | None = typer.Option(
+        None, "--model", "-m", help="Filter by model key"
+    ),
 ) -> None:
     """List retraining runs with status and metrics."""
     from openeye_ai.mlops.retraining import list_runs
@@ -111,12 +121,16 @@ def mlops_runs(
     table.add_column("Started")
 
     for r in runs:
-        status_style = {"completed": "green", "running": "yellow", "failed": "red"}.get(r.status.value, "")
+        status_style = {"completed": "green", "running": "yellow", "failed": "red"}.get(
+            r.status.value, ""
+        )
         table.add_row(
             r.id[:12],
             r.pipeline_name,
             r.model_key,
-            f"[{status_style}]{r.status.value}[/{status_style}]" if status_style else r.status.value,
+            f"[{status_style}]{r.status.value}[/{status_style}]"
+            if status_style
+            else r.status.value,
             r.triggered_by,
             r.new_version or "—",
             r.started_at or "—",

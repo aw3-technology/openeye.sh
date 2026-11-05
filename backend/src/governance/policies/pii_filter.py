@@ -22,7 +22,9 @@ class PIIFilterPolicy(GovernancePolicy):
     name = "pii_filter"
     version = "1.0"
     domain = PolicyDomain.DESKTOP_AGENT
-    description = "Detect and redact PII (email, phone, SSN, credit card) in screen text."
+    description = (
+        "Detect and redact PII (email, phone, SSN, credit card) in screen text."
+    )
 
     def _setup(self, params: dict) -> None:
         self.redact_patterns: list[dict] = params.get("redact_patterns", [])
@@ -58,7 +60,9 @@ class PIIFilterPolicy(GovernancePolicy):
                 pii_type = pattern_def.get("type", "")
                 action = pattern_def.get("action", "redact")
 
-                regex = self.custom_patterns.get(pii_type) or _PII_PATTERNS.get(pii_type)
+                regex = self.custom_patterns.get(pii_type) or _PII_PATTERNS.get(
+                    pii_type
+                )
                 if not regex:
                     continue
 
@@ -77,7 +81,11 @@ class PIIFilterPolicy(GovernancePolicy):
                             decision=decision,
                             reason=f"PII detected ({pii_type}) in {source_name}: {len(matches)} match(es)",
                             severity=severity,
-                            modifications={"redact": pii_type, "source": source_name, "count": len(matches)},
+                            modifications={
+                                "redact": pii_type,
+                                "source": source_name,
+                                "count": len(matches),
+                            },
                             metadata={"pii_type": pii_type, "source": source_name},
                         )
                     )

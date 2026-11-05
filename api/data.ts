@@ -11,6 +11,7 @@
  *   POST   /api/data/avatar                    body: image bytes → { url }
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { createHash, randomBytes } from "node:crypto";
 import pg from "pg";
 import { put } from "@vercel/blob";
 import { pool } from "./_lib/db.js";
@@ -66,12 +67,30 @@ function buildWhere(r: Resource, userId: string, query: URLSearchParams) {
   return { where: clauses.join(" and "), params, filtered: clauses.length > 1 };
 }
 
+/** Drops columns that must never reach the browser. */
+function strip<T extends Record<string, unknown>>(r: Resource, row: T): T {
+  if (!r.hidden || !row) return row;
+  const copy = { ...row };
+  for (const col of r.hidden) delete copy[col];
+  return copy;
+}
+
+/** Device key in the format the fleet control plane checks (sha256 of X-Device-API-Key). */
+function newDeviceKey() {
+  const apiKey = `oek_${randomBytes(32).toString("base64url")}`;
+  return { apiKey, hash: createHash("sha256").update(apiKey).digest("hex") };
+}
+
 /** Keeps only writable columns and serializes jsonb ones. */
 function pickRow(r: Resource, body: Record<string, unknown>) {
   const row: Record<string, unknown> = {};
   for (const col of r.writable) {
     if (!(col in body)) continue;
     const value = body[col];
+    const allowed = r.enums?.[col];
+    if (allowed && !allowed.includes(value as string)) {
+      throw new HttpError(400, `${col} must be one of: ${allowed.join(", ")}`);
+    }
     row[col] = r.json?.includes(col) && value !== null && value !== undefined ? JSON.stringify(value) : value;
   }
   return row;
@@ -96,9 +115,10 @@ async function list(r: Resource, userId: string, query: URLSearchParams) {
     `select ${selectList(r)} from ${r.table} t where ${where} order by t.${r.order} limit ${limit} offset ${offset}`,
     params,
   );
-  if (query.get("count") !== "1") return { data: rows };
+  const data = rows.map((row) => strip(r, row));
+  if (query.get("count") !== "1") return { data };
   const { rows: countRows } = await pool.query(`select count(*)::int as count from ${r.table} t where ${where}`, params);
-  return { data: rows, count: countRows[0].count as number };
+  return { data, count: countRows[0].count as number };
 }
 
 async function getOne(r: Resource, userId: string, id: string) {
@@ -108,20 +128,25 @@ async function getOne(r: Resource, userId: string, id: string) {
     [id, userId],
   );
   if (!rows[0]) throw new HttpError(404, "Not found");
-  return rows[0];
+  return strip(r, rows[0]);
 }
 
 async function create(r: Resource, userId: string, body: Record<string, unknown>) {
   if (r.noCreate) throw new HttpError(405, "Method not allowed");
   const row = pickRow(r, body);
   await assertRefsOwned(r, userId, row);
+  // A registered device gets its own key; only the hash is stored.
+  const deviceKey = r.table === "devices" ? newDeviceKey() : null;
+  if (deviceKey) row.api_key_hash = deviceKey.hash;
   const cols = ["user_id", ...Object.keys(row)];
   const values = [userId, ...Object.values(row)];
   const { rows } = await pool.query(
     `insert into ${r.table} (${cols.join(", ")}) values (${cols.map((_, i) => `$${i + 1}`).join(", ")}) returning id`,
     values,
   );
-  return getOne(r, userId, rows[0].id);
+  const created = await getOne(r, userId, rows[0].id);
+  // The plaintext key is returned once, at registration.
+  return deviceKey ? { ...created, api_key: deviceKey.apiKey } : created;
 }
 
 async function update(r: Resource, userId: string, id: string, body: Record<string, unknown>) {

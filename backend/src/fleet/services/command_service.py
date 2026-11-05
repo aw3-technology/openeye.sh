@@ -4,7 +4,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from supabase import Client
+from ..db import Database
 
 from ..models import CommandStatus
 
@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class CommandService:
-    def __init__(self, sb: Client):
-        self.sb = sb
+    def __init__(self, db: Database):
+        self.db = db
 
     def enqueue(
         self,
@@ -29,7 +29,7 @@ class CommandService:
             "payload": payload or {},
             "status": CommandStatus.PENDING.value,
         }
-        result = self.sb.table("device_commands").insert(row).execute()
+        result = self.db.table("device_commands").insert(row).execute()
         if not result.data:
             raise RuntimeError("Failed to insert command")
         return result.data[0]
@@ -40,7 +40,7 @@ class CommandService:
         device_id: Optional[str] = None,
         status_filter: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
-        q = self.sb.table("device_commands").select("*").eq("user_id", user_id)
+        q = self.db.table("device_commands").select("*").eq("user_id", user_id)
         if device_id:
             q = q.eq("device_id", device_id)
         if status_filter:
@@ -48,10 +48,12 @@ class CommandService:
         q = q.order("issued_at", desc=True)
         return q.execute().data or []
 
-    def complete_command(self, user_id: str, command_id: str, result: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def complete_command(
+        self, user_id: str, command_id: str, result: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         # Verify command belongs to user
         check = (
-            self.sb.table("device_commands")
+            self.db.table("device_commands")
             .select("id")
             .eq("id", command_id)
             .eq("user_id", user_id)
@@ -62,12 +64,14 @@ class CommandService:
             raise KeyError(f"Command {command_id} not found")
         now = datetime.now(timezone.utc).isoformat()
         res = (
-            self.sb.table("device_commands")
-            .update({
-                "status": CommandStatus.COMPLETED.value,
-                "completed_at": now,
-                "result": result or {},
-            })
+            self.db.table("device_commands")
+            .update(
+                {
+                    "status": CommandStatus.COMPLETED.value,
+                    "completed_at": now,
+                    "result": result or {},
+                }
+            )
             .eq("id", command_id)
             .execute()
         )
@@ -75,10 +79,12 @@ class CommandService:
             raise KeyError(f"Command {command_id} not found")
         return res.data[0]
 
-    def device_complete_command(self, device_id: str, command_id: str, result: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def device_complete_command(
+        self, device_id: str, command_id: str, result: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Complete a command using device identity (for device agent auth)."""
         check = (
-            self.sb.table("device_commands")
+            self.db.table("device_commands")
             .select("id")
             .eq("id", command_id)
             .eq("device_id", device_id)
@@ -89,12 +95,14 @@ class CommandService:
             raise KeyError(f"Command {command_id} not found for device {device_id}")
         now = datetime.now(timezone.utc).isoformat()
         res = (
-            self.sb.table("device_commands")
-            .update({
-                "status": CommandStatus.COMPLETED.value,
-                "completed_at": now,
-                "result": result or {},
-            })
+            self.db.table("device_commands")
+            .update(
+                {
+                    "status": CommandStatus.COMPLETED.value,
+                    "completed_at": now,
+                    "result": result or {},
+                }
+            )
             .eq("id", command_id)
             .execute()
         )
@@ -105,12 +113,14 @@ class CommandService:
     def fail_command(self, command_id: str, error: str) -> Dict[str, Any]:
         now = datetime.now(timezone.utc).isoformat()
         res = (
-            self.sb.table("device_commands")
-            .update({
-                "status": CommandStatus.FAILED.value,
-                "completed_at": now,
-                "result": {"error": error},
-            })
+            self.db.table("device_commands")
+            .update(
+                {
+                    "status": CommandStatus.FAILED.value,
+                    "completed_at": now,
+                    "result": {"error": error},
+                }
+            )
             .eq("id", command_id)
             .execute()
         )

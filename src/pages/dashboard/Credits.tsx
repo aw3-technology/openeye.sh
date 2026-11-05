@@ -66,7 +66,7 @@ export default function Credits() {
     const txs = transactions.data?.data ?? [];
     let totalSpent = 0;
     let totalAdded = 0;
-    let txCount = txs.length;
+    const txCount = txs.length;
     for (const tx of txs) {
       if (tx.amount < 0) totalSpent += Math.abs(tx.amount);
       else totalAdded += tx.amount;
@@ -86,13 +86,26 @@ export default function Credits() {
     <div className="space-y-6">
       <h1 className="font-display text-3xl font-light">Credits & Billing</h1>
 
+      {balance.isError && (
+        <div role="alert" className="flex items-start gap-3 rounded-lg border border-foreground/10 bg-card p-4">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <div className="text-sm">
+            <p className="font-medium">Couldn't load your credit balance</p>
+            <p className="mt-1 text-muted-foreground">
+              Try again in a moment. Self-hosted inference with{" "}
+              <code className="rounded bg-muted px-1 py-0.5 text-[11px]">openeye serve</code> doesn't use credits.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Balance + stats row */}
-      <CreditStats
+      {!balance.isError && <CreditStats
         balance={balance}
         currentBalance={currentBalance}
         txStats={txStats}
         transactionsLoading={transactions.isLoading}
-      />
+      />}
 
       {/* Pricing tiers */}
       <div>
@@ -109,10 +122,13 @@ export default function Credits() {
           {tiers.isLoading && (
             <p className="col-span-full text-sm text-muted-foreground">Loading tiers...</p>
           )}
-          {tiers.isError && (
+          {tiers.isError && !balance.isError && (
             <p className="col-span-full text-sm text-destructive" role="alert">
               Failed to load pricing tiers. Please refresh the page.
             </p>
+          )}
+          {tiers.isError && balance.isError && (
+            <p className="col-span-full text-sm text-muted-foreground">Credit packs couldn't be loaded. Refresh to try again.</p>
           )}
         </div>
       </div>

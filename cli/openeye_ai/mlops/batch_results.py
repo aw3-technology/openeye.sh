@@ -31,7 +31,10 @@ def _write_results_local(results: list[dict], output_path: str, fmt: str) -> str
                 writer = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore")
                 writer.writeheader()
                 for r in results:
-                    flat = {k: json.dumps(v) if isinstance(v, (dict, list)) else v for k, v in r.items()}
+                    flat = {
+                        k: json.dumps(v) if isinstance(v, (dict, list)) else v
+                        for k, v in r.items()
+                    }
                     writer.writerow(flat)
         return str(dest)
     else:

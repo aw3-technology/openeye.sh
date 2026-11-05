@@ -18,6 +18,10 @@
       "destination": "/api/cred?__path=:path*"
     },
     {
+      "source": "/v1/:path*",
+      "destination": "/api/v1?__path=:path*"
+    },
+    {
       "source": "/dashboard",
       "destination": "/app.html"
     },
@@ -26,6 +30,13 @@
       "destination": "/app.html"
     }
   ],
+  "functions": {
+    "api/v1.ts": {
+      "memory": 2048,
+      "maxDuration": 60,
+      "includeFiles": "{models/yolov8n.onnx,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs}"
+    }
+  },
   "headers": [
     {
       "source": "/(llms.txt|llms-full.txt|docs/(.*).md)",

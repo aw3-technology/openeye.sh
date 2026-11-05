@@ -15,7 +15,7 @@ import logoHorizontalDark from "@/assets/openeye-logo-horizontal-dark.png";
 
 type AuthMode = "sign_in" | "sign_up";
 
-// Social providers configured on the server (GOOGLE_CLIENT_ID, APPLE_CLIENT_ID).
+// Social providers configured on the server (GOOGLE_CLIENT_ID, APPLE_CLIENT_ID). 1Profile is always on.
 const OAUTH_PROVIDERS = new Set(
   (import.meta.env.VITE_AUTH_PROVIDERS as string | undefined)?.split(",").map((p) => p.trim()) ?? [],
 );
@@ -38,7 +38,7 @@ export default function LoginPage() {
     navigate(from, { replace: true });
   };
 
-  const handleOAuthSignIn = async (provider: "google" | "apple") => {
+  const handleOAuthSignIn = async (provider: "1profile" | "google" | "apple") => {
     if (!isCloud) return;
     setLoading(provider);
     setError(null);
@@ -150,9 +150,20 @@ export default function LoginPage() {
           </p>
 
           {/* OAuth Buttons — cloud only, for providers configured on the server */}
-          {isCloud && (OAUTH_PROVIDERS.has("google") || OAUTH_PROVIDERS.has("apple")) && (
+          {isCloud && (
             <>
               <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full h-11"
+                  onClick={() => handleOAuthSignIn("1profile")}
+                  disabled={!!loading}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                  {loading === "1profile" ? "Signing in..." : "Continue with 1Profile"}
+                </Button>
                 {OAUTH_PROVIDERS.has("google") && (
                   <Button
                     variant="outline"

@@ -32,7 +32,9 @@ def execute_count(
 
 
 def execute_existence(
-    raw_q: str, desc: str, objects: list[DetectedObject3D],
+    raw_q: str,
+    desc: str,
+    objects: list[DetectedObject3D],
     scene_graph: SceneGraphData,
 ) -> NLQueryResult:
     matches = find_objects(desc, objects)
@@ -52,7 +54,9 @@ def execute_existence(
 
 
 def execute_location(
-    raw_q: str, label: str, objects: list[DetectedObject3D],
+    raw_q: str,
+    label: str,
+    objects: list[DetectedObject3D],
     scene_graph: SceneGraphData,
 ) -> NLQueryResult:
     matches = find_objects(label, objects)
@@ -74,14 +78,14 @@ def execute_location(
         else:
             cx = (obj.bbox.x1 + obj.bbox.x2) / 2
             pos = "left" if cx < 0.33 else ("right" if cx > 0.66 else "centre")
-            descriptions.append(f"{obj.label} ({obj.track_id}) is in the {pos} of the frame")
+            descriptions.append(
+                f"{obj.label} ({obj.track_id}) is in the {pos} of the frame"
+            )
 
     for rel in scene_graph.relationships:
         if rel.subject_id in [m.track_id for m in matches]:
             target_label = label_for_id(rel.object_id, objects)
-            descriptions.append(
-                f"  → {rel.relation.value} {target_label}"
-            )
+            descriptions.append(f"  → {rel.relation.value} {target_label}")
 
     return NLQueryResult(
         query=raw_q,
@@ -92,8 +96,12 @@ def execute_location(
 
 
 def execute_relation(
-    raw_q: str, subj_label: str, relation_word: str, obj_label: str,
-    objects: list[DetectedObject3D], scene_graph: SceneGraphData,
+    raw_q: str,
+    subj_label: str,
+    relation_word: str,
+    obj_label: str,
+    objects: list[DetectedObject3D],
+    scene_graph: SceneGraphData,
 ) -> NLQueryResult:
     subj_matches = find_objects(subj_label, objects)
     obj_matches = find_objects(obj_label, objects)
@@ -130,7 +138,8 @@ def execute_relation(
     obj_ids = {m.track_id for m in obj_matches}
 
     found = [
-        r for r in scene_graph.relationships
+        r
+        for r in scene_graph.relationships
         if r.subject_id in subj_ids
         and r.object_id in obj_ids
         and (target_rel is None or r.relation == target_rel)
@@ -153,7 +162,9 @@ def execute_relation(
 
 
 def execute_objects_on(
-    raw_q: str, surface_label: str, objects: list[DetectedObject3D],
+    raw_q: str,
+    surface_label: str,
+    objects: list[DetectedObject3D],
     scene_graph: SceneGraphData,
 ) -> NLQueryResult:
     surfaces = find_objects(surface_label, objects)
@@ -167,7 +178,8 @@ def execute_objects_on(
 
     surface_ids = {s.track_id for s in surfaces}
     on_items = [
-        r for r in scene_graph.relationships
+        r
+        for r in scene_graph.relationships
         if r.object_id in surface_ids and r.relation == RelationType.ON
     ]
 
@@ -189,9 +201,7 @@ def execute_objects_on(
     )
 
 
-def execute_describe(
-    raw_q: str, objects: list[DetectedObject3D]
-) -> NLQueryResult:
+def execute_describe(raw_q: str, objects: list[DetectedObject3D]) -> NLQueryResult:
     if not objects:
         return NLQueryResult(
             query=raw_q,

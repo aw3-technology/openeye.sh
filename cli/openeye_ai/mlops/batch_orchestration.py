@@ -169,7 +169,9 @@ def run_batch_inference(
                 elif config.storage_backend == StorageBackend.GCS:
                     img = _download_gcs_image(img_path)
                 else:
-                    raise ValueError(f"Unsupported storage backend: {config.storage_backend}")
+                    raise ValueError(
+                        f"Unsupported storage backend: {config.storage_backend}"
+                    )
 
                 result = adapter.predict(img)
                 return {"source": str(img_path), "status": "ok", **result}
@@ -184,7 +186,11 @@ def run_batch_inference(
                     result = future.result()
                 except Exception as exc:
                     img_path = futures[future]
-                    result = {"source": str(img_path), "status": "error", "error": str(exc)}
+                    result = {
+                        "source": str(img_path),
+                        "status": "error",
+                        "error": str(exc),
+                    }
                 results.append(result)
 
                 if result.get("status") == "error":
@@ -207,11 +213,17 @@ def run_batch_inference(
 
         # Write results
         if config.storage_backend == StorageBackend.LOCAL:
-            result_path = _write_results_local(results, config.output_path, config.output_format)
+            result_path = _write_results_local(
+                results, config.output_path, config.output_format
+            )
         elif config.storage_backend == StorageBackend.S3:
-            result_path = _write_results_s3(results, config.output_path, config.output_format)
+            result_path = _write_results_s3(
+                results, config.output_path, config.output_format
+            )
         elif config.storage_backend == StorageBackend.GCS:
-            result_path = _write_results_gcs(results, config.output_path, config.output_format)
+            result_path = _write_results_gcs(
+                results, config.output_path, config.output_format
+            )
         else:
             result_path = config.output_path
 

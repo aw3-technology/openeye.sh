@@ -1,4 +1,5 @@
 """HTTP client for remote governance server communication."""
+
 from __future__ import annotations
 
 import httpx
@@ -16,7 +17,9 @@ class GovernanceClient:
     def _request(self, method: str, path: str, **kwargs) -> dict | list:
         """Make HTTP request, raise typer.Exit on failure."""
         try:
-            r = httpx.request(method, f"{self.server}{path}", timeout=self.timeout, **kwargs)
+            r = httpx.request(
+                method, f"{self.server}{path}", timeout=self.timeout, **kwargs
+            )
             r.raise_for_status()
             return r.json()
         except Exception as e:

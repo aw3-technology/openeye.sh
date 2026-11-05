@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { agentDemoTicks } from "@/data/agentDemoData";
 import type { AgentTickEvent, Observation } from "@/types/agent";
+import { useSaveObservation } from "@/hooks/useObservations";
 
 type Mode = "demo" | "live";
 
@@ -24,6 +25,8 @@ export function useAgentStream(serverUrl = ""): UseAgentStreamReturn {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const demoIndexRef = useRef(0);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const { mutate: saveObservation } = useSaveObservation();
+  const savedIdsRef = useRef(new Set<string>());
 
   const stopAgent = useCallback(() => {
     setIsRunning(false);
@@ -61,6 +64,9 @@ export function useAgentStream(serverUrl = ""): UseAgentStreamReturn {
     if (!serverUrl) return;
     setTicks([]);
     setIsRunning(true);
+    // Live observations are kept in Observation Memory, grouped per run.
+    const sessionId = crypto.randomUUID();
+    savedIdsRef.current = new Set();
 
     fetch(`${serverUrl}/agent/start`, {
       method: "POST",
@@ -79,7 +85,13 @@ export function useAgentStream(serverUrl = ""): UseAgentStreamReturn {
           es.close();
           return;
         }
-        setTicks((prev) => [...prev, data as AgentTickEvent]);
+        const tick = data as AgentTickEvent;
+        setTicks((prev) => [...prev, tick]);
+        const obs = tick.observation;
+        if (obs && !savedIdsRef.current.has(obs.id)) {
+          savedIdsRef.current.add(obs.id);
+          saveObservation({ observation: obs, sessionId });
+        }
       } catch {
         // skip malformed
       }
@@ -89,7 +101,7 @@ export function useAgentStream(serverUrl = ""): UseAgentStreamReturn {
       setIsRunning(false);
       es.close();
     };
-  }, [serverUrl]);
+  }, [serverUrl, saveObservation]);
 
   const startAgent = useCallback(
     (m: Mode = "demo") => {

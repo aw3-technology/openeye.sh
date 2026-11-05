@@ -4,8 +4,12 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..deps import get_current_user_id, get_supabase
-from ..models import DeploymentCreateRequest, DeploymentDeviceStatusResponse, DeploymentResponse
+from ..deps import get_current_user_id, get_db
+from ..models import (
+    DeploymentCreateRequest,
+    DeploymentDeviceStatusResponse,
+    DeploymentResponse,
+)
 from ..services.deployment_service import DeploymentService
 
 router = APIRouter()
@@ -15,9 +19,9 @@ router = APIRouter()
 async def create_deployment(
     req: DeploymentCreateRequest,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = DeploymentService(sb)
+    svc = DeploymentService(db)
     return svc.create(user_id, req)
 
 
@@ -25,9 +29,9 @@ async def create_deployment(
 async def list_deployments(
     status: Optional[str] = None,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = DeploymentService(sb)
+    svc = DeploymentService(db)
     return svc.list_deployments(user_id, status)
 
 
@@ -35,22 +39,24 @@ async def list_deployments(
 async def get_deployment(
     deployment_id: str,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = DeploymentService(sb)
+    svc = DeploymentService(db)
     try:
         return svc.get_deployment(user_id, deployment_id)
     except KeyError:
         raise HTTPException(status_code=404, detail="Deployment not found")
 
 
-@router.get("/{deployment_id}/devices", response_model=List[DeploymentDeviceStatusResponse])
+@router.get(
+    "/{deployment_id}/devices", response_model=List[DeploymentDeviceStatusResponse]
+)
 async def get_deployment_devices(
     deployment_id: str,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = DeploymentService(sb)
+    svc = DeploymentService(db)
     return svc.get_device_statuses(user_id, deployment_id)
 
 
@@ -58,9 +64,9 @@ async def get_deployment_devices(
 async def advance_deployment(
     deployment_id: str,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = DeploymentService(sb)
+    svc = DeploymentService(db)
     try:
         return svc.advance_stage(user_id, deployment_id)
     except (KeyError, ValueError) as e:
@@ -71,9 +77,9 @@ async def advance_deployment(
 async def pause_deployment(
     deployment_id: str,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = DeploymentService(sb)
+    svc = DeploymentService(db)
     try:
         return svc.pause(user_id, deployment_id)
     except KeyError:
@@ -84,9 +90,9 @@ async def pause_deployment(
 async def rollback_deployment(
     deployment_id: str,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = DeploymentService(sb)
+    svc = DeploymentService(db)
     try:
         return svc.rollback(user_id, deployment_id)
     except (KeyError, ValueError) as e:

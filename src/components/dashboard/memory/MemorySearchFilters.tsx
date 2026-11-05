@@ -1,8 +1,10 @@
 import { useCallback, useMemo } from "react";
 import { Search, Filter } from "lucide-react";
-import { allTags, demoObservations } from "./data";
+import type { Observation } from "@/types/agent";
+import { tagsOf } from "./data";
 
 export function MemorySearchFilters({
+  observations,
   query,
   onQueryChange,
   timeRange,
@@ -16,6 +18,7 @@ export function MemorySearchFilters({
   filteredCount,
   totalCount,
 }: {
+  observations: Observation[];
   query: string;
   onQueryChange: (v: string) => void;
   timeRange: string;
@@ -31,11 +34,11 @@ export function MemorySearchFilters({
 }) {
   const tagCounts = useMemo(
     () =>
-      allTags.map((tag) => ({
+      tagsOf(observations).map((tag) => ({
         tag,
-        count: demoObservations.filter((o) => o.tags.includes(tag)).length,
+        count: observations.filter((o) => o.tags.includes(tag)).length,
       })),
-    [],
+    [observations],
   );
 
   const handleToggleFilters = useCallback(

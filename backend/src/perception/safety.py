@@ -65,47 +65,53 @@ class SafetyGuardian:
             distance, bearing = self._compute_distance_bearing(human)
             zone = self._classify_zone(distance)
 
-            zones.append(SafetyZone(
-                human_track_id=human.track_id,
-                zone=zone,
-                distance_m=round(distance, 2),
-                bearing_deg=round(bearing, 1),
-            ))
+            zones.append(
+                SafetyZone(
+                    human_track_id=human.track_id,
+                    zone=zone,
+                    distance_m=round(distance, 2),
+                    bearing_deg=round(bearing, 1),
+                )
+            )
 
             # New human entering workspace
             is_new = human.track_id not in self._previous_human_ids
 
             if zone == ZoneLevel.DANGER:
-                alerts.append(SafetyAlert(
-                    human_track_id=human.track_id,
-                    zone=zone,
-                    distance_m=round(distance, 2),
-                    message=f"DANGER: Human {human.track_id} at {distance:.2f}m — immediate halt recommended",
-                    halt_recommended=True,
-                ))
+                alerts.append(
+                    SafetyAlert(
+                        human_track_id=human.track_id,
+                        zone=zone,
+                        distance_m=round(distance, 2),
+                        message=f"DANGER: Human {human.track_id} at {distance:.2f}m — immediate halt recommended",
+                        halt_recommended=True,
+                    )
+                )
             elif zone == ZoneLevel.CAUTION:
-                alerts.append(SafetyAlert(
-                    human_track_id=human.track_id,
-                    zone=zone,
-                    distance_m=round(distance, 2),
-                    message=f"CAUTION: Human {human.track_id} at {distance:.2f}m — reduce speed",
-                    halt_recommended=False,
-                ))
+                alerts.append(
+                    SafetyAlert(
+                        human_track_id=human.track_id,
+                        zone=zone,
+                        distance_m=round(distance, 2),
+                        message=f"CAUTION: Human {human.track_id} at {distance:.2f}m — reduce speed",
+                        halt_recommended=False,
+                    )
+                )
             elif is_new:
-                alerts.append(SafetyAlert(
-                    human_track_id=human.track_id,
-                    zone=zone,
-                    distance_m=round(distance, 2),
-                    message=f"Human {human.track_id} detected in workspace at {distance:.2f}m",
-                    halt_recommended=False,
-                ))
+                alerts.append(
+                    SafetyAlert(
+                        human_track_id=human.track_id,
+                        zone=zone,
+                        distance_m=round(distance, 2),
+                        message=f"Human {human.track_id} detected in workspace at {distance:.2f}m",
+                        halt_recommended=False,
+                    )
+                )
 
         self._previous_human_ids = current_ids
         return alerts, zones
 
-    def _compute_distance_bearing(
-        self, human: DetectedObject3D
-    ) -> tuple[float, float]:
+    def _compute_distance_bearing(self, human: DetectedObject3D) -> tuple[float, float]:
         """Compute distance and bearing from robot to human."""
         if human.position_3d:
             dx = human.position_3d.x - self.robot_pos.x
@@ -117,7 +123,7 @@ class SafetyGuardian:
 
         # Fallback: estimate from bbox size (larger bbox ≈ closer)
         bbox = human.bbox
-        bbox_height_ratio = (bbox.y2 - bbox.y1)  # relative to frame
+        bbox_height_ratio = bbox.y2 - bbox.y1  # relative to frame
         # Rough: a person filling the frame is ~0.5m away
         estimated_dist = max(0.3, 2.0 / max(bbox_height_ratio, 0.01))
         bbox_cx = (bbox.x1 + bbox.x2) / 2

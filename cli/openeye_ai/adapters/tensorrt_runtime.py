@@ -19,4 +19,5 @@ class TensorRTAdapter(ONNXAdapter):
 
 class Adapter(TensorRTAdapter):
     """Generic TensorRT adapter — same as ONNX but with TRT providers."""
+
     pass

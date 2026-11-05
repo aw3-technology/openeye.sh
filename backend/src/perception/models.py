@@ -75,6 +75,7 @@ class Position3D(BaseModel):
 
 class FloorPlane(BaseModel):
     """Estimated floor plane for navigation."""
+
     normal: tuple[float, float, float] = Field(
         description="Unit normal vector of the floor plane (nx, ny, nz)"
     )
@@ -89,6 +90,7 @@ class FloorPlane(BaseModel):
 
 class GraspPoint(BaseModel):
     """Suggested grasp point on a manipulable object."""
+
     object_track_id: str
     position: Position3D
     approach_vector: tuple[float, float, float] = Field(
@@ -100,6 +102,7 @@ class GraspPoint(BaseModel):
 
 class DetectedObject3D(BaseModel):
     """A single detected object with optional 3D position."""
+
     track_id: str = Field(description="Consistent identity across frames")
     label: str
     confidence: float = Field(ge=0, le=1)
@@ -140,6 +143,7 @@ class SceneGraphNode(BaseModel):
 
 class SceneGraphData(BaseModel):
     """Full scene graph for a single frame."""
+
     nodes: list[SceneGraphNode] = Field(default_factory=list)
     relationships: list[SpatialRelationship] = Field(default_factory=list)
     root_id: str = Field(default="scene_root")
@@ -152,6 +156,7 @@ class SceneGraphData(BaseModel):
 
 class SafetyZone(BaseModel):
     """Zone classification relative to a detected human."""
+
     human_track_id: str
     zone: ZoneLevel
     distance_m: float = Field(description="Distance from robot origin in metres")
@@ -160,6 +165,7 @@ class SafetyZone(BaseModel):
 
 class SafetyAlert(BaseModel):
     """Alert generated when a human enters the workspace."""
+
     human_track_id: str
     zone: ZoneLevel
     distance_m: float
@@ -205,6 +211,7 @@ class ActionSuggestion(BaseModel):
 
 class RegionOfInterest(BaseModel):
     """Defines a sub-region of the frame to focus perception on."""
+
     x1: float = Field(ge=0, le=1, description="Normalised left edge")
     y1: float = Field(ge=0, le=1, description="Normalised top edge")
     x2: float = Field(ge=0, le=1, description="Normalised right edge")
@@ -232,6 +239,7 @@ class NLQueryResult(BaseModel):
 
 class PerceptionFrame(BaseModel):
     """Unified perception output combining all pipeline stages for a single frame."""
+
     frame_id: int
     timestamp: float
     inference_ms: float = Field(description="Total pipeline latency in milliseconds")
@@ -270,5 +278,6 @@ class PerceptionFrame(BaseModel):
 
     # Governance verdict (when governance engine is active)
     governance_verdict: Optional[dict] = Field(
-        default=None, description="Governance evaluation result, if governance engine is active"
+        default=None,
+        description="Governance evaluation result, if governance engine is active",
     )

@@ -6,15 +6,11 @@ import base64
 import io
 import json
 import time
-from pathlib import Path
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from PIL import Image
-
 from openeye_ai.server.agentic_session import AgenticConfig, AgenticSession
-
+from PIL import Image
 
 # ── Helpers ──────────────────────────────────────────────────────────
 
@@ -116,8 +112,18 @@ class TestAgenticSession:
         config = AgenticConfig(active_object_window=5.0)
         session = self._make_session(config=config)
         session.objects_seen = {
-            "t1": {"label": "person", "first_seen": time.time(), "last_seen": time.time(), "count": 1},
-            "t2": {"label": "car", "first_seen": time.time() - 100, "last_seen": time.time() - 100, "count": 1},
+            "t1": {
+                "label": "person",
+                "first_seen": time.time(),
+                "last_seen": time.time(),
+                "count": 1,
+            },
+            "t2": {
+                "label": "car",
+                "first_seen": time.time() - 100,
+                "last_seen": time.time() - 100,
+                "count": 1,
+            },
         }
         snapshot = session.build_active_objects_snapshot()
         assert "t1" in snapshot
@@ -125,8 +131,9 @@ class TestAgenticSession:
 
     def test_run_vlm_reasoning_no_client(self):
         import asyncio
+
         session = self._make_session(vlm_client=None)
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             session.run_vlm_reasoning("base64data", "scene desc", "goal")
         )
         assert "not configured" in result["description"].lower()
@@ -134,6 +141,7 @@ class TestAgenticSession:
 
     def test_run_vlm_reasoning_success(self):
         import asyncio
+
         mock_client = AsyncMock()
         mock_resp = MagicMock()
         mock_resp.choices = [MagicMock()]
@@ -141,9 +149,7 @@ class TestAgenticSession:
         mock_client.chat.completions.create.return_value = mock_resp
 
         session = self._make_session(vlm_client=mock_client, vlm_model="test-vlm")
-        result = asyncio.get_event_loop().run_until_complete(
-            session.run_vlm_reasoning("b64", "desc", "find object")
-        )
+        result = asyncio.run(session.run_vlm_reasoning("b64", "desc", "find object"))
         assert result["description"] == "OBSERVATION: test scene"
         assert "test-vlm" in result["reasoning"]
         assert result["latency_ms"] >= 0
@@ -159,20 +165,17 @@ class TestAgenticSession:
 
         config = AgenticConfig(vlm_timeout=0.01)
         session = self._make_session(vlm_client=mock_client, config=config)
-        result = asyncio.get_event_loop().run_until_complete(
-            session.run_vlm_reasoning("b64", "desc", "goal")
-        )
+        result = asyncio.run(session.run_vlm_reasoning("b64", "desc", "goal"))
         assert "timed out" in result["description"].lower()
 
     def test_run_vlm_reasoning_error(self):
         import asyncio
+
         mock_client = AsyncMock()
         mock_client.chat.completions.create.side_effect = RuntimeError("API error")
 
         session = self._make_session(vlm_client=mock_client)
-        result = asyncio.get_event_loop().run_until_complete(
-            session.run_vlm_reasoning("b64", "desc", "goal")
-        )
+        result = asyncio.run(session.run_vlm_reasoning("b64", "desc", "goal"))
         assert "failed" in result["description"].lower()
 
     def test_goal_update(self):
@@ -269,10 +272,19 @@ class TestWebSocketAgentic:
             data = ws.receive_json()
 
             required_keys = {
-                "type", "frame_id", "goal", "detections", "scene_graph",
-                "scene_description", "vlm_reasoning", "action_plan",
-                "safety_zones", "safety_alerts", "change_alerts",
-                "memory", "latency",
+                "type",
+                "frame_id",
+                "goal",
+                "detections",
+                "scene_graph",
+                "scene_description",
+                "vlm_reasoning",
+                "action_plan",
+                "safety_zones",
+                "safety_alerts",
+                "change_alerts",
+                "memory",
+                "latency",
             }
             assert required_keys.issubset(data.keys())
 
