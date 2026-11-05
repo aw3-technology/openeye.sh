@@ -88,17 +88,17 @@ pip install unitree-sdk2py              # Only for SDK control mode (in your own
 To deploy Safety Guardian across a fleet of G1 robots:
 
 ```bash
-# Register the G1
-openeye fleet register \
-    --name "g1-demo-01" \
-    --site "event-floor" \
-    --tags unitree-g1,safety-guardian
+# Register the G1 (prints its device ID and a one-time oek_ device key)
+openeye fleet register g1-demo-01 --type robot
 
-# Push the safety config to all G1 units
-openeye fleet push-config \
-    --target tag:unitree-g1 \
-    --config configs/g1_safety_guardian.yaml
+# Tag it so the fleet can be targeted as a group
+openeye fleet tag <device-id> model=unitree-g1 role=safety-guardian site=event-floor
+
+# Send a command to every tagged G1
+openeye fleet batch restart --tag model=unitree-g1
 ```
+
+This needs a self-hosted fleet control plane; see the [Fleet Management](fleet-management.md) guide. There is no `push-config` command: set per-device overrides with `openeye fleet config <device-id> '<json>'`. The reference safety config lives in `cli/openeye_ai/configs/g1_safety_guardian.yaml`.
 
 ## CLI Reference
 
@@ -115,4 +115,6 @@ Options:
   --clear-duration Seconds before resume    (default: 2.0)
   --max-fps       Camera frame rate cap     (default: 15.0)
   --camera, -c    USB device index          (default: 0)
+  --video, -v     Video file fallback
+  --demo          Warm up the model first
 ```

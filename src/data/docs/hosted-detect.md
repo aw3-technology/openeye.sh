@@ -2,7 +2,7 @@
 title: POST /v1/detect
 ---
 
-Object detection with YOLOv8 Nano (80 COCO classes). Costs **1 credit** per call.
+Object detection with YOLOv8 Nano (80 COCO classes), run on CPU with ONNX Runtime. Costs 1 credit per call.
 
 ### Request
 
@@ -55,12 +55,20 @@ for obj in resp.json()["objects"]:
 | 400 | Missing `file`, bad `confidence`, or an image that can't be decoded |
 | 401 | Missing or invalid API key |
 | 402 | Not enough credits |
-| 413 | Image over 4 MB |
-| 415 | Not JPEG or PNG |
+| 413 | Image over 4 MB, or a PNG over 25 megapixels |
+| 415 | Not JPEG or PNG, or the request is not multipart/form-data |
 | 429 | Rate limit exceeded (see Rate Limits) |
 
-Credits are refunded if inference fails.
+Error bodies are JSON with an `error` message, e.g. `{"error": "Image must be under 4 MB"}`. Credits are taken only after the image is decoded, and refunded if inference fails.
+
+### From the CLI
+
+```bash
+export OPENEYE_API_KEY=oe_your_key_here
+openeye api detect photo.jpg --confidence 0.3
+openeye api detect photo.jpg --pretty   # full JSON response
+```
 
 ### Self-hosted
 
-`openeye serve yolov8` serves the same route at `http://localhost:8000/v1/detect`, free.
+`openeye serve yolov8` serves the same route at `http://localhost:8000/v1/detect`, free. There `confidence` must be a query parameter (`/v1/detect?confidence=0.3`).

@@ -1,6 +1,6 @@
 # CLI Commands
 
-OpenEye provides model management, inference, demo, and subcommand groups for fleet, MLOps, and governance.
+OpenEye provides model management, inference, demo, and server-utility commands, plus subcommand groups for `config`, `fleet`, `mlops`, `govern`, `agent`, and `api` (the hosted API). Run `openeye --help`, `openeye <command> --help`, or `openeye docs` (add `--json` for machine-readable output) for the built-in reference. `openeye --version` / `-v` prints the installed version.
 
 ## Model Management
 
@@ -14,49 +14,63 @@ openeye list
 
 Output shows model name, task, size, hardware tags, and whether it's downloaded.
 
-### `openeye pull <model>`
+### `openeye pull [model]`
 
-Download model weights from the registry.
+Download model weights to `~/.openeye/models/`.
 
 ```bash
 openeye pull yolov8
 openeye pull depth-anything
-openeye pull grounding-dino
+openeye pull yolov8 --quantized
+openeye pull --all
 ```
+
+Registered models: `yolov8`, `depth-anything`, `grounding-dino`, `yolo26`, `sam2`, `rfdetr`, `smolvla` (see `cli/openeye_ai/models.yaml`).
 
 **Options:**
 
-- `--variant <name>` — Pull a specific variant (e.g., `onnx`, `tensorrt`)
+- `--all` — Pull every model in the registry
+- `--variant <name>` — Pull a specific variant
+- `--quantized` — Shortcut for `--variant quantized`
 - `--force` — Re-download even if already present
 
 ### `openeye remove <model>`
 
-Delete a downloaded model from the local cache.
+Delete downloaded model weights from `~/.openeye/models/`.
 
 ```bash
 openeye remove yolov8
 ```
 
-### `openeye add-model`
+### `openeye add-model <key>`
 
-Register a custom model in the local registry.
+Add a new model to the registry.
 
-### `openeye register-adapter`
+```bash
+openeye add-model my-detector --task detection --adapter onnx_generic --hf-repo me/my-detector --filename model.onnx
+```
 
-Register a custom adapter for a model backend.
+**Options:** `--name` (defaults to key), `--task` (`detection`, `depth`, `segmentation`, `classification`, `embedding`), `--adapter` (adapter key or path to a `.py` file), `--hf-repo`, `--filename`, `--size-mb`, `--description`.
+
+### `openeye register-adapter <key> <adapter-path>`
+
+Register a custom adapter file and add it to the registry. Options: `--name`, `--task`, `--description`. See [Custom Adapter](../tutorials/custom-adapter.md).
 
 ### `openeye update-registry`
 
-Update the model registry from the upstream source.
+Fetch the remote registry and merge new models into your local one.
 
 ## Inference
 
 ### `openeye run <model> [image]`
 
-Run inference on a single image and print JSON results. Supports stdin piping for chaining commands.
+Run inference on an image (or every image in a directory) and print unified JSON. Pass `-` (or omit the image) to read from stdin: either raw image bytes or the JSON output of a previous `openeye run`, so commands can be chained.
 
 ```bash
 openeye run yolov8 photo.jpg
+openeye run yolov8 ./images/
+cat photo.jpg | openeye run yolov8 -
+openeye run yolov8 photo.jpg | openeye run depth-anything -
 openeye run depth-anything scene.png
 openeye run grounding-dino image.jpg --prompt "red cup"
 openeye run yolov8 photo.jpg --visualize
@@ -71,6 +85,7 @@ openeye run yolov8 photo.jpg --backend onnx
 - `--visualize` — Save an annotated image with bounding boxes or depth map
 - `--backend, -b <onnx|tensorrt>` — Use a specific runtime backend
 - `--variant <name>` — Use a specific model variant
+- `--confidence, -c <float>` — Minimum confidence threshold (0.0–1.0)
 
 ### `openeye bench <model>`
 
@@ -78,7 +93,7 @@ Benchmark a model's inference speed.
 
 ```bash
 openeye bench yolov8
-openeye bench yolov8 --variant onnx --runs 50
+openeye bench yolov8 --variant quantized --runs 50
 ```
 
 **Options:**
@@ -108,6 +123,8 @@ openeye serve yolov8 --vlm-model qwen/qwen3.5-9b
 - `--vlm-model <id>` — VLM model ID for the `/ws/vlm` perception endpoint (e.g., `qwen/qwen3.5-9b`)
 - `--cortex-llm <id>` — Cortex LLM model ID for agentic reasoning (e.g., `z-ai/glm-5-turbo`)
 
+See [Server API](server-api.md) for the endpoints, and [Connect the openeye.sh dashboard](server-api.md#connect-the-openeyesh-dashboard) to drive a local server from the web dashboard.
+
 ### `openeye watch`
 
 Live camera feed with real-time detections displayed in the terminal using Rich.
@@ -135,26 +152,45 @@ openeye watch --models yolov8 --video demo.mp4
 
 Unitree G1 robot safety demo with Rich CLI output. Demonstrates real-time human detection, zone-based safety evaluation, and robot halt/resume commands.
 
-See [G1 Demo Quickstart](../../g1-demo-quickstart.md) for details.
+```bash
+openeye g1-demo --transport webcam --control-mode dry_run
+```
+
+**Options:** `--transport` (`webcam`, `usb`, `rtsp`, `sdk`, `auto`; default `webcam`), `--host` (G1 IP, default `192.168.123.161`), `--camera, -c` (default `0`), `--control-mode` (`sdk`, `http`, `dry_run`; default `dry_run`), `--model, -m` (default `yolov8`), `--danger-m` (default `0.5`), `--caution-m` (default `1.5`), `--clear-duration` (seconds clear before resume, default `2.0`), `--max-fps` (default `15.0`), `--video, -v`, `--demo`.
+
+See the [G1 Safety Demo](../tutorials/g1-demo.md) tutorial for details.
+
+### `openeye vlm-demo`
+
+Send an image to a vision-language model through OpenRouter (needs `OPENROUTER_API_KEY`).
+
+```bash
+openeye vlm-demo --image photo.jpg --prompt "What hazards do you see?"
+openeye vlm-demo --all-models
+```
+
+**Options:** `--image` (default `src/assets/demo/scene-warehouse.jpg`, a path inside the repo), `--model, -m` (OpenRouter model ID, default `qwen/qwen3-vl-235b:free`), `--prompt, -p`, `--all-models` (compare all free VLM models side by side).
 
 ## Configuration
 
 ### `openeye config`
 
-View or set configuration values.
+Get and set key/value pairs in `~/.openeye/config.yaml`.
 
 ```bash
-openeye config get default_model
-openeye config set default_model yolov8
+openeye config set default-device gpu
+openeye config get default-device
 ```
 
-Configuration is stored in `~/.openeye/config.yaml`.
+`config get` exits with code 1 if the key isn't set. Values are stored as strings. No built-in command currently reads these values, so treat this as a local settings store.
 
 ## Fleet Management
 
 ### `openeye fleet`
 
-Subcommands for managing edge devices, deployments, groups, alerts, and maintenance.
+Subcommands for managing edge devices, deployments, groups, alerts, and maintenance against a self-hosted fleet control plane (see [Fleet Management](../tutorials/fleet-management.md)).
+
+All fleet commands call `$OPENEYE_FLEET_URL` (default `http://localhost:8001`). All except `fleet agent` require `OPENEYE_TOKEN`, a Better Auth session token from the database the control plane uses.
 
 ### Device Management
 
@@ -167,7 +203,9 @@ openeye fleet config <device-id> '<json-string>'
 openeye fleet resources <device-id> [--limit 20]
 openeye fleet restart <device-id>
 openeye fleet decommission <device-id> [--reason <text>] [--wipe]
-openeye fleet batch <action> [--tag key=value] [--payload '<json>']
+openeye fleet batch <command> [--tag key=value] [--payload '<json>']
+openeye fleet commands [--device <device-id>] [--status <status>]
+openeye fleet agent --device-id <uuid> --api-key oek_... [--server http://localhost:8001] [--interval 15]
 ```
 
 | Subcommand | Description |
@@ -181,6 +219,10 @@ openeye fleet batch <action> [--tag key=value] [--payload '<json>']
 | `restart` | Send restart command to a device |
 | `decommission` | Decommission a device with optional data wipe |
 | `batch` | Send a command to devices matching a tag filter |
+| `commands` | List pending device commands |
+| `agent` | Start the device agent on an edge device (heartbeats, command polling) |
+
+`fleet agent` authenticates with the device key returned at registration (`--api-key` or `OPENEYE_DEVICE_API_KEY`); its `--server` defaults to `$OPENEYE_FLEET_URL` (or `http://localhost:8001`).
 
 ### Groups
 
@@ -231,7 +273,7 @@ openeye fleet resolve-alert <alert-id>
 
 | Subcommand | Description |
 |------------|-------------|
-| `alerts` | List fleet alerts (shows unresolved by default) |
+| `alerts` | List fleet alerts (all alerts unless `--resolved` is given) |
 | `resolve-alert` | Resolve a fleet alert by ID |
 
 ### Maintenance
@@ -254,55 +296,66 @@ openeye fleet maintenance-delete <window-id>
 
 ### `openeye mlops`
 
-Model lifecycle and operations subcommands, organized into deployment, evaluation, and training workflows.
+Model lifecycle and operations subcommands. State is kept in YAML files under `~/.openeye/` (registry, promotions, A/B tests, runs, and so on).
 
-### Deployment & Registry
+### Registry, Promotion & Export
 
 ```bash
-openeye mlops upload <file> --name <name> --key <key> --format onnx|torchscript|safetensors
+openeye mlops upload <file> [--name <name>] [--key <key>] [--format onnx|torchscript|safetensors|pytorch] [--task detection] [--author <name>] [--description <text>] [--adapter onnx_generic]
 openeye mlops registry
 openeye mlops versions <model-key>
-openeye mlops promote <key> <version> <stage> [--requester <name>] [--reason <text>]
-openeye mlops approve <key> <version> [--approver <name>]
-openeye mlops reject <key> <version> [--approver <name>] [--reason <text>]
-openeye mlops export <key> <version> <format> [--output <path>] [--quantize]
+openeye mlops promote --model <key> --version <v> --from dev|staging --to staging|production [--requester cli-user] [--reason <text>]
+openeye mlops approve-promotion --model <key> --version <v> [--approver cli-user]
+openeye mlops reject-promotion --model <key> --version <v> [--approver cli-user] [--reason <text>]
+openeye mlops export <model-key> --format onnx|tensorrt|coreml [--version latest] [--output <path>] [--quantize]
 openeye mlops exports [--model <key>]
-openeye mlops lineage <key> <version>
+openeye mlops lineage <model-key> <version>
 ```
+
+`upload` auto-detects `--format` when omitted and defaults `--name`/`--key` to the file name.
 
 ### A/B Testing & Shadow Mode
 
 ```bash
-openeye mlops ab-test <key> --a <version> --b <version> [--split 0.5] [--max-samples <n>]
-openeye mlops ab-status [<key>]
-openeye mlops shadow <key> --prod <version> --shadow <version> [--sample-rate 1.0]
-openeye mlops shadow-status [<key>]
+openeye mlops create-ab-test --champion <version> --challenger <version> [--traffic 50/50] [--name <name>] [--model <key>] [--max-samples <n>]
+openeye mlops ab-tests [<model-key>]
+openeye mlops complete-ab-test <test-id>
+openeye mlops shadow-mode --champion <version> --challenger <version> [--model <key>] [--sample-rate 1.0] [--max-samples <n>]
+openeye mlops shadow-status [<model-key>]
 ```
 
-### Evaluation & Validation
+`--model` is auto-detected from the champion version when omitted.
+
+### Evaluation, Benchmarks & Validation
 
 ```bash
+openeye mlops evaluate <model> --dataset <path> [--version latest] [--iou 0.5] [--confidence 0.25]
 openeye mlops benchmark <model> [--runs 100] [--width 640] [--height 480]
-openeye mlops batch <key> <version> <input-path> <output-path> [--batch-size 32] [--workers 4]
+openeye mlops batch-create --model <key> --input <path> [--output <path>] [--version latest] [--batch-size 32] [--workers 4] [--format jsonl|csv]
+openeye mlops validation-create --name <name> --model <key> --dataset <path> --conditions "accuracy > 0.95,latency_ms < 50" [--desc <text>]
 openeye mlops validate <model> <version> <test-id>
-openeye mlops validation-create --name <name> --model <key> --dataset <path> --conditions <expr>
 openeye mlops validations [--model <key>]
 openeye mlops validation-runs [--test <id>] [--model <key>]
 ```
 
+`evaluate --dataset` accepts COCO JSON, JSONL, or an image directory. `batch-create --input` accepts a local directory, `s3://`, or `gs://` path.
+
 ### Training & Feedback
 
 ```bash
-openeye mlops retrain <pipeline-name> [--by <triggerer>]
-openeye mlops pipeline-create --name <name> --model <key> --script <path> [--dataset <path>]
+openeye mlops pipeline-create --name <name> [--model default] [--script train.py] [--dataset <path>] [--schedule "0 2 * * *"]
 openeye mlops pipelines [--model <key>]
+openeye mlops retrain <pipeline-name> [--by manual]
 openeye mlops runs [--pipeline <name>] [--model <key>]
 openeye mlops run-status <run-id>
-openeye mlops annotate <key> <version> <image> --label <label> [--type misclassification]
+openeye mlops feedback --prediction-id <id> --correct true|false [--label <label>] [--model default] [--version latest] [--annotator cli-user] [--notes <text>]
+openeye mlops annotate <model-key> <version> <image> --label <label> [--type misclassification] [--predicted <label>] [--annotator cli-user] [--notes <text>]
 openeye mlops annotations [--model <key>] [--label <type>] [--unfed]
-openeye mlops feedback <key> <output-path>
+openeye mlops feedback-generate <model-key> <output>
 openeye mlops feedback-batches [--model <key>]
 ```
+
+`annotate --type` is one of `false_positive`, `false_negative`, `misclassification`, `wrong_bbox`, `low_confidence`. `feedback --label` is required when `--correct false`.
 
 ## Agent
 
@@ -331,48 +384,48 @@ openeye agent recall "when did a person enter?"
 
 **`agent run` Options:**
 
-- `--model <name>` — Detection model to use (default: `yolov8`)
-- `--goal <text>` — Goal for the agent to pursue
-- `--hz <float>` — Tick frequency in Hz
-- `--video <path>` — Video file input (instead of camera)
-- `--max-ticks <n>` — Maximum ticks before stopping
-- `--vlm <id>` — VLM model for reasoning
+- `--model, -m <name>` — Detection model to use (default: `yolov8`)
+- `--goal, -g <text>` — Goal for the agent to pursue (default: `monitor the scene`)
+- `--hz <float>` — Tick frequency in Hz (default: `1.0`)
+- `--video <path>` — Video file input (fallback if no camera)
+- `--max-ticks <n>` — Stop after N ticks
+- `--vlm` — Enable VLM reasoning via Nebius (a flag, not a model ID; needs `NEBIUS_API_KEY` or `OPENROUTER_API_KEY`)
+
+`start`, `stop`, `status`, `memory` (`--limit, -n`, default 10), and `recall <query>` (`--limit, -n`, default 5) talk to a running `openeye serve`; they take `--server, -s` (default `$OPENEYE_SERVER_URL`, `http://localhost:8000`).
 
 ## Hosted API
 
 ### `openeye api`
 
-Client commands for the hosted inference API.
+Client for the hosted inference API at `https://openeye.sh/v1`. Create a key in the dashboard under **Settings → API Keys**, then:
 
 ```bash
-openeye api detect photo.jpg --pretty
-openeye api depth scene.png
+export OPENEYE_API_KEY=oe_your_key_here
+openeye api detect photo.jpg
+openeye api detect photo.jpg --confidence 0.5 --pretty
 openeye api describe photo.jpg --prompt "what hazards are present?"
 openeye api models
 openeye api usage --days 7
 ```
 
-| Subcommand | Description |
-|------------|-------------|
-| `detect` | Run object detection via hosted API |
-| `depth` | Run depth estimation via hosted API |
-| `describe` | Get VLM scene description via hosted API |
-| `models` | List available hosted models and credit costs |
-| `usage` | Show credit balance and usage statistics |
+| Subcommand | Description | Options |
+|------------|-------------|---------|
+| `detect <image>` | Object detection (YOLOv8, 1 credit) | `--confidence, -c` (default `0.25`), `--pretty, -p` (print the raw JSON) |
+| `describe <image>` | VLM scene description (3 credits) | `--prompt, -p` (default `Describe what you see in this image.`) |
+| `depth <image>` | Depth estimation | — |
+| `models` | List hosted models and credit costs | — |
+| `usage` | Credit balance and usage | `--days, -d` (default `30`) |
 
-**Common Options:**
+Every subcommand takes `--server, -s <url>` (default `$OPENEYE_API_URL`, or `https://openeye.sh`). The key is read from `OPENEYE_API_KEY` and sent as `Authorization: Bearer`.
 
-- `--server <url>` — API server URL (default: `$OPENEYE_API_URL` or `http://localhost:8001`)
-- `--pretty` — Pretty-print JSON output
-- `--confidence <float>` — Minimum confidence threshold (for `detect`)
-- `--prompt <text>` — Custom prompt (for `describe`)
-- `--days <n>` — Usage history period (for `usage`, default: 30)
+!!! note "Hosted availability"
+    `detect`, `models`, and `usage` are live. `describe` returns `503` until scene description is enabled on the hosted API, and `depth` returns `501` on the hosted API; point `--server` at a local `openeye serve depth-anything` to use it.
 
 ## Server Utilities
 
 ### `openeye health`
 
-Check server health and queue status.
+Check server health and queue status. `health`, `nebius-stats`, `server-config-get`, and `server-config-set` all take `--server, -s` (default `$OPENEYE_SERVER_URL`, `http://localhost:8000`).
 
 ```bash
 openeye health
@@ -403,7 +456,7 @@ openeye server-config-set vlm_model "Qwen/Qwen3-VL-72B"
 
 ### `openeye govern`
 
-Safety policy management, audit logs, and rule enforcement subcommands.
+Safety policy management, audit logs, and rule enforcement subcommands. `status`, `enable`, `disable`, `load`, `audit`, and `violations` take `--server, -s`; without it, `status`, `enable`, `disable`, and `load` act on the local engine.
 
 ```bash
 openeye govern status
@@ -434,15 +487,17 @@ openeye govern init [--domain robotics|desktop_agent|universal] [--output govern
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENEYE_SERVER_URL` | `http://localhost:8000` | Default inference server URL |
-| `OPENEYE_FLEET_URL` | `http://localhost:8001` | Fleet control plane URL |
-| `OPENEYE_API_URL` | `http://localhost:8001` | Hosted API URL |
-| `OPENEYE_TOKEN` | — | Fleet authentication token |
-| `OPENEYE_API_KEY` | — | Hosted API key (format: `oe_...`) |
-| `NEBIUS_API_KEY` | — | Nebius VLM API key |
+| Variable | Default | Used by |
+|----------|---------|---------|
+| `OPENEYE_SERVER_URL` | `http://localhost:8000` | `health`, `nebius-stats`, `server-config-*`, `agent start/stop/status/memory/recall` |
+| `OPENEYE_API_URL` | `https://openeye.sh` | `openeye api ...` |
+| `OPENEYE_API_KEY` | — | `openeye api ...` (hosted API key, `oe_...`) |
+| `OPENEYE_FLEET_URL` | `http://localhost:8001` | `openeye fleet ...` (including the `fleet agent --server` default) |
+| `OPENEYE_TOKEN` | — | `openeye fleet ...` (Better Auth session token) |
+| `OPENEYE_DEVICE_API_KEY` | — | `openeye fleet agent` (device key, `oek_...`) |
+| `OPENEYE_SERVER_API_KEY` | — | `openeye serve`: if set, `/v1/*` accepts only this key |
+| `CORS_ORIGINS` | `https://openeye.sh,https://www.openeye.sh,http://localhost:5173,http://localhost:3000,http://localhost:8080` | `openeye serve` allowed browser origins |
+| `NEBIUS_API_KEY` | — | Nebius VLM provider |
 | `NEBIUS_BASE_URL` | `https://api.studio.nebius.com/v1` | Nebius API endpoint |
 | `NEBIUS_MODEL` | `Qwen/Qwen2.5-VL-72B-Instruct` | Default VLM model |
-| `OPENROUTER_API_KEY` | — | OpenRouter VLM alternative key |
-| `CORS_ORIGINS` | `http://localhost:5173,http://localhost:3000` | Allowed CORS origins |
+| `OPENROUTER_API_KEY` | — | OpenRouter VLM provider (`vlm-demo`, `serve`, `agent run --vlm`) |

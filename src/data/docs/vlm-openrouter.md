@@ -14,10 +14,12 @@ OPENROUTER_API_KEY=sk-or-v1-your-key-here
 
 Get a free key at [openrouter.ai/keys](https://openrouter.ai/keys).
 
-Install dependencies:
+Or export it in your shell; vlm-demo reads a .env file from the repository root when run from a checkout.
+
+Install the VLM client (the openai package):
 
 ```bash
-pip install openai Pillow
+pipx install "openeye-sh[vlm]" --force
 ```
 
 ### Available Models
@@ -70,9 +72,9 @@ python -m openeye_ai.demos.vlm_openrouter_demo --all-models
 
 The VLM demo uses the same OpenRouter provider as the live pipeline. In production, the server's `/ws/vlm` WebSocket endpoint streams VLM reasoning alongside YOLO detections:
 
-1. **Detection** — YOLO finds objects at ~30 FPS
-2. **VLM Reasoning** — OpenRouter VLM analyses keyframes for scene understanding
-3. **Agentic Loop** — combines both for planning and decision-making
+- 1. **Detection** — YOLO finds objects at ~30 FPS
+- 2. **VLM Reasoning** — OpenRouter VLM analyses keyframes for scene understanding
+- 3. **Agentic Loop** — combines both for planning and decision-making
 
 The `vlm-demo` command isolates step 2 for testing and prompt iteration.
 

@@ -2,7 +2,29 @@
 title: JavaScript / TypeScript
 ---
 
-### Object Detection (fetch)
+### Object Detection (hosted API, Node 18+)
+
+Keep the API key on a server; don't ship it to browsers.
+
+```typescript
+import { readFile } from "node:fs/promises";
+
+const form = new FormData();
+form.append("file", new Blob([await readFile("photo.jpg")], { type: "image/jpeg" }), "photo.jpg");
+form.append("confidence", "0.3");
+
+const resp = await fetch("https://openeye.sh/v1/detect", {
+  method: "POST",
+  headers: { Authorization: `Bearer ${process.env.OPENEYE_API_KEY}` },
+  body: form,
+});
+if (!resp.ok) throw new Error(`${resp.status}: ${(await resp.json()).error}`);
+
+const data = await resp.json();
+console.log(`${data.objects.length} objects, ${data.credits_used} credit(s)`);
+```
+
+### Object Detection (self-hosted, fetch)
 
 ```typescript
 const form = new FormData();

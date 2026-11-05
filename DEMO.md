@@ -23,7 +23,6 @@
 cat > backend/.env << 'EOF'
 NEBIUS_API_KEY=<your-key>
 NEBIUS_BASE_URL=https://api.tokenfactory.nebius.com/v1/
-CAMERA_INDEX=0
 EOF
 ```
 
@@ -54,8 +53,10 @@ You should see:
 
 ```bash
 npm run dev
-# → http://localhost:5173
+# → http://localhost:8080
 ```
+
+Or skip the local frontend: open [openeye.sh/dashboard](https://openeye.sh/dashboard), click **Server** on the Overview page, and enter `http://localhost:8000`. `openeye serve` allows the openeye.sh origin by default.
 
 ---
 
@@ -63,7 +64,7 @@ npm run dev
 
 ### Act 1: Live Camera + VLM Reasoning
 
-**Open:** `http://localhost:5173/dashboard/livestream`
+**Open:** `http://localhost:8080/dashboard/live`
 
 This is the flagship view. It shows:
 
@@ -82,7 +83,7 @@ This is the flagship view. It shows:
 
 ### Act 2: Agentic Loop
 
-**Open:** `http://localhost:5173/dashboard/agentic`
+**Open:** `http://localhost:8080/dashboard/agentic`
 
 The agentic loop runs continuously:
 1. **Perceive** — YOLO detection every frame
@@ -108,7 +109,7 @@ Shows a Rich-formatted table with:
 - Model name (`Qwen/Qwen2.5-VL-72B-Instruct`)
 - Provider: **Nebius Token Factory**
 
-**Dashboard:** `http://localhost:5173/dashboard` (Overview page)
+**Dashboard:** `http://localhost:8080/dashboard` (Overview page)
 - Nebius Token Factory section with 4 live metrics:
   - VLM Calls, Tokens Used, Avg Latency, Success Rate
 - Polls `/nebius/stats` every 5 seconds
@@ -195,5 +196,5 @@ openeye g1-demo --demo
 | `Non-base64 digit found` | VLM WebSocket expects raw base64 string, not JSON wrapper |
 | Wrong base URL | Set `NEBIUS_BASE_URL=https://api.tokenfactory.nebius.com/v1/` |
 | `python-multipart` error | Run `pipx inject openeye-sh python-multipart` |
-| Frontend port conflict | Vite auto-increments ports (5173 → 5174 → ...) |
-| Camera not found | Set `CAMERA_INDEX=0` in `.env` or try `1` for external camera |
+| Frontend port conflict | The dev server is configured for port 8080 (`vite.config.ts`); free the port or run `npx vite --port <n>` |
+| Camera not found | Dashboard views use the browser camera, so check the site's camera permission. For terminal demos pass `--camera 1` (`openeye watch`, `openeye g1-demo`) |

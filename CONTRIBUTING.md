@@ -4,7 +4,7 @@ Thanks for your interest in contributing to OpenEye! This guide will help you ge
 
 ## Prerequisites
 
-- **Python 3.10+** (CLI package) / **Python 3.11+** (backend)
+- **Python 3.12+** (CLI package and backend)
 - **Node.js 20+** and npm (frontend)
 - **Git**
 
@@ -14,7 +14,9 @@ Thanks for your interest in contributing to OpenEye! This guide will help you ge
 openeye.sh/
 ├── cli/              # openeye-sh CLI & inference server (Python)
 ├── backend/          # Perception engine runtime (Python)
-├── src/              # React frontend (TypeScript)
+├── src/              # React frontend (TypeScript); docs pages live in src/data/docs/
+├── api/              # Vercel functions: auth, dashboard data, credits, hosted /v1 API
+├── db/               # Postgres schema (schema.sql) for Neon
 ├── docs/             # MkDocs documentation site
 └── .github/          # CI workflows
 ```
@@ -25,11 +27,21 @@ openeye.sh/
 
 ```bash
 npm install
-npm run dev          # Start dev server
+npm run dev          # Start Vite dev server (http://localhost:8080)
 npm run lint         # ESLint
 npx tsc --noEmit     # Type check
 npm test             # Run vitest
 ```
+
+`npm run dev` serves only the SPA. To work on sign-in, dashboard data, credits, or the hosted `/v1` API, run the Vercel functions in `api/` as well:
+
+```bash
+vercel env pull .env.local   # Neon DATABASE_URL, BETTER_AUTH_SECRET, CRED_*, ...
+npm run db:migrate           # apply db/schema.sql (uses DATABASE_URL_UNPOOLED or DATABASE_URL)
+vercel dev
+```
+
+See `.env.example` for every variable. Never point local development or tests at the production database.
 
 ### CLI
 
