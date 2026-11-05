@@ -87,6 +87,10 @@ function pickRow(r: Resource, body: Record<string, unknown>) {
   for (const col of r.writable) {
     if (!(col in body)) continue;
     const value = body[col];
+    const allowed = r.enums?.[col];
+    if (allowed && !allowed.includes(value as string)) {
+      throw new HttpError(400, `${col} must be one of: ${allowed.join(", ")}`);
+    }
     row[col] = r.json?.includes(col) && value !== null && value !== undefined ? JSON.stringify(value) : value;
   }
   return row;

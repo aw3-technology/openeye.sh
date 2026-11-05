@@ -22,7 +22,14 @@ export interface Resource {
   noCreate?: boolean;
   /** Columns never returned to the browser (e.g. secret hashes). */
   hidden?: string[];
+  /** Writable columns restricted to a fixed set of values. */
+  enums?: Record<string, readonly string[]>;
 }
+
+/** Command types the device agent understands (backend/src/fleet command_service). */
+export const COMMAND_TYPES = [
+  "restart", "update_config", "deploy_model", "rollback_model", "ota_update", "decommission", "collect_logs",
+] as const;
 
 export const resources: Record<string, Resource> = {
   devices: {
@@ -51,6 +58,7 @@ export const resources: Record<string, Resource> = {
     filters: ["device_id", "status"],
     order: "issued_at desc",
     refs: { device_id: "devices" },
+    enums: { command_type: COMMAND_TYPES },
   },
   deployments: {
     table: "deployments",
