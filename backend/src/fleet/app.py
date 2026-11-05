@@ -1,10 +1,12 @@
 """Fleet control plane – FastAPI application factory."""
 
 import asyncio
+import contextlib
 import logging
 import os
 import time
-from collections import defaultdict
+from contextlib import asynccontextmanager
+from typing import Optional
 
 import psycopg
 from fastapi import FastAPI, Request
@@ -22,25 +24,113 @@ from .routers import (
     ota,
     v1_api,
 )
+from .offline_sweeper import run_offline_sweeper, sweep_interval_from_env
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_CORS_ORIGINS = "http://localhost:5173,http://localhost:3000"
+_DEFAULT_CORS_ORIGINS = ",".join(
+    [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://localhost:8080",  # dashboard dev server (`npm run dev`)
+        "https://openeye.sh",
+        "https://www.openeye.sh",
+    ]
+)
 
 # Simple in-memory sliding-window rate limiter for fleet endpoints
-_rate_buckets: dict[str, list[float]] = defaultdict(list)
-_rate_lock = asyncio.Lock()
-_FLEET_RATE_LIMIT = 120  # requests per window
+_FLEET_RATE_LIMIT = 120  # requests per window, per client IP
 _FLEET_RATE_WINDOW = 60  # seconds
+_RATE_BUCKET_PRUNE_THRESHOLD = 10_000  # distinct IPs before stale keys are pruned
 
 
-def create_fleet_app() -> FastAPI:
-    """Create and return the Fleet Management FastAPI application."""
+def create_fleet_app(
+    *,
+    rate_limit: Optional[int] = None,
+    rate_window: Optional[float] = None,
+    offline_sweep_interval: Optional[float] = None,
+) -> FastAPI:
+    """Create and return the Fleet Management FastAPI application.
+
+    Args:
+        rate_limit: Requests per window per client IP (default 120, or
+            ``FLEET_RATE_LIMIT``).
+        rate_window: Rate-limit window in seconds (default 60).
+        offline_sweep_interval: Seconds between offline-device sweeps; ``<= 0``
+            disables the sweeper. Defaults to ``FLEET_OFFLINE_SWEEP_INTERVAL``
+            (30s when unset).
+    """
+    limit = (
+        rate_limit
+        if rate_limit is not None
+        else int(os.environ.get("FLEET_RATE_LIMIT", _FLEET_RATE_LIMIT))
+    )
+    window = rate_window if rate_window is not None else _FLEET_RATE_WINDOW
+    sweep_interval = (
+        offline_sweep_interval
+        if offline_sweep_interval is not None
+        else sweep_interval_from_env()
+    )
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        sweeper: Optional[asyncio.Task] = None
+        if sweep_interval > 0:
+            sweeper = asyncio.create_task(
+                run_offline_sweeper(sweep_interval), name="fleet-offline-sweeper"
+            )
+        app.state.offline_sweeper = sweeper
+        try:
+            yield
+        finally:
+            if sweeper is not None:
+                sweeper.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await sweeper
+            from .db import close_database
+            from .deps import close_fallback_services
+
+            await close_fallback_services()
+            close_database()
+
     app = FastAPI(
         title="OpenEye Fleet Control Plane",
         description="Manage edge AI devices, staged deployments, OTA updates, and fleet health.",
         version="0.1.0",
+        lifespan=lifespan,
     )
+
+    # Per-app limiter state (so separate apps, e.g. in tests, don't share buckets)
+    rate_buckets: dict[str, list[float]] = {}
+    rate_lock = asyncio.Lock()
+
+    @app.middleware("http")
+    async def rate_limit_middleware(request: Request, call_next):
+        # Skip for health checks and v1 API (has its own rate limiter)
+        if request.url.path == "/health" or request.url.path.startswith("/v1"):
+            return await call_next(request)
+
+        client_ip = request.client.host if request.client else "unknown"
+        key = f"fleet:{client_ip}"
+        now = time.monotonic()
+        cutoff = now - window
+
+        async with rate_lock:
+            bucket = [t for t in rate_buckets.get(key, ()) if t > cutoff]
+            if len(bucket) >= limit:
+                rate_buckets[key] = bucket
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "Rate limit exceeded. Try again later."},
+                    headers={"Retry-After": str(int(window))},
+                )
+            bucket.append(now)
+            rate_buckets[key] = bucket
+            # Bound memory under many distinct IPs: drop keys with no recent hits
+            if len(rate_buckets) > _RATE_BUCKET_PRUNE_THRESHOLD:
+                for k in [k for k, b in rate_buckets.items() if b[-1] <= cutoff]:
+                    del rate_buckets[k]
+        return await call_next(request)
 
     allowed_origins = [
         o.strip()
@@ -48,6 +138,8 @@ def create_fleet_app() -> FastAPI:
         if o.strip()
     ]
 
+    # Added after the rate limiter so CORS is the outermost layer: 429s still
+    # carry CORS headers and preflights are answered without being counted.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_origins,
@@ -60,35 +152,6 @@ def create_fleet_app() -> FastAPI:
             "X-Device-API-Key",
         ],
     )
-
-    @app.middleware("http")
-    async def rate_limit_middleware(request: Request, call_next):
-        # Skip for health checks and v1 API (has its own rate limiter)
-        if request.url.path == "/health" or request.url.path.startswith("/v1"):
-            return await call_next(request)
-
-        client_ip = request.client.host if request.client else "unknown"
-        key = f"fleet:{client_ip}"
-        now = time.monotonic()
-
-        async with _rate_lock:
-            bucket = _rate_buckets[key]
-            cutoff = now - _FLEET_RATE_WINDOW
-            _rate_buckets[key] = bucket = [t for t in bucket if t > cutoff]
-            # Prune empty buckets to prevent memory leak from many distinct IPs
-            if not bucket:
-                del _rate_buckets[key]
-                return await call_next(request)
-
-            if len(bucket) >= _FLEET_RATE_LIMIT:
-                return JSONResponse(
-                    status_code=429,
-                    content={"detail": "Rate limit exceeded. Try again later."},
-                    headers={"Retry-After": str(_FLEET_RATE_WINDOW)},
-                )
-
-            bucket.append(now)
-        return await call_next(request)
 
     # Mount routers
     app.include_router(devices.router, prefix="/devices", tags=["Devices"])
@@ -112,14 +175,6 @@ def create_fleet_app() -> FastAPI:
     @app.get("/health")
     async def health():
         return {"status": "ok", "service": "fleet-control-plane"}
-
-    @app.on_event("shutdown")
-    async def shutdown_services():
-        from .db import close_database
-        from .deps import close_fallback_services
-
-        await close_fallback_services()
-        close_database()
 
     logger.info("Fleet control plane app created")
     return app

@@ -1,13 +1,19 @@
-"""openeye docs — machine-readable CLI reference for AI agents."""
+"""openeye docs — machine-readable CLI reference for AI agents.
+
+The command reference is generated from the live Typer app, so command
+names, positional arguments and options always match what the CLI really
+accepts.  Only the surrounding prose (models, endpoints, env vars, MCP) is
+hand-written.
+"""
 
 from __future__ import annotations
 
 import json
+from typing import Any
 
 import typer
-from rich import print as rprint
 
-DOCS = r"""# OpenEye CLI Reference
+_INTRO = r"""# OpenEye CLI Reference
 
 OpenEye is a CLI for vision AI models — pull, run, serve, and manage
 computer-vision models from your terminal.  Think "Ollama for vision."
@@ -42,28 +48,12 @@ openeye bench yolov8             # benchmark latency & throughput
 Use `openeye list` to see download status, sizes, and hardware support.
 
 ---
+"""
 
-## Commands
+_OUTRO = r"""
+---
 
-### Model management
-| Command                | Description                                |
-|------------------------|--------------------------------------------|
-| `openeye list`         | List models with status, size, hardware    |
-| `openeye pull <model>` | Download model weights                     |
-| `openeye remove <model>` | Delete downloaded model weights          |
-| `openeye add-model`    | Add a new model to the registry            |
-| `openeye register-adapter` | Register a custom adapter              |
-| `openeye update-registry` | Fetch and merge remote registry updates |
-
-### Inference
-| Command | Description |
-|---------|-------------|
-| `openeye run <model> <image>` | Single-image inference. Outputs JSON with detections/depth map. Supports `--pretty` for visual output, `--confidence` threshold, `--output` to save annotated image, `-p` prompt for grounding models. Accepts stdin (JSON pipeline or raw image bytes). |
-| `openeye bench <model>` | Benchmark model latency. Options: `--runs`, `--warmup`, `--width`, `--height`. |
-| `openeye serve <model>` | Start FastAPI server with REST + WebSocket endpoints. Options: `--host`, `--port`, `--demo`, `--vlm-model`, `--cortex-llm`. |
-| `openeye watch <model>` | Live camera feed with real-time detections in terminal. Options: `--models` (comma-sep), `--camera`, `--video`, `--safety`, `--danger-m`, `--caution-m`. |
-
-### Server endpoints (when `openeye serve` is running)
+## Server endpoints (when `openeye serve` is running)
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/predict` | POST | Inference — multipart image upload, returns JSON |
@@ -73,139 +63,23 @@ Use `openeye list` to see download status, sizes, and hardware support.
 | `/ws/perception` | WS | Real-time perception loop |
 | `/ws/vlm` | WS | Vision Language Model reasoning |
 | `/ws/agentic` | WS | Agentic loop (perceive → reason → act) |
-| `/v1/detect` | POST | Hosted API — object detection (credit-tracked) |
-| `/v1/depth` | POST | Hosted API — depth estimation (credit-tracked) |
-| `/v1/describe` | POST | Hosted API — VLM image description (credit-tracked) |
+| `/v1/detect` | POST | Hosted-API-compatible detection (1 credit; `confidence` form field) |
+| `/v1/depth` | POST | Hosted-API-compatible depth estimation (2 credits) |
+| `/v1/describe` | POST | Hosted-API-compatible VLM description (3 credits; `prompt` form field) |
 | `/v1/models` | GET | List available API models |
 | `/v1/usage` | GET | API usage and remaining credits |
 
-### Fleet management (`openeye fleet ...`)
-| Command | Description |
-|---------|-------------|
-| `fleet register` | Register a new device |
-| `fleet ls` | List devices (filter by `--status`, `--type`) |
-| `fleet info <id>` | Show device details |
-| `fleet restart <id>` | Restart a device |
-| `fleet decommission <id>` | Decommission a device |
-| `fleet tag <id>` | Add tags to a device |
-| `fleet config <id>` | Override device configuration |
-| `fleet resources <id>` | Show device resource usage |
-| `fleet batch` | Send batch commands |
-| `fleet deploy` | Create staged deployment (canary/rolling/blue-green/all-at-once) |
-| `fleet rollback <id>` | Rollback a deployment |
-| `fleet deployments` | List deployments |
-| `fleet advance <id>` | Advance canary to next stage |
-| `fleet pause-deployment <id>` | Pause a deployment |
-| `fleet ota <id>` | Over-the-air firmware update |
-| `fleet group-create` | Create device group |
-| `fleet groups` | List groups |
-| `fleet group-add` | Add device to group |
-| `fleet group-remove` | Remove device from group |
-| `fleet group-members <id>` | List group members |
-| `fleet group-scaling <id>` | Configure autoscaling |
-| `fleet maintenance-create` | Schedule maintenance window |
-| `fleet maintenance-list` | List maintenance windows |
-| `fleet maintenance-update` | Update maintenance schedule |
-| `fleet maintenance-delete` | Delete maintenance window |
-| `fleet alerts` | List alerts |
-| `fleet resolve-alert <id>` | Resolve an alert |
-| `fleet command-queue <id>` | List pending device commands |
-| `fleet agent-start <id>` | Start agentic loop on device |
-
-### MLOps (`openeye mlops ...`)
-| Command | Description |
-|---------|-------------|
-| `mlops retrain` | Trigger a retraining run |
-| `mlops pipeline-create` | Create retraining pipeline (optional cron) |
-| `mlops pipelines` | List pipelines |
-| `mlops runs` | List retraining runs |
-| `mlops run-status <id>` | Get run status |
-| `mlops upload` | Upload custom model (ONNX/PyTorch/SafeTensors) |
-| `mlops registry` | List models in enterprise registry |
-| `mlops versions <model>` | Show version history |
-| `mlops promote <model> <version>` | Promote to next environment |
-| `mlops approve-promotion <id>` | Approve promotion |
-| `mlops reject-promotion <id>` | Reject promotion |
-| `mlops evaluate` | Run model evaluation |
-| `mlops benchmark` | Benchmark performance |
-| `mlops validate` | Validate on test set |
-| `mlops validation-create` | Create validation test |
-| `mlops validations` | List validation tests |
-| `mlops validation-runs` | Show validation history |
-| `mlops create-ab-test` | Create A/B test |
-| `mlops ab-tests` | List A/B tests |
-| `mlops complete-ab-test <id>` | Complete and analyze A/B test |
-| `mlops shadow-mode` | Enable shadow mode |
-| `mlops shadow-status` | Check shadow status |
-| `mlops batch-create` | Create batch inference job |
-| `mlops feedback` | Submit inference feedback |
-| `mlops annotate` | Manually annotate samples |
-| `mlops annotations` | List pending annotations |
-| `mlops feedback-generate` | Generate synthetic feedback |
-| `mlops export` | Export model in different format |
-| `mlops exports` | List exports |
-| `mlops lineage` | Show model lineage |
-
-### Governance (`openeye govern ...`)
-| Command | Description |
-|---------|-------------|
-| `govern status` | Current governance status |
-| `govern ls` | List all policies |
-| `govern enable <policy>` | Enable a policy |
-| `govern disable <policy>` | Disable a policy |
-| `govern presets` | List presets |
-| `govern load <preset>` | Load preset configuration |
-| `govern validate` | Validate governance config |
-| `govern audit` | Show audit trail |
-| `govern init` | Initialize governance |
-| `govern violations` | List violations |
-
-### Agent (`openeye agent ...`)
-| Command | Description |
-|---------|-------------|
-| `agent run` | Run agentic perception loop locally. Options: `--model`, `--goal`, `--hz`, `--video`, `--max-ticks`, `--vlm` |
-| `agent start` | Start agentic loop on running server |
-| `agent stop` | Stop agentic loop on server |
-| `agent status` | Show agent status |
-| `agent memory` | Show recent observations |
-| `agent recall <query>` | Query agent memory |
-
-### Hosted API client (`openeye api ...`)
-| Command | Description |
-|---------|-------------|
-| `api detect <image>` | Object detection via hosted API |
-| `api describe <image>` | VLM description via hosted API |
-| `api usage` | Show API usage and credits |
-| `api models` | List available API models |
-
-### Configuration
-| Command | Description |
-|---------|-------------|
-| `openeye config get <key>` | Get config value |
-| `openeye config set <key> <value>` | Set config value |
-
-### Server utilities
-| Command | Description |
-|---------|-------------|
-| `openeye health` | Check server health |
-| `openeye nebius-stats` | Show Nebius VLM usage stats |
-| `openeye server-config-get` | Get runtime server config |
-| `openeye server-config-set <key> <value>` | Update server config |
-
-### Demos
-| Command | Description |
-|---------|-------------|
-| `openeye g1-demo` | Unitree G1 Safety Guardian demo |
-| `openeye vlm-demo` | Vision Language Model demo |
-
----
+`/v1/*` accepts `Authorization: Bearer oe_...` or `X-API-Key: oe_...`.
 
 ## Environment variables
 | Variable | Description |
 |----------|-------------|
 | `OPENEYE_SERVER_URL` | Server URL for client commands (default: `http://localhost:8000`) |
-| `OPENEYE_API_URL` | Hosted API URL |
-| `OPENEYE_API_KEY` | API key for hosted API |
+| `OPENEYE_API_URL` | Hosted API URL (default: `https://openeye.sh`) |
+| `OPENEYE_API_KEY` | API key for the hosted API (`openeye api ...`) |
+| `OPENEYE_FLEET_URL` | Fleet control plane URL (default: `http://localhost:8001`) |
+| `OPENEYE_TOKEN` | Auth token for `openeye fleet ...` |
+| `OPENEYE_SERVER_API_KEY` | When set on `openeye serve`, the only key `/v1/*` accepts |
 
 ## Piping & composition
 ```bash
@@ -222,8 +96,157 @@ openeye run yolov8 photo.jpg --output result.jpg
 openeye-mcp   # starts MCP server over stdio
 ```
 Tools: openeye_list, openeye_pull, openeye_run, openeye_serve,
-       openeye_health, openeye_bench, openeye_remove, openeye_nebius_stats
+       openeye_health, openeye_bench, openeye_remove, openeye_nebius_stats,
+       openeye_api_detect, openeye_api_describe, openeye_api_models,
+       openeye_api_usage
 """
+
+_GROUP_TITLES = {
+    "config": "Configuration",
+    "fleet": "Fleet management",
+    "mlops": "MLOps",
+    "govern": "Governance",
+    "agent": "Agent",
+    "api": "Hosted API client",
+}
+
+
+def _root_command() -> Any:
+    from openeye_ai.cli import app
+
+    return typer.main.get_command(app)
+
+
+# Duck-typed checks: recent Typer releases vendor their own copy of Click,
+# so isinstance() against ``click.*`` classes is not reliable.
+def _is_group(cmd: Any) -> bool:
+    return hasattr(cmd, "list_commands") and hasattr(cmd, "get_command")
+
+
+def _is_arg(param: Any) -> bool:
+    return getattr(param, "param_type_name", "") == "argument"
+
+
+def _is_opt(param: Any) -> bool:
+    return getattr(param, "param_type_name", "") == "option"
+
+
+def _usage(path: str, cmd: Any) -> str:
+    """Build a one-line signature: positionals and required options."""
+    parts = [path]
+    for p in cmd.params:
+        if _is_arg(p):
+            token = f"<{(p.name or 'arg').replace('_', '-')}>"
+            if p.nargs == -1:
+                token += "..."
+            parts.append(token if p.required else f"[{token}]")
+        elif _is_opt(p) and p.required and not p.is_flag:
+            flag = _long_flag(p)
+            parts.append(f"{flag} <{flag.lstrip('-').upper()}>")
+    return " ".join(parts)
+
+
+def _long_flag(opt: Any) -> str:
+    return max(opt.opts, key=len)
+
+
+def _describe(cmd: Any) -> dict[str, Any]:
+    return {
+        "help": cmd.get_short_help_str(limit=200),
+        "arguments": [
+            {
+                "name": p.name,
+                "required": p.required,
+                "variadic": p.nargs == -1,
+            }
+            for p in cmd.params
+            if _is_arg(p)
+        ],
+        "options": [
+            {
+                "flags": list(p.opts) + list(p.secondary_opts),
+                "required": p.required,
+                "is_flag": p.is_flag,
+                "help": p.help or "",
+            }
+            for p in cmd.params
+            if _is_opt(p) and not p.hidden
+        ],
+    }
+
+
+def collect_commands() -> list[dict[str, Any]]:
+    """Walk the Typer app and return one record per leaf command."""
+    root = _root_command()
+    ctx = root.context_class(root, info_name="openeye")
+    out: list[dict[str, Any]] = []
+
+    def walk(group: Any, prefix: str, group_name: str | None) -> None:
+        for name in group.list_commands(ctx):
+            cmd = group.get_command(ctx, name)
+            if cmd is None or cmd.hidden:
+                continue
+            path = f"{prefix} {name}"
+            if _is_group(cmd):
+                walk(cmd, path, group_name or name)
+                continue
+            rec = _describe(cmd)
+            rec["command"] = path
+            rec["group"] = group_name
+            rec["usage"] = _usage(path, cmd)
+            out.append(rec)
+
+    walk(root, "openeye", None)
+    return out
+
+
+def _md_cell(text: str) -> str:
+    return text.replace("|", "\\|").replace("\n", " ")
+
+
+def _commands_markdown(commands: list[dict[str, Any]]) -> str:
+    groups: dict[str | None, list[dict[str, Any]]] = {}
+    for c in commands:
+        groups.setdefault(c["group"], []).append(c)
+
+    lines = [
+        "## Commands",
+        "",
+        "Generated from the installed CLI. `<arg>` is required, `[<arg>]` is",
+        "optional; run `openeye <command> --help` for full option details.",
+    ]
+    order = [None] + sorted(k for k in groups if k is not None)
+    for key in order:
+        if key not in groups:
+            continue
+        title = (
+            "Core commands"
+            if key is None
+            else f"{_GROUP_TITLES.get(key, key.title())} (`openeye {key} ...`)"
+        )
+        lines += ["", f"### {title}", "| Command | Description | Options |"]
+        lines.append("|---------|-------------|---------|")
+        for c in groups[key]:
+            opts = ", ".join(f"`{f}`" for f in _optional_flags_from(c))
+            lines.append(
+                f"| `{_md_cell(c['usage'])}` | {_md_cell(c['help'])} | {opts} |"
+            )
+    return "\n".join(lines)
+
+
+def _optional_flags_from(rec: dict[str, Any]) -> list[str]:
+    return [
+        max(o["flags"], key=len)
+        for o in rec["options"]
+        if not o["required"] and "--help" not in o["flags"]
+    ]
+
+
+def build_reference() -> str:
+    """Return the full markdown reference."""
+    return (
+        _INTRO + "\n" + _commands_markdown(collect_commands()) + "\n" + _OUTRO
+    ).strip()
 
 
 def docs(
@@ -233,6 +256,12 @@ def docs(
 ) -> None:
     """Show full CLI reference — designed for AI agents and humans alike."""
     if machine:
-        typer.echo(json.dumps({"reference": DOCS.strip()}, indent=2))
+        typer.echo(
+            json.dumps(
+                {"reference": build_reference(), "commands": collect_commands()},
+                indent=2,
+            )
+        )
     else:
-        rprint(DOCS.strip())
+        # Plain echo: the reference contains [<arg>] which Rich would eat as markup.
+        typer.echo(build_reference())

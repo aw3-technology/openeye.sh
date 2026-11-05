@@ -3,7 +3,7 @@ from __future__ import annotations
 import io
 import logging
 
-from fastapi import Depends, Query, Request, UploadFile
+from fastapi import Depends, Form, Query, Request, UploadFile
 from fastapi.responses import JSONResponse
 from PIL import Image, UnidentifiedImageError
 
@@ -39,13 +39,41 @@ def _upload_error(detail: str):
     return HTTPException(status_code=400, detail=detail)
 
 
+_DEFAULT_CONFIDENCE = 0.25
+_DEFAULT_PROMPT = "Describe what you see in this image."
+_MAX_PROMPT_LENGTH = 2000
+
+
+def _resolve_confidence(form_value: str | None, query_value: str | None) -> float:
+    """Pick ``confidence`` from the multipart form, then the query string.
+
+    Matches the hosted API (``form.fields.confidence ?? query.confidence``).
+    """
+    raw = form_value if form_value not in (None, "") else query_value
+    if raw in (None, ""):
+        return _DEFAULT_CONFIDENCE
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        raise _upload_error("confidence must be between 0 and 1")
+    if not 0 <= value <= 1:
+        raise _upload_error("confidence must be between 0 and 1")
+    return value
+
+
 async def detect(
     request: Request,
     file: UploadFile,
-    confidence: float = Query(0.25, ge=0, le=1),
+    confidence_form: str | None = Form(None, alias="confidence"),
+    confidence_query: str | None = Query(None, alias="confidence"),
     api_key: str = Depends(_valid_api_key),
 ):
-    """Object detection via hosted API."""
+    """Object detection via hosted API.
+
+    ``confidence`` may be sent as a multipart form field (preferred, as the
+    ``openeye api`` CLI does) or as a query parameter.
+    """
+    confidence = _resolve_confidence(confidence_form, confidence_query)
     state = get_state(request)
     img = await _read_image(file)
     w, h = img.size
@@ -111,6 +139,9 @@ async def depth(
 
     return JSONResponse(
         {
+            "model": state.model_name,
+            "image": {"width": w, "height": h},
+            # Top-level width/height kept for backwards compatibility.
             "width": w,
             "height": h,
             "credits_used": credits_used,
@@ -123,12 +154,21 @@ async def depth(
 async def describe(
     request: Request,
     file: UploadFile,
-    prompt: str = Query("Describe what you see in this image."),
+    prompt_form: str | None = Form(None, alias="prompt"),
+    prompt_query: str | None = Query(None, alias="prompt"),
     api_key: str = Depends(_valid_api_key),
 ):
-    """VLM scene description via hosted API."""
+    """VLM scene description via hosted API.
+
+    ``prompt`` may be sent as a multipart form field (as the hosted API and
+    the ``openeye api`` CLI do) or as a query parameter.
+    """
+    prompt = prompt_form or prompt_query or _DEFAULT_PROMPT
+    if len(prompt) > _MAX_PROMPT_LENGTH:
+        raise _upload_error(f"Prompt too long (max {_MAX_PROMPT_LENGTH} characters)")
     state = get_state(request)
     img = await _read_image(file)
+    w, h = img.size
 
     def _infer():
         if hasattr(state.adapter, "predict_with_prompt"):
@@ -143,14 +183,16 @@ async def describe(
         logger.error("Describe failed: %s", exc)
         return JSONResponse({"error": "Inference failed"}, status_code=500)
 
-    credits_used = _CREDITS.get("describe", 5)
+    credits_used = _CREDITS.get("describe", 3)
     ledger = _get_ledger(request)
     ledger.record(api_key, state.model_name, "describe", credits_used)
 
     description = result_data.get("description", result_data.get("text", ""))
     return JSONResponse(
         {
+            "model": state.model_name,
             "description": description,
+            "image": {"width": w, "height": h},
             "credits_used": credits_used,
             "inference_ms": result_data.get("inference_ms", 0),
         }

@@ -95,7 +95,7 @@ dev: ## Start frontend dev server (Vite)
 	npm run dev
 
 dev-backend: ## Start the fleet control plane on :8001 (needs DATABASE_URL)
-	cd backend && uvicorn src.fleet.app:app --reload --port 8001
+	cd backend/src && uvicorn fleet.app:create_fleet_app --factory --reload --port 8001
 
 # ---------------------------------------------------------------------------
 # Clean
