@@ -1,0 +1,180 @@
+# OpenEye — full reference for LLMs and agents
+
+> OpenEye is an open-source "Ollama for vision": the `openeye` CLI pulls, runs and serves computer-vision models locally and outputs structured JSON. A hosted, pay-per-call inference API runs at https://openeye.sh/v1. Source: https://github.com/aw3-technology/openeye.sh
+
+This file is a plain-text quick reference. Human docs: https://openeye.sh/docs
+
+---
+
+## 1. Hosted inference API (https://openeye.sh/v1)
+
+No GPU or install needed. Create an API key in the dashboard (https://openeye.sh/dashboard/settings/api-keys) and buy credits (https://openeye.sh/dashboard/settings/credits).
+
+Auth header: `Authorization: Bearer oe_...` (or `X-API-Key: oe_...`). Keys are shown once; only a SHA-256 hash is stored.
+
+### Endpoints
+
+| Method | Path | Credits | Notes |
+|---|---|---|---|
+| GET | /v1/models | 0 | Array of models with `id`, `name`, `task`, `credits_per_call`, `description`, `available` |
+| POST | /v1/detect | 1 | YOLOv8n (80 COCO classes), CPU. multipart field `file`; optional `confidence` (form field or query, 0-1, default 0.25) |
+| POST | /v1/describe | 3 | Vision-language model (Qwen2.5-VL via OpenRouter). multipart `file` + `prompt` (max 2000 chars). Returns 503 until enabled on the hosted API |
+| POST | /v1/depth | 2 | Not available on the hosted API: returns 501. Run depth self-hosted with `openeye serve depth-anything` |
+| GET | /v1/usage?days=30 | 0 | Balance and usage for the key's owner (days 1-365) |
+
+Images: JPEG or PNG, under 4 MB, at most 25 megapixels. There is no WebSocket streaming on the hosted API.
+
+### Examples
+
+```bash
+export OPENEYE_API_KEY=oe_...
+
+curl -s https://openeye.sh/v1/models -H "Authorization: Bearer $OPENEYE_API_KEY"
+
+curl -s https://openeye.sh/v1/detect \
+  -H "Authorization: Bearer $OPENEYE_API_KEY" \
+  -F file=@photo.jpg -F confidence=0.3
+
+curl -s "https://openeye.sh/v1/usage?days=7" -H "Authorization: Bearer $OPENEYE_API_KEY"
+```
+
+### Responses
+
+POST /v1/detect:
+
+```json
+{
+  "model": "yolov8",
+  "objects": [
+    { "label": "person", "confidence": 0.92, "bbox": { "x": 0.12, "y": 0.08, "w": 0.35, "h": 0.8 } }
+  ],
+  "image": { "width": 1280, "height": 720 },
+  "inference_ms": 180.5,
+  "credits_used": 1
+}
+```
+
+`bbox` is normalized 0-1: `x`,`y` = top-left corner, `w`,`h` = size.
+
+POST /v1/describe: `{ "model", "description", "image": {width,height}, "inference_ms", "credits_used" }`.
+
+GET /v1/usage:
+
+```json
+{
+  "balance": 847, "credits_remaining": 847,
+  "total_requests": 153, "total_calls": 153,
+  "total_credits_used": 180, "credits_used": 180,
+  "by_endpoint": { "/v1/detect": 140, "/v1/describe": 13 },
+  "daily_credits": { "2026-11-03": 15, "2026-11-04": 22 },
+  "truncated": false
+}
+```
+
+### Errors
+
+All errors are JSON `{ "error": "<message>" }`.
+
+| Status | Meaning |
+|---|---|
+| 400 | Bad input (missing `file`, bad `confidence`, undecodable image, prompt too long) |
+| 401 | Missing or invalid API key (keys start with `oe_`) |
+| 402 | Not enough credits (also returned when the account has never bought credits) |
+| 404 | Unknown endpoint |
+| 413 | Image over 4 MB or over 25 megapixels |
+| 415 | Not multipart/form-data, or image is not JPEG/PNG |
+| 429 | Rate limit (default 60 requests/minute per key). Headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `Retry-After` |
+| 501 | `/v1/depth` on the hosted API |
+| 502 | Upstream vision model failed (credits are refunded) |
+| 503 | `/v1/describe` not enabled on the hosted API yet |
+
+Credits are deducted before inference and refunded if inference fails.
+
+---
+
+## 2. CLI (`openeye`)
+
+Install: `pipx install openeye-sh` (Python 3.12+). Extras: `yolo`, `depth`, `grounding`, `sam`, `rfdetr`, `smolvla`, `onnx`, `onnx-gpu`, `tensorrt`, `camera`, `vlm`, `cloud`, `mcp`, `all` (= yolo, depth, grounding, vlm + OpenCV). Example: `pipx install "openeye-sh[yolo,mcp]"`.
+
+Local models: `yolov8`, `yolo26`, `rfdetr`, `grounding-dino`, `depth-anything`, `sam2`, `smolvla`. Weights live in `~/.openeye/models/`; config in `~/.openeye/config.yaml`.
+
+```bash
+openeye list                                  # models + download status
+openeye pull yolov8                           # download weights (--variant, --quantized, --all, --force)
+openeye run yolov8 photo.jpg --pretty         # inference → PredictionResult JSON (-c confidence, -p prompt, -o out.json, --visualize)
+openeye run grounding-dino photo.jpg -p "red mug"
+openeye bench yolov8 --runs 20                # latency benchmark
+openeye serve yolov8 --port 8000              # local REST + WebSocket server
+openeye watch -m yolov8 -c 0                  # live camera in the terminal (needs [camera])
+openeye health                                # check a running server (OPENEYE_SERVER_URL)
+openeye docs --json                           # full CLI reference as JSON
+
+# Hosted API from the CLI (needs OPENEYE_API_KEY; base URL OPENEYE_API_URL, default https://openeye.sh)
+openeye api models
+openeye api detect photo.jpg -c 0.3 --pretty
+openeye api describe photo.jpg -p "How many people are visible?"
+openeye api usage --days 7
+```
+
+Other command groups: `openeye config get|set`, `openeye fleet ...` (self-hosted control plane), `openeye mlops ...`, `openeye govern ...` (safety policies), `openeye agent run|start|stop|status|memory|recall`.
+
+Environment variables:
+
+| Variable | Default | Used by |
+|---|---|---|
+| OPENEYE_API_KEY | — | `openeye api`, MCP hosted-API tools |
+| OPENEYE_API_URL | https://openeye.sh | `openeye api` |
+| OPENEYE_SERVER_URL | http://localhost:8000 | `health`, `nebius-stats`, `server-config-*`, `agent start/stop/status/memory/recall` |
+| OPENEYE_FLEET_URL | http://localhost:8001 | `openeye fleet` |
+| OPENEYE_TOKEN | — | `openeye fleet` (Better Auth session token) |
+| OPENEYE_DEVICE_API_KEY | — | `openeye fleet agent` (device key, `oek_...`) |
+
+### PredictionResult (local `run` / `/predict`)
+
+```json
+{
+  "model": "yolov8", "task": "detection", "timestamp": "2026-11-05T12:00:00Z",
+  "image": { "width": 640, "height": 480, "source": "photo.jpg" },
+  "objects": [ { "label": "cup", "confidence": 0.88, "bbox": { "x": 0.4, "y": 0.5, "w": 0.1, "h": 0.15 } } ],
+  "depth_map": null, "segmentation_masks": null, "vla_action": null,
+  "inference_ms": 12.3
+}
+```
+
+---
+
+## 3. Local server (`openeye serve <model>`)
+
+Default http://localhost:8000. CORS allows https://openeye.sh (plus Chrome Private Network Access), so the openeye.sh dashboard can connect to it via its Server URL setting.
+
+- `POST /predict` (multipart `file`, optional `?prompt=`), `GET /health`, `GET /metrics`, `GET /queue/status`, `GET|PUT /config`, `POST /perception`, `POST /vlm/analyze`, `GET /nebius/stats`
+- `/v1/detect|depth|describe|models|usage`: same shape as the hosted API. Accepts any `oe_` key, or only `OPENEYE_SERVER_API_KEY` when that is set; credits are tracked in memory only
+- `/agent/*`, `/mlops/*`, `/governance/*` routers
+- WebSockets: `/ws` (frames → predictions), `/ws/perception`, `/ws/agentic`, `/ws/vlm`
+
+---
+
+## 4. MCP server (`openeye-mcp`)
+
+A stdio MCP server for Claude Code, Claude Desktop and other MCP clients. Install with the `mcp` extra.
+
+Local tools (wrap the `openeye` CLI): `openeye_list`, `openeye_pull`, `openeye_run`, `openeye_serve`, `openeye_health`, `openeye_bench`, `openeye_remove`, `openeye_nebius_stats`.
+Hosted-API tools (need `OPENEYE_API_KEY`): `openeye_api_detect(image_path, confidence)`, `openeye_api_describe(image_path, prompt)`, `openeye_api_models()`, `openeye_api_usage(days)`.
+
+```json
+{
+  "mcpServers": {
+    "openeye": {
+      "command": "openeye-mcp",
+      "env": { "OPENEYE_API_KEY": "oe_..." }
+    }
+  }
+}
+```
+
+---
+
+## 5. Fleet management
+
+- Dashboard (https://openeye.sh/dashboard/fleet) stores devices, deployments, groups, maintenance windows, alerts and device commands in the hosted database. Registering a device returns its `oek_...` device key once.
+- The device agent and fleet API are a self-hosted FastAPI control plane (`backend/`, port 8001, Postgres via `DATABASE_URL`). Auth: Better Auth session token as Bearer, `X-Device-API-Key: oek_...` for devices, `oe_` keys for its `/v1` endpoints.

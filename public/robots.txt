@@ -1,16 +1,11 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# OpenEye — https://openeye.sh
+# Public marketing, docs, blog and model pages are crawlable.
+# The signed-in dashboard, server functions and the hosted API are not.
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /v1/
 
 Sitemap: https://openeye.sh/sitemap.xml

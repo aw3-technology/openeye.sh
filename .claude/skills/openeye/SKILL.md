@@ -1,223 +1,199 @@
 ---
 name: openeye
-description: Get context-aware help with the OpenEye vision AI platform — CLI, server, fleet management, adapters, and frontend.
+description: Get context-aware help with the OpenEye vision AI platform — the openeye CLI and local server, the hosted API at openeye.sh/v1, the MCP server, the Vercel/Neon website and dashboard, and the self-hosted fleet control plane.
 argument-hint: "<question about OpenEye>"
 allowed-tools: Bash, Read, Glob, Grep, WebSearch, WebFetch, Agent
 ---
 
 # OpenEye — Ollama for Vision AI
 
-OpenEye is a full-stack vision AI platform. The CLI (`openeye`) lets you pull, run, serve, and manage computer-vision models from your terminal. The backend provides a perception pipeline with real-time object detection, depth estimation, scene understanding, and fleet management. The React frontend offers a dashboard for inference, live streaming, fleet control, and MLOps.
+OpenEye has four parts that share one repo (`aw3-technology/openeye.sh`):
+
+1. **CLI + local server** (`cli/`, PyPI `openeye-sh`, command `openeye`): pull, run, benchmark and serve vision models; `openeye serve` is a FastAPI server on :8000. Also ships the MCP server `openeye-mcp`.
+2. **Website + dashboard + hosted API** (`src/` + `api/`): a Vite/React SPA on Vercel at https://openeye.sh. Server code is four Vercel functions in `api/`, backed by **Neon Postgres** (`db/schema.sql`) and Vercel Blob. The hosted inference API is `https://openeye.sh/v1`.
+3. **Fleet control plane** (`backend/src/fleet/`): self-hosted FastAPI on :8001 using the same Postgres schema. Not deployed by us; users run it.
+4. **Perception runtime** (`backend/src/`): OM1-derived pipeline, mode/cortex runtime, plugins, gRPC on :50051.
+
+There is no Supabase and no Lovable in this project, and `api.openeye.ai` does not exist. Cred (credits) and 1Profile (sign-in) are third-party services.
 
 ## Project Structure
 
 ```
-cli/                          # Python CLI + inference server (Typer)
+api/                          # Vercel functions (Node, TypeScript)
+  auth.ts                     # Better Auth at /api/auth/*
+  data.ts                     # Owner-scoped CRUD at /api/data/:resource (+ POST /api/data/avatar → Vercel Blob)
+  cred.ts                     # Cred credits proxy at /api/cred/*
+  v1.ts                       # Hosted inference API at /v1/* (YOLOv8n ONNX on CPU, OpenRouter VLM)
+  _lib/                       # auth.ts (Better Auth config), resources.ts (table allow-list), db.ts (pg Pool),
+                              # api-key-auth.ts, credits.ts, yolo.ts, multipart.ts, http.ts
+db/schema.sql                 # Neon schema (Better Auth tables + app + fleet tables); `npm run db:migrate`
+vercel.json                   # Rewrites /api/auth|data|cred/* and /v1/* to the functions; SPA fallback
+models/yolov8n.onnx           # Bundled into api/v1.ts
+
+src/                          # React frontend (Vite + TypeScript + Tailwind + shadcn/ui)
+  App.tsx                     # Routes: public pages + /dashboard/*
+  lib/                        # api.ts (/api/data client), auth-client.ts (Better Auth), cred-api.ts (/api/cred),
+                              # openeye-client.ts / openeye-ws.ts (local `openeye serve`), fleet-client*.ts
+  hooks/                      # useAuth, useOpenEyeConnection, useFleetQueries, useCredits, useObservations, ...
+  pages/, pages/dashboard/, components/, content/blog/*.md, data/docs/
+
+cli/                          # Python CLI + local server (Typer + FastAPI)
   openeye_ai/
-    cli.py                    # Main CLI commands (1344 lines)
-    fleet_cli.py              # Fleet management commands
-    registry.py               # Model registry & adapter resolution
-    config.py                 # User config (~/.openeye/config.yaml)
-    schema.py                 # Pydantic output schemas
+    cli.py                    # Registers commands (implementations live in commands/)
+    _cli_helpers.py           # OPENEYE_SERVER_URL / OPENEYE_API_URL / OPENEYE_FLEET_URL defaults
+    commands/                 # models_*, inference/, server_cli, api_cli, agent_cli, fleet/, mlops/, governance/, docs
     models.yaml               # Bundled model registry
-    adapters/                 # Model adapters (base.py, yolov8.py, depth_anything.py, etc.)
-    mlops/                    # Model lifecycle (A/B testing, export, retraining, etc.)
-    server/                   # FastAPI server (app.py, metrics.py, queue.py, rate_limit.py)
-    utils/                    # Benchmark, camera, download, hardware, visualization
-  tests/
-  pyproject.toml              # Entry point: openeye = "openeye_ai.cli:app"
+    adapters/                 # ModelAdapter implementations
+    server/                   # app.py, routes/ (rest, v1, websockets), agent_router, middleware (CORS/PNA)
+    mcp/                      # server.py (FastMCP tools), tools.py (runs the openeye binary)
+  pyproject.toml              # scripts: openeye, openeye-mcp
 
-backend/                      # Perception runtime + fleet control plane
-  src/
-    run.py                    # Runtime entry point
-    perception/               # Perception pipeline (detection, depth, tracking, scene graph)
-    perception_grpc/          # gRPC streaming service (port 50051)
-    fleet/                    # Fleet control plane (FastAPI, port 8001)
-    runtime/                  # Mode system, cortex loop, mode manager
-    inputs/                   # Sensor plugins (VLM, YOLO, video)
-    actions/                  # Action plugins
-    llm/                      # LLM plugins (OpenAI, Nebius, OpenRouter)
-    simulators/               # Simulator plugins
-    fuser/                    # Prompt assembly
-  config/                     # JSON5 config files + schemas
+backend/                      # Perception runtime + fleet control plane (Python 3.12)
+  src/fleet/                  # FastAPI control plane (create_fleet_app factory), Postgres via DATABASE_URL
+  src/perception/, perception_grpc/, runtime/, inputs/, llm/, actions/, governance/
+  config/                     # JSON5 runtime configs + schemas
 
-src/                          # React frontend (Vite + TypeScript)
-  hooks/                      # React hooks (useOpenEyeConnection, useOpenEyeStream, useFleetQueries, etc.)
-  lib/                        # Client libraries (openeye-client.ts, openeye-ws.ts, fleet-client.ts, cred-api.ts)
-  types/                      # TypeScript types (openeye.ts, fleet.ts, credits.ts, mlops.ts)
-  components/dashboard/       # Dashboard components (LiveCameraFeed, DetectionCanvas, etc.)
-  components/fleet/           # Fleet components (DeviceTable, DeploymentWizard, etc.)
-  pages/dashboard/            # Dashboard pages (Inference, LiveStream, History, etc.)
-  pages/dashboard/fleet/      # Fleet pages (FleetDashboard, Deployments, etc.)
+integrations/openclaw/        # OpenClaw skill for the hosted API
+openclaw-skill/openeye/       # OpenClaw skill for the CLI
+.mcp.json                     # Project MCP config for Claude Code (runs cli/.venv python -m openeye_ai.mcp.server)
 ```
 
 ## Quick Command Reference
 
 ```bash
-# Model management
-openeye list                              # Show available/downloaded models
-openeye pull yolov8                       # Download model weights
-openeye pull yolov8 --variant quantized   # Download quantized variant
-openeye run yolov8 photo.jpg              # Run inference, output JSON
-openeye run yolov8 photo.jpg --pretty     # Pretty-print results
-openeye run grounding_dino img.png -p "find the red car"  # Open-vocab detection
-openeye bench yolov8 --runs 20           # Benchmark inference speed
-openeye remove yolov8                     # Delete downloaded weights
-openeye serve yolov8                      # Start REST/WS server on :8000
+# Models and inference (local)
+openeye list                                   # available/downloaded models
+openeye pull yolov8                            # download weights (--variant, --quantized, --all, --force)
+openeye run yolov8 photo.jpg --pretty          # PredictionResult JSON (-c confidence, -o file, --visualize)
+openeye run grounding-dino img.png -p "red car" # open-vocab detection
+openeye bench yolov8 --runs 20
+openeye serve yolov8                           # REST + WS on :8000
+openeye remove yolov8                          # deletes weights — ask first
 
-# Configuration
-openeye config set default_model yolov8
-openeye config get default_model
+# Hosted API (needs OPENEYE_API_KEY=oe_...; default base https://openeye.sh)
+openeye api models
+openeye api detect photo.jpg --pretty
+openeye api usage --days 7
 
-# Fleet management (needs OPENEYE_FLEET_URL + OPENEYE_TOKEN)
+# Fleet (self-hosted control plane; OPENEYE_FLEET_URL + OPENEYE_TOKEN)
 openeye fleet register my-cam --type camera
 openeye fleet ls --status online
-openeye fleet deploy --name v2-rollout --model yolov8 --version 2.0 --strategy canary
-openeye fleet rollback <deployment_id>
+openeye fleet deploy --name v2 --model yolov8 --version 2.0 --strategy canary
 
-# MLOps
-openeye mlops upload model.onnx --name "Custom" --key custom --format onnx
-openeye mlops promote custom v1.0.0 production
-openeye mlops ab-test custom --a v1.0.0 --b v2.0.0 --split 0.5
-openeye mlops export custom v1.0.0 onnx --quantize
-openeye mlops batch custom v1.0.0 ./images ./output --batch-size 32
+# Full reference, generated from the code
+openeye docs            # or: openeye docs --json
 ```
+
+Model keys (`cli/openeye_ai/models.yaml`): `yolov8`, `depth-anything`, `grounding-dino`, `yolo26`, `sam2`, `rfdetr`, `smolvla`. Keys use hyphens.
+
+## Hosted API in one screen
+
+Base `https://openeye.sh/v1`, `Authorization: Bearer oe_...` (or `X-API-Key`). Keys come from Dashboard → Settings → API Keys and are stored as SHA-256 hashes in `api_keys`.
+
+| Endpoint | Credits | Status |
+|---|---|---|
+| `GET /v1/models` | 0 | live, includes `available` flags |
+| `POST /v1/detect` (multipart `file`, `confidence`, default 0.25) | 1 | live, YOLOv8n COCO-80 on CPU |
+| `POST /v1/describe` (multipart `file`, `prompt`) | 3 | returns 503 until `OPENROUTER_API_KEY` is set |
+| `POST /v1/depth` | 2 | returns 501 on hosted; self-host with `openeye serve depth-anything` |
+| `GET /v1/usage?days=30` | 0 | live |
+
+JPEG/PNG under 4 MB. Rate limit defaults to 60/min per key (`api_keys.rate_limit`). Credits come from Cred via `api/_lib/credits.ts`; failures are refunded. No WebSocket streaming on hosted. Details: `API_REFERENCE.md`.
+
+## MCP Server
+
+`openeye-mcp` (entry point `openeye_ai.mcp.server:main`, stdio transport; install the `mcp` extra) exposes:
+
+- Local tools (shell out to the `openeye` binary): `openeye_list`, `openeye_pull`, `openeye_run`, `openeye_serve`, `openeye_health`, `openeye_bench`, `openeye_remove`, `openeye_nebius_stats`
+- Hosted-API tools (need `OPENEYE_API_KEY` in the MCP server's environment): `openeye_api_detect(image_path, confidence)`, `openeye_api_describe(image_path, prompt)`, `openeye_api_models()`, `openeye_api_usage(days)`
+
+Client config (Claude Desktop, Cursor, or a user-level Claude Code config):
+
+```json
+{
+  "mcpServers": {
+    "openeye": {
+      "command": "openeye-mcp",
+      "env": { "OPENEYE_API_KEY": "oe_..." }
+    }
+  }
+}
+```
+
+The repo's `.mcp.json` runs `cli/.venv/bin/python -m openeye_ai.mcp.server` from the repo root, so it needs a dev venv first: `python3.12 -m venv cli/.venv && cli/.venv/bin/pip install -e "cli/[all,mcp]"`. It sets no `env`, so the hosted-API tools only work if `OPENEYE_API_KEY` is exported in the shell that launched Claude Code.
 
 ## Environment Variables
 
+CLI (`cli/openeye_ai/_cli_helpers.py` and commands):
+
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `OPENEYE_FLEET_URL` | `http://localhost:8001` | Fleet control plane URL |
-| `OPENEYE_TOKEN` | `""` | Bearer token for fleet API |
-| `OPENEYE_DEVICE_API_KEY` | — | API key for device agent auth |
-| `OPENAI_API_KEY` | — | Required for VLM perception mode |
-| `GOOGLE_API_KEY` | — | Optional: Gemini VLM |
-| `CAMERA_INDEX` | `0` | Default camera device index |
-| `DATABASE_URL` | — | Neon Postgres connection string (Vercel functions) |
-| `BETTER_AUTH_SECRET` | — | Session signing secret (Vercel functions) |
+| `OPENEYE_SERVER_URL` | `http://localhost:8000` | Local `openeye serve` (health, server-config, agent) |
+| `OPENEYE_API_URL` | `https://openeye.sh` | Hosted API base for `openeye api` |
+| `OPENEYE_API_KEY` | — | `oe_` key for `openeye api` and MCP hosted tools |
+| `OPENEYE_FLEET_URL` | `http://localhost:8001` | Fleet control plane |
+| `OPENEYE_TOKEN` | — | Better Auth session token for `openeye fleet` |
+| `OPENEYE_DEVICE_API_KEY` | — | Device key (`oek_...`) for `openeye fleet agent` |
+| `OPENEYE_SERVER_API_KEY` | — | If set, the local server's `/v1/*` only accepts this key |
+| `CORS_ORIGINS` | openeye.sh + localhost:5173/3000/8080 | Local server CORS |
+| `OPENROUTER_API_KEY`, `NEBIUS_API_KEY`, `NEBIUS_MODEL` | — | VLM features of the local server |
 
-## Available Models & Adapters
+Vercel functions (`api/`): `DATABASE_URL` (Neon), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `ONEPROFILE_CLIENT_ID`/`ONEPROFILE_ISSUER` (optional overrides), `GOOGLE_CLIENT_ID`/`_SECRET` and `APPLE_CLIENT_ID`/`_SECRET` (providers are enabled only when set), `CRED_API_KEY`, `CRED_API_BASE`, `CRED_CREDIT_TYPE_ID`, `OPENEYE_CREDITS_DISABLED` (previews only), `OPENROUTER_API_KEY`, `OPENROUTER_VLM_MODEL`, `BLOB_READ_WRITE_TOKEN`.
 
-| Model | Task | Adapter | Extras |
-|-------|------|---------|--------|
-| `yolov8` | detection | `yolov8` | `pipx install "openeye-sh[yolo]"` |
-| `depth_anything` | depth | `depth_anything` | `pipx install "openeye-sh[depth]"` |
-| `grounding_dino` | detection (open-vocab) | `grounding_dino` | `pipx install "openeye-sh[grounding]"` |
-| ONNX models | varies | `onnx_generic` / `yolov8:onnx` | `pipx install "openeye-sh[onnx]"` |
-| TensorRT models | varies | `tensorrt_generic` / `yolov8:tensorrt` | `pipx install "openeye-sh[tensorrt]"` |
-
-Install all extras: `pipx install "openeye-sh[all]"`
-
-## Creating a Custom Adapter
-
-Extend `ModelAdapter` from `cli/openeye_ai/adapters/base.py`:
-
-```python
-from openeye_ai.adapters.base import ModelAdapter
-from pathlib import Path
-from PIL import Image
-
-class Adapter(ModelAdapter):
-    def _do_load(self, model_dir: Path) -> None:
-        # Load weights from model_dir
-        ...
-
-    def _do_predict(self, image: Image.Image) -> dict:
-        # Return {"detections": [...], "inference_ms": float}
-        ...
-
-    def pull(self, model_dir: Path) -> None:
-        # Download weights to model_dir
-        ...
-```
-
-Register it: `openeye register-adapter my-model ./my_adapter.py --task detection`
-
-## Server API (when running `openeye serve`)
-
-- `GET /health` — `{"status": "ok", "model": "<name>"}`
-- `POST /predict` — Multipart file upload, returns `PredictionResult` JSON
-- `GET /config` / `PUT /config` — Get/set runtime configuration
-- `GET /metrics` — Prometheus-style inference metrics
-- `GET /queue/status` — Request queue depth and status
-- `WS /ws` — WebSocket for real-time streaming (send base64 frames, receive predictions)
+Fleet backend (`backend/.env.example`): `DATABASE_URL`, `DATABASE_POOL_MAX`, `CRED_API_KEY`, `CRED_API_BASE`, `CRED_CREDIT_TYPE_ID`, `CRED_APP_ORIGIN`, `CORS_ORIGINS`.
 
 ## Build & Run Commands
 
 ```bash
-# Frontend
-npm install && npm run dev          # Dev server
-npm run build                       # Production build
-npm run test                        # Vitest tests
-npm run lint                        # ESLint
+# Frontend + Vercel functions
+npm ci && npm run dev               # Vite dev server (port 8080)
+vercel dev                          # Run SPA + api/ functions together (needs .env.local)
+npm run db:migrate                  # Apply db/schema.sql to DATABASE_URL in .env.local
+npm run build && npm run test && npm run lint
 
 # CLI
-pipx install -e "./cli[all]"       # Install CLI with all extras
-pytest                              # Run CLI tests
+pipx install "openeye-sh[all]"      # Released CLI
+pip install -e "cli/[all,mcp]" --group dev   # Dev install (Makefile: make install-cli)
+cd cli && python -m pytest -m "not integration"
 
-# Backend runtime
-cd backend && pip install -r requirements.txt
-python src/run.py openeye_vlm       # Start perception runtime
+# Fleet control plane (no module-level app; use the factory)
+pip install -e backend/ --group dev
+cd backend/src && DATABASE_URL=... uvicorn fleet.app:create_fleet_app --factory --port 8001
 
-# Fleet control plane
-cd backend && python -m uvicorn src.fleet.app:app --port 8001
+# Perception runtime
+cd backend && python src/run.py openeye_vlm
 ```
+
+## Dashboard behavior (https://openeye.sh/dashboard)
+
+- Sign-in: Better Auth — email/password, "Continue with 1Profile" (always on), Google/Apple only when configured; plus a local demo mode with no account.
+- Works without a local server (reads/writes `/api/data` and `/api/cred`): Overview, History, Export, API Keys, Credits, Profile, fleet CRUD, Observation Memory.
+- Needs a connected `openeye serve` (Server URL dialog, default `http://localhost:8000`): Inference, Live, Scene Graph live, Metrics, Benchmark, Config editor, Governance, MLOps, Agent loop live mode.
+- Cloud vs local mode: `src/lib/deployment-env.ts` (`openeye.sh` and `*.vercel.app` are cloud; override with `VITE_DEPLOY_ENV`). In cloud mode fleet pages use `/api/data`; in local mode they call the fleet server directly.
 
 ## Troubleshooting
 
 | Error | Fix |
 |-------|-----|
-| `ImportError: ultralytics` | `pipx install "openeye-sh[yolo]"` |
-| `ImportError: onnxruntime` | `pipx install "openeye-sh[onnx]"` |
-| `Model 'x' not found` | Run `openeye list` to see available models, then `openeye pull x` |
-| `Connection refused :8000` | Start server with `openeye serve <model>` |
-| `Connection refused :8001` | Start fleet control plane or set `OPENEYE_FLEET_URL` |
-| `401 Unauthorized (fleet)` | Set `OPENEYE_TOKEN` env var |
-| `Camera not found` | Check `CAMERA_INDEX` or pass `--camera` to `openeye watch` |
+| `ImportError: ultralytics` | `pipx install "openeye-sh[yolo]"` (or `pipx inject openeye-sh ultralytics`) |
+| `Model 'x' not found` | `openeye list`, then `openeye pull x` (hyphenated keys) |
+| `Connection refused :8000` | Start `openeye serve <model>` or set `OPENEYE_SERVER_URL` |
+| `Connection refused :8001` | Start the fleet control plane or set `OPENEYE_FLEET_URL` |
+| `401` from `openeye fleet` | Set `OPENEYE_TOKEN` to a Better Auth session token |
+| `401` from `/v1` | Key must start with `oe_` and exist in Dashboard → API Keys |
+| `402` from `/v1` | Buy credits in Dashboard → Settings → Credits |
+| Dashboard can't reach local server | Check the Server URL dialog; the server allows `https://openeye.sh` via CORS + Private Network Access |
 
-## Running CLI Commands
+## Safety Guidelines
 
-The CLI is installed globally via pipx. Run commands directly:
-
-```bash
-openeye <command> [args...]
-```
-
-### Common Workflows
-
-```bash
-# Pull a model then run inference
-openeye pull yolov8
-openeye run yolov8 photo.jpg
-
-# Start the server and verify it's healthy
-openeye serve yolov8 &
-curl -s http://localhost:8000/health | python3 -m json.tool
-
-# Benchmark a model
-openeye bench yolov8 --runs 20
-
-# List available models (shows download status)
-openeye list
-```
-
-### Output Formats
-
-- `openeye run` outputs JSON by default (`PredictionResult` schema). Use `--pretty` for human-readable output.
-- `openeye list` outputs a Rich table to stderr, machine-readable data to stdout.
-- `openeye bench` outputs a Rich table with latency percentiles.
-- `openeye serve` runs in the foreground; use `&` or a background task to keep it running.
-
-### Safety Guidelines
-
-- Never run `openeye remove` without user confirmation — it permanently deletes model weights.
-- Don't bind `openeye serve` to privileged ports (< 1024) without explicit request.
-- Large model pulls (`depth_anything`, `grounding_dino`) can take several minutes and use significant disk space — warn the user.
-- Always check `openeye list` before attempting to run a model that may not be downloaded.
+- Never run `openeye remove` or `openeye fleet decommission` without user confirmation.
+- Hosted API calls spend the user's credits: check `openeye api usage` before batches.
+- Never print `oe_`/`oek_` keys or session tokens.
+- Large pulls (`depth-anything`, `grounding-dino`, `sam2`, `smolvla`) take minutes and disk space — warn first.
+- `openeye serve` runs in the foreground; background it explicitly.
 
 ## Detailed References
 
-For full command signatures, API specs, and architecture details, read:
-- `.claude/skills/openeye/CLI_REFERENCE.md` — All CLI commands with options
-- `.claude/skills/openeye/API_REFERENCE.md` — Server endpoints, TypeScript clients, React hooks
-- `.claude/skills/openeye/ARCHITECTURE.md` — Backend perception pipeline, mode system, plugin architecture
+- `.claude/skills/openeye/CLI_REFERENCE.md` — every CLI command with options (generated from the Typer app)
+- `.claude/skills/openeye/API_REFERENCE.md` — hosted `/v1`, `/api/*` functions, local server, fleet control plane, gRPC, frontend clients
+- `.claude/skills/openeye/ARCHITECTURE.md` — platform architecture, data model, perception pipeline, runtime and plugins
