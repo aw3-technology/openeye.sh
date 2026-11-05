@@ -30,17 +30,21 @@ async def _run_single(
         f"[bold green]*[/bold green] Image:  [bold]{image_label}[/bold]",
         f"[bold green]*[/bold green] Prompt: [dim]{prompt[:80]}{'...' if len(prompt) > 80 else ''}[/dim]",
     ]
-    console.print(Panel(
-        "\n".join(banner_lines),
-        title="[bold cyan]OpenEye VLM Demo[/bold cyan]",
-        subtitle="[dim]OpenRouter[/dim]",
-        border_style="cyan",
-    ))
+    console.print(
+        Panel(
+            "\n".join(banner_lines),
+            title="[bold cyan]OpenEye VLM Demo[/bold cyan]",
+            subtitle="[dim]OpenRouter[/dim]",
+            border_style="cyan",
+        )
+    )
 
     # Query with spinner
     with console.status(f"[bold]Querying {model}...[/bold]", spinner="dots"):
         try:
-            text, elapsed = await _query_vlm(api_key, model, image_b64, prompt, base_url=base_url)
+            text, elapsed = await _query_vlm(
+                api_key, model, image_b64, prompt, base_url=base_url
+            )
         except Exception as e:
             console.print(f"[red]API error: {e}[/red]")
             return
@@ -52,13 +56,15 @@ async def _run_single(
     header.append(f"{elapsed:.1f}s", style=f"bold {latency_style}")
 
     console.print()
-    console.print(Panel(
-        text,
-        title="[bold]VLM Response[/bold]",
-        subtitle=str(header),
-        border_style="green",
-        padding=(1, 2),
-    ))
+    console.print(
+        Panel(
+            text,
+            title="[bold]VLM Response[/bold]",
+            subtitle=str(header),
+            border_style="green",
+            padding=(1, 2),
+        )
+    )
 
 
 async def _run_all_models(
@@ -71,21 +77,27 @@ async def _run_all_models(
     base_url: str,
 ) -> None:
     """Run all free models concurrently and display results in a table."""
-    console.print(Panel(
-        f"[bold green]*[/bold green] Image:  [bold]{image_label}[/bold]\n"
-        f"[bold green]*[/bold green] Models: [bold]{len(free_models)}[/bold] free VLMs\n"
-        f"[bold green]*[/bold green] Prompt: [dim]{prompt[:80]}{'...' if len(prompt) > 80 else ''}[/dim]",
-        title="[bold cyan]OpenEye VLM — Model Comparison[/bold cyan]",
-        subtitle="[dim]OpenRouter[/dim]",
-        border_style="cyan",
-    ))
+    console.print(
+        Panel(
+            f"[bold green]*[/bold green] Image:  [bold]{image_label}[/bold]\n"
+            f"[bold green]*[/bold green] Models: [bold]{len(free_models)}[/bold] free VLMs\n"
+            f"[bold green]*[/bold green] Prompt: [dim]{prompt[:80]}{'...' if len(prompt) > 80 else ''}[/dim]",
+            title="[bold cyan]OpenEye VLM — Model Comparison[/bold cyan]",
+            subtitle="[dim]OpenRouter[/dim]",
+            border_style="cyan",
+        )
+    )
 
     results: list[tuple[str, str, str | None, float]] = []
 
-    with console.status("[bold]Querying all models concurrently...[/bold]", spinner="dots"):
+    with console.status(
+        "[bold]Querying all models concurrently...[/bold]", spinner="dots"
+    ):
         tasks = []
         for model_id, model_name in free_models:
-            tasks.append(_query_vlm(api_key, model_id, image_b64, prompt, base_url=base_url))
+            tasks.append(
+                _query_vlm(api_key, model_id, image_b64, prompt, base_url=base_url)
+            )
 
         outcomes = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -100,24 +112,30 @@ async def _run_all_models(
     console.print()
     for model_id, model_name, text, elapsed in results:
         if text is None:
-            console.print(Panel(
-                "[red]Error — model did not respond[/red]",
-                title=f"[bold]{model_name}[/bold]",
-                border_style="red",
-            ))
+            console.print(
+                Panel(
+                    "[red]Error — model did not respond[/red]",
+                    title=f"[bold]{model_name}[/bold]",
+                    border_style="red",
+                )
+            )
         else:
-            latency_style = "green" if elapsed < 5 else ("yellow" if elapsed < 15 else "red")
+            latency_style = (
+                "green" if elapsed < 5 else ("yellow" if elapsed < 15 else "red")
+            )
             subtitle = Text()
             subtitle.append(f"{elapsed:.1f}s", style=f"bold {latency_style}")
             subtitle.append(f"  |  {model_id}", style="dim")
 
-            console.print(Panel(
-                text,
-                title=f"[bold]{model_name}[/bold]",
-                subtitle=str(subtitle),
-                border_style="cyan",
-                padding=(1, 2),
-            ))
+            console.print(
+                Panel(
+                    text,
+                    title=f"[bold]{model_name}[/bold]",
+                    subtitle=str(subtitle),
+                    border_style="cyan",
+                    padding=(1, 2),
+                )
+            )
         console.print()
 
     # Summary table
@@ -131,7 +149,9 @@ async def _run_all_models(
         if text is None:
             table.add_row(model_name, "—", "—", Text("FAIL", style="bold red"))
         else:
-            latency_style = "green" if elapsed < 5 else ("yellow" if elapsed < 15 else "red")
+            latency_style = (
+                "green" if elapsed < 5 else ("yellow" if elapsed < 15 else "red")
+            )
             table.add_row(
                 model_name,
                 Text(f"{elapsed:.1f}s", style=latency_style),

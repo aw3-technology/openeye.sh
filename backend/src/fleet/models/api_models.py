@@ -4,6 +4,7 @@ from typing import Dict, List
 
 from pydantic import BaseModel, Field
 
+
 class BBox(BaseModel):
     x: float = Field(description="Left edge (0-1)")
     y: float = Field(description="Top edge (0-1)")
@@ -57,10 +58,19 @@ class ModelInfo(BaseModel):
 class UsageResponse(BaseModel):
     balance: int = Field(description="Current credit balance")
     total_requests: int = Field(default=0, description="Total API requests in period")
-    total_credits_used: int = Field(default=0, description="Total credits used in period")
-    by_endpoint: Dict[str, int] = Field(default_factory=dict, description="Request counts by endpoint")
-    daily_credits: Dict[str, int] = Field(default_factory=dict, description="Credits used per day")
-    truncated: bool = Field(default=False, description="True if usage data exceeds 1,000 rows and was truncated")
+    total_credits_used: int = Field(
+        default=0, description="Total credits used in period"
+    )
+    by_endpoint: Dict[str, int] = Field(
+        default_factory=dict, description="Request counts by endpoint"
+    )
+    daily_credits: Dict[str, int] = Field(
+        default_factory=dict, description="Credits used per day"
+    )
+    truncated: bool = Field(
+        default=False,
+        description="True if usage data exceeds 1,000 rows and was truncated",
+    )
 
 
 class ErrorResponse(BaseModel):

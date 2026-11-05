@@ -8,11 +8,32 @@ from perception.models import (
 from perception.positioning import _REFERENCE_WIDTHS
 
 # Labels considered manipulable for grasp-point estimation
-_MANIPULABLE_LABELS = frozenset({
-    "cup", "bottle", "bowl", "fork", "knife", "spoon", "banana", "apple",
-    "orange", "book", "cell phone", "remote", "scissors", "mouse", "keyboard",
-    "toothbrush", "pen", "pencil", "mug", "can", "box", "toy",
-})
+_MANIPULABLE_LABELS = frozenset(
+    {
+        "cup",
+        "bottle",
+        "bowl",
+        "fork",
+        "knife",
+        "spoon",
+        "banana",
+        "apple",
+        "orange",
+        "book",
+        "cell phone",
+        "remote",
+        "scissors",
+        "mouse",
+        "keyboard",
+        "toothbrush",
+        "pen",
+        "pencil",
+        "mug",
+        "can",
+        "box",
+        "toy",
+    }
+)
 
 
 def suggest_grasp_points(obj: DetectedObject3D) -> list[GraspPoint]:

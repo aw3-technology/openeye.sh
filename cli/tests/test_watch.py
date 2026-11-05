@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-import time
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+from conftest import StubAdapter
+from openeye_ai.cli import app
 from PIL import Image
 from typer.testing import CliRunner
-
-from openeye_ai.cli import app
-
-from conftest import StubAdapter
 
 runner = CliRunner()
 
@@ -106,7 +102,9 @@ class TestStory30VideoInput:
         """When --video is given, _open_input_source creates a VideoPlayer."""
         mock_vp = MagicMock()
         with (
-            patch("openeye_ai.utils.camera.VideoPlayer", return_value=mock_vp) as vp_cls,
+            patch(
+                "openeye_ai.utils.camera.VideoPlayer", return_value=mock_vp
+            ) as vp_cls,
             patch("openeye_ai.utils.camera.Camera") as cam_cls,
         ):
             from openeye_ai.commands.inference.watch_helpers import open_input_source
@@ -279,7 +277,7 @@ class TestStory37DemoFallback:
 
     def test_no_demo_exits_with_code_1(self):
         """When camera fails and no demo video exists, exit 1."""
-        from click.exceptions import Exit as ClickExit
+        from typer import Exit as TyperExit
 
         with (
             patch(
@@ -290,7 +288,7 @@ class TestStory37DemoFallback:
         ):
             from openeye_ai.commands.inference.watch_helpers import open_input_source
 
-            with pytest.raises(ClickExit):
+            with pytest.raises(TyperExit):
                 open_input_source(0, None)
 
     def test_video_flag_fallback_on_camera_fail(self):
@@ -365,7 +363,9 @@ class TestEdgeCases:
         with (
             patch(f"{_W}.load_adapters", return_value=adapters),
             patch(f"{_W}.init_safety_guardian", return_value=(None, None, None, None)),
-            patch(f"{_W}.open_input_source", return_value=(DroppingCamera(), "camera 0")),
+            patch(
+                f"{_W}.open_input_source", return_value=(DroppingCamera(), "camera 0")
+            ),
             patch(f"{_W}.time.sleep"),
             patch("rich.live.Live", NoOpLive),
         ):

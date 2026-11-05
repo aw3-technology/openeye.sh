@@ -35,7 +35,9 @@ class Adapter(ModelAdapter):
 
         model_path = model_dir / "yolov8n.pt"
         if not model_path.exists():
-            raise FileNotFoundError(f"Weights not found at {model_path}. Re-run: openeye pull yolov8")
+            raise FileNotFoundError(
+                f"Weights not found at {model_path}. Re-run: openeye pull yolov8"
+            )
         self._model = YOLO(str(model_path))
 
     def _do_predict(self, image: Image.Image) -> dict[str, Any]:
@@ -52,16 +54,18 @@ class Adapter(ModelAdapter):
                 conf = float(boxes.conf[i])
                 cls_id = int(boxes.cls[i])
                 label = r.names[cls_id]
-                objects.append({
-                    "label": label,
-                    "confidence": round(conf, 4),
-                    "bbox": {
-                        "x": round(x1 / w_img, 4),
-                        "y": round(y1 / h_img, 4),
-                        "w": round((x2 - x1) / w_img, 4),
-                        "h": round((y2 - y1) / h_img, 4),
-                    },
-                })
+                objects.append(
+                    {
+                        "label": label,
+                        "confidence": round(conf, 4),
+                        "bbox": {
+                            "x": round(x1 / w_img, 4),
+                            "y": round(y1 / h_img, 4),
+                            "w": round((x2 - x1) / w_img, 4),
+                            "h": round((y2 - y1) / h_img, 4),
+                        },
+                    }
+                )
 
         return {
             "objects": objects,

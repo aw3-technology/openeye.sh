@@ -59,6 +59,7 @@ DEFAULT_IMAGE = "src/assets/demo/scene-warehouse.jpg"
 # Entry points
 # ---------------------------------------------------------------------------
 
+
 def run_demo(args: argparse.Namespace) -> None:
     """Entry point called from the CLI command."""
     _load_env()
@@ -106,19 +107,33 @@ def run_demo(args: argparse.Namespace) -> None:
     # Encode image
     with console.status("[bold]Encoding image...[/bold]"):
         image_b64 = _encode_image(image_path)
-    console.print(f"[green]Image loaded:[/green] {image_label} ({len(image_b64) // 1024} KB encoded)")
+    console.print(
+        f"[green]Image loaded:[/green] {image_label} ({len(image_b64) // 1024} KB encoded)"
+    )
 
     # Run
     if args.all_models:
-        asyncio.run(_run_all_models(
-            api_key, image_b64, args.prompt, image_label,
-            free_models=FREE_MODELS, base_url=OPENROUTER_BASE_URL,
-        ))
+        asyncio.run(
+            _run_all_models(
+                api_key,
+                image_b64,
+                args.prompt,
+                image_label,
+                free_models=FREE_MODELS,
+                base_url=OPENROUTER_BASE_URL,
+            )
+        )
     else:
-        asyncio.run(_run_single(
-            api_key, args.model, image_b64, args.prompt, image_label,
-            base_url=OPENROUTER_BASE_URL,
-        ))
+        asyncio.run(
+            _run_single(
+                api_key,
+                args.model,
+                image_b64,
+                args.prompt,
+                image_label,
+                base_url=OPENROUTER_BASE_URL,
+            )
+        )
 
 
 def main() -> None:
@@ -144,19 +159,25 @@ Examples:
     )
 
     parser.add_argument(
-        "--image", default=DEFAULT_IMAGE,
+        "--image",
+        default=DEFAULT_IMAGE,
         help=f"Path to image file (default: {DEFAULT_IMAGE})",
     )
     parser.add_argument(
-        "--model", "-m", default=DEFAULT_MODEL,
+        "--model",
+        "-m",
+        default=DEFAULT_MODEL,
         help=f"OpenRouter model ID (default: {DEFAULT_MODEL})",
     )
     parser.add_argument(
-        "--prompt", "-p", default=DEFAULT_PROMPT,
+        "--prompt",
+        "-p",
+        default=DEFAULT_PROMPT,
         help="Custom prompt to send with the image",
     )
     parser.add_argument(
-        "--all-models", action="store_true",
+        "--all-models",
+        action="store_true",
         help="Compare all free VLM models side-by-side",
     )
 

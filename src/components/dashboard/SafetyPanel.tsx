@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { SafetyAlert } from "@/types/openeye";
 import { safetyStateConfig, safetyLogColor } from "@/lib/safety-utils";
 
+const SCENE_CLEAR_INTERVAL_MS = 5000;
+
 interface LogEntry {
   id: number;
   message: string;
@@ -16,6 +18,7 @@ export function SafetyPanel() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const logRef = useRef<HTMLDivElement>(null);
   const logCounterRef = useRef(0);
+  const lastClearLogRef = useRef(0);
 
   const config = safetyStateConfig[overallSafetyState];
 
@@ -34,8 +37,10 @@ export function SafetyPanel() {
         });
       }
     } else if ((latestFrame.objects?.length ?? 0) > 0) {
-      // Only add "Scene clear" occasionally to avoid spam
-      if (Math.random() < 0.05) {
+      // Log "Scene clear" at most every few seconds to avoid spam
+      const now = Date.now();
+      if (now - lastClearLogRef.current >= SCENE_CLEAR_INTERVAL_MS) {
+        lastClearLogRef.current = now;
         newEntries.push({
           id: ++logCounterRef.current,
           message: `Scene clear — ${latestFrame.objects?.length ?? 0} objects, 0 hazards.`,

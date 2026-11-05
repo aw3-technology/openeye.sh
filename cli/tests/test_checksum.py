@@ -6,7 +6,6 @@ import hashlib
 from pathlib import Path
 
 import pytest
-
 from openeye_ai.utils.checksum import compute_checksum, verify_checksum
 
 KNOWN_CONTENT = b"hello world"

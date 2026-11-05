@@ -4,18 +4,16 @@ from __future__ import annotations
 
 import json
 
-import pytest
-
 from openeye_ai.cli import app
-from .conftest import make_device
 
+from .conftest import make_device
 
 # ── Story 51: register ───────────────────────────────────────────
 
 
 class TestRegister:
     def test_register_returns_id_and_api_key(self, fleet_runner, mock_request):
-        mock = mock_request({"id": "dev-uuid-1", "api_key": "oek_secret123"})
+        mock_request({"id": "dev-uuid-1", "api_key": "oek_secret123"})
         result = fleet_runner.invoke(app, ["fleet", "register", "cam-front"])
         assert result.exit_code == 0
         assert "dev-uuid-1" in result.output
@@ -77,7 +75,9 @@ class TestDeviceInfo:
 class TestTag:
     def test_tag_key_value_pairs(self, fleet_runner, mock_request):
         mock = mock_request({})
-        fleet_runner.invoke(app, ["fleet", "tag", "dev-1", "location=warehouse-a", "zone=loading"])
+        fleet_runner.invoke(
+            app, ["fleet", "tag", "dev-1", "location=warehouse-a", "zone=loading"]
+        )
         mock.assert_called_once()
         path = mock.call_args[0][1]
         data = mock.call_args[0][2]
@@ -86,7 +86,9 @@ class TestTag:
 
     def test_tag_invalid_format_exits_1(self, fleet_runner, mock_request):
         mock_request({})
-        result = fleet_runner.invoke(app, ["fleet", "tag", "dev-1", "bad-tag-no-equals"])
+        result = fleet_runner.invoke(
+            app, ["fleet", "tag", "dev-1", "bad-tag-no-equals"]
+        )
         assert result.exit_code == 1
         assert "Invalid tag format" in result.output
 

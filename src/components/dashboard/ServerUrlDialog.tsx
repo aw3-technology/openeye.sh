@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
 import {
   Dialog,
@@ -18,10 +18,7 @@ export function ServerUrlDialog() {
   const { serverUrl, setServerUrl, isCloudDeployment } = useOpenEyeConnection();
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState(serverUrl);
-  const placeholder = useMemo(
-    () => isCloudDeployment ? "https://your-server.example.com" : "http://localhost:8000",
-    [isCloudDeployment],
-  );
+  const placeholder = "http://localhost:8000";
 
   const isValidUrl = (s: string) => {
     try {
@@ -54,8 +51,8 @@ export function ServerUrlDialog() {
           <DialogTitle>OpenEye Server URL</DialogTitle>
           <DialogDescription>
             {isCloudDeployment
-              ? "Enter the public URL of your OpenEye server to connect from the cloud dashboard."
-              : "Enter the URL of your running \u0060openeye serve\u0060 instance."}
+              ? "Run `openeye serve` on this computer and use http://localhost:8000, or enter the HTTPS URL of a server you host. If your browser blocks the connection, serve it over HTTPS instead."
+              : "Enter the URL of your running `openeye serve` instance."}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">

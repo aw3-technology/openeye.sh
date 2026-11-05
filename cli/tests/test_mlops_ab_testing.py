@@ -12,7 +12,9 @@ class TestABTesting:
 
         test = ABTestResult(
             id="ab-test1",
-            config=ABTestConfig(name="t", model_key="m", version_a="v1", version_b="v2"),
+            config=ABTestConfig(
+                name="t", model_key="m", version_a="v1", version_b="v2"
+            ),
             metrics_a=ABTestMetrics(version="v1", mean_accuracy=0.90),
             metrics_b=ABTestMetrics(version="v2", mean_accuracy=0.95),
         )
@@ -25,9 +27,15 @@ class TestABTesting:
 
         test = ABTestResult(
             id="ab-test2",
-            config=ABTestConfig(name="t", model_key="m", version_a="v1", version_b="v2"),
-            metrics_a=ABTestMetrics(version="v1", mean_accuracy=0.90, mean_latency_ms=10),
-            metrics_b=ABTestMetrics(version="v2", mean_accuracy=0.90, mean_latency_ms=20),
+            config=ABTestConfig(
+                name="t", model_key="m", version_a="v1", version_b="v2"
+            ),
+            metrics_a=ABTestMetrics(
+                version="v1", mean_accuracy=0.90, mean_latency_ms=10
+            ),
+            metrics_b=ABTestMetrics(
+                version="v2", mean_accuracy=0.90, mean_latency_ms=20
+            ),
         )
         _determine_winner(test)
         assert test.winner == "v1"  # lower latency wins
@@ -38,7 +46,9 @@ class TestABTesting:
 
         test = ABTestResult(
             id="ab-test3",
-            config=ABTestConfig(name="t", model_key="m", version_a="v1", version_b="v2"),
+            config=ABTestConfig(
+                name="t", model_key="m", version_a="v1", version_b="v2"
+            ),
             metrics_a=ABTestMetrics(version="v1"),
             metrics_b=ABTestMetrics(version="v2"),
         )
@@ -49,7 +59,9 @@ class TestABTesting:
         from openeye_ai.mlops.ab_testing import create_ab_test, list_ab_tests
         from openeye_ai.mlops.schemas import ABTestConfig
 
-        config = ABTestConfig(name="exp1", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="exp1", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
         assert test.id.startswith("ab-")
 
@@ -62,7 +74,9 @@ class TestABTesting:
         from openeye_ai.mlops.ab_testing import create_ab_test, record_result
         from openeye_ai.mlops.schemas import ABTestConfig
 
-        config = ABTestConfig(name="exp2", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="exp2", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
 
         updated = record_result(test.id, "v1", latency_ms=10.0, accuracy=0.9)
@@ -74,7 +88,9 @@ class TestABTesting:
         from openeye_ai.mlops.ab_testing import create_ab_test, record_result
         from openeye_ai.mlops.schemas import ABTestConfig
 
-        config = ABTestConfig(name="exp3", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="exp3", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
 
         with pytest.raises(ValueError, match="not part of test"):
@@ -90,7 +106,9 @@ class TestABTesting:
         from openeye_ai.mlops.ab_testing import create_ab_test, get_ab_test
         from openeye_ai.mlops.schemas import ABTestConfig
 
-        config = ABTestConfig(name="get-test", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="get-test", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
         fetched = get_ab_test(test.id)
         assert fetched.id == test.id
@@ -100,7 +118,9 @@ class TestABTesting:
         from openeye_ai.mlops.ab_testing import complete_ab_test, create_ab_test
         from openeye_ai.mlops.schemas import ABTestConfig, ABTestStatus
 
-        config = ABTestConfig(name="complete-test", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="complete-test", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
         completed = complete_ab_test(test.id)
         assert completed.status == ABTestStatus.COMPLETED
@@ -117,16 +137,24 @@ class TestABTesting:
         from openeye_ai.mlops.ab_testing import create_ab_test, route_request
         from openeye_ai.mlops.schemas import ABTestConfig
 
-        config = ABTestConfig(name="route-test", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="route-test", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
         result = route_request(test.id)
         assert result in ("v1", "v2")
 
     def test_route_request_non_running(self):
-        from openeye_ai.mlops.ab_testing import complete_ab_test, create_ab_test, route_request
+        from openeye_ai.mlops.ab_testing import (
+            complete_ab_test,
+            create_ab_test,
+            route_request,
+        )
         from openeye_ai.mlops.schemas import ABTestConfig
 
-        config = ABTestConfig(name="route-done", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="route-done", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
         complete_ab_test(test.id)
         with pytest.raises(RuntimeError, match="not running"):
@@ -136,7 +164,9 @@ class TestABTesting:
         from openeye_ai.mlops.ab_testing import create_ab_test, record_result
         from openeye_ai.mlops.schemas import ABTestConfig
 
-        config = ABTestConfig(name="err-test", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="err-test", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
         updated = record_result(test.id, "v1", latency_ms=10.0, error=True)
         assert updated.metrics_a.error_rate == pytest.approx(1.0)
@@ -145,9 +175,13 @@ class TestABTesting:
         from openeye_ai.mlops.ab_testing import create_ab_test, record_result
         from openeye_ai.mlops.schemas import ABTestConfig
 
-        config = ABTestConfig(name="custom-test", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="custom-test", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
-        updated = record_result(test.id, "v1", latency_ms=10.0, custom_metrics={"iou": 0.85})
+        updated = record_result(
+            test.id, "v1", latency_ms=10.0, custom_metrics={"iou": 0.85}
+        )
         assert updated.metrics_a.custom_metrics["iou"] == pytest.approx(0.85)
 
     def test_record_result_auto_completion_via_max_samples(self):
@@ -155,7 +189,10 @@ class TestABTesting:
         from openeye_ai.mlops.schemas import ABTestConfig, ABTestStatus
 
         config = ABTestConfig(
-            name="auto-complete", model_key="m", version_a="v1", version_b="v2",
+            name="auto-complete",
+            model_key="m",
+            version_a="v1",
+            version_b="v2",
             max_samples=2,
         )
         test = create_ab_test(config)
@@ -175,7 +212,9 @@ class TestABTesting:
         from openeye_ai.mlops.ab_testing import create_ab_test, record_result
         from openeye_ai.mlops.schemas import ABTestConfig
 
-        config = ABTestConfig(name="avg-test", model_key="m", version_a="v1", version_b="v2")
+        config = ABTestConfig(
+            name="avg-test", model_key="m", version_a="v1", version_b="v2"
+        )
         test = create_ab_test(config)
         record_result(test.id, "v1", latency_ms=10.0, accuracy=0.8)
         updated = record_result(test.id, "v1", latency_ms=20.0, accuracy=1.0)

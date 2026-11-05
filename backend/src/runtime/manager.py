@@ -8,8 +8,6 @@ from runtime.config import (
     ModeConfig,
     ModeSystemConfig,
     TransitionRule,
-    TransitionType,
-    mode_config_to_dict,
 )
 from runtime.state import ModeState, ModeStatePersistence
 from runtime.transition_evaluator import TransitionEvaluator
@@ -36,7 +34,9 @@ class ModeManager:
         if config.mode_memory_enabled:
             self._load_mode_state()
 
-        logging.info(f"Mode Manager initialized with current mode: {self.state.current_mode}")
+        logging.info(
+            f"Mode Manager initialized with current mode: {self.state.current_mode}"
+        )
         self._create_runtime_config_file()
 
     def _get_runtime_config_path(self) -> str:
@@ -88,10 +88,16 @@ class ModeManager:
     def _evaluate_context_conditions(self, rule: TransitionRule) -> bool:
         return self._evaluator._evaluate_context_conditions(rule, self.state)
 
-    def _evaluate_single_condition(self, key: str, expected_value, user_context: Dict) -> bool:
-        return self._evaluator._evaluate_single_condition(key, expected_value, user_context)
+    def _evaluate_single_condition(
+        self, key: str, expected_value, user_context: Dict
+    ) -> bool:
+        return self._evaluator._evaluate_single_condition(
+            key, expected_value, user_context
+        )
 
-    async def request_transition(self, target_mode: str, reason: str = "manual") -> bool:
+    async def request_transition(
+        self, target_mode: str, reason: str = "manual"
+    ) -> bool:
         if not self.config.allow_manual_switching and reason == "manual":
             logging.warning("Manual mode switching is disabled")
             return False
@@ -135,10 +141,14 @@ class ModeManager:
                 self.state.current_mode = target_mode
                 self.state.mode_start_time = time.time()
                 self.state.last_transition_time = time.time()
-                self.state.transition_history.append(f"{from_mode}->{target_mode}:{reason}")
+                self.state.transition_history.append(
+                    f"{from_mode}->{target_mode}:{reason}"
+                )
                 if len(self.state.transition_history) > 50:
                     self.state.transition_history = self.state.transition_history[-25:]
-                logging.info(f"Mode transition: {from_mode} -> {target_mode} (reason: {reason})")
+                logging.info(
+                    f"Mode transition: {from_mode} -> {target_mode} (reason: {reason})"
+                )
                 await to_config.execute_lifecycle_hooks(
                     LifecycleHookType.ON_ENTRY, transition_context.copy()
                 )
@@ -149,7 +159,9 @@ class ModeManager:
                 self._save_mode_state()
                 return True
             except Exception as e:
-                logging.error(f"Failed to execute transition {from_mode} -> {target_mode}: {e}")
+                logging.error(
+                    f"Failed to execute transition {from_mode} -> {target_mode}: {e}"
+                )
                 return False
             finally:
                 self._is_transitioning = False
@@ -189,7 +201,9 @@ class ModeManager:
     def get_user_context(self) -> Dict:
         return self.state.user_context.copy()
 
-    async def process_tick(self, input_text: Optional[str]) -> Optional[tuple[str, str]]:
+    async def process_tick(
+        self, input_text: Optional[str]
+    ) -> Optional[tuple[str, str]]:
         time_target = await self.check_time_based_transitions()
         if time_target:
             return (time_target, "time_based")

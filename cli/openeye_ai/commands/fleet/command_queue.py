@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 import typer
 from rich import print as rprint
 from rich.table import Table
@@ -12,7 +11,9 @@ from ._helpers import _get, err_console, fleet_app
 
 @fleet_app.command("commands")
 def list_commands(
-    device_id: str | None = typer.Option(None, "--device", "-d", help="Filter by device ID"),
+    device_id: str | None = typer.Option(
+        None, "--device", "-d", help="Filter by device ID"
+    ),
     status: str | None = typer.Option(None, "--status", "-s", help="Filter by status"),
 ) -> None:
     """List pending device commands."""
@@ -37,12 +38,16 @@ def list_commands(
     tbl.add_column("Created")
     for c in entries:
         status_val = c.get("status", "?")
-        status_style = {"pending": "yellow", "completed": "green", "failed": "red"}.get(status_val, "")
+        status_style = {"pending": "yellow", "completed": "green", "failed": "red"}.get(
+            status_val, ""
+        )
         tbl.add_row(
             c.get("id", "?")[:12],
             c.get("device_id", "?")[:12],
             c.get("command_type", c.get("command", "?")),
-            f"[{status_style}]{status_val}[/{status_style}]" if status_style else status_val,
+            f"[{status_style}]{status_val}[/{status_style}]"
+            if status_style
+            else status_val,
             str(c.get("created_at", "\u2014")),
         )
     err_console.print(tbl)

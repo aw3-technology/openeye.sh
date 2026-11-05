@@ -32,9 +32,11 @@ def build_objects_3d(
         label = det.get("label", det.get("class", "unknown"))
         is_manip = label.lower() in _MANIPULABLE_LABELS
 
-        pos_3d, depth_m = estimate_3d_position(
-            bbox, depth_map, frame_w, frame_h
-        ) if depth_map is not None else (None, None)
+        pos_3d, depth_m = (
+            estimate_3d_position(bbox, depth_map, frame_w, frame_h)
+            if depth_map is not None
+            else (None, None)
+        )
 
         obj = DetectedObject3D(
             track_id=det["track_id"],

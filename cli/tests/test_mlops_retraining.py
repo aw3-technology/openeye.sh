@@ -11,7 +11,9 @@ class TestRetraining:
         from openeye_ai.mlops.schemas import RetrainingPipelineConfig
 
         config = RetrainingPipelineConfig(
-            name="pipe1", model_key="m", training_script="echo ok",
+            name="pipe1",
+            model_key="m",
+            training_script="echo ok",
         )
         create_pipeline(config)
         fetched = get_pipeline("pipe1")
@@ -22,7 +24,9 @@ class TestRetraining:
         from openeye_ai.mlops.schemas import RetrainingPipelineConfig
 
         config = RetrainingPipelineConfig(
-            name="dup-pipe", model_key="m", training_script="echo ok",
+            name="dup-pipe",
+            model_key="m",
+            training_script="echo ok",
         )
         create_pipeline(config)
         with pytest.raises(ValueError, match="already exists"):
@@ -38,8 +42,12 @@ class TestRetraining:
         from openeye_ai.mlops.retraining import create_pipeline, list_pipelines
         from openeye_ai.mlops.schemas import RetrainingPipelineConfig
 
-        create_pipeline(RetrainingPipelineConfig(name="p1", model_key="m1", training_script="x"))
-        create_pipeline(RetrainingPipelineConfig(name="p2", model_key="m2", training_script="y"))
+        create_pipeline(
+            RetrainingPipelineConfig(name="p1", model_key="m1", training_script="x")
+        )
+        create_pipeline(
+            RetrainingPipelineConfig(name="p2", model_key="m2", training_script="y")
+        )
         assert len(list_pipelines()) == 2
         assert len(list_pipelines(model_key="m1")) == 1
 
@@ -47,7 +55,11 @@ class TestRetraining:
         from openeye_ai.mlops.retraining import create_pipeline, trigger_retraining
         from openeye_ai.mlops.schemas import PipelineStatus, RetrainingPipelineConfig
 
-        create_pipeline(RetrainingPipelineConfig(name="trig", model_key="m", training_script="echo ok"))
+        create_pipeline(
+            RetrainingPipelineConfig(
+                name="trig", model_key="m", training_script="echo ok"
+            )
+        )
         run = trigger_retraining("trig", triggered_by="test")
         assert run.id.startswith("retrain-")
         assert run.status == PipelineStatus.RUNNING
@@ -56,7 +68,9 @@ class TestRetraining:
         from openeye_ai.mlops.retraining import create_pipeline, trigger_retraining
         from openeye_ai.mlops.schemas import RetrainingPipelineConfig
 
-        create_pipeline(RetrainingPipelineConfig(name="dup-run", model_key="m", training_script="x"))
+        create_pipeline(
+            RetrainingPipelineConfig(name="dup-run", model_key="m", training_script="x")
+        )
         trigger_retraining("dup-run")
         with pytest.raises(ValueError, match="already has a running"):
             trigger_retraining("dup-run")
@@ -82,12 +96,15 @@ class TestRetraining:
 
         retraining._accuracy_buffer.clear()
 
-        create_pipeline(RetrainingPipelineConfig(
-            name="drift-pipe", model_key="driftmodel",
-            trigger=RetrainingTrigger.ACCURACY_DRIFT,
-            training_script="echo retrain",
-            drift_config=DriftDetectionConfig(window_size=5, threshold=0.1),
-        ))
+        create_pipeline(
+            RetrainingPipelineConfig(
+                name="drift-pipe",
+                model_key="driftmodel",
+                trigger=RetrainingTrigger.ACCURACY_DRIFT,
+                training_script="echo retrain",
+                drift_config=DriftDetectionConfig(window_size=5, threshold=0.1),
+            )
+        )
 
         # Feed baseline (high accuracy)
         for _ in range(5):
@@ -107,21 +124,35 @@ class TestRetraining:
             get_run("retrain-nonexistent")
 
     def test_get_run_success(self):
-        from openeye_ai.mlops.retraining import create_pipeline, get_run, trigger_retraining
+        from openeye_ai.mlops.retraining import (
+            create_pipeline,
+            get_run,
+            trigger_retraining,
+        )
         from openeye_ai.mlops.schemas import RetrainingPipelineConfig
 
-        create_pipeline(RetrainingPipelineConfig(name="get-run", model_key="m", training_script="x"))
+        create_pipeline(
+            RetrainingPipelineConfig(name="get-run", model_key="m", training_script="x")
+        )
         run = trigger_retraining("get-run")
         fetched = get_run(run.id)
         assert fetched.id == run.id
         assert fetched.pipeline_name == "get-run"
 
     def test_list_runs(self):
-        from openeye_ai.mlops.retraining import create_pipeline, list_runs, trigger_retraining
+        from openeye_ai.mlops.retraining import (
+            create_pipeline,
+            list_runs,
+            trigger_retraining,
+        )
         from openeye_ai.mlops.schemas import RetrainingPipelineConfig
 
-        create_pipeline(RetrainingPipelineConfig(name="lr1", model_key="m1", training_script="x"))
-        create_pipeline(RetrainingPipelineConfig(name="lr2", model_key="m2", training_script="y"))
+        create_pipeline(
+            RetrainingPipelineConfig(name="lr1", model_key="m1", training_script="x")
+        )
+        create_pipeline(
+            RetrainingPipelineConfig(name="lr2", model_key="m2", training_script="y")
+        )
         trigger_retraining("lr1")
         trigger_retraining("lr2")
         assert len(list_runs()) == 2

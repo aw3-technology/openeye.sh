@@ -74,7 +74,7 @@ class G1Connector:
     def _init_sdk(self) -> None:
         """Initialize Unitree SDK2 sport client."""
         try:
-            from unitree_sdk2py.core.channel import ChannelFactory
+            from unitree_sdk2py.core.channel import ChannelFactory  # noqa: F401  (SDK presence check)
             from unitree_sdk2py.g1.sport import SportClient
         except ImportError:
             raise ImportError(
@@ -143,7 +143,9 @@ class G1Connector:
         self._halt_time = time.monotonic()
         self._halt_count += 1
 
-        reasons = [a.get("message", "unknown") for a in alerts if a.get("halt_recommended")]
+        reasons = [
+            a.get("message", "unknown") for a in alerts if a.get("halt_recommended")
+        ]
         reason_str = "; ".join(reasons)
 
         logger.warning("G1 HALT issued: %s", reason_str)
@@ -180,7 +182,9 @@ class G1Connector:
                 logger.error("SDK StopMove attempt %d failed: %s", attempt + 1, e)
                 if attempt == 0:
                     time.sleep(0.05)  # Brief retry delay
-        logger.critical("SDK StopMove FAILED after retries — robot may still be moving!")
+        logger.critical(
+            "SDK StopMove FAILED after retries — robot may still be moving!"
+        )
 
     def _sdk_resume(self) -> None:
         """Send a gentle stand-in-place via SDK to release from halt."""
@@ -215,7 +219,9 @@ class G1Connector:
                 time.sleep(0.05)
 
         if action == "stop_move":
-            logger.critical("G1 HTTP halt FAILED after retries — robot may still be moving!")
+            logger.critical(
+                "G1 HTTP halt FAILED after retries — robot may still be moving!"
+            )
 
     def _status(
         self,

@@ -9,6 +9,15 @@ import typer
 from rich import print as rprint
 
 from openeye_ai._cli_helpers import dependency_error, err_console
+from openeye_ai.commands.inference.result_formatter import (
+    _format_pretty,
+    _merge_pipeline,
+    _save_visualization,
+)
+from openeye_ai.commands.inference.stdin_resolver import (
+    _collect_images,
+    _resolve_stdin,
+)
 from openeye_ai.config import MODELS_DIR
 from openeye_ai.registry import (
     get_adapter,
@@ -17,9 +26,6 @@ from openeye_ai.registry import (
     is_downloaded,
     is_variant_downloaded,
 )
-
-from openeye_ai.commands.inference.stdin_resolver import _resolve_stdin, _IMAGE_EXTENSIONS, _collect_images
-from openeye_ai.commands.inference.result_formatter import _format_pretty, _merge_pipeline, _save_visualization
 
 
 def _run_single(
@@ -35,7 +41,6 @@ def _run_single(
     piped_data: dict | None,
 ) -> str:
     """Run inference on a single image and return JSON output string."""
-    import json
 
     from PIL import Image, UnidentifiedImageError
 
@@ -100,14 +105,30 @@ def _run_single(
 
 def run(
     model: str = typer.Argument(help="Model name (e.g. yolov8)"),
-    image: str | None = typer.Argument(None, help="Image path, directory, or '-' for stdin"),
-    prompt: str | None = typer.Option(None, "--prompt", "-p", help="Text prompt (for grounding-dino)"),
-    pretty: bool = typer.Option(False, "--pretty", help="Human-readable colored output"),
-    output: Path | None = typer.Option(None, "--output", "-o", help="Write JSON output to file"),
-    visualize: bool = typer.Option(False, "--visualize", help="Save annotated image with bounding boxes"),
-    backend: str | None = typer.Option(None, "--backend", "-b", help="Backend: onnx, tensorrt"),
-    variant: str | None = typer.Option(None, "--variant", help="Use a specific model variant"),
-    confidence: float | None = typer.Option(None, "--confidence", "-c", help="Minimum confidence threshold (0.0-1.0)"),
+    image: str | None = typer.Argument(
+        None, help="Image path, directory, or '-' for stdin"
+    ),
+    prompt: str | None = typer.Option(
+        None, "--prompt", "-p", help="Text prompt (for grounding-dino)"
+    ),
+    pretty: bool = typer.Option(
+        False, "--pretty", help="Human-readable colored output"
+    ),
+    output: Path | None = typer.Option(
+        None, "--output", "-o", help="Write JSON output to file"
+    ),
+    visualize: bool = typer.Option(
+        False, "--visualize", help="Save annotated image with bounding boxes"
+    ),
+    backend: str | None = typer.Option(
+        None, "--backend", "-b", help="Backend: onnx, tensorrt"
+    ),
+    variant: str | None = typer.Option(
+        None, "--variant", help="Use a specific model variant"
+    ),
+    confidence: float | None = typer.Option(
+        None, "--confidence", "-c", help="Minimum confidence threshold (0.0-1.0)"
+    ),
 ) -> None:
     """Run inference on an image (or directory of images) and output unified JSON."""
     import json
@@ -129,12 +150,16 @@ def run(
     if effective_variant:
         model_dir = MODELS_DIR / model / f".variant-{effective_variant}"
         if not is_variant_downloaded(model, effective_variant):
-            rprint(f"[yellow]Variant '{effective_variant}' not downloaded. Run: openeye pull {model} --variant {effective_variant}[/yellow]")
+            rprint(
+                f"[yellow]Variant '{effective_variant}' not downloaded. Run: openeye pull {model} --variant {effective_variant}[/yellow]"
+            )
             raise typer.Exit(code=1)
     else:
         model_dir = MODELS_DIR / model
         if not is_downloaded(model):
-            rprint(f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]")
+            rprint(
+                f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]"
+            )
             raise typer.Exit(code=1)
 
     # ── Resolve image source ─────────────────────────────────────────
@@ -158,10 +183,14 @@ def run(
 
     if image is None or image == "-":
         if sys.stdin.isatty():
-            rprint("[red]No image provided. Pass a file path or pipe data from a previous run.[/red]")
+            rprint(
+                "[red]No image provided. Pass a file path or pipe data from a previous run.[/red]"
+            )
             rprint("[dim]  Usage: openeye run yolov8 photo.jpg[/dim]")
             rprint("[dim]         cat photo.jpg | openeye run yolov8 -[/dim]")
-            rprint("[dim]         openeye run yolov8 photo.jpg | openeye run depth-anything -[/dim]")
+            rprint(
+                "[dim]         openeye run yolov8 photo.jpg | openeye run depth-anything -[/dim]"
+            )
             raise typer.Exit(code=1)
         image_path, piped_data, _ = _resolve_stdin()
 
@@ -187,8 +216,16 @@ def run(
     # ── Single image inference ───────────────────────────────────────
     if image_path and not batch_paths:
         json_str = _run_single(
-            model, image_path, adapter, info, prompt,
-            confidence, pretty, output, visualize, piped_data,
+            model,
+            image_path,
+            adapter,
+            info,
+            prompt,
+            confidence,
+            pretty,
+            output,
+            visualize,
+            piped_data,
         )
         print(json_str)
         return
@@ -199,12 +236,22 @@ def run(
         err_console.print(f"[dim][{i + 1}/{len(batch_paths)}] {img_path.name}[/dim]")
         try:
             json_str = _run_single(
-                model, img_path, adapter, info, prompt,
-                confidence, pretty, None, visualize, None,
+                model,
+                img_path,
+                adapter,
+                info,
+                prompt,
+                confidence,
+                pretty,
+                None,
+                visualize,
+                None,
             )
             results.append(json_str)
         except (typer.Exit, SystemExit):
-            rprint(f"[yellow]Skipping {img_path.name} (error)[/yellow]", file=sys.stderr)
+            rprint(
+                f"[yellow]Skipping {img_path.name} (error)[/yellow]", file=sys.stderr
+            )
 
     # Output batch results as JSON array
     batch_output = "[" + ",".join(results) + "]"

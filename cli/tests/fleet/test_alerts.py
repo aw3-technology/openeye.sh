@@ -3,15 +3,26 @@
 from __future__ import annotations
 
 from openeye_ai.cli import app
+
 from .conftest import make_alert
 
 
 class TestAlertsList:
     def test_alerts_list(self, fleet_runner, mock_request):
-        mock_request([
-            make_alert(severity="critical", alert_type="device_offline", title="cam-1 offline"),
-            make_alert(severity="warning", alert_type="high_resource_usage", title="High CPU"),
-        ])
+        mock_request(
+            [
+                make_alert(
+                    severity="critical",
+                    alert_type="device_offline",
+                    title="cam-1 offline",
+                ),
+                make_alert(
+                    severity="warning",
+                    alert_type="high_resource_usage",
+                    title="High CPU",
+                ),
+            ]
+        )
         result = fleet_runner.invoke(app, ["fleet", "alerts"])
         assert result.exit_code == 0
 

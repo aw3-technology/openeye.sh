@@ -5,7 +5,14 @@ from __future__ import annotations
 import re
 from typing import Any
 
-VALID_TASKS = {"detection", "depth", "segmentation", "classification", "embedding", "vla"}
+VALID_TASKS = {
+    "detection",
+    "depth",
+    "segmentation",
+    "classification",
+    "embedding",
+    "vla",
+}
 CHECKSUM_PATTERN = re.compile(r"^[a-fA-F0-9]{64}$")  # SHA-256
 REQUIRED_FIELDS = {"name", "task", "adapter", "description"}
 FULL_FIELDS = REQUIRED_FIELDS | {"hf_repo", "filename", "size_mb"}
@@ -15,7 +22,9 @@ class ValidationError(ValueError):
     """Raised when a model registry entry fails validation."""
 
 
-def validate_model_entry(entry: dict[str, Any], *, allow_custom_adapter: bool = False) -> None:
+def validate_model_entry(
+    entry: dict[str, Any], *, allow_custom_adapter: bool = False
+) -> None:
     """Validate a model registry entry dict.
 
     Raises ValidationError on any schema violation.

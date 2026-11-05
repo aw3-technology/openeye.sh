@@ -71,9 +71,7 @@ class CortexLoopMixin:
 
         finished_promises, _ = await lc.action_orchestrator.flush_promises()
 
-        prompt = await lc.fuser.fuse(
-            lc.current_config.agent_inputs, finished_promises
-        )
+        prompt = await lc.fuser.fuse(lc.current_config.agent_inputs, finished_promises)
         if prompt is None:
             logging.debug("No prompt to fuse")
             return

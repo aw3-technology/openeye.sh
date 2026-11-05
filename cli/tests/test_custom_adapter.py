@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import pytest
-from PIL import Image
-
 from openeye_ai.utils.custom_adapter import CustomAdapterError, load_custom_adapter
+from PIL import Image
 
 # ── Valid adapter source ─────────────────────────────────────────────
 

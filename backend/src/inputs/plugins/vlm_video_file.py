@@ -40,9 +40,12 @@ class VLM_VideoFileConfig(SensorConfig):
         default=0.25,
         description="Default confidence threshold for unlisted classes",
     )
-    start_frame: int = Field(default=0, description="Frame number to start processing from")
+    start_frame: int = Field(
+        default=0, description="Frame number to start processing from"
+    )
     end_frame: Optional[int] = Field(
-        default=None, description="Frame number to stop processing at (None = end of video)"
+        default=None,
+        description="Frame number to stop processing at (None = end of video)",
     )
 
 
@@ -203,12 +206,16 @@ class VLM_VideoFile(FuserInput[VLM_VideoFileConfig, Optional[List]]):
         timestamp = time.time()
 
         inference_start = time.perf_counter()
-        results = self.model.predict(source=frame, save=False, stream=True, verbose=False)
+        results = self.model.predict(
+            source=frame, save=False, stream=True, verbose=False
+        )
         detections = self._detector.extract_detections(results, self.model.names)
         inference_ms = (time.perf_counter() - inference_start) * 1000
         total_ms = (time.perf_counter() - frame_start) * 1000
 
-        progress = (self.frame_index / self.total_frames * 100) if self.total_frames > 0 else 0
+        progress = (
+            (self.frame_index / self.total_frames * 100) if self.total_frames > 0 else 0
+        )
 
         self._detector.record_telemetry(
             frame_index=self.frame_index,

@@ -48,11 +48,15 @@ def _get_depth():
 
                 logger.info("Loading Depth Anything V2 model...")
                 _depth_model = {
-                    "transform": Compose([
-                        Resize((518, 518)),
-                        ToTensor(),
-                        Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                    ]),
+                    "transform": Compose(
+                        [
+                            Resize((518, 518)),
+                            ToTensor(),
+                            Normalize(
+                                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                            ),
+                        ]
+                    ),
                     "device": "cuda" if torch.cuda.is_available() else "cpu",
                 }
                 # Attempt to load the actual model; fall back to a simple depth estimation
@@ -65,7 +69,9 @@ def _get_depth():
                     model.eval()
                     _depth_model["model"] = model
                 except Exception:
-                    logger.warning("Depth Anything V2 not available; using gradient fallback")
+                    logger.warning(
+                        "Depth Anything V2 not available; using gradient fallback"
+                    )
                     _depth_model["model"] = None
                 logger.info("Depth model loaded")
     return _depth_model
@@ -140,9 +146,7 @@ class InferenceService:
 
         # Normalize to 0-255 and encode as PNG
         depth_norm = (
-            (depth_np - depth_np.min())
-            / (depth_np.max() - depth_np.min() + 1e-8)
-            * 255
+            (depth_np - depth_np.min()) / (depth_np.max() - depth_np.min() + 1e-8) * 255
         ).astype(np.uint8)
         depth_img = Image.fromarray(depth_norm)
         buf = io.BytesIO()
@@ -167,6 +171,7 @@ class InferenceService:
     def _get_openai_client(cls):
         if cls._openai_client is None:
             import openai
+
             cls._openai_client = openai.AsyncOpenAI()
         return cls._openai_client
 

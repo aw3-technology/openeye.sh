@@ -115,7 +115,7 @@ export const publicMegaMenus: MegaMenu[] = [
         links: [
           { href: "/demo", label: "Live Demo", description: "Run perception in the browser", icon: PlayCircle },
           { href: "/dashboard", label: "Dashboard", description: "Inference, fleet & metrics", icon: LayoutDashboard },
-          { href: "/pricing", label: "Pricing", description: "Free CLI, paid cloud credits", icon: Tag },
+          { href: "/pricing", label: "Pricing", description: "Free to self-host, cloud coming soon", icon: Tag },
         ],
       },
     ],

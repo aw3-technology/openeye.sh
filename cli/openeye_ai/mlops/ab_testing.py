@@ -7,11 +7,9 @@ accuracy/latency metrics side by side.
 from __future__ import annotations
 
 import random
-import statistics
-import time
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -70,7 +68,9 @@ def route_request(test_id: str) -> str:
     """
     test = get_ab_test(test_id)
     if test.status != ABTestStatus.RUNNING:
-        raise RuntimeError(f"A/B test '{test_id}' is not running (status: {test.status.value})")
+        raise RuntimeError(
+            f"A/B test '{test_id}' is not running (status: {test.status.value})"
+        )
 
     if random.random() < test.config.traffic_split:
         return test.config.version_b

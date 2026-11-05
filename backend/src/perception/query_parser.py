@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 
 @dataclass
 class ParsedQuery:
-    intent: str  # "count", "existence", "location", "objects_on", "relation", "describe"
+    intent: (
+        str  # "count", "existence", "location", "objects_on", "relation", "describe"
+    )
     raw: str
     label: str = ""
     subject: str = ""
@@ -24,17 +25,18 @@ def parse_query(question: str) -> ParsedQuery:
 
     m = re.match(r"how many (.+)", q)
     if m:
-        return ParsedQuery(intent="count", raw=question, label=m.group(1).strip().rstrip("s"))
+        return ParsedQuery(
+            intent="count", raw=question, label=m.group(1).strip().rstrip("s")
+        )
 
     m = re.match(r"(?:is|are) there (?:a |an |any |the )?(.+)", q)
     if m:
         desc = m.group(1).strip()
-        rel_match = re.match(
-            r"(.+?) (on|near|above|below) (?:the |a )?(.+)", desc
-        )
+        rel_match = re.match(r"(.+?) (on|near|above|below) (?:the |a )?(.+)", desc)
         if rel_match:
             return ParsedQuery(
-                intent="relation", raw=question,
+                intent="relation",
+                raw=question,
                 subject=rel_match.group(1).strip(),
                 relation_word=rel_match.group(2).strip(),
                 object_label=rel_match.group(3).strip(),
@@ -45,7 +47,10 @@ def parse_query(question: str) -> ParsedQuery:
     if m:
         return ParsedQuery(intent="location", raw=question, label=m.group(1).strip())
 
-    m = re.match(r"what (?:objects?|things?|items?) (?:are|is) (?:on|near|above|below) (?:the )?(.+)", q)
+    m = re.match(
+        r"what (?:objects?|things?|items?) (?:are|is) (?:on|near|above|below) (?:the )?(.+)",
+        q,
+    )
     if m:
         return ParsedQuery(intent="objects_on", raw=question, label=m.group(1).strip())
 
@@ -55,7 +60,8 @@ def parse_query(question: str) -> ParsedQuery:
     )
     if m:
         return ParsedQuery(
-            intent="relation", raw=question,
+            intent="relation",
+            raw=question,
             subject=m.group(1).strip(),
             relation_word=m.group(2).strip(),
             object_label=m.group(3).strip(),

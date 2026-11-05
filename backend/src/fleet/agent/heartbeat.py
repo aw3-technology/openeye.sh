@@ -2,11 +2,11 @@
 
 import asyncio
 import logging
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, Optional
 
 import httpx
 
-from ..models import HeartbeatRequest, ResourceUsage
+from ..models import HeartbeatRequest
 from .config import AgentConfig
 from .resource_monitor import ResourceMonitor
 
@@ -23,7 +23,9 @@ class HeartbeatSender:
     async def start(self) -> None:
         """Start the heartbeat loop."""
         self._running = True
-        logger.info("Heartbeat sender started (interval=%.1fs)", self.config.heartbeat_interval)
+        logger.info(
+            "Heartbeat sender started (interval=%.1fs)", self.config.heartbeat_interval
+        )
         while self._running:
             try:
                 await self._send_heartbeat()

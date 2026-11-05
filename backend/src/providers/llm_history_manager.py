@@ -81,27 +81,36 @@ class LLMHistoryManager:
             }
             if isinstance(self.client, openai.AsyncClient):
                 response = await asyncio.wait_for(
-                    self.client.chat.completions.create(**api_kwargs), timeout=timeout,
+                    self.client.chat.completions.create(**api_kwargs),
+                    timeout=timeout,
                 )
             else:
                 loop = asyncio.get_running_loop()
                 response = await asyncio.wait_for(
                     loop.run_in_executor(
                         None,
-                        functools.partial(self.client.chat.completions.create, **api_kwargs),
+                        functools.partial(
+                            self.client.chat.completions.create, **api_kwargs
+                        ),
                     ),
                     timeout=timeout,
                 )
             if not response or not response.choices:
-                return ChatMessage(role="system", content="Error: Received invalid response from API")
+                return ChatMessage(
+                    role="system", content="Error: Received invalid response from API"
+                )
             summary = response.choices[0].message.content
             if summary is None:
-                return ChatMessage(role="system", content="Error: Received empty summary from API")
+                return ChatMessage(
+                    role="system", content="Error: Received empty summary from API"
+                )
             return ChatMessage(role="assistant", content=f"Previously, {summary}")
         except asyncio.TimeoutError:
             return ChatMessage(role="system", content="Error: API request timed out")
         except openai.APIError as e:
-            return ChatMessage(role="system", content=f"Error: API service unavailable: {str(e)}")
+            return ChatMessage(
+                role="system", content=f"Error: API service unavailable: {str(e)}"
+            )
         except Exception as e:
             logging.error(f"Error summarizing messages: {type(e).__name__}: {e}")
             return ChatMessage(role="system", content="Error summarizing state")
@@ -114,7 +123,9 @@ class LLMHistoryManager:
                 return
             messages_copy = messages.copy()
             num_summarized = len(messages_copy)
-            self._summary_task = asyncio.create_task(self.summarize_messages(messages_copy))
+            self._summary_task = asyncio.create_task(
+                self.summarize_messages(messages_copy)
+            )
 
             def callback(task):
                 try:
@@ -124,13 +135,18 @@ class LLMHistoryManager:
                     if summary_message.role == "assistant":
                         del messages[:num_summarized]
                         messages.insert(0, summary_message)
-                    elif summary_message.role == "system" and "Error" in summary_message.content:
+                    elif (
+                        summary_message.role == "system"
+                        and "Error" in summary_message.content
+                    ):
                         target_length = self.config.history_length
                         if target_length is not None and len(messages) > target_length:
                             excess = len(messages) - target_length
                             del messages[:excess]
                 except Exception as e:
-                    logging.error(f"Error in summary task callback: {type(e).__name__}: {e}")
+                    logging.error(
+                        f"Error in summary task callback: {type(e).__name__}: {e}"
+                    )
                     target_length = self.config.history_length
                     if target_length is not None and len(messages) > target_length:
                         excess = len(messages) - target_length
@@ -144,9 +160,9 @@ class LLMHistoryManager:
         return [{"role": msg.role, "content": msg.content} for msg in self.history]
 
     @staticmethod
-    def update_history() -> (
-        Callable[[Callable[..., Awaitable[R]]], Callable[..., Awaitable[R]]]
-    ):
+    def update_history() -> Callable[
+        [Callable[..., Awaitable[R]]], Callable[..., Awaitable[R]]
+    ]:
         def decorator(func: Callable[..., Awaitable[R]]) -> Callable[..., Awaitable[R]]:
             @functools.wraps(func)
             async def wrapper(self: Any, prompt: str, *args: Any, **kwargs: Any) -> R:
@@ -157,7 +173,6 @@ class LLMHistoryManager:
                     self.history_manager.frame_index += 1
                     return response
                 self.agent_name = self._config.agent_name
-                cycle = self.history_manager.frame_index
                 current_tick = self.io_provider.tick_counter
                 formatted_inputs = f"{self.agent_name} sensed the following: "
                 for input_type, input_info in self.io_provider.inputs.items():
@@ -202,5 +217,7 @@ class LLMHistoryManager:
                         self.history_manager.history.pop()
                 self.history_manager.frame_index += 1
                 return response
+
             return wrapper
+
         return decorator

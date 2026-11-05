@@ -42,9 +42,7 @@ class Adapter(ModelAdapter):
 
         # Prepare observation for the policy
         img_array = np.array(image.resize((224, 224)))
-        img_tensor = (
-            torch.from_numpy(img_array).permute(2, 0, 1).float() / 255.0
-        )
+        img_tensor = torch.from_numpy(img_array).permute(2, 0, 1).float() / 255.0
         img_tensor = img_tensor.unsqueeze(0)
 
         if torch.cuda.is_available():

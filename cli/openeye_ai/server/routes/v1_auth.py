@@ -27,4 +27,5 @@ def _valid_api_key(authorization: str = Header(...)) -> str:
 
 def _auth_error(detail: str):
     from fastapi import HTTPException
+
     return HTTPException(status_code=401, detail=detail)

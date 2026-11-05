@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -53,11 +53,13 @@ class AgenticSession:
     # ── Timeline ────────────────────────────────────────────────── #
 
     def add_timeline_event(self, event: str, details: str) -> None:
-        self.timeline.append({
-            "timestamp": time.time(),
-            "event": event,
-            "details": details,
-        })
+        self.timeline.append(
+            {
+                "timestamp": time.time(),
+                "event": event,
+                "details": details,
+            }
+        )
         if len(self.timeline) > self.cfg.timeline_max:
             self.timeline.pop(0)
 
@@ -89,16 +91,25 @@ class AgenticSession:
 
         # Detect disappearances
         for tid, info in list(self.objects_seen.items()):
-            if tid not in current_ids and (now - info["last_seen"]) > self.cfg.disappear_threshold:
+            if (
+                tid not in current_ids
+                and (now - info["last_seen"]) > self.cfg.disappear_threshold
+            ):
                 if (now - info["last_seen"]) < self.cfg.disappear_threshold + 1.0:
-                    changes.append({"type": "disappeared", "track_id": tid, "label": info["label"]})
-                    self.add_timeline_event("object_disappeared", f"{info['label']} (ID: {tid})")
+                    changes.append(
+                        {"type": "disappeared", "track_id": tid, "label": info["label"]}
+                    )
+                    self.add_timeline_event(
+                        "object_disappeared", f"{info['label']} (ID: {tid})"
+                    )
 
         return changes
 
     # ── VLM reasoning ───────────────────────────────────────────── #
 
-    async def run_vlm_reasoning(self, frame_b64: str, scene_desc: str, goal: str) -> dict:
+    async def run_vlm_reasoning(
+        self, frame_b64: str, scene_desc: str, goal: str
+    ) -> dict:
         """Send frame to VLM for high-level reasoning."""
         if not self.vlm_client:
             return {
@@ -109,7 +120,8 @@ class AgenticSession:
 
         goal_context = f" Current goal: {goal}." if goal else ""
         objects_summary = ", ".join(
-            f"{info['label']}" for info in self.objects_seen.values()
+            f"{info['label']}"
+            for info in self.objects_seen.values()
             if (time.time() - info["last_seen"]) < 5.0
         )
 
@@ -137,9 +149,14 @@ class AgenticSession:
                             "content": [
                                 {
                                     "type": "image_url",
-                                    "image_url": {"url": f"data:image/jpeg;base64,{frame_b64}"},
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{frame_b64}"
+                                    },
                                 },
-                                {"type": "text", "text": f"Analyze this frame. Goal: {goal or 'observe and describe'}"},
+                                {
+                                    "type": "text",
+                                    "text": f"Analyze this frame. Goal: {goal or 'observe and describe'}",
+                                },
                             ],
                         },
                     ],
@@ -187,7 +204,7 @@ class AgenticSession:
         """Build the ``memory`` dict for the WS response."""
         return {
             "objects_seen": self.build_active_objects_snapshot(),
-            "timeline": self.timeline[-self.cfg.timeline_tail:],
+            "timeline": self.timeline[-self.cfg.timeline_tail :],
             "frame_count": self.frame_count,
             "total_objects_tracked": len(self.objects_seen),
         }

@@ -8,10 +8,9 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from governance.engine import GovernanceEngine
-from governance.loader import list_presets, validate_yaml
+from governance.loader import list_presets
 from governance.models import (
     AuditEntry,
-    GovernanceConfig,
     GovernanceStatus,
     PolicyInfo,
 )
@@ -112,7 +111,9 @@ async def update_config(payload: YAMLPayload):
 
 
 @router.get("/audit", response_model=list[AuditEntry])
-async def get_audit(limit: int = Query(default=100, ge=1, le=1000), offset: int = Query(default=0, ge=0)):
+async def get_audit(
+    limit: int = Query(default=100, ge=1, le=1000), offset: int = Query(default=0, ge=0)
+):
     return _get_engine().audit.get_entries(limit=limit, offset=offset)
 
 

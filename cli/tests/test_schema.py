@@ -1,9 +1,8 @@
 """Tests for Pydantic schema models."""
 
 import pytest
-from pydantic import ValidationError
-
 from openeye_ai.schema import BBox, DetectedObject, ImageInfo, PredictionResult
+from pydantic import ValidationError
 
 
 class TestBBox:

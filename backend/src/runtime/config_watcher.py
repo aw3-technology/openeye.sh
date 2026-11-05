@@ -4,7 +4,7 @@ import os
 import time
 from typing import Callable, Optional
 
-from runtime.config import ModeSystemConfig, load_mode_config
+from runtime.config import load_mode_config
 
 
 class ConfigWatcher:
@@ -19,7 +19,9 @@ class ConfigWatcher:
         self.config_path = config_path
         self.check_interval = check_interval
         self._get_runtime = get_runtime
-        self.last_modified: Optional[float] = self._get_file_mtime() if config_path else None
+        self.last_modified: Optional[float] = (
+            self._get_file_mtime() if config_path else None
+        )
         self.task: Optional[asyncio.Task] = None
 
         if config_path:
@@ -99,7 +101,9 @@ class ConfigWatcher:
 
             mode_config = rt.mode_config.modes.get(current_mode)
             await rt.lifecycle.initialize_mode(current_mode, mode_config)
-            await rt.lifecycle.start_orchestrators(rt._run_cortex_loop, rt.transitions.ensure_task_running)
+            await rt.lifecycle.start_orchestrators(
+                rt._run_cortex_loop, rt.transitions.ensure_task_running
+            )
 
             logging.info(
                 f"Mode configuration reloaded successfully, active mode: {current_mode}"
@@ -112,7 +116,9 @@ class ConfigWatcher:
                 current_mode = rt.mode_manager.current_mode_name
                 mode_config = rt.mode_config.modes.get(current_mode)
                 await rt.lifecycle.initialize_mode(current_mode, mode_config)
-                await rt.lifecycle.start_orchestrators(rt._run_cortex_loop, rt.transitions.ensure_task_running)
+                await rt.lifecycle.start_orchestrators(
+                    rt._run_cortex_loop, rt.transitions.ensure_task_running
+                )
                 logging.info("Successfully recovered with previous configuration")
             except Exception as recovery_error:
                 logging.critical(

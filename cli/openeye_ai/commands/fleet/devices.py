@@ -14,7 +14,9 @@ from ._helpers import _delete, _get, _post, _put, err_console, fleet_app
 @fleet_app.command("register")
 def register(
     name: str = typer.Argument(..., help="Device name"),
-    device_type: str = typer.Option("edge_node", "--type", "-t", help="camera|robot|edge_node|gateway|drone"),
+    device_type: str = typer.Option(
+        "edge_node", "--type", "-t", help="camera|robot|edge_node|gateway|drone"
+    ),
 ) -> None:
     """Register a new device in the fleet."""
     result = _post("/devices", {"name": name, "device_type": device_type})
@@ -25,8 +27,15 @@ def register(
 
 @fleet_app.command("ls")
 def list_devices(
-    status: str | None = typer.Option(None, "--status", "-s", help="Filter by status: online, offline, error"),
-    device_type: str | None = typer.Option(None, "--type", "-t", help="Filter by type: camera, robot, edge_node, gateway, drone"),
+    status: str | None = typer.Option(
+        None, "--status", "-s", help="Filter by status: online, offline, error"
+    ),
+    device_type: str | None = typer.Option(
+        None,
+        "--type",
+        "-t",
+        help="Filter by type: camera, robot, edge_node, gateway, drone",
+    ),
 ) -> None:
     """List all devices."""
     params = {}
@@ -45,12 +54,16 @@ def list_devices(
     tbl.add_column("Model")
     tbl.add_column("Last Heartbeat")
     for d in devices:
-        status_style = {"online": "green", "offline": "dim", "error": "red"}.get(d["status"], "")
+        status_style = {"online": "green", "offline": "dim", "error": "red"}.get(
+            d["status"], ""
+        )
         tbl.add_row(
             d["name"],
             d["id"][:12],
             d["device_type"],
-            f"[{status_style}]{d['status']}[/{status_style}]" if status_style else d["status"],
+            f"[{status_style}]{d['status']}[/{status_style}]"
+            if status_style
+            else d["status"],
             d.get("current_model_version") or "\u2014",
             d.get("last_heartbeat_at", "\u2014") or "\u2014",
         )
@@ -79,7 +92,9 @@ def restart(
 def decommission(
     device_id: str = typer.Argument(..., help="Device UUID"),
     reason: str = typer.Option("", "--reason", "-r", help="Reason for decommissioning"),
-    wipe: bool = typer.Option(False, "--wipe", help="Wipe device data after decommissioning"),
+    wipe: bool = typer.Option(
+        False, "--wipe", help="Wipe device data after decommissioning"
+    ),
 ) -> None:
     """Decommission a device."""
     result = _delete(f"/devices/{device_id}", {"reason": reason, "wipe_data": wipe})
@@ -150,16 +165,24 @@ def device_resources(
             f"[{mem_style}]{mem:.1f}[/{mem_style}]",
             f"{e.get('disk_percent', 0):.1f}",
             str(e.get("inference_rate", "\u2014")),
-            f"{e.get('gpu_percent', 0):.1f}" if e.get("gpu_percent") is not None else "\u2014",
+            f"{e.get('gpu_percent', 0):.1f}"
+            if e.get("gpu_percent") is not None
+            else "\u2014",
         )
     err_console.print(tbl)
 
 
 @fleet_app.command("batch")
 def batch_command(
-    command: str = typer.Argument(..., help="Command to send: restart, update_config, update_model"),
-    tag_filter: str | None = typer.Option(None, "--tag", "-t", help="Tag filter as key=value"),
-    payload_json: str | None = typer.Option(None, "--payload", "-p", help="JSON payload for the command"),
+    command: str = typer.Argument(
+        ..., help="Command to send: restart, update_config, update_model"
+    ),
+    tag_filter: str | None = typer.Option(
+        None, "--tag", "-t", help="Tag filter as key=value"
+    ),
+    payload_json: str | None = typer.Option(
+        None, "--payload", "-p", help="JSON payload for the command"
+    ),
 ) -> None:
     """Send a batch command to devices matching a tag filter."""
     body: dict = {"action": command}
@@ -176,4 +199,6 @@ def batch_command(
             rprint("[red]Invalid JSON payload[/red]")
             raise typer.Exit(code=1)
     result = _post("/devices/batch", body)
-    rprint(f"[green]Batch command sent:[/green] {result.get('affected_devices', '?')} devices")
+    rprint(
+        f"[green]Batch command sent:[/green] {result.get('affected_devices', '?')} devices"
+    )

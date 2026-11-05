@@ -7,11 +7,10 @@ tracking versions with metadata: training dataset, metrics, author, changelog.
 from __future__ import annotations
 
 import hashlib
+import logging
 import shutil
 from pathlib import Path
 from typing import Any, Optional
-
-import logging
 
 from openeye_ai.config import MODELS_DIR, OPENEYE_HOME
 
@@ -80,7 +79,9 @@ def get_registered_model(key: str) -> ModelRegistryEntry:
     data = _load_enterprise_registry()
     if key not in data["models"]:
         available = ", ".join(data["models"].keys()) or "none"
-        raise KeyError(f"Model '{key}' not in enterprise registry. Available: {available}")
+        raise KeyError(
+            f"Model '{key}' not in enterprise registry. Available: {available}"
+        )
     raw = data["models"][key]
     return ModelRegistryEntry(key=key, **raw)
 
@@ -92,8 +93,11 @@ def upload_and_register(request: ModelUploadRequest) -> ModelVersion:
     registry entry with version 1.0.0.
     """
     import re
+
     if not re.match(r"^[a-zA-Z0-9_.-]+$", request.key):
-        raise ValueError(f"Invalid model key: {request.key!r} — must be alphanumeric with dashes/underscores only")
+        raise ValueError(
+            f"Invalid model key: {request.key!r} — must be alphanumeric with dashes/underscores only"
+        )
     src = Path(request.file_path)
     if not src.exists():
         raise FileNotFoundError(f"Model file not found: {src}")
@@ -137,7 +141,9 @@ def upload_and_register(request: ModelUploadRequest) -> ModelVersion:
     # Register in enterprise registry
     data = _load_enterprise_registry()
     if request.key in data["models"]:
-        raise ValueError(f"Model '{request.key}' already exists. Use add_version() instead.")
+        raise ValueError(
+            f"Model '{request.key}' already exists. Use add_version() instead."
+        )
 
     data["models"][request.key] = {
         "name": request.name,
@@ -211,7 +217,9 @@ def add_version(
     existing_versions = data["models"][model_key].get("versions", [])
     for v in existing_versions:
         if v["version"] == version:
-            raise ValueError(f"Version '{version}' already exists for model '{model_key}'.")
+            raise ValueError(
+                f"Version '{version}' already exists for model '{model_key}'."
+            )
 
     existing_versions.append(new_version.model_dump())
     data["models"][model_key]["versions"] = existing_versions

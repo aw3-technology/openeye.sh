@@ -38,11 +38,12 @@ export function OpenEyeConnectionProvider({ children }: { children: ReactNode })
 
   const isCloud = useMemo(() => checkCloudDeployment(), []);
 
-  // Skip health polling when using default localhost URL on a deployed (non-localhost) origin
-  const isDefaultLocalhost = serverUrl === "http://localhost:8000" && typeof window !== "undefined" && window.location.hostname !== "localhost";
+  // On the cloud site no server is configured until the user enters one; a
+  // user-entered URL (including http://localhost:8000) is always polled.
+  const hasServer = serverUrl.trim() !== "";
 
   useEffect(() => {
-    if (isDefaultLocalhost) {
+    if (!hasServer) {
       setIsConnected(false);
       setHealthData(null);
       return;
@@ -71,7 +72,7 @@ export function OpenEyeConnectionProvider({ children }: { children: ReactNode })
       cancelled = true;
       clearInterval(id);
     };
-  }, [client, serverUrl]);
+  }, [client, serverUrl, hasServer]);
 
   return (
     <OpenEyeConnectionContext.Provider

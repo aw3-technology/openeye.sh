@@ -4,9 +4,8 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from PIL import Image
-
 from openeye_ai.adapters.base import ModelAdapter, ModelNotLoadedError
+from PIL import Image
 
 
 def test_abc_cannot_be_instantiated():
@@ -68,9 +67,9 @@ def test_predict_with_different_modes(fake_adapter):
 
 
 def test_pull_creates_directory():
-    from tests.conftest import FakeAdapter
-
     import tempfile
+
+    from tests.conftest import FakeAdapter
 
     adapter = FakeAdapter()
     with tempfile.TemporaryDirectory() as td:

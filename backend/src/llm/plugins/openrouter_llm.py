@@ -45,7 +45,7 @@ class OpenRouterConfig(LLMConfig):
         description="Fallback model if the primary model fails",
     )
     site_url: str = Field(
-        default="https://perceptify.dev",
+        default="https://openeye.sh",
         description="Site URL for OpenRouter HTTP-Referer header",
     )
     site_name: str = Field(
@@ -77,9 +77,7 @@ class OpenRouterLLM(LLM[R]):
         )
         self.history_manager = LLMHistoryManager(self._config, self._client)
 
-    async def _call_model(
-        self, model: str, formatted_messages: list
-    ) -> T.Optional[R]:
+    async def _call_model(self, model: str, formatted_messages: list) -> T.Optional[R]:
         response = await self._client.chat.completions.create(
             model=model,
             messages=T.cast(T.Any, formatted_messages),

@@ -11,14 +11,18 @@ from .enums import DeploymentStatus, DeploymentStrategy
 class RolloutStage(BaseModel):
     name: str = Field(description="Stage name, e.g. 'canary-10%'")
     percentage: float = Field(ge=0, le=100, description="% of target devices")
-    min_wait_seconds: int = Field(default=300, description="Minimum wait before advancing")
+    min_wait_seconds: int = Field(
+        default=300, description="Minimum wait before advancing"
+    )
 
 
 class DeploymentCreateRequest(BaseModel):
     name: str = Field(description="Deployment name")
     model_id: str = Field(description="Model identifier to deploy")
     model_version: str = Field(description="Model version string")
-    model_url: Optional[str] = Field(default=None, description="Download URL for model artifact")
+    model_url: Optional[str] = Field(
+        default=None, description="Download URL for model artifact"
+    )
     model_checksum: Optional[str] = Field(default=None, description="SHA-256 checksum")
     strategy: DeploymentStrategy = Field(default=DeploymentStrategy.CANARY)
     rollout_stages: List[RolloutStage] = Field(
@@ -29,9 +33,15 @@ class DeploymentCreateRequest(BaseModel):
         ],
         description="Staged rollout plan",
     )
-    target_device_ids: List[str] = Field(default_factory=list, description="Specific device UUIDs")
-    target_group_id: Optional[str] = Field(default=None, description="Target device group")
-    bandwidth_limit_mbps: Optional[float] = Field(default=None, description="Download bandwidth limit")
+    target_device_ids: List[str] = Field(
+        default_factory=list, description="Specific device UUIDs"
+    )
+    target_group_id: Optional[str] = Field(
+        default=None, description="Target device group"
+    )
+    bandwidth_limit_mbps: Optional[float] = Field(
+        default=None, description="Download bandwidth limit"
+    )
 
 
 class DeploymentResponse(BaseModel):

@@ -49,15 +49,22 @@ class TestValidation:
 
         with pytest.raises(ValueError, match="Invalid condition"):
             create_validation_test(
-                name="bad", model_key="m", test_dataset="/tmp/d",
+                name="bad",
+                model_key="m",
+                test_dataset="/tmp/d",
                 conditions=["not a real condition"],
             )
 
     def test_create_and_list_validation_tests(self):
-        from openeye_ai.mlops.validation import create_validation_test, list_validation_tests
+        from openeye_ai.mlops.validation import (
+            create_validation_test,
+            list_validation_tests,
+        )
 
         create_validation_test(
-            name="smoke", model_key="mymodel", test_dataset="/data",
+            name="smoke",
+            model_key="mymodel",
+            test_dataset="/data",
             conditions=["accuracy > 0.8", "latency_ms < 100"],
         )
         tests = list_validation_tests()
@@ -75,10 +82,15 @@ class TestValidation:
             get_validation_test("vt-nonexistent")
 
     def test_get_validation_test_success(self):
-        from openeye_ai.mlops.validation import create_validation_test, get_validation_test
+        from openeye_ai.mlops.validation import (
+            create_validation_test,
+            get_validation_test,
+        )
 
         test = create_validation_test(
-            name="get-test", model_key="m", test_dataset="/data",
+            name="get-test",
+            model_key="m",
+            test_dataset="/data",
             conditions=["accuracy > 0.8"],
         )
         fetched = get_validation_test(test.id)

@@ -57,8 +57,10 @@ class ServerState:
         nebius_key = os.environ.get("NEBIUS_API_KEY", "")
 
         # If user explicitly set an OpenRouter key and the model looks like an OpenRouter ID
-        is_openrouter = bool(openrouter_key) and "/" in model and (
-            model.split("/")[0].islower() or ":free" in model
+        is_openrouter = (
+            bool(openrouter_key)
+            and "/" in model
+            and (model.split("/")[0].islower() or ":free" in model)
         )
 
         if is_openrouter:
@@ -66,7 +68,9 @@ class ServerState:
             base_url = "https://openrouter.ai/api/v1"
         else:
             api_key = nebius_key
-            base_url = os.environ.get("NEBIUS_BASE_URL", "https://api.studio.nebius.com/v1")
+            base_url = os.environ.get(
+                "NEBIUS_BASE_URL", "https://api.studio.nebius.com/v1"
+            )
 
         return api_key, base_url, model
 
@@ -102,7 +106,9 @@ class ServerState:
                     return adapter.predict(img).get("objects", [])
 
                 gov = self.init_governance()
-                self.pipeline = PerceptionPipeline(detector=detector_fn, governance_engine=gov)
+                self.pipeline = PerceptionPipeline(
+                    detector=detector_fn, governance_engine=gov
+                )
             except ImportError as e:
                 logger.warning(f"PerceptionPipeline not available: {e}")
                 return None

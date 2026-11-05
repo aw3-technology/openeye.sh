@@ -49,7 +49,7 @@ export default function ApiKeys() {
         <div>
           <h1 className="text-2xl font-semibold">API Keys</h1>
           <p className="text-sm text-muted-foreground">
-            Manage keys for authenticating with the OpenEye inference API.
+            Keys for the OpenEye <code className="text-xs">/v1</code> inference API.
           </p>
         </div>
         <CreateKeyDialog onGenerate={handleCreate} />
@@ -70,7 +70,13 @@ export default function ApiKeys() {
 
       {/* Quick Start */}
       <div>
-        <h2 className="mb-3 text-lg font-medium">Quick Start</h2>
+        <h2 className="mb-1 text-lg font-medium">Quick Start</h2>
+        <p className="mb-3 text-sm text-muted-foreground">
+          The hosted API isn't live yet; keys created here will work with it at launch. Until then, run{" "}
+          <code className="text-xs">openeye serve</code> and call it locally. It accepts any key starting with{" "}
+          <code className="text-xs">oe_</code>, or only <code className="text-xs">OPENEYE_SERVER_API_KEY</code> when
+          that is set.
+        </p>
         <Card>
           <CardContent className="pt-6">
             <Tabs value={quickStartTab} onValueChange={setQuickStartTab}>
@@ -82,10 +88,9 @@ export default function ApiKeys() {
               </TabsList>
               <TabsContent value="curl">
                 <CodeBlock
-                  code={`curl -X POST https://api.openeye.ai/v1/detect \\
-  -H "X-API-Key: oe_your_key_here" \\
-  -F "file=@photo.jpg" \\
-  -F "confidence=0.3"`}
+                  code={`curl -X POST "http://localhost:8000/v1/detect?confidence=0.3" \\
+  -H "Authorization: Bearer oe_your_key_here" \\
+  -F "file=@photo.jpg"`}
                 />
               </TabsContent>
               <TabsContent value="python">
@@ -94,10 +99,10 @@ export default function ApiKeys() {
                   code={`import requests
 
 resp = requests.post(
-    "https://api.openeye.ai/v1/detect",
-    headers={"X-API-Key": "oe_your_key_here"},
+    "http://localhost:8000/v1/detect",
+    headers={"Authorization": "Bearer oe_your_key_here"},
     files={"file": open("photo.jpg", "rb")},
-    data={"confidence": 0.3},
+    params={"confidence": 0.3},
 )
 detections = resp.json()["objects"]
 for obj in detections:
@@ -110,9 +115,9 @@ for obj in detections:
                   code={`const form = new FormData();
 form.append("file", imageBlob, "photo.jpg");
 
-const res = await fetch("https://api.openeye.ai/v1/detect", {
+const res = await fetch("http://localhost:8000/v1/detect?confidence=0.3", {
   method: "POST",
-  headers: { "X-API-Key": "oe_your_key_here" },
+  headers: { Authorization: "Bearer oe_your_key_here" },
   body: form,
 });
 const { objects } = await res.json();
@@ -122,19 +127,15 @@ objects.forEach(o => console.log(\`\${o.label}: \${o.confidence}\`));`}
               <TabsContent value="websocket">
                 <CodeBlock
                   lang="javascript"
-                  code={`const ws = new WebSocket("wss://api.openeye.ai/ws/perception");
-
-ws.onopen = () => {
-  ws.send(JSON.stringify({ api_key: "oe_your_key_here" }));
-};
+                  code={`const ws = new WebSocket("ws://localhost:8000/ws/perception");
 
 ws.onmessage = (event) => {
   const frame = JSON.parse(event.data);
   console.log("Detections:", frame.objects);
 };
 
-// Send frames as base64
-ws.send(JSON.stringify({ image: base64Frame }));`}
+// Each message is one base64-encoded JPEG or PNG frame
+ws.onopen = () => ws.send(base64Frame);`}
                 />
               </TabsContent>
             </Tabs>

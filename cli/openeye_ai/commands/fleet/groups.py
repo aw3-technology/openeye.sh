@@ -56,7 +56,9 @@ def group_remove_device(
 ) -> None:
     """Remove a device from a group."""
     _delete(f"/groups/{group_id}/members/{device_id}")
-    rprint(f"[yellow]Device {device_id[:12]} removed from group {group_id[:12]}[/yellow]")
+    rprint(
+        f"[yellow]Device {device_id[:12]} removed from group {group_id[:12]}[/yellow]"
+    )
 
 
 @fleet_app.command("group-members")
@@ -77,12 +79,16 @@ def group_members(
     tbl.add_column("Type")
     tbl.add_column("Status")
     for d in entries:
-        status_style = {"online": "green", "offline": "dim", "error": "red"}.get(d.get("status", ""), "")
+        status_style = {"online": "green", "offline": "dim", "error": "red"}.get(
+            d.get("status", ""), ""
+        )
         tbl.add_row(
             d.get("name", "?"),
             d.get("id", d.get("device_id", "?"))[:12],
             d.get("device_type", "\u2014"),
-            f"[{status_style}]{d.get('status', '?')}[/{status_style}]" if status_style else d.get("status", "?"),
+            f"[{status_style}]{d.get('status', '?')}[/{status_style}]"
+            if status_style
+            else d.get("status", "?"),
         )
     err_console.print(tbl)
 
@@ -90,10 +96,14 @@ def group_members(
 @fleet_app.command("group-scaling")
 def group_scaling(
     group_id: str = typer.Argument(..., help="Group UUID"),
-    enabled: bool = typer.Option(True, "--enabled/--disabled", help="Enable or disable auto-scaling"),
+    enabled: bool = typer.Option(
+        True, "--enabled/--disabled", help="Enable or disable auto-scaling"
+    ),
     min_devices: int = typer.Option(1, "--min", help="Minimum devices"),
     max_devices: int = typer.Option(10, "--max", help="Maximum devices"),
-    target_cpu: float = typer.Option(70.0, "--target-cpu", help="Target CPU percentage"),
+    target_cpu: float = typer.Option(
+        70.0, "--target-cpu", help="Target CPU percentage"
+    ),
 ) -> None:
     """Set auto-scaling policy for a device group."""
     policy = {
@@ -104,4 +114,6 @@ def group_scaling(
     }
     _put(f"/groups/{group_id}/scaling", policy)
     state = "enabled" if enabled else "disabled"
-    rprint(f"[green]Auto-scaling {state}[/green] (min={min_devices}, max={max_devices}, cpu={target_cpu}%)")
+    rprint(
+        f"[green]Auto-scaling {state}[/green] (min={min_devices}, max={max_devices}, cpu={target_cpu}%)"
+    )

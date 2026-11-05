@@ -48,7 +48,8 @@ def create_app(
 
     # Try to mount governance router and wire up set_engine
     try:
-        from governance.router import router as governance_router, set_engine as set_governance_engine
+        from governance.router import router as governance_router
+        from governance.router import set_engine as set_governance_engine
 
         app.include_router(governance_router)
         state._set_governance_engine = set_governance_engine

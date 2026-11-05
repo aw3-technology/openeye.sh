@@ -47,10 +47,7 @@ def export_model(request: ExportRequest) -> ExportResult:
         }
         ext = ext_map[request.target_format]
         output_path = (
-            MODELS_DIR
-            / request.model_key
-            / f"v{request.model_version}"
-            / f"model{ext}"
+            MODELS_DIR / request.model_key / f"v{request.model_version}" / f"model{ext}"
         )
 
     # Export

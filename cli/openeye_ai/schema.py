@@ -38,7 +38,9 @@ class SegmentationMask(BaseModel):
 class PredictionResult(BaseModel):
     model: str
     task: str
-    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
     image: ImageInfo
     objects: list[DetectedObject] = Field(default_factory=list)
     depth_map: Optional[str] = Field(
@@ -61,7 +63,9 @@ class Observation(BaseModel):
 
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12])
     tick: int
-    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
     detections: list[DetectedObject] = Field(default_factory=list)
     scene_summary: str = ""
     change_description: str = ""
@@ -91,7 +95,9 @@ class AgentTickEvent(BaseModel):
     action_taken: str = ""
     memory_recalled: list[Observation] = Field(default_factory=list)
     current_plan: list[str] = Field(default_factory=list)
-    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
 
 
 class RecallQuery(BaseModel):

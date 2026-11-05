@@ -7,10 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from PIL import Image
-
 from openeye_ai.adapters.base import ModelAdapter
-
+from PIL import Image
 
 # ── Shared test helpers ──────────────────────────────────────────────
 
@@ -66,8 +64,16 @@ def make_test_registry(
     elif variant_style == "format":
         yolov8["adapter"] = "yolo"
         yolov8["variants"] = {
-            "onnx": {"filename": "yolov8n.onnx", "size_mb": 12, "adapter": "yolov8:onnx"},
-            "tensorrt": {"filename": "yolov8n.engine", "size_mb": 15, "adapter": "yolov8:tensorrt"},
+            "onnx": {
+                "filename": "yolov8n.onnx",
+                "size_mb": 12,
+                "adapter": "yolov8:onnx",
+            },
+            "tensorrt": {
+                "filename": "yolov8n.engine",
+                "size_mb": 15,
+                "adapter": "yolov8:tensorrt",
+            },
         }
 
     # Non-quantized style also uses "yolo" adapter key
@@ -80,7 +86,9 @@ def make_test_registry(
         "name": "Depth Anything",
         "task": "depth",
         "adapter": "depth_anything",
-        "description": "Monocular depth estimation" if include_checksum else "Monocular depth",
+        "description": "Monocular depth estimation"
+        if include_checksum
+        else "Monocular depth",
         "hf_repo": "depth/anything",
         "filename": "depth.pt",
         "size_mb": 98 if include_checksum else 50,
@@ -134,9 +142,17 @@ class StubAdapter:
         track_pulls: list[str] | None = None,
         fail_on: str | None = None,
     ):
-        self._detections = detections if detections is not None else [
-            {"label": "person", "confidence": 0.9, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}}
-        ]
+        self._detections = (
+            detections
+            if detections is not None
+            else [
+                {
+                    "label": "person",
+                    "confidence": 0.9,
+                    "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4},
+                }
+            ]
+        )
         self._inference_ms = inference_ms
         self._track_pulls = track_pulls
         self._fail_on = fail_on
@@ -212,10 +228,9 @@ def tmp_openeye_home(tmp_path, monkeypatch):
 @pytest.fixture()
 def app_client(fake_adapter):
     """Return a TestClient wrapping the FastAPI app with a FakeAdapter."""
-    from starlette.testclient import TestClient
-
     from openeye_ai.server.app import create_app
     from openeye_ai.server.rate_limit import limiter
+    from starlette.testclient import TestClient
 
     # Reset rate limiter state between tests
     limiter.reset()
@@ -271,21 +286,52 @@ def memory_store(tmp_path):
 def _isolate_mlops(tmp_openeye_home, monkeypatch):
     """Redirect all MLOps YAML paths to a temp dir so tests don't touch real state."""
     home = tmp_openeye_home
-    monkeypatch.setattr("openeye_ai.mlops.model_registry._ENTERPRISE_REGISTRY_PATH", home / "registry.yaml")
+    monkeypatch.setattr(
+        "openeye_ai.mlops.model_registry._ENTERPRISE_REGISTRY_PATH",
+        home / "registry.yaml",
+    )
     monkeypatch.setattr("openeye_ai.mlops.model_registry.MODELS_DIR", home / "models")
-    monkeypatch.setattr("openeye_ai.mlops.lifecycle._PROMOTIONS_PATH", home / "promotions.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.ab_testing._AB_TESTS_PATH", home / "ab_tests.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.shadow_mode._SHADOW_PATH", home / "shadow_deployments.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.retraining._PIPELINES_PATH", home / "retraining_pipelines.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.retraining._RUNS_PATH", home / "retraining_runs.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.batch_jobs._BATCH_JOBS_PATH", home / "batch_jobs.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.feedback._ANNOTATIONS_PATH", home / "annotations.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.feedback._BATCHES_PATH", home / "feedback_batches.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.validation._TESTS_PATH", home / "validation_tests.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.validation._RUNS_PATH", home / "validation_runs.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.lineage._LINEAGE_PATH", home / "model_lineage.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.export._EXPORTS_PATH", home / "model_exports.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.benchmark_matrix._BENCHMARKS_PATH", home / "benchmark_results.yaml")
+    monkeypatch.setattr(
+        "openeye_ai.mlops.lifecycle._PROMOTIONS_PATH", home / "promotions.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.ab_testing._AB_TESTS_PATH", home / "ab_tests.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.shadow_mode._SHADOW_PATH", home / "shadow_deployments.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.retraining._PIPELINES_PATH",
+        home / "retraining_pipelines.yaml",
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.retraining._RUNS_PATH", home / "retraining_runs.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.batch_jobs._BATCH_JOBS_PATH", home / "batch_jobs.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.feedback._ANNOTATIONS_PATH", home / "annotations.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.feedback._BATCHES_PATH", home / "feedback_batches.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.validation._TESTS_PATH", home / "validation_tests.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.validation._RUNS_PATH", home / "validation_runs.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.lineage._LINEAGE_PATH", home / "model_lineage.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.export._EXPORTS_PATH", home / "model_exports.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.benchmark_matrix._BENCHMARKS_PATH",
+        home / "benchmark_results.yaml",
+    )
 
 
 @pytest.fixture()

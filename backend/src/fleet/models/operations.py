@@ -21,5 +21,9 @@ class DecommissionRequest(BaseModel):
 
 class BatchDeviceRequest(BaseModel):
     tag_filter: Dict[str, str] = Field(description="Match devices with these tags")
-    action: str = Field(description="Action to perform: restart, update_config, decommission")
-    payload: Dict[str, Any] = Field(default_factory=dict, description="Action-specific payload")
+    action: str = Field(
+        description="Action to perform: restart, update_config, decommission"
+    )
+    payload: Dict[str, Any] = Field(
+        default_factory=dict, description="Action-specific payload"
+    )

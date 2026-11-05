@@ -7,7 +7,13 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from fastapi.responses import JSONResponse
 from PIL import Image
 
-from ..deps import ApiKeyContext, get_api_key_auth, get_supabase
+from ..deps import (
+    ApiKeyContext,
+    get_api_key_auth,
+    get_credits_service,
+    get_db,
+    get_inference_service,
+)
 from ..models import (
     DepthResponse,
     DescribeResponse,
@@ -25,10 +31,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Hosted API"])
 router.include_router(stream_router)
-
-# Shared service instances
-_credits_svc = CreditsService()
-_inference_svc = InferenceService()
 
 # Available models
 MODELS = [
@@ -78,18 +80,27 @@ async def _read_image(file: UploadFile) -> Image.Image:
             break
         total += len(chunk)
         if total > _MAX_IMAGE_BYTES:
-            raise HTTPException(status_code=413, detail="File too large. Maximum size is 20MB.")
+            raise HTTPException(
+                status_code=413, detail="File too large. Maximum size is 20MB."
+            )
         chunks.append(chunk)
     contents = b"".join(chunks)
     try:
         return Image.open(BytesIO(contents)).convert("RGB")
     except Exception:
-        raise HTTPException(status_code=400, detail="Cannot decode image. Supported formats: JPEG, PNG, WebP.")
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot decode image. Supported formats: JPEG, PNG, WebP.",
+        )
 
 
-async def _enforce_rate_limit(rate_svc: RateLimitService, ctx: ApiKeyContext) -> tuple[int, int]:
+async def _enforce_rate_limit(
+    rate_svc: RateLimitService, ctx: ApiKeyContext
+) -> tuple[int, int]:
     """Check rate limit, raise 429 if exceeded. Returns (remaining, reset)."""
-    allowed, remaining, reset = await rate_svc.check_rate_limit(ctx.api_key_id, ctx.rate_limit)
+    allowed, remaining, reset = await rate_svc.check_rate_limit(
+        ctx.api_key_id, ctx.rate_limit
+    )
     if not allowed:
         raise HTTPException(
             status_code=429,
@@ -99,10 +110,12 @@ async def _enforce_rate_limit(rate_svc: RateLimitService, ctx: ApiKeyContext) ->
     return remaining, reset
 
 
-async def _enforce_credits(user_id: str, cost: int) -> None:
+async def _enforce_credits(
+    credits_svc: CreditsService, user_id: str, cost: int
+) -> None:
     """Check and deduct credits, raise 402 if insufficient."""
     if cost > 0:
-        ok = await _credits_svc.check_and_deduct(user_id, cost)
+        ok = await credits_svc.check_and_deduct(user_id, cost)
         if not ok:
             raise HTTPException(
                 status_code=402,
@@ -116,25 +129,31 @@ async def _enforce_credits(user_id: str, cost: int) -> None:
 @router.post(
     "/detect",
     response_model=DetectResponse,
-    responses={401: {"model": ErrorResponse}, 402: {"model": ErrorResponse}, 429: {"model": ErrorResponse}},
+    responses={
+        401: {"model": ErrorResponse},
+        402: {"model": ErrorResponse},
+        429: {"model": ErrorResponse},
+    },
 )
 async def detect(
     file: UploadFile = File(...),
     confidence: float = Form(default=0.25, ge=0.0, le=1.0),
     ctx: ApiKeyContext = Depends(get_api_key_auth),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
+    credits_svc: CreditsService = Depends(get_credits_service),
+    inference_svc: InferenceService = Depends(get_inference_service),
 ):
     """Run YOLOv8 object detection on an uploaded image."""
-    rate_svc = RateLimitService(sb)
+    rate_svc = RateLimitService(db)
     remaining, reset = await _enforce_rate_limit(rate_svc, ctx)
     cost = CREDIT_COSTS["detect"]
-    await _enforce_credits(ctx.user_id, cost)
+    await _enforce_credits(credits_svc, ctx.user_id, cost)
 
     image = await _read_image(file)
     try:
-        result = await _inference_svc.detect(image, confidence=confidence)
+        result = await inference_svc.detect(image, confidence=confidence)
     except Exception:
-        await _credits_svc.refund(ctx.user_id, cost)
+        await credits_svc.refund(ctx.user_id, cost)
         raise
 
     await rate_svc.log_usage(
@@ -156,24 +175,30 @@ async def detect(
 @router.post(
     "/depth",
     response_model=DepthResponse,
-    responses={401: {"model": ErrorResponse}, 402: {"model": ErrorResponse}, 429: {"model": ErrorResponse}},
+    responses={
+        401: {"model": ErrorResponse},
+        402: {"model": ErrorResponse},
+        429: {"model": ErrorResponse},
+    },
 )
 async def depth(
     file: UploadFile = File(...),
     ctx: ApiKeyContext = Depends(get_api_key_auth),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
+    credits_svc: CreditsService = Depends(get_credits_service),
+    inference_svc: InferenceService = Depends(get_inference_service),
 ):
     """Run depth estimation on an uploaded image."""
-    rate_svc = RateLimitService(sb)
+    rate_svc = RateLimitService(db)
     remaining, reset = await _enforce_rate_limit(rate_svc, ctx)
     cost = CREDIT_COSTS["depth"]
-    await _enforce_credits(ctx.user_id, cost)
+    await _enforce_credits(credits_svc, ctx.user_id, cost)
 
     image = await _read_image(file)
     try:
-        result = await _inference_svc.depth(image)
+        result = await inference_svc.depth(image)
     except Exception:
-        await _credits_svc.refund(ctx.user_id, cost)
+        await credits_svc.refund(ctx.user_id, cost)
         raise
 
     await rate_svc.log_usage(
@@ -195,13 +220,19 @@ async def depth(
 @router.post(
     "/describe",
     response_model=DescribeResponse,
-    responses={401: {"model": ErrorResponse}, 402: {"model": ErrorResponse}, 429: {"model": ErrorResponse}},
+    responses={
+        401: {"model": ErrorResponse},
+        402: {"model": ErrorResponse},
+        429: {"model": ErrorResponse},
+    },
 )
 async def describe(
     file: UploadFile = File(...),
     prompt: str = Form(default="Describe what you see in this image."),
     ctx: ApiKeyContext = Depends(get_api_key_auth),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
+    credits_svc: CreditsService = Depends(get_credits_service),
+    inference_svc: InferenceService = Depends(get_inference_service),
 ):
     """Run scene description on an uploaded image."""
     if len(prompt) > _MAX_PROMPT_LENGTH:
@@ -210,17 +241,17 @@ async def describe(
             detail=f"Prompt too long. Maximum length is {_MAX_PROMPT_LENGTH} characters.",
         )
 
-    rate_svc = RateLimitService(sb)
+    rate_svc = RateLimitService(db)
     remaining, reset = await _enforce_rate_limit(rate_svc, ctx)
     cost = CREDIT_COSTS["describe"]
-    await _enforce_credits(ctx.user_id, cost)
+    await _enforce_credits(credits_svc, ctx.user_id, cost)
 
     image = await _read_image(file)
     try:
-        result = await _inference_svc.describe(image, prompt=prompt)
+        result = await inference_svc.describe(image, prompt=prompt)
     except Exception:
         # Refund credits on inference failure
-        await _credits_svc.refund(ctx.user_id, cost)
+        await credits_svc.refund(ctx.user_id, cost)
         raise
 
     await rate_svc.log_usage(
@@ -249,11 +280,12 @@ async def list_models(ctx: ApiKeyContext = Depends(get_api_key_auth)):
 async def get_usage(
     days: int = Query(default=30, ge=1, le=365),
     ctx: ApiKeyContext = Depends(get_api_key_auth),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
+    credits_svc: CreditsService = Depends(get_credits_service),
 ):
     """Get credit balance and usage statistics."""
-    balance = await _credits_svc.get_balance(ctx.user_id)
-    rate_svc = RateLimitService(sb)
+    balance = await credits_svc.get_balance(ctx.user_id)
+    rate_svc = RateLimitService(db)
     stats = await rate_svc.get_usage_stats(ctx.user_id, days=days)
 
     return {

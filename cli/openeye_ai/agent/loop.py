@@ -58,7 +58,11 @@ def _build_llm_prompt(
     change_description: str,
 ) -> str:
     """Construct the LLM prompt following fuser pattern."""
-    plan_str = "\n".join(f"  {i+1}. {s}" for i, s in enumerate(current_plan)) if current_plan else "  No plan yet."
+    plan_str = (
+        "\n".join(f"  {i + 1}. {s}" for i, s in enumerate(current_plan))
+        if current_plan
+        else "  No plan yet."
+    )
     return f"""You are an autonomous vision agent monitoring a scene.
 
 GOAL: {goal}
@@ -94,11 +98,14 @@ def _parse_llm_response(response: str) -> AgentReasoning:
     for line in response.strip().splitlines():
         line = line.strip()
         if line.upper().startswith("THOUGHT:"):
-            thought = line[len("THOUGHT:"):].strip()
+            thought = line[len("THOUGHT:") :].strip()
         elif line.upper().startswith("ACTION:"):
-            action = line[len("ACTION:"):].strip()
+            action = line[len("ACTION:") :].strip()
         elif line.upper().startswith("PLAN_CHANGED:"):
-            plan_changed = line[len("PLAN_CHANGED:"):].strip().lower() in ("yes", "true")
+            plan_changed = line[len("PLAN_CHANGED:") :].strip().lower() in (
+                "yes",
+                "true",
+            )
         elif line and line[0].isdigit() and "." in line[:3]:
             plan.append(line.split(".", 1)[1].strip())
 
@@ -177,20 +184,32 @@ class AgentLoop:
                     all_detections.append(DetectedObject(**obj_data))
                 if prediction is None:
                     from openeye_ai.schema import ImageInfo, PredictionResult
+
                     w, h = frame.size
                     prediction = PredictionResult(
                         model=_name,
                         task="detection",
                         image=ImageInfo(width=w, height=h, source="camera"),
-                        objects=[DetectedObject(**o) for o in result.get("objects", [])],
+                        objects=[
+                            DetectedObject(**o) for o in result.get("objects", [])
+                        ],
                         inference_ms=result.get("inference_ms", 0.0),
                     )
 
-            self._emit(AgentTickEvent(tick=self.tick, phase="perceive", prediction=prediction, current_plan=self.current_plan))
+            self._emit(
+                AgentTickEvent(
+                    tick=self.tick,
+                    phase="perceive",
+                    prediction=prediction,
+                    current_plan=self.current_plan,
+                )
+            )
 
             # 2. OBSERVE — diff with previous
             scene_summary = _build_scene_summary(all_detections)
-            change_desc, significance = _diff_detections(self.prev_detections, all_detections)
+            change_desc, significance = _diff_detections(
+                self.prev_detections, all_detections
+            )
 
             # Tag based on detected labels
             tags = sorted({d.label for d in all_detections})
@@ -216,12 +235,15 @@ class AgentLoop:
             recalled = self.memory.recall_recent(self.memory_recall_count)
             memory_context = self.memory.summarize(recalled)
 
-            self._emit(AgentTickEvent(
-                tick=self.tick, phase="recall",
-                observation=observation,
-                memory_recalled=recalled,
-                current_plan=self.current_plan,
-            ))
+            self._emit(
+                AgentTickEvent(
+                    tick=self.tick,
+                    phase="recall",
+                    observation=observation,
+                    memory_recalled=recalled,
+                    current_plan=self.current_plan,
+                )
+            )
 
             # 4. REASON
             reasoning = AgentReasoning(
@@ -235,7 +257,11 @@ class AgentLoop:
 
             if self.llm_call:
                 prompt = _build_llm_prompt(
-                    self.goal, scene_summary, memory_context, self.current_plan, change_desc
+                    self.goal,
+                    scene_summary,
+                    memory_context,
+                    self.current_plan,
+                    change_desc,
                 )
                 try:
                     llm_response = self.llm_call(prompt)
@@ -248,23 +274,29 @@ class AgentLoop:
             if reasoning.plan_changed and reasoning.current_plan:
                 self.current_plan = reasoning.current_plan
 
-            self._emit(AgentTickEvent(
-                tick=self.tick, phase="reason",
-                observation=observation,
-                reasoning=reasoning,
-                current_plan=self.current_plan,
-            ))
+            self._emit(
+                AgentTickEvent(
+                    tick=self.tick,
+                    phase="reason",
+                    observation=observation,
+                    reasoning=reasoning,
+                    current_plan=self.current_plan,
+                )
+            )
 
             # 5. ACT
             action = reasoning.decided_action or "continue monitoring"
-            self._emit(AgentTickEvent(
-                tick=self.tick, phase="act",
-                observation=observation,
-                reasoning=reasoning,
-                action_taken=action,
-                memory_recalled=recalled,
-                current_plan=self.current_plan,
-            ))
+            self._emit(
+                AgentTickEvent(
+                    tick=self.tick,
+                    phase="act",
+                    observation=observation,
+                    reasoning=reasoning,
+                    action_taken=action,
+                    memory_recalled=recalled,
+                    current_plan=self.current_plan,
+                )
+            )
 
             # Pace the loop
             elapsed = time.perf_counter() - loop_start

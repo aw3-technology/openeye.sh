@@ -47,7 +47,9 @@ class VideoStream:
         self._running.set()
         self._thread = threading.Thread(target=self._capture_loop, daemon=True)
         self._thread.start()
-        logging.info(f"VideoStream started on device {self.device_index} at {self.fps} FPS")
+        logging.info(
+            f"VideoStream started on device {self.device_index} at {self.fps} FPS"
+        )
 
     def stop(self):
         self._running.clear()
@@ -127,7 +129,9 @@ class VideoStream:
                     continue
 
                 consecutive_failures = 0
-                success, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
+                success, buffer = cv2.imencode(
+                    ".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70]
+                )
                 if not success or buffer is None:
                     logging.warning("Failed to encode frame as JPEG")
                     continue

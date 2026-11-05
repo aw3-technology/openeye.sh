@@ -1,7 +1,6 @@
 """WebSocket streaming inference endpoint — extracted from v1_api."""
 
 import base64
-import hashlib
 import json
 import logging
 from io import BytesIO
@@ -9,7 +8,7 @@ from io import BytesIO
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from PIL import Image
 
-from ..deps import ApiKeyContext, get_supabase
+from ..deps import get_credits_service, get_db, get_inference_service, lookup_api_key
 from ..services.credits_service import CREDIT_COSTS, CreditsService
 from ..services.inference_service import InferenceService
 from ..services.rate_limit_service import RateLimitService
@@ -18,15 +17,13 @@ logger = logging.getLogger(__name__)
 
 stream_router = APIRouter(tags=["Hosted API"])
 
-# Re-use shared service instances (same singletons as v1_api)
-_credits_svc = CreditsService()
-_inference_svc = InferenceService()
-
 
 @stream_router.websocket("/stream")
 async def stream(
     websocket: WebSocket,
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
+    credits_svc: CreditsService = Depends(get_credits_service),
+    inference_svc: InferenceService = Depends(get_inference_service),
 ):
     """Real-time streaming inference over WebSocket.
 
@@ -54,27 +51,10 @@ async def stream(
         await websocket.close(code=4001, reason="Invalid API key format")
         return
 
-    key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
-    result = (
-        sb.table("api_keys")
-        .select("id, user_id, key_prefix, scopes, rate_limit")
-        .eq("key_hash", key_hash)
-        .limit(1)
-        .execute()
-    )
-
-    if not result.data:
+    ctx = lookup_api_key(db, raw_key)
+    if ctx is None:
         await websocket.close(code=4001, reason="Invalid API key")
         return
-
-    row = result.data[0]
-    ctx = ApiKeyContext(
-        user_id=row["user_id"],
-        api_key_id=row["id"],
-        key_prefix=row["key_prefix"],
-        scopes=row.get("scopes") or ["inference"],
-        rate_limit=row.get("rate_limit") or 60,
-    )
 
     await websocket.send_json({"status": "authenticated"})
 
@@ -83,7 +63,7 @@ async def stream(
     confidence = 0.25
 
     # Step 3: Process frames
-    rate_svc = RateLimitService(sb)
+    rate_svc = RateLimitService(db)
     cost = CREDIT_COSTS["stream_frame"]
 
     try:
@@ -94,16 +74,24 @@ async def stream(
             if msg.startswith("{") and msg.endswith("}"):
                 try:
                     config = json.loads(msg)
-                    if isinstance(config, dict) and any(k in config for k in ("model", "confidence")):
+                    if isinstance(config, dict) and any(
+                        k in config for k in ("model", "confidence")
+                    ):
                         supported_models = {"yolov8", "depth", "describe"}
                         if "model" in config:
                             if config["model"] not in supported_models:
-                                await websocket.send_json({"error": f"Unsupported model: {config['model']}. Use: {', '.join(sorted(supported_models))}"})
+                                await websocket.send_json(
+                                    {
+                                        "error": f"Unsupported model: {config['model']}. Use: {', '.join(sorted(supported_models))}"
+                                    }
+                                )
                                 continue
                             model = config["model"]
                         if "confidence" in config:
                             confidence = float(config["confidence"])
-                        await websocket.send_json({"status": "configured", "model": model})
+                        await websocket.send_json(
+                            {"status": "configured", "model": model}
+                        )
                         continue
                 except (json.JSONDecodeError, ValueError):
                     pass
@@ -125,16 +113,16 @@ async def stream(
                 continue
 
             # Credit check
-            ok = await _credits_svc.check_and_deduct(ctx.user_id, cost)
+            ok = await credits_svc.check_and_deduct(ctx.user_id, cost)
             if not ok:
                 await websocket.send_json({"error": "Insufficient credits"})
                 continue
 
             # Run inference — refund credits on failure
             try:
-                result = await _inference_svc.detect(image, confidence=confidence)
+                result = await inference_svc.detect(image, confidence=confidence)
             except Exception:
-                await _credits_svc.refund(ctx.user_id, cost)
+                await credits_svc.refund(ctx.user_id, cost)
                 await websocket.send_json({"error": "Inference failed"})
                 continue
 

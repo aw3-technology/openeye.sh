@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import sys
+from contextlib import ExitStack
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 import yaml
 from typer.testing import CliRunner
 
@@ -15,15 +15,12 @@ _BACKEND_SRC = str(Path(__file__).resolve().parents[2] / "backend" / "src")
 if _BACKEND_SRC not in sys.path:
     sys.path.insert(0, _BACKEND_SRC)
 
-from governance.audit import AuditLog
 from governance.models import (
     AuditEntry,
     GovernanceConfig,
-    GovernanceStatus,
     PolicyConfig,
     PolicyDecision,
     PolicyDomain,
-    PolicyInfo,
     Severity,
 )
 from openeye_ai.cli import app
@@ -55,8 +52,20 @@ def _make_engine(
 
 
 def _patch_engine(engine):
-    """Return a patch context that makes _get_engine() return *engine*."""
-    return patch("openeye_ai.commands.governance._get_engine", return_value=engine)
+    """Return a patch context that makes _get_engine() return *engine*.
+
+    Policy commands and audit commands each define their own ``_get_engine``,
+    so both lookup sites are patched.
+    """
+    stack = ExitStack()
+    for module in ("policy_commands", "audit_commands"):
+        stack.enter_context(
+            patch(
+                f"openeye_ai.commands.governance.{module}._get_engine",
+                return_value=engine,
+            )
+        )
+    return stack
 
 
 # ── Story 90: status shows enabled_policy_names ─────────────────────
@@ -158,7 +167,9 @@ class TestRoboticsPreset:
         from governance.loader import load_preset
 
         config = load_preset("robotics")
-        blur = next((p for p in config.policies if p.name == "human-detection-blur"), None)
+        blur = next(
+            (p for p in config.policies if p.name == "human-detection-blur"), None
+        )
         assert blur is not None
         assert blur.type == "pii_filter"
 
@@ -266,7 +277,9 @@ class TestLocalViolations:
 class TestDomainInit:
     def test_init_robotics_has_zone_and_object_and_action(self, tmp_path):
         out = tmp_path / "gov.yaml"
-        result = runner.invoke(app, ["govern", "init", "--domain", "robotics", "--output", str(out)])
+        result = runner.invoke(
+            app, ["govern", "init", "--domain", "robotics", "--output", str(out)]
+        )
         assert result.exit_code == 0
         data = yaml.safe_load(out.read_text())
         policy_types = {p["type"] for p in data["policies"]}
@@ -276,7 +289,9 @@ class TestDomainInit:
 
     def test_init_desktop_agent_has_pii_and_boundary(self, tmp_path):
         out = tmp_path / "gov.yaml"
-        result = runner.invoke(app, ["govern", "init", "--domain", "desktop_agent", "--output", str(out)])
+        result = runner.invoke(
+            app, ["govern", "init", "--domain", "desktop_agent", "--output", str(out)]
+        )
         assert result.exit_code == 0
         data = yaml.safe_load(out.read_text())
         policy_types = {p["type"] for p in data["policies"]}
@@ -286,7 +301,9 @@ class TestDomainInit:
 
     def test_init_universal_has_action_filter_only(self, tmp_path):
         out = tmp_path / "gov.yaml"
-        result = runner.invoke(app, ["govern", "init", "--domain", "universal", "--output", str(out)])
+        result = runner.invoke(
+            app, ["govern", "init", "--domain", "universal", "--output", str(out)]
+        )
         assert result.exit_code == 0
         data = yaml.safe_load(out.read_text())
         policy_types = {p["type"] for p in data["policies"]}
@@ -302,7 +319,9 @@ class TestDomainInit:
 
     def test_init_unknown_domain_falls_back_to_universal(self, tmp_path):
         out = tmp_path / "gov.yaml"
-        result = runner.invoke(app, ["govern", "init", "--domain", "unknown_stuff", "--output", str(out)])
+        result = runner.invoke(
+            app, ["govern", "init", "--domain", "unknown_stuff", "--output", str(out)]
+        )
         assert result.exit_code == 0
         data = yaml.safe_load(out.read_text())
         # Falls back to universal (action_filter only)

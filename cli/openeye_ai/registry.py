@@ -34,7 +34,9 @@ def _load_raw() -> dict[str, Any]:
     except yaml.YAMLError as exc:
         raise ValueError(f"Failed to parse {_REGISTRY_PATH}: {exc}") from exc
     if not isinstance(data, dict):
-        raise ValueError(f"Invalid registry file: expected YAML dict, got {type(data).__name__}")
+        raise ValueError(
+            f"Invalid registry file: expected YAML dict, got {type(data).__name__}"
+        )
     return data
 
 
@@ -72,7 +74,9 @@ def get_variant_info(name: str, variant: str) -> dict[str, Any]:
     variants = info.get("variants") or {}
     if variant not in variants:
         available = ", ".join(variants.keys()) if variants else "none"
-        raise KeyError(f"Unknown variant '{variant}' for model '{name}'. Available: {available}")
+        raise KeyError(
+            f"Unknown variant '{variant}' for model '{name}'. Available: {available}"
+        )
 
     # Start with parent fields, overlay variant-specific fields
     merged = dict(info)
@@ -114,7 +118,9 @@ def get_adapter(name: str, *, variant: str | None = None):
         # Prevent path traversal outside of cwd or home
         cwd = Path.cwd().resolve()
         home = Path.home().resolve()
-        if not (str(resolved).startswith(str(cwd)) or str(resolved).startswith(str(home))):
+        if not (
+            str(resolved).startswith(str(cwd)) or str(resolved).startswith(str(home))
+        ):
             raise ValueError(
                 f"Custom adapter path '{adapter_key}' resolves outside the current directory and home. "
                 "This is not allowed for security reasons."

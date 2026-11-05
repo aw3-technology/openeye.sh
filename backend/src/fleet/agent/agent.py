@@ -6,7 +6,6 @@ from typing import Any, Dict, List
 
 import httpx
 
-from .bandwidth_limiter import BandwidthLimiter
 from .config import AgentConfig
 from .heartbeat import HeartbeatSender
 from .model_cache import ModelCache
@@ -65,7 +64,9 @@ class DeviceAgent:
                     await self._cmd_decommission(cmd_id, payload)
                 else:
                     logger.warning("Unknown command type: %s", cmd_type)
-                    await self._report_command_result(cmd_id, {"error": f"Unknown command: {cmd_type}"})
+                    await self._report_command_result(
+                        cmd_id, {"error": f"Unknown command: {cmd_type}"}
+                    )
             except Exception as exc:
                 logger.error("Command %s failed: %s", cmd_id, exc)
                 await self._report_command_result(cmd_id, {"error": str(exc)})
@@ -81,13 +82,13 @@ class DeviceAgent:
             raise ValueError("model_version is required in deploy payload")
         model_url = payload.get("model_url")
         checksum = payload.get("model_checksum")
-        bw_limit = payload.get("bandwidth_limit_mbps")
 
         if self.model_cache.has_version(version):
             logger.info("Model %s already cached", version)
         elif model_url:
             # Stream download directly to disk to avoid holding full model in memory
-            import tempfile, shutil
+            import tempfile
+
             async with httpx.AsyncClient(timeout=300) as client:
                 async with client.stream("GET", model_url) as resp:
                     resp.raise_for_status()
@@ -98,17 +99,22 @@ class DeviceAgent:
             with open(tmp_path, "rb") as f:
                 data = f.read()
             import os
+
             os.unlink(tmp_path)
             self.model_cache.store(version, data, checksum)
         else:
             raise ValueError("No model_url provided and version not cached")
 
-        await self._report_command_result(cmd_id, {"status": "deployed", "version": version})
+        await self._report_command_result(
+            cmd_id, {"status": "deployed", "version": version}
+        )
 
     async def _cmd_rollback_model(self, cmd_id: str, payload: Dict[str, Any]) -> None:
         rolled_back = self.model_cache.rollback()
         if rolled_back:
-            await self._report_command_result(cmd_id, {"status": "rolled_back", "version": rolled_back})
+            await self._report_command_result(
+                cmd_id, {"status": "rolled_back", "version": rolled_back}
+            )
         else:
             raise ValueError("No previous version available for rollback")
 
@@ -117,18 +123,23 @@ class DeviceAgent:
             if key not in payload:
                 raise ValueError(f"Missing required OTA payload key: {key}")
         # Run synchronous download in a thread to avoid blocking the event loop
-        path = await asyncio.to_thread(
+        await asyncio.to_thread(
             self.ota_updater.download_and_verify,
             url=payload["firmware_url"],
             version=payload["firmware_version"],
             expected_checksum=payload["checksum"],
             bandwidth_limit_mbps=payload.get("bandwidth_limit_mbps"),
         )
-        success = await asyncio.to_thread(self.ota_updater.apply, payload["firmware_version"])
-        await self._report_command_result(cmd_id, {
-            "status": "applied" if success else "failed",
-            "version": payload["firmware_version"],
-        })
+        success = await asyncio.to_thread(
+            self.ota_updater.apply, payload["firmware_version"]
+        )
+        await self._report_command_result(
+            cmd_id,
+            {
+                "status": "applied" if success else "failed",
+                "version": payload["firmware_version"],
+            },
+        )
 
     async def _cmd_update_config(self, cmd_id: str, payload: Dict[str, Any]) -> None:
         logger.info("Config update received: %s", payload)

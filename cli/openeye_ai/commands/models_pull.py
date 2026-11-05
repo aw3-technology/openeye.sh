@@ -89,7 +89,9 @@ def _pull_single(
         from openeye_ai.utils.checksum import verify_checksum
 
         if not verify_checksum(model_dir, filename, checksum_info):
-            rprint("[red]Checksum verification failed. Re-run with --force to re-download.[/red]")
+            rprint(
+                "[red]Checksum verification failed. Re-run with --force to re-download.[/red]"
+            )
             return False
 
     from openeye_ai.utils.download import mark_pulled
@@ -100,15 +102,29 @@ def _pull_single(
 
 
 def pull(
-    model: str | None = typer.Argument(None, help="Model name to download (e.g. yolov8)"),
-    all_models: bool = typer.Option(False, "--all", help="Pull all models in the registry"),
-    variant: str | None = typer.Option(None, "--variant", help="Pull a specific variant"),
-    quantized: bool = typer.Option(False, "--quantized", help="Pull the quantized variant (shortcut for --variant quantized)"),
-    force: bool = typer.Option(False, "--force", help="Force re-download even if already pulled"),
+    model: str | None = typer.Argument(
+        None, help="Model name to download (e.g. yolov8)"
+    ),
+    all_models: bool = typer.Option(
+        False, "--all", help="Pull all models in the registry"
+    ),
+    variant: str | None = typer.Option(
+        None, "--variant", help="Pull a specific variant"
+    ),
+    quantized: bool = typer.Option(
+        False,
+        "--quantized",
+        help="Pull the quantized variant (shortcut for --variant quantized)",
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Force re-download even if already pulled"
+    ),
 ) -> None:
     """Download model weights to ~/.openeye/models/."""
     if quantized and variant:
-        rprint("[red]Cannot use both --quantized and --variant. Use one or the other.[/red]")
+        rprint(
+            "[red]Cannot use both --quantized and --variant. Use one or the other.[/red]"
+        )
         raise typer.Exit(code=1)
     effective_variant = "quantized" if quantized else variant
 

@@ -24,6 +24,7 @@ class AvatarLLMState:
             @functools.wraps(f)
             async def wrapper(*args: Any, **kwargs: Any) -> T:
                 return await f(*args, **kwargs)
+
             return wrapper
 
         if func is not None:

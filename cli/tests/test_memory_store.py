@@ -2,18 +2,24 @@
 
 from __future__ import annotations
 
-import time
-
 from openeye_ai.memory.store import ObservationMemoryStore
 from openeye_ai.schema import BBox, DetectedObject, Observation, RecallQuery
 
 
-def _make_obs(tick: int, *, significance: float = 0.5, tags: list[str] | None = None, summary: str = "") -> Observation:
+def _make_obs(
+    tick: int,
+    *,
+    significance: float = 0.5,
+    tags: list[str] | None = None,
+    summary: str = "",
+) -> Observation:
     """Helper to create a test Observation."""
     return Observation(
         tick=tick,
         detections=[
-            DetectedObject(label="person", confidence=0.9, bbox=BBox(x=0.1, y=0.2, w=0.3, h=0.4)),
+            DetectedObject(
+                label="person", confidence=0.9, bbox=BBox(x=0.1, y=0.2, w=0.3, h=0.4)
+            ),
         ],
         scene_summary=summary or f"tick {tick} scene",
         change_description="",

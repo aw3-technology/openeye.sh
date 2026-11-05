@@ -6,19 +6,16 @@ import subprocess
 import uuid
 from collections import deque
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
 from .persistence import atomic_save_yaml, safe_load_yaml_list
-
 from .schemas import (
-    DriftDetectionConfig,
     PipelineStatus,
     RetrainingPipelineConfig,
     RetrainingRun,
     RetrainingTrigger,
-    TrainingMetrics,
 )
 
 _PIPELINES_PATH = OPENEYE_HOME / "retraining_pipelines.yaml"
@@ -100,9 +97,9 @@ def record_accuracy(model_key: str, accuracy: float) -> bool:
         if len(buf) < cfg.window_size * 2:
             continue
         buf_list = list(buf)
-        recent = buf_list[-cfg.window_size:]
+        recent = buf_list[-cfg.window_size :]
         # Use the window immediately before 'recent' as baseline for comparison
-        baseline = buf_list[-cfg.window_size * 2:-cfg.window_size]
+        baseline = buf_list[-cfg.window_size * 2 : -cfg.window_size]
 
         recent_mean = sum(recent) / len(recent)
         baseline_mean = sum(baseline) / len(baseline)
@@ -189,7 +186,9 @@ def execute_retraining(run_id: str) -> RetrainingRun:
             timeout=3600 * 4,  # 4 hour timeout
         )
 
-        run.logs.append(result.stdout[-2000:] if len(result.stdout) > 2000 else result.stdout)
+        run.logs.append(
+            result.stdout[-2000:] if len(result.stdout) > 2000 else result.stdout
+        )
         if result.stderr:
             run.logs.append(f"STDERR: {result.stderr[-1000:]}")
 

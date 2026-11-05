@@ -25,6 +25,7 @@ FLEET_URL = os.environ.get("OPENEYE_FLEET_URL", "http://localhost:8001")
 
 # ── Backend sys.path helper ─────────────────────────────────────────
 
+
 def ensure_backend_path() -> Path:
     """Add backend/src to sys.path for perception pipeline imports.
 
@@ -43,6 +44,7 @@ def ensure_backend_path() -> Path:
         candidate = candidate.parent
     rprint("[red]Cannot find backend/src/perception — run from the repo root[/red]")
     raise typer.Exit(code=1)
+
 
 _EXTRAS = {
     "yolov8": "yolo",
@@ -132,7 +134,9 @@ def http_request(
         rprint(f"[red]Cannot connect to {url}[/red]")
         raise typer.Exit(code=1)
     except httpx.HTTPStatusError as exc:
-        rprint(f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]")
+        rprint(
+            f"[red]Error {exc.response.status_code}: {exc.response.text[:200]}[/red]"
+        )
         raise typer.Exit(code=1)
     except httpx.TimeoutException:
         rprint("[red]Error: Request timed out[/red]")

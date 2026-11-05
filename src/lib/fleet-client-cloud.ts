@@ -38,9 +38,24 @@ import {
   type FleetAlertRow,
 } from "./fleet-cloud-helpers";
 
+// Command types the device agent understands (backend/src/fleet command_service).
+const COMMAND_TYPES = new Set([
+  "restart", "update_config", "deploy_model", "rollback_model", "ota_update", "decommission", "collect_logs",
+]);
+
 // ── Cloud Fleet Client ────────────────────────────────────────
 
 export class CloudFleetClient implements FleetClientInterface {
+  /** Queues a command for a device; its agent picks it up on the next heartbeat. */
+  private async issueCommand(deviceId: string, commandType: string, payload: Record<string, unknown> = {}) {
+    if (!COMMAND_TYPES.has(commandType)) throw new Error(`Unsupported command: ${commandType}`);
+    return api.create<{ id: string }>("device_commands", {
+      device_id: deviceId,
+      command_type: commandType,
+      payload,
+    });
+  }
+
   // ── Devices ──────────────────────────────────────────────────
 
   async registerDevice(req: DeviceRegisterRequest): Promise<DeviceResponse> {
@@ -54,7 +69,9 @@ export class CloudFleetClient implements FleetClientInterface {
       status: "pending",
       registered_at: new Date().toISOString(),
     };
-    return mapDevice(await api.create<DeviceRow>("devices", row));
+    // The server generates the device key and returns it only on this call.
+    const created = await api.create<DeviceRow & { api_key?: string }>("devices", row);
+    return { ...mapDevice(created), api_key: created.api_key ?? null };
   }
 
   async listDevices(params?: { status?: string; device_type?: string; tag_key?: string; tag_value?: string }): Promise<DeviceResponse[]> {
@@ -100,11 +117,12 @@ export class CloudFleetClient implements FleetClientInterface {
   }
 
   async restartDevice(deviceId: string) {
-    await api.update("devices", deviceId, { status: "maintenance" });
-    return { status: "restart_queued", command_id: crypto.randomUUID() };
+    const command = await this.issueCommand(deviceId, "restart");
+    return { status: "restart_queued", command_id: command.id };
   }
 
-  async decommissionDevice(deviceId: string, _req?: DecommissionRequest): Promise<DeviceResponse> {
+  async decommissionDevice(deviceId: string, req?: DecommissionRequest): Promise<DeviceResponse> {
+    await this.issueCommand(deviceId, "decommission", { ...req });
     return mapDevice(await api.update<DeviceRow>("devices", deviceId, { status: "decommissioned" }));
   }
 
@@ -114,15 +132,12 @@ export class CloudFleetClient implements FleetClientInterface {
       const tags = (d.tags || {}) as Record<string, string>;
       return Object.entries(req.tag_filter).every(([k, v]) => tags[k] === v);
     });
+    const commands = [];
     for (const device of matched) {
-      if (req.action === "restart") {
-        await api.update("devices", device.id, { status: "maintenance" });
-      }
+      const command = await this.issueCommand(device.id, req.action, req.payload ?? {});
+      commands.push({ device_id: device.id, command_id: command.id });
     }
-    return {
-      matched: matched.length,
-      commands: matched.map(d => ({ device_id: d.id, command_id: crypto.randomUUID() })),
-    };
+    return { matched: matched.length, commands };
   }
 
   // ── Deployments ──────────────────────────────────────────────
@@ -141,7 +156,23 @@ export class CloudFleetClient implements FleetClientInterface {
       target_group_id: req.target_group_id || null,
       bandwidth_limit_mbps: req.bandwidth_limit_mbps || null,
     };
-    return mapDeployment(await api.create<DeploymentRow>("deployments", row));
+    const deployment = await api.create<DeploymentRow>("deployments", row);
+
+    // One status row per target device, as the control plane does.
+    let deviceIds = req.target_device_ids ?? [];
+    if (deviceIds.length === 0 && req.target_group_id) {
+      const { data: members } = await api.list<{ device_id: string }>("group_members", { group_id: req.target_group_id });
+      deviceIds = members.map(m => m.device_id);
+    }
+    for (const deviceId of deviceIds) {
+      await api.create("deployment_device_status", {
+        deployment_id: deployment.id,
+        device_id: deviceId,
+        status: "pending",
+        stage: 0,
+      });
+    }
+    return mapDeployment(deployment);
   }
 
   async listDeployments(status?: string): Promise<DeploymentResponse[]> {
@@ -277,12 +308,11 @@ export class CloudFleetClient implements FleetClientInterface {
   // ── OTA ──────────────────────────────────────────────────────
 
   async pushOTAUpdate(req: OTAUpdateRequest) {
-    for (const deviceId of req.device_ids) {
-      await api.update("devices", deviceId, {
-        firmware_version: req.firmware_version,
-        status: "maintenance",
-      });
+    // The device reports its new firmware_version once the update is applied.
+    const { device_ids, ...payload } = req;
+    for (const deviceId of device_ids) {
+      await this.issueCommand(deviceId, "ota_update", payload);
     }
-    return { status: "ota_queued", command_count: req.device_ids.length };
+    return { status: "ota_queued", command_count: device_ids.length };
   }
 }

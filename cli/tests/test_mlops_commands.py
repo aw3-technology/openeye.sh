@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 import json
-import shutil
-from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from typer.testing import CliRunner
-
 from openeye_ai.cli import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -23,15 +19,35 @@ runner = CliRunner()
 def _isolate_mlops(tmp_openeye_home, monkeypatch):
     """Redirect all MLOps YAML paths to a temp dir."""
     home = tmp_openeye_home
-    monkeypatch.setattr("openeye_ai.mlops.model_registry._ENTERPRISE_REGISTRY_PATH", home / "registry.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.lifecycle._PROMOTIONS_PATH", home / "promotions.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.ab_testing._AB_TESTS_PATH", home / "ab_tests.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.shadow_mode._SHADOW_PATH", home / "shadow_deployments.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.retraining._PIPELINES_PATH", home / "retraining_pipelines.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.retraining._RUNS_PATH", home / "retraining_runs.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.batch_jobs._BATCH_JOBS_PATH", home / "batch_jobs.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.feedback._ANNOTATIONS_PATH", home / "annotations.yaml")
-    monkeypatch.setattr("openeye_ai.mlops.feedback._BATCHES_PATH", home / "feedback_batches.yaml")
+    monkeypatch.setattr(
+        "openeye_ai.mlops.model_registry._ENTERPRISE_REGISTRY_PATH",
+        home / "registry.yaml",
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.lifecycle._PROMOTIONS_PATH", home / "promotions.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.ab_testing._AB_TESTS_PATH", home / "ab_tests.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.shadow_mode._SHADOW_PATH", home / "shadow_deployments.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.retraining._PIPELINES_PATH",
+        home / "retraining_pipelines.yaml",
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.retraining._RUNS_PATH", home / "retraining_runs.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.batch_jobs._BATCH_JOBS_PATH", home / "batch_jobs.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.feedback._ANNOTATIONS_PATH", home / "annotations.yaml"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.mlops.feedback._BATCHES_PATH", home / "feedback_batches.yaml"
+    )
 
 
 @pytest.fixture()
@@ -45,12 +61,20 @@ def model_file(tmp_path):
 @pytest.fixture()
 def registered_model(model_file, tmp_openeye_home):
     """Upload a model to the registry and return the key."""
-    result = runner.invoke(app, [
-        "mlops", "upload", str(model_file),
-        "--name", "Custom Model",
-        "--key", "custom-model",
-        "--format", "pytorch",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "mlops",
+            "upload",
+            str(model_file),
+            "--name",
+            "Custom Model",
+            "--key",
+            "custom-model",
+            "--format",
+            "pytorch",
+        ],
+    )
     assert result.exit_code == 0
     return "custom-model"
 
@@ -67,12 +91,20 @@ class TestUpload:
         assert "custom-model" in result.output
 
     def test_upload_with_explicit_flags(self, model_file, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "upload", str(model_file),
-            "--name", "My Model",
-            "--key", "my-model",
-            "--format", "pytorch",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "upload",
+                str(model_file),
+                "--name",
+                "My Model",
+                "--key",
+                "my-model",
+                "--format",
+                "pytorch",
+            ],
+        )
         assert result.exit_code == 0
         assert "My Model" in result.output
 
@@ -123,25 +155,41 @@ class TestVersions:
 
 class TestPromote:
     def test_promote_dev_to_staging(self, registered_model):
-        result = runner.invoke(app, [
-            "mlops", "promote",
-            "--model", "custom-model",
-            "--version", "1.0.0",
-            "--from", "dev",
-            "--to", "staging",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "promote",
+                "--model",
+                "custom-model",
+                "--version",
+                "1.0.0",
+                "--from",
+                "dev",
+                "--to",
+                "staging",
+            ],
+        )
         assert result.exit_code == 0
         assert "dev" in result.output
         assert "staging" in result.output
 
     def test_promote_invalid_stage(self, registered_model):
-        result = runner.invoke(app, [
-            "mlops", "promote",
-            "--model", "custom-model",
-            "--version", "1.0.0",
-            "--from", "dev",
-            "--to", "invalid",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "promote",
+                "--model",
+                "custom-model",
+                "--version",
+                "1.0.0",
+                "--from",
+                "dev",
+                "--to",
+                "invalid",
+            ],
+        )
         assert result.exit_code == 1
 
 
@@ -151,30 +199,64 @@ class TestPromote:
 class TestApprovePromotion:
     def test_approve_pending(self, registered_model):
         # First promote to staging (auto-approved by default gate)
-        runner.invoke(app, [
-            "mlops", "promote",
-            "--model", "custom-model", "--version", "1.0.0",
-            "--from", "dev", "--to", "staging",
-        ])
+        runner.invoke(
+            app,
+            [
+                "mlops",
+                "promote",
+                "--model",
+                "custom-model",
+                "--version",
+                "1.0.0",
+                "--from",
+                "dev",
+                "--to",
+                "staging",
+            ],
+        )
         # Then request production (requires approval)
-        runner.invoke(app, [
-            "mlops", "promote",
-            "--model", "custom-model", "--version", "1.0.0",
-            "--from", "staging", "--to", "production",
-        ])
+        runner.invoke(
+            app,
+            [
+                "mlops",
+                "promote",
+                "--model",
+                "custom-model",
+                "--version",
+                "1.0.0",
+                "--from",
+                "staging",
+                "--to",
+                "production",
+            ],
+        )
         # Approve it
-        result = runner.invoke(app, [
-            "mlops", "approve-promotion",
-            "--model", "custom-model", "--version", "1.0.0",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "approve-promotion",
+                "--model",
+                "custom-model",
+                "--version",
+                "1.0.0",
+            ],
+        )
         assert result.exit_code == 0
         assert "approved" in result.output.lower()
 
     def test_approve_no_pending(self, registered_model):
-        result = runner.invoke(app, [
-            "mlops", "approve-promotion",
-            "--model", "custom-model", "--version", "1.0.0",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "approve-promotion",
+                "--model",
+                "custom-model",
+                "--version",
+                "1.0.0",
+            ],
+        )
         assert result.exit_code == 1
 
 
@@ -183,19 +265,39 @@ class TestApprovePromotion:
 
 class TestEvaluate:
     def test_evaluate_model_not_downloaded(self, tmp_openeye_home, monkeypatch):
-        monkeypatch.setattr("openeye_ai.commands.mlops.evaluate.is_downloaded", lambda m: False)
-        result = runner.invoke(app, [
-            "mlops", "evaluate", "yolov8", "--dataset", "val.json",
-        ])
+        monkeypatch.setattr(
+            "openeye_ai.commands.mlops.evaluate.is_downloaded", lambda m: False
+        )
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "evaluate",
+                "yolov8",
+                "--dataset",
+                "val.json",
+            ],
+        )
         assert result.exit_code == 1
         assert "not downloaded" in result.output
 
     def test_evaluate_dataset_not_found(self, tmp_openeye_home, monkeypatch):
-        monkeypatch.setattr("openeye_ai.commands.mlops.evaluate.is_downloaded", lambda m: True)
-        monkeypatch.setattr("openeye_ai.commands.mlops.evaluate.get_adapter", lambda m: MagicMock())
-        result = runner.invoke(app, [
-            "mlops", "evaluate", "yolov8", "--dataset", "/tmp/nonexistent.json",
-        ])
+        monkeypatch.setattr(
+            "openeye_ai.commands.mlops.evaluate.is_downloaded", lambda m: True
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.mlops.evaluate.get_adapter", lambda m: MagicMock()
+        )
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "evaluate",
+                "yolov8",
+                "--dataset",
+                "/tmp/nonexistent.json",
+            ],
+        )
         assert result.exit_code == 1
         assert "not found" in result.output
 
@@ -203,18 +305,33 @@ class TestEvaluate:
         from openeye_ai.mlops.schemas import EvaluationMetrics
 
         mock_adapter = MagicMock()
-        monkeypatch.setattr("openeye_ai.commands.mlops.evaluate.is_downloaded", lambda m: True)
-        monkeypatch.setattr("openeye_ai.commands.mlops.evaluate.get_adapter", lambda m: mock_adapter)
+        monkeypatch.setattr(
+            "openeye_ai.commands.mlops.evaluate.is_downloaded", lambda m: True
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.mlops.evaluate.get_adapter", lambda m: mock_adapter
+        )
 
         # Create a dummy dataset
         dataset = tmp_path / "val.json"
-        dataset.write_text(json.dumps({
-            "images": [], "annotations": [], "categories": [],
-        }))
+        dataset.write_text(
+            json.dumps(
+                {
+                    "images": [],
+                    "annotations": [],
+                    "categories": [],
+                }
+            )
+        )
 
         mock_metrics = EvaluationMetrics(
-            precision=0.85, recall=0.90, f1=0.87, mAP=0.82,
-            total_images=100, total_predictions=500, total_ground_truth=450,
+            precision=0.85,
+            recall=0.90,
+            f1=0.87,
+            mAP=0.82,
+            total_images=100,
+            total_predictions=500,
+            total_ground_truth=450,
             per_class={"person": 0.90, "car": 0.75},
         )
         monkeypatch.setattr(
@@ -222,9 +339,16 @@ class TestEvaluate:
             lambda *a, **kw: mock_metrics,
         )
 
-        result = runner.invoke(app, [
-            "mlops", "evaluate", "yolov8", "--dataset", str(dataset),
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "evaluate",
+                "yolov8",
+                "--dataset",
+                str(dataset),
+            ],
+        )
         assert result.exit_code == 0
         assert "Precision" in result.output
         assert "Recall" in result.output
@@ -236,33 +360,53 @@ class TestEvaluate:
 
 class TestCreateABTest:
     def test_create_ab_test(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "create-ab-test",
-            "--champion", "yolov8-v2",
-            "--challenger", "yolov8-v3",
-            "--traffic", "80/20",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "create-ab-test",
+                "--champion",
+                "yolov8-v2",
+                "--challenger",
+                "yolov8-v3",
+                "--traffic",
+                "80/20",
+            ],
+        )
         assert result.exit_code == 0
         assert "A/B test created" in result.output
         assert "80%" in result.output
         assert "20%" in result.output
 
     def test_create_ab_test_default_traffic(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "create-ab-test",
-            "--champion", "yolov8-v2",
-            "--challenger", "yolov8-v3",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "create-ab-test",
+                "--champion",
+                "yolov8-v2",
+                "--challenger",
+                "yolov8-v3",
+            ],
+        )
         assert result.exit_code == 0
         assert "50%" in result.output
 
     def test_create_ab_test_invalid_traffic(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "create-ab-test",
-            "--champion", "yolov8-v2",
-            "--challenger", "yolov8-v3",
-            "--traffic", "invalid",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "create-ab-test",
+                "--champion",
+                "yolov8-v2",
+                "--challenger",
+                "yolov8-v3",
+                "--traffic",
+                "invalid",
+            ],
+        )
         assert result.exit_code == 1
 
 
@@ -277,12 +421,19 @@ class TestABTests:
 
     def test_ab_tests_shows_running(self, tmp_openeye_home):
         # Create a test first
-        runner.invoke(app, [
-            "mlops", "create-ab-test",
-            "--champion", "yolov8-v2",
-            "--challenger", "yolov8-v3",
-            "--traffic", "80/20",
-        ])
+        runner.invoke(
+            app,
+            [
+                "mlops",
+                "create-ab-test",
+                "--champion",
+                "yolov8-v2",
+                "--challenger",
+                "yolov8-v3",
+                "--traffic",
+                "80/20",
+            ],
+        )
         result = runner.invoke(app, ["mlops", "ab-tests"])
         assert result.exit_code == 0
         # Rich table may truncate "yolov8" to "yolo…" — check for prefix
@@ -296,11 +447,17 @@ class TestABTests:
 class TestCompleteABTest:
     def test_complete_ab_test(self, tmp_openeye_home):
         # Create a test
-        create_result = runner.invoke(app, [
-            "mlops", "create-ab-test",
-            "--champion", "yolov8-v2",
-            "--challenger", "yolov8-v3",
-        ])
+        create_result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "create-ab-test",
+                "--champion",
+                "yolov8-v2",
+                "--challenger",
+                "yolov8-v3",
+            ],
+        )
         # Extract test ID from output
         for line in create_result.output.splitlines():
             if "ab-" in line:
@@ -322,20 +479,31 @@ class TestCompleteABTest:
 
 class TestPipelineCreate:
     def test_pipeline_create_with_schedule(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "pipeline-create",
-            "--name", "nightly-retrain",
-            "--schedule", "0 2 * * *",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "pipeline-create",
+                "--name",
+                "nightly-retrain",
+                "--schedule",
+                "0 2 * * *",
+            ],
+        )
         assert result.exit_code == 0
         assert "Pipeline created" in result.output
         assert "nightly-retrain" in result.output
 
     def test_pipeline_create_minimal(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "pipeline-create",
-            "--name", "manual-retrain",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "pipeline-create",
+                "--name",
+                "manual-retrain",
+            ],
+        )
         assert result.exit_code == 0
         assert "Pipeline created" in result.output
 
@@ -350,11 +518,17 @@ class TestRetrain:
 
     def test_retrain_triggers_run(self, tmp_openeye_home, monkeypatch):
         # Create pipeline first
-        runner.invoke(app, [
-            "mlops", "pipeline-create",
-            "--name", "test-pipeline",
-            "--script", "echo ok",
-        ])
+        runner.invoke(
+            app,
+            [
+                "mlops",
+                "pipeline-create",
+                "--name",
+                "test-pipeline",
+                "--script",
+                "echo ok",
+            ],
+        )
         result = runner.invoke(app, ["mlops", "retrain", "test-pipeline"])
         assert result.exit_code == 0
         assert "Retraining triggered" in result.output
@@ -370,11 +544,17 @@ class TestRuns:
         assert "No retraining runs" in result.output
 
     def test_runs_after_retrain(self, tmp_openeye_home):
-        runner.invoke(app, [
-            "mlops", "pipeline-create",
-            "--name", "test-pipe",
-            "--script", "echo ok",
-        ])
+        runner.invoke(
+            app,
+            [
+                "mlops",
+                "pipeline-create",
+                "--name",
+                "test-pipe",
+                "--script",
+                "echo ok",
+            ],
+        )
         runner.invoke(app, ["mlops", "retrain", "test-pipe"])
         result = runner.invoke(app, ["mlops", "runs"])
         assert result.exit_code == 0
@@ -387,21 +567,33 @@ class TestRuns:
 
 class TestBatchCreate:
     def test_batch_create(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "batch-create",
-            "--model", "yolov8",
-            "--input", "s3://bucket/images/",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "batch-create",
+                "--model",
+                "yolov8",
+                "--input",
+                "s3://bucket/images/",
+            ],
+        )
         assert result.exit_code == 0
         assert "Batch job created" in result.output
         assert "s3://bucket/images/" in result.output
 
     def test_batch_create_local(self, tmp_openeye_home, tmp_path):
-        result = runner.invoke(app, [
-            "mlops", "batch-create",
-            "--model", "yolov8",
-            "--input", str(tmp_path),
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "batch-create",
+                "--model",
+                "yolov8",
+                "--input",
+                str(tmp_path),
+            ],
+        )
         assert result.exit_code == 0
         assert "Batch job created" in result.output
 
@@ -411,16 +603,30 @@ class TestBatchCreate:
 
 class TestExport:
     def test_export_invalid_format(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "export", "yolov8", "--format", "invalid",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "export",
+                "yolov8",
+                "--format",
+                "invalid",
+            ],
+        )
         assert result.exit_code == 1
         assert "Invalid format" in result.output
 
     def test_export_model_not_found(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "export", "nonexistent", "--format", "onnx",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "export",
+                "nonexistent",
+                "--format",
+                "onnx",
+            ],
+        )
         assert result.exit_code == 1
 
 
@@ -429,31 +635,50 @@ class TestExport:
 
 class TestFeedback:
     def test_feedback_correct_prediction(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "feedback",
-            "--prediction-id", "pred-123",
-            "--correct", "true",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "feedback",
+                "--prediction-id",
+                "pred-123",
+                "--correct",
+                "true",
+            ],
+        )
         assert result.exit_code == 0
         assert "confirmed correct" in result.output
 
     def test_feedback_incorrect_with_label(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "feedback",
-            "--prediction-id", "pred-456",
-            "--correct", "false",
-            "--label", "forklift",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "feedback",
+                "--prediction-id",
+                "pred-456",
+                "--correct",
+                "false",
+                "--label",
+                "forklift",
+            ],
+        )
         assert result.exit_code == 0
         assert "Feedback recorded" in result.output
         assert "forklift" in result.output
 
     def test_feedback_incorrect_missing_label(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "feedback",
-            "--prediction-id", "pred-789",
-            "--correct", "false",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "feedback",
+                "--prediction-id",
+                "pred-789",
+                "--correct",
+                "false",
+            ],
+        )
         assert result.exit_code == 1
         assert "--label is required" in result.output
 
@@ -463,23 +688,36 @@ class TestFeedback:
 
 class TestShadowMode:
     def test_shadow_mode_create(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "shadow-mode",
-            "--champion", "v2",
-            "--challenger", "v3",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "shadow-mode",
+                "--champion",
+                "v2",
+                "--challenger",
+                "v3",
+            ],
+        )
         assert result.exit_code == 0
         assert "Shadow deployment created" in result.output
         assert "v2" in result.output
         assert "v3" in result.output
 
     def test_shadow_mode_with_model(self, tmp_openeye_home):
-        result = runner.invoke(app, [
-            "mlops", "shadow-mode",
-            "--champion", "v2",
-            "--challenger", "v3",
-            "--model", "yolov8",
-        ])
+        result = runner.invoke(
+            app,
+            [
+                "mlops",
+                "shadow-mode",
+                "--champion",
+                "v2",
+                "--challenger",
+                "v3",
+                "--model",
+                "yolov8",
+            ],
+        )
         assert result.exit_code == 0
         assert "Shadow deployment created" in result.output
 
@@ -489,12 +727,19 @@ class TestShadowMode:
         assert "No shadow deployments" in result.output
 
     def test_shadow_status_shows_deployment(self, tmp_openeye_home):
-        runner.invoke(app, [
-            "mlops", "shadow-mode",
-            "--champion", "v2",
-            "--challenger", "v3",
-            "--model", "yolov8",
-        ])
+        runner.invoke(
+            app,
+            [
+                "mlops",
+                "shadow-mode",
+                "--champion",
+                "v2",
+                "--challenger",
+                "v3",
+                "--model",
+                "yolov8",
+            ],
+        )
         result = runner.invoke(app, ["mlops", "shadow-status"])
         assert result.exit_code == 0
         assert "yolov8" in result.output

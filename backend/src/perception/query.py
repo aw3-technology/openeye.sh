@@ -56,8 +56,12 @@ class PerceptionQueryEngine:
 
         if parsed.intent == "relation":
             return execute_relation(
-                parsed.raw, parsed.subject, parsed.relation_word, parsed.object_label,
-                objects, scene_graph,
+                parsed.raw,
+                parsed.subject,
+                parsed.relation_word,
+                parsed.object_label,
+                objects,
+                scene_graph,
             )
 
         return execute_describe(parsed.raw, objects)

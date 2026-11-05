@@ -21,7 +21,9 @@ def setup_config_file(config_name: Optional[str]) -> Tuple[str, str]:
             os.path.dirname(__file__), "../config/memory", ".runtime.json5"
         )
         if not os.path.exists(runtime_config_path):
-            logging.error(f"Default runtime configuration file not found: {runtime_config_path}")
+            logging.error(
+                f"Default runtime configuration file not found: {runtime_config_path}"
+            )
             raise typer.Exit(1)
         config_name = ".runtime"
         config_path = os.path.join(
@@ -42,11 +44,17 @@ def start(
         None,
         help="The name of the configuration file (without extension) located in the config directory.",
     ),
-    hot_reload: bool = typer.Option(True, help="Enable hot-reload of configuration files."),
-    check_interval: int = typer.Option(60, help="Interval in seconds between config file checks."),
+    hot_reload: bool = typer.Option(
+        True, help="Enable hot-reload of configuration files."
+    ),
+    check_interval: int = typer.Option(
+        60, help="Interval in seconds between config file checks."
+    ),
     log_level: str = typer.Option("INFO", help="The logging level to use."),
     log_to_file: bool = typer.Option(False, help="Whether to log output to a file."),
-    grpc_port: int = typer.Option(50051, help="Port for gRPC perception streaming endpoint."),
+    grpc_port: int = typer.Option(
+        50051, help="Port for gRPC perception streaming endpoint."
+    ),
 ) -> None:
     config_name, config_path = setup_config_file(config_name)
     setup_logging(config_name, log_level, log_to_file)

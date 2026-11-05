@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from typing import Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
+from .model_registry import (
+    _load_enterprise_registry,
+    _save_enterprise_registry,
+    get_version,
+)
 from .persistence import atomic_save_yaml, safe_load_yaml_list
-
-from .model_registry import _load_enterprise_registry, _save_enterprise_registry, get_version
 from .schemas import (
     ApprovalGate,
     ApprovalStatus,
@@ -92,9 +96,7 @@ def request_promotion(request: PromotionRequest) -> PromotionRecord:
     return record
 
 
-def approve_promotion(
-    model_key: str, version: str, approver: str
-) -> PromotionRecord:
+def approve_promotion(model_key: str, version: str, approver: str) -> PromotionRecord:
     """Approve a pending promotion request."""
     records = _load_promotions()
 
@@ -157,7 +159,9 @@ def _apply_promotion(record: PromotionRecord) -> None:
     data = _load_enterprise_registry()
     model = data["models"].get(record.model_key)
     if model is None:
-        raise KeyError(f"Model '{record.model_key}' not found in registry during promotion.")
+        raise KeyError(
+            f"Model '{record.model_key}' not found in registry during promotion."
+        )
 
     versions = model.get("versions", [])
     for v in versions:
@@ -166,7 +170,9 @@ def _apply_promotion(record: PromotionRecord) -> None:
             _save_enterprise_registry(data)
             return
 
-    raise KeyError(f"Version '{record.version}' not found for model '{record.model_key}' during promotion.")
+    raise KeyError(
+        f"Version '{record.version}' not found for model '{record.model_key}' during promotion."
+    )
 
 
 def _find_gate(from_stage: ModelStage, to_stage: ModelStage) -> Optional[ApprovalGate]:
@@ -175,8 +181,6 @@ def _find_gate(from_stage: ModelStage, to_stage: ModelStage) -> Optional[Approva
             return gate
     return None
 
-
-import re
 
 # Pattern: "metric_name operator threshold"
 _GATE_CONDITION_RE = re.compile(r"^(\w+)\s*(>=|<=|>|<|==|!=)\s*([\d.]+)$")
