@@ -9,9 +9,12 @@ export const docsManifest = [
       "cli-watch",
       "cli-bench",
       "cli-list",
+      "cli-models",
       "cli-config",
       "cli-agent",
       "cli-api",
+      "cli-fleet",
+      "cli-utilities",
     ],
   },
   {

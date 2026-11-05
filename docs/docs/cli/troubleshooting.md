@@ -51,8 +51,8 @@ openeye list
 # Pull a specific model
 openeye pull yolov8
 
-# Pull a specific variant
-openeye pull yolov8 --variant yolov8s
+# Pull a specific variant (see the Variants column of `openeye list`)
+openeye pull yolov8 --variant quantized
 ```
 
 If you see `Weights not found at <path>. Re-run: openeye pull <model>`, the model directory exists but weight files are missing or corrupt. Re-pull to fix:
@@ -71,7 +71,7 @@ openeye pull yolov8
 ### Camera not detected
 
 1. Verify the camera works outside OpenEye (e.g. Photo Booth on macOS, `cheese` on Linux).
-2. Try a different index: `openeye watch yolov8 --camera 1`
+2. Try a different index: `openeye watch --models yolov8 --camera 1`
 3. On macOS, ensure Terminal has camera permission in **System Settings > Privacy & Security > Camera**.
 
 ### OpenCV not installed
@@ -89,14 +89,14 @@ Use `opencv-python-headless` in server/CI environments and `opencv-python` if yo
 If your camera is unavailable, use a video file instead:
 
 ```bash
-openeye watch yolov8 --video path/to/video.mp4
+openeye watch --models yolov8 --video path/to/video.mp4
 ```
 
 The CLI accepts any format OpenCV supports (MP4, AVI, MOV, etc.).
 
 ### Unitree G1 camera
 
-The G1 camera auto-detects transports in this order: **SDK > USB > RTSP**. If connection fails:
+`openeye g1-demo` uses `--transport webcam` by default; `--transport auto` auto-detects in this order: **SDK > USB > RTSP**. If connection fails:
 
 - Ensure the G1 is powered on and connected
 - Try forcing a specific transport: `--transport usb` or `--transport rtsp`
@@ -115,7 +115,7 @@ Another process is already bound to that port.
 lsof -i :8000
 
 # Start on a different port
-openeye serve yolov8 --port 8001
+openeye serve yolov8 --port 8002
 ```
 
 Valid port range is **1--65535**. Ports below 1024 require root on most systems.
@@ -134,7 +134,7 @@ OpenEye auto-detects hardware in this order: **CUDA > Apple MPS > CPU**.
 openeye bench yolov8
 ```
 
-The benchmark output includes a `device` field (`CUDA`, `MPS`, or `CPU`).
+The benchmark table includes a `Device` row showing the detected hardware.
 
 ### CUDA not available
 
@@ -162,7 +162,7 @@ pip install --upgrade torch torchvision
 
 ### Forcing CPU
 
-If GPU inference is unstable, set the device explicitly in your adapter or pass `--device cpu` where supported.
+The CLI has no `--device` flag. If GPU inference is unstable, set the device in your adapter, or hide the GPU from PyTorch (for example `CUDA_VISIBLE_DEVICES=""`).
 
 ---
 
@@ -174,15 +174,20 @@ If GPU inference is unstable, set the device explicitly in your adapter or pass 
 
 The server allows these origins by default:
 
+- `https://openeye.sh` and `https://www.openeye.sh` (the hosted dashboard)
 - `http://localhost:5173`
 - `http://localhost:3000`
 - `http://localhost:8080`
 
-To add custom origins, set the `CORS_ORIGINS` environment variable:
+To change them, set the `CORS_ORIGINS` environment variable. It replaces the defaults, so list every origin you need:
 
 ```bash
-CORS_ORIGINS="http://localhost:5173,https://myapp.example.com" openeye serve yolov8
+CORS_ORIGINS="https://openeye.sh,http://localhost:8080,https://myapp.example.com" openeye serve yolov8
 ```
+
+### Dashboard at openeye.sh can't reach `localhost`
+
+The hosted dashboard calls your local server straight from the browser. The server answers Chrome's Private Network Access preflight, but some browsers or extensions still block HTTPS pages from calling `http://localhost`. Check the browser console; if the request is blocked, serve the API over HTTPS (for example behind a reverse proxy or tunnel) and enter that URL in the dashboard's **Server** dialog. See [Connect the openeye.sh dashboard](server-api.md#connect-the-openeyesh-dashboard).
 
 ### Firewall / network
 

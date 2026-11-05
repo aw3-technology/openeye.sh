@@ -5,16 +5,28 @@ import os
 from fastapi import Header
 
 
-def _valid_api_key(authorization: str = Header(...)) -> str:
-    """Validate ``Authorization: Bearer oe_...`` header.
+def _valid_api_key(
+    authorization: str | None = Header(None),
+    x_api_key: str | None = Header(None),
+) -> str:
+    """Validate the API key from ``Authorization: Bearer oe_...`` or ``X-API-Key``.
 
-    In production this would hit a key store; here we accept any key that
-    starts with ``oe_`` (or matches ``OPENEYE_API_KEY`` when set on the
-    server side).
+    Mirrors the hosted API: a Bearer token wins when present, otherwise the
+    ``X-API-Key`` header is used.  In production this would hit a key store;
+    here we accept any key that starts with ``oe_`` — or, when
+    ``OPENEYE_SERVER_API_KEY`` is set on the server side, only that exact key.
     """
-    scheme, _, token = authorization.partition(" ")
-    if scheme.lower() != "bearer" or not token:
-        raise _auth_error("Missing Bearer token")
+    token = ""
+    if authorization:
+        scheme, _, value = authorization.partition(" ")
+        if scheme.lower() == "bearer":
+            token = value.strip()
+    if not token and x_api_key:
+        token = x_api_key.strip()
+    if not token:
+        raise _auth_error(
+            "Missing API key (use 'Authorization: Bearer oe_...' or 'X-API-Key')"
+        )
     server_key = os.environ.get("OPENEYE_SERVER_API_KEY", "")
     if server_key:
         if token == server_key:

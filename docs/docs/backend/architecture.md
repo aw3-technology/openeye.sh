@@ -84,7 +84,9 @@ The fleet subsystem (under `fleet/`) provides a control plane for edge devices:
 - **Device agent** — runs on each device with heartbeat, model caching, and resource monitoring
 - **Alerts** — fleet-wide alert management
 
-The fleet control plane runs as a separate FastAPI server on port 8001.
+The fleet control plane runs as a separate, self-hosted FastAPI server (port 8001 by convention) backed by Postgres via `DATABASE_URL`. See [Configuration → Fleet Control Plane](configuration.md#fleet-control-plane) to run it.
+
+The hosted dashboard at openeye.sh does not talk to a self-hosted control plane: its fleet pages store devices, deployments, groups, maintenance windows, alerts, and queued device commands through the website's own `/api/data` routes.
 
 ## Actions
 

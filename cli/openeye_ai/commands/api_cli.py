@@ -11,8 +11,7 @@ from rich import print as rprint
 from rich.table import Table
 
 from openeye_ai._cli_helpers import API_URL as _API_URL
-from openeye_ai._cli_helpers import err_console as console
-from openeye_ai._cli_helpers import http_request
+from openeye_ai._cli_helpers import console, http_request
 
 api_app = typer.Typer(
     help="Hosted inference API — detect, describe, and manage credits."
@@ -86,6 +85,9 @@ def api_detect(
 @api_app.command("depth")
 def api_depth(
     image: Path = typer.Argument(help="Path to image file"),
+    output: Path | None = typer.Option(
+        None, "--output", "-o", help="Save the returned depth map PNG to this path"
+    ),
     server: str | None = typer.Option(None, "--server", "-s", help="API server URL"),
 ) -> None:
     """Run depth estimation on an image via the hosted API."""
@@ -107,9 +109,29 @@ def api_depth(
     rprint(
         f"[green]Depth estimation complete[/green] ({result.get('credits_used', 0)} credits)"
     )
-    rprint(f"  Shape: {result.get('width', '?')}x{result.get('height', '?')}")
-    if result.get("output_path"):
-        rprint(f"  Output: {result['output_path']}")
+    info = result.get("image") or {}
+    width = info.get("width", result.get("width", "?"))
+    height = info.get("height", result.get("height", "?"))
+    rprint(f"  Image: {width}x{height}")
+    if result.get("model"):
+        rprint(f"  Model: {result['model']}")
+
+    depth_map = result.get("depth_map")
+    if not depth_map:
+        rprint("  [yellow]No depth map returned[/yellow]")
+    elif output is not None:
+        from openeye_ai.utils.visualize import save_depth_map
+
+        try:
+            save_depth_map(depth_map, output)
+        except OSError as exc:
+            rprint(f"[red]Could not save depth map: {exc}[/red]")
+            raise typer.Exit(code=1)
+        rprint(f"  Saved depth map: {output}")
+    else:
+        rprint(
+            f"  Depth map: {len(depth_map)} bytes (base64 PNG; use --output to save)"
+        )
 
 
 # ── api describe ──────────────────────────────────────────────────
@@ -150,11 +172,16 @@ def api_describe(
 @api_app.command("models")
 def api_models(
     server: str | None = typer.Option(None, "--server", "-s", help="API server URL"),
+    as_json: bool = typer.Option(False, "--json", help="Print the raw JSON response"),
 ) -> None:
     """List available hosted models and their credit costs."""
     url = _api_url(server)
     r = http_request("GET", f"{url}/v1/models", headers=_auth_headers(), timeout=10)
     models = r.json()
+
+    if as_json:
+        typer.echo(json.dumps(models, indent=2))
+        return
 
     table = Table(title="Hosted Models")
     table.add_column("Model", style="cyan")
@@ -196,16 +223,23 @@ def api_usage(
     table.add_column("Field", style="cyan")
     table.add_column("Value")
 
-    table.add_row("Credits remaining", str(data.get("credits_remaining", "?")))
-    table.add_row("Credits used", str(data.get("credits_used", "?")))
-    table.add_row("Total calls", str(data.get("total_calls", "?")))
+    def _first(*keys: str):
+        for k in keys:
+            if data.get(k) is not None:
+                return data[k]
+        return "?"
+
+    table.add_row("Credits remaining", str(_first("credits_remaining", "balance")))
+    table.add_row("Credits used", str(_first("credits_used", "total_credits_used")))
+    table.add_row("Total calls", str(_first("total_calls", "total_requests")))
     table.add_row("Period", f"Last {days} days")
 
-    if data.get("by_model"):
-        for model_name, stats in data["by_model"].items():
-            table.add_row(
-                f"  {model_name}",
-                f"{stats.get('calls', 0)} calls, {stats.get('credits', 0)} credits",
-            )
+    by_endpoint = data.get("by_endpoint") or {}
+    if by_endpoint:
+        table.add_row("Calls by endpoint", "")
+        for endpoint, calls in sorted(by_endpoint.items()):
+            table.add_row(f"  {endpoint}", f"{calls} calls")
+    if data.get("truncated"):
+        table.add_row("Note", "History truncated")
 
     console.print(table)

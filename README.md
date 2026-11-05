@@ -8,7 +8,7 @@ OpenEye is a CLI-first perception engine that turns raw video into structured wo
 
 ## Features
 
-- **Object Detection** — YOLOv8, YOLOv26, Grounding DINO, RF-DETR, and custom adapters
+- **Object Detection** — YOLOv8, YOLO26 (currently ships YOLO11n weights), Grounding DINO, RF-DETR, and custom adapters
 - **Depth Estimation** — Monocular depth via Depth Anything V2
 - **Segmentation** — SAM2 segment anything
 - **Scene Understanding** — Spatial relationships, scene graphs, natural language queries
@@ -20,7 +20,8 @@ OpenEye is a CLI-first perception engine that turns raw video into structured wo
 - **Fleet Management** — Register, deploy, and monitor edge devices at scale
 - **MLOps** — Model registry, versioning, A/B testing, batch inference
 - **Governance** — Policy enforcement, audit logging, safety rule management
-- **Web Dashboard** — React-based UI for inference, live streams, fleet management, and more
+- **Hosted API** — `https://openeye.sh/v1` for object detection without running anything locally (pay per call in credits)
+- **Web Dashboard** — [openeye.sh/dashboard](https://openeye.sh/dashboard): API keys, credits, history, fleet management, and — connected to your own `openeye serve` — inference, live streams, and more
 
 ## Quick Install
 
@@ -53,13 +54,52 @@ openeye watch --models yolov8
 openeye watch --models yolov8 --safety
 ```
 
+## Hosted API Quick Start
+
+No GPU or local install needed for detection:
+
+1. Sign in at [openeye.sh](https://openeye.sh/login) (email/password or 1Profile).
+2. Create a key in **Dashboard → Settings → API Keys** (keys start with `oe_` and are shown once).
+3. Buy credits in **Dashboard → Settings → Credits**.
+4. Call the API:
+
+```bash
+curl -X POST https://openeye.sh/v1/detect \
+  -H "Authorization: Bearer oe_your_key_here" \
+  -F "file=@photo.jpg"
+
+# or with the CLI
+export OPENEYE_API_KEY=oe_your_key_here
+openeye api detect photo.jpg
+openeye api usage
+```
+
+| Endpoint | Status | Credits |
+|----------|--------|---------|
+| `POST /v1/detect` | Live (YOLOv8n, JPEG/PNG under 4 MB) | 1 |
+| `POST /v1/describe` | Returns `503` until the VLM is enabled on the hosted API | 3 |
+| `POST /v1/depth` | Returns `501` — self-hosted only (`openeye serve depth-anything`) | 2 |
+| `GET /v1/models`, `GET /v1/usage` | Live | free |
+
+The hosted API has no WebSocket streaming; for streaming, run `openeye serve`. See the [docs](https://openeye.sh/docs) for details.
+
+## Use the Dashboard with a Local Server
+
+`openeye serve` allows requests from `https://openeye.sh` by default, so the hosted dashboard can drive a server on your machine:
+
+```bash
+openeye serve yolov8          # http://localhost:8000
+```
+
+Open [openeye.sh/dashboard](https://openeye.sh/dashboard), click **Server** on the Overview page (the "OpenEye Server URL" dialog), and enter `http://localhost:8000`. Inference, Live, Scene Graph, Metrics, Benchmark, Config, Governance, MLOps, and the live agent loop then run against your server. If your browser blocks the connection from an HTTPS page to `localhost`, serve OpenEye over HTTPS instead.
+
 ## Interactive CLI Demo
 
 An interactive walkthrough that runs real OpenEye commands against sample images. Great for evaluating the tool, onboarding, or live presentations.
 
 ### Prerequisites
 
-- **Python 3.12** (torch requires <=3.12)
+- **Python 3.12+**
 - **jq** (optional, for JSON pipeline steps — `brew install jq`)
 - **curl** (for the API server step)
 
@@ -142,14 +182,18 @@ openeye.sh/
 ├── cli/              # openeye-sh CLI & inference server (Python)
 ├── backend/          # Perception engine runtime (Python)
 ├── src/              # React web frontend (TypeScript)
+├── api/              # Vercel functions (auth, data, credits, /v1 API)
+├── db/               # Postgres schema
 └── docs/             # MkDocs documentation site
 ```
 
 | Package | Description | Language |
 |---------|-------------|----------|
-| `cli/` | CLI tool & FastAPI inference server (port 8000) | Python |
-| `backend/` | Perception pipeline, fleet control plane (port 8001), governance engine | Python |
-| `src/` | Web dashboard with live streams, fleet management, MLOps, and agentic UI | TypeScript/React |
+| `cli/` | CLI tool & FastAPI inference server (port 8000), MCP server (`openeye-mcp`) | Python |
+| `backend/` | Perception pipeline, self-hosted fleet control plane (port 8001), governance engine | Python |
+| `src/` | Website and dashboard at openeye.sh | TypeScript/React |
+| `api/` | Vercel functions: Better Auth (`/api/auth`), dashboard data (`/api/data`), credits proxy (`/api/cred`), hosted inference API (`/v1`) | TypeScript |
+| `db/` | Postgres schema (`schema.sql`) shared by the website and the fleet control plane | SQL |
 
 ## Tech Stack
 
@@ -157,7 +201,11 @@ openeye.sh/
 
 **Frontend**: React, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query
 
-**Auth**: Better Auth on Neon Postgres (email/password, Google/Apple OAuth), hosted on Vercel
+**Website & API**: Vercel (static SPA + functions in `api/`), Neon Postgres, Vercel Blob (avatars)
+
+**Auth**: Better Auth — email/password and "Continue with 1Profile"; Google/Apple sign-in when their OAuth credentials are configured
+
+**Credits**: [Cred](https://cred.diy), proxied through `/api/cred`
 
 **AI/ML**: Ultralytics (YOLO), Transformers, ONNX Runtime, TensorRT, LangChain
 
@@ -167,8 +215,18 @@ openeye.sh/
 
 ```bash
 npm install
-npm run dev
+npm run dev          # Vite only, http://localhost:8080 (no api/ functions)
 ```
+
+To run the `api/` functions too (sign-in, dashboard data, credits, `/v1`), use the Vercel CLI:
+
+```bash
+vercel env pull .env.local   # DATABASE_URL, BETTER_AUTH_SECRET, ... (see .env.example)
+npm run db:migrate           # apply db/schema.sql to that database
+vercel dev
+```
+
+Without the server functions you can still use **Continue as Demo User** on the login page.
 
 ### CLI
 
@@ -184,9 +242,12 @@ cd backend
 pip install -e . --group dev
 ```
 
+The fleet control plane in `backend/src/fleet` is self-hosted: point `DATABASE_URL` at a Postgres database (Neon works) with `db/schema.sql` applied. See `backend/.env.example`.
+
 ## Documentation
 
-Full documentation is available in the `docs/` directory, built with MkDocs Material.
+- [openeye.sh/docs](https://openeye.sh/docs) — the main docs (source: `src/data/docs/`)
+- `docs/` — MkDocs Material site with longer guides and tutorials
 
 ## License
 

@@ -2,6 +2,36 @@
 title: Python
 ---
 
+### Object Detection (hosted API)
+
+```python
+import os
+import requests
+
+resp = requests.post(
+    "https://openeye.sh/v1/detect",
+    headers={"Authorization": f"Bearer {os.environ['OPENEYE_API_KEY']}"},
+    files={"file": open("photo.jpg", "rb")},
+    data={"confidence": 0.3},
+)
+if resp.status_code == 402:
+    raise SystemExit("Out of credits: buy more in Dashboard → Settings → Credits")
+resp.raise_for_status()
+data = resp.json()
+print(f'{len(data["objects"])} objects, {data["credits_used"]} credit(s)')
+```
+
+Usage and balance:
+
+```python
+usage = requests.get(
+    "https://openeye.sh/v1/usage",
+    headers={"Authorization": f"Bearer {os.environ['OPENEYE_API_KEY']}"},
+    params={"days": 7},
+).json()
+print(usage["balance"], usage["total_requests"])
+```
+
 ### Object Detection (self-hosted)
 
 ```python

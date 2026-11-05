@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import Depends, Query, Request
@@ -14,7 +15,7 @@ from .v1_auth import _valid_api_key
 _CREDITS: dict[str, int] = {
     "detect": 1,
     "depth": 2,
-    "describe": 5,
+    "describe": 3,
 }
 
 
@@ -50,6 +51,11 @@ class _UsageLedger:
         )
 
     def summary(self, api_key: str, days: int = 30) -> dict[str, Any]:
+        """Usage summary using the hosted API's response keys.
+
+        ``by_model`` / ``recent_calls`` are local-server extras kept for
+        backwards compatibility.
+        """
         cutoff = time.time() - days * 86400
         by_model = self._records.get(api_key, {})
         total_credits = sum(r.credits for r in by_model.values())
@@ -63,10 +69,26 @@ class _UsageLedger:
             for h in self._history
             if h["api_key"] == api_key and h["timestamp"] >= cutoff
         ]
+        by_endpoint: dict[str, int] = {}
+        daily_credits: dict[str, int] = {}
+        for h in recent:
+            endpoint = f"/v1/{h['task']}"
+            by_endpoint[endpoint] = by_endpoint.get(endpoint, 0) + 1
+            day = datetime.fromtimestamp(h["timestamp"], tz=timezone.utc).strftime(
+                "%Y-%m-%d"
+            )
+            daily_credits[day] = daily_credits.get(day, 0) + h["credits"]
+        remaining = max(self.starting_credits - total_credits, 0)
         return {
-            "credits_remaining": max(self.starting_credits - total_credits, 0),
-            "credits_used": total_credits,
+            "balance": remaining,
+            "credits_remaining": remaining,
+            "total_requests": total_calls,
             "total_calls": total_calls,
+            "total_credits_used": total_credits,
+            "credits_used": total_credits,
+            "by_endpoint": by_endpoint,
+            "daily_credits": dict(sorted(daily_credits.items())),
+            "truncated": False,
             "by_model": model_breakdown,
             "recent_calls": len(recent),
         }

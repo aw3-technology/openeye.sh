@@ -7,7 +7,9 @@ from dataclasses import dataclass
 class AgentConfig:
     device_id: str = ""
     api_key: str = ""
-    server_url: str = "https://localhost:8001"
+    server_url: str = (
+        "http://localhost:8001"  # matches OPENEYE_FLEET_URL / make dev-backend
+    )
     heartbeat_interval: float = 15.0  # seconds
     model_cache_dir: str = "/tmp/openeye/models"
     firmware_dir: str = "/tmp/openeye/firmware"

@@ -1,105 +1,100 @@
-# OpenEye Hosted API Reference
+# OpenEye API Reference
 
-Base URL: `https://api.openeye.ai` (configurable via `OPENEYE_API_URL`)
+Base URL: `https://openeye.sh` (configurable via `OPENEYE_API_URL`). All inference endpoints are under `/v1`.
+
+The same `/v1` contract is also served by a local `openeye serve <model>` (`http://localhost:8000`) and by a self-hosted fleet control plane (`http://localhost:8001`); differences are noted below.
 
 ## Authentication
 
-All inference and usage endpoints accept an API key via either header:
+Inference and usage endpoints accept an API key via either header:
 
-- `X-API-Key: oe_xxx`
 - `Authorization: Bearer oe_xxx`
+- `X-API-Key: oe_xxx`
 
-Fleet management endpoints require a JWT:
+Create keys at https://openeye.sh/dashboard/settings/api-keys. A key is shown once; only its SHA-256 hash is stored.
 
-- `Authorization: Bearer <jwt>`
+## Rate Limiting (hosted)
 
-Device heartbeat endpoints use device API keys:
-
-- `X-Device-API-Key: dev_xxx`
-
-## Rate Limiting
-
-Default: 120 requests per 60-second sliding window (per API key, configurable).
-
-Response headers on every request:
+Default 60 requests per 60-second window per API key (set per key). Headers:
 
 | Header | Description |
 |---|---|
 | `X-RateLimit-Limit` | Max requests per window |
 | `X-RateLimit-Remaining` | Requests remaining |
-| `X-RateLimit-Reset` | Unix timestamp when window resets |
+| `Retry-After` | Seconds to wait (on 429) |
 
 ## Inference Endpoints
 
 ### POST /v1/detect
 
-Object detection using YOLOv8.
+Object detection with YOLOv8n (80 COCO classes), CPU.
 
 **Request**: `multipart/form-data`
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `file` | file | (required) | Image file (JPEG, PNG, WebP). Max 20 MB |
-| `confidence` | float | 0.25 | Minimum confidence threshold (0.0-1.0) |
+| `file` | file | (required) | JPEG or PNG, under 4 MB, at most 25 megapixels |
+| `confidence` | float | 0.25 | Minimum confidence (0.0-1.0). Form field or query parameter |
 
 **Cost**: 1 credit
 
-### POST /v1/depth
-
-Depth estimation using Depth Anything V2.
-
-**Request**: `multipart/form-data`
-
-| Field | Type | Default | Description |
-|---|---|---|---|
-| `file` | file | (required) | Image file. Max 20 MB |
-
-**Cost**: 2 credits
-
 ### POST /v1/describe
 
-Scene description using GPT-4o vision.
-
-**Request**: `multipart/form-data`
+Scene description with a vision-language model (hosted: Qwen2.5-VL via OpenRouter).
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `file` | file | (required) | Image file. Max 20 MB |
-| `prompt` | string | "Describe what you see in this image." | Vision prompt. Max 2000 chars |
+| `file` | file | (required) | JPEG or PNG, under 4 MB |
+| `prompt` | string | "Describe what you see in this image." | Max 2000 characters |
 
-**Cost**: 3 credits
+**Cost**: 3 credits. **Hosted status**: returns 503 until the VLM is enabled; `GET /v1/models` shows `available: true` for `qwen2.5-vl` when it is.
+
+### POST /v1/depth
+
+Depth estimation with Depth Anything V2.
+
+**Hosted status**: always 501. Run `openeye serve depth-anything` and call `http://localhost:8000/v1/depth` instead. **Cost** (where available): 2 credits.
 
 ### GET /v1/models
 
-List available models and their credit costs.
-
-**Response**: Array of `ModelInfo` objects.
+Array of `{ id, name, task, credits_per_call, description, available }`.
 
 ### GET /v1/usage
 
-Credit balance and usage statistics.
+Balance and usage statistics for the key's owner.
 
 | Param | Type | Default | Description |
 |---|---|---|---|
-| `days` | int | 30 | Usage history window (1-365) |
+| `days` | int | 30 | Usage window (1-365) |
 
-### WS /v1/stream
+### Streaming
 
-Real-time streaming inference over WebSocket.
+There is no WebSocket streaming on the hosted API. A self-hosted fleet control plane offers `WS /v1/stream` (first message `{"api_key": "oe_xxx"}`, then base64 frames; 1 credit per frame), and `openeye serve` offers `ws://localhost:8000/ws`.
 
-**Protocol**:
-1. Client connects to `wss://api.openeye.ai/v1/stream`
-2. Client sends auth: `{"api_key": "oe_xxx"}`
-3. Server responds: `{"status": "authenticated"}`
-4. Client optionally sends config: `{"model": "yolov8", "confidence": 0.3}`
-5. Client sends base64-encoded image frames as text messages
-6. Server responds with detection JSON for each frame
+## Credits
 
-**Cost**: 1 credit per frame
+Credits are bought at https://openeye.sh/dashboard/settings/credits. They are deducted before inference and refunded if inference fails. Users who have never bought credits get 402.
 
-## Fleet Management Endpoints
+## Error Responses
 
-Fleet endpoints run on port 8001.
+Hosted errors are JSON `{ "error": "<message>" }` (self-hosted FastAPI servers use `{ "detail": "<message>" }`).
+
+| Status | Meaning |
+|---|---|
+| 400 | Bad request (missing `file`, bad `confidence`, undecodable image, prompt too long) |
+| 401 | Invalid or missing API key |
+| 402 | Not enough credits |
+| 404 | Unknown endpoint |
+| 413 | Image too large (hosted: 4 MB / 25 MP; fleet control plane: 20 MB) |
+| 415 | Not multipart, or not JPEG/PNG |
+| 429 | Rate limit exceeded |
+| 501 | Depth on the hosted API |
+| 502 | Upstream vision model failed |
+| 503 | Describe not enabled on the hosted API |
+
+## Fleet Management Endpoints (self-hosted)
+
+The fleet control plane (`backend/src/fleet`) runs wherever the user deploys it, usually `http://localhost:8001`. It is not available at openeye.sh. Auth: `Authorization: Bearer <OpenEye session token>` (or an `oe_` key); devices use `X-Device-API-Key: oek_xxx`.
 
 ### Devices
 
@@ -111,16 +106,19 @@ Fleet endpoints run on port 8001.
 | PATCH | /devices/{id} | Update device |
 | PUT | /devices/{id}/tags | Set device tags |
 | PUT | /devices/{id}/config | Set config overrides |
-| GET | /devices/{id}/resources | Get resource usage history |
+| GET | /devices/{id}/resources | Resource usage history |
 | POST | /devices/{id}/restart | Restart device |
 | DELETE | /devices/{id} | Decommission device |
-| POST | /devices/batch | Batch operation on multiple devices |
+| POST | /devices/batch | Batch operation on tagged devices |
 
-### Heartbeats
+### Heartbeats and Commands
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | /heartbeats | Receive device heartbeat (returns pending commands) |
+| POST | /heartbeats | Device heartbeat (returns pending commands; device key) |
+| GET | /commands | List commands (filter by `device_id`, `status`) |
+| POST | /commands/{id}/complete | Complete command |
+| POST | /commands/{id}/device-complete | Device completes command (device key) |
 
 ### Deployments
 
@@ -128,65 +126,33 @@ Fleet endpoints run on port 8001.
 |---|---|---|
 | POST | /deployments | Create deployment |
 | GET | /deployments | List deployments (filter by `status`) |
-| GET | /deployments/{id} | Get deployment details |
-| GET | /deployments/{id}/devices | Get device statuses for deployment |
-| POST | /deployments/{id}/advance | Advance deployment stage |
-| POST | /deployments/{id}/pause | Pause deployment |
-| POST | /deployments/{id}/rollback | Rollback deployment |
+| GET | /deployments/{id} | Get deployment |
+| GET | /deployments/{id}/devices | Device statuses for a deployment |
+| POST | /deployments/{id}/advance | Advance stage |
+| POST | /deployments/{id}/pause | Pause |
+| POST | /deployments/{id}/rollback | Roll back |
 
 ### Device Groups
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | /groups | Create device group |
-| GET | /groups | List device groups |
-| GET | /groups/{id} | Get group details |
+| POST | /groups | Create group |
+| GET | /groups | List groups |
+| GET | /groups/{id} | Get group |
 | DELETE | /groups/{id} | Delete group |
-| POST | /groups/{id}/members | Add device to group |
-| DELETE | /groups/{id}/members/{device_id} | Remove device from group |
-| GET | /groups/{id}/members | List group members |
+| POST | /groups/{id}/members | Add device |
+| DELETE | /groups/{id}/members/{device_id} | Remove device |
+| GET | /groups/{id}/members | List members |
 | PUT | /groups/{id}/scaling | Set auto-scaling policy |
 
-### Maintenance
+### Maintenance, Alerts, OTA
 
 | Method | Endpoint | Description |
 |---|---|---|
 | POST | /maintenance | Create maintenance window |
-| GET | /maintenance | List maintenance windows (filter by `active_only`) |
-| GET | /maintenance/{id} | Get maintenance window |
-| PATCH | /maintenance/{id} | Update maintenance window |
-| DELETE | /maintenance/{id} | Delete maintenance window |
-
-### Alerts
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | /alerts | List alerts (filter by `severity`, `resolved`) |
+| GET | /maintenance | List windows (`active_only`) |
+| GET / PATCH / DELETE | /maintenance/{id} | Get / update / delete window |
+| GET | /alerts | List alerts (`severity`, `resolved`) |
 | POST | /alerts/{id}/resolve | Resolve alert |
-
-### OTA Updates
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | /ota/update | Push OTA firmware update |
-
-### Commands
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | /commands | List commands (filter by `device_id`, `status`) |
-| POST | /commands/{id}/complete | Complete command |
-| POST | /commands/{id}/device-complete | Device completes command (device API key auth) |
-
-## Error Responses
-
-All errors return JSON with a `detail` field:
-
-| Status | Meaning |
-|---|---|
-| 400 | Bad request (invalid image, prompt too long) |
-| 401 | Invalid or missing API key |
-| 402 | Insufficient credits |
-| 413 | File too large (>20 MB) |
-| 429 | Rate limit exceeded |
-| 5xx | Server error |
+| POST | /ota/update | Push OTA update |
+| GET | /health | Control-plane health |

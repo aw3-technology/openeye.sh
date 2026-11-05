@@ -1,4 +1,5 @@
 import { loadDocs } from "./docs-loader";
+import { inlineToPlainText } from "@/lib/markdown-inline";
 
 export type BlockType =
   | "paragraph"
@@ -11,7 +12,11 @@ export type BlockType =
 export interface DocBlock {
   type: BlockType;
   content?: string;
+  /** List items; strings may contain inline Markdown. */
   items?: string[];
+  /** For `list` blocks: numbered list (`1. …`), starting at `start`. */
+  ordered?: boolean;
+  start?: number;
   language?: string;
   filename?: string;
   level?: 2 | 3;
@@ -49,6 +54,6 @@ export function getDocEntry(id: string): DocEntry | undefined {
 /** First paragraph of a section, trimmed to a meta-description length. */
 export function docDescription(entry: DocSection): string {
   const first = entry.blocks.find((b) => b.type === "paragraph")?.content ?? "";
-  const text = first.replace(/`/g, "").trim() || `${entry.title} — OpenEye documentation.`;
+  const text = inlineToPlainText(first).trim() || `${entry.title} — OpenEye documentation.`;
   return text.length > 158 ? `${text.slice(0, 155).replace(/\s+\S*$/, "")}…` : text;
 }

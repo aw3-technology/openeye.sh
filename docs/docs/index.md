@@ -6,7 +6,7 @@ OpenEye is a CLI-first perception engine that turns raw video into structured wo
 
 ## Features
 
-- **Object Detection** — YOLOv8, YOLOv26, Grounding DINO, RF-DETR, and custom adapters
+- **Object Detection** — YOLOv8, YOLO26, Grounding DINO, RF-DETR, and custom adapters
 - **Depth Estimation** — Monocular depth via Depth Anything V2
 - **Segmentation** — SAM2 segment anything
 - **Scene Understanding** — Spatial relationships, scene graphs, natural language queries
@@ -17,7 +17,8 @@ OpenEye is a CLI-first perception engine that turns raw video into structured wo
 - **CLI-Native** — Every capability accessible from the terminal
 - **Model-Agnostic** — Swap models without code changes via the adapter pattern
 - **REST + WebSocket API** — Serve models over HTTP with a single command
-- **Web Dashboard** — React-based UI for inference, live camera streams, scene graphs, and fleet management
+- **Hosted API** — Object detection at `https://openeye.sh/v1` with an API key and pay-per-call credits, no setup
+- **Web Dashboard** — [openeye.sh/dashboard](https://openeye.sh/dashboard) for API keys, credits, history, and fleet records; connect it to your own `openeye serve` for inference, live camera streams, and scene graphs
 - **Fleet Management** — Register, deploy, and monitor edge devices at scale
 - **MLOps** — Model registry, versioning, A/B testing, batch inference, shadow mode
 
@@ -46,10 +47,21 @@ openeye run yolov8 photo.jpg
 openeye serve yolov8
 ```
 
+Or skip the install and call the hosted API with a key from the dashboard:
+
+```bash
+curl -X POST https://openeye.sh/v1/detect \
+  -H "Authorization: Bearer oe_your_key_here" \
+  -F "file=@photo.jpg"
+```
+
+See the [Quickstart](getting-started/quickstart.md) for both paths.
+
 ## Packages
 
 | Package | Description | Language |
 |---------|-------------|----------|
 | `cli/` | CLI tool & FastAPI inference server | Python |
 | `backend/` | Perception pipeline, fleet control plane, governance engine | Python |
-| `src/` | Web dashboard | TypeScript/React |
+| `src/`, `api/` | Website and dashboard (Vite + React) and its Vercel functions: auth, data, credits, hosted `/v1` API | TypeScript |
+| `db/` | Postgres schema (`schema.sql`) shared by the website and the fleet control plane | SQL |

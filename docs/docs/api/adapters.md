@@ -42,7 +42,7 @@ class ModelAdapter(ABC):
 | Adapter | Module | Task |
 |---------|--------|------|
 | `yolov8` | `openeye_ai.adapters.yolov8` | Object detection (Ultralytics YOLOv8) |
-| `yolo26` | `openeye_ai.adapters.yolo26` | Object detection (YOLOv26) |
+| `yolo26` | `openeye_ai.adapters.yolo26` | Object detection (YOLO26 registry entry; currently downloads `yolo11n.pt` weights) |
 | `depth_anything` | `openeye_ai.adapters.depth_anything` | Monocular depth estimation (Depth Anything V2) |
 | `grounding_dino` | `openeye_ai.adapters.grounding_dino` | Open-vocabulary detection (Grounding DINO) |
 | `rfdetr` | `openeye_ai.adapters.rfdetr` | Object detection (RF-DETR) |

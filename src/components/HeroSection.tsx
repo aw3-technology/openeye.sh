@@ -10,7 +10,7 @@ const highlights = [
   "Runs on your hardware",
   "REST + WebSocket",
   "MCP server built in",
-  "Apache 2.0",
+  "MIT licensed",
 ];
 
 export function HeroSection() {

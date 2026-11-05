@@ -53,7 +53,7 @@ export function TitleSlide() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
       >
-        github.com/aw3-technology/openeye.sh &nbsp;&middot;&nbsp; Apache 2.0
+        github.com/aw3-technology/openeye.sh &nbsp;&middot;&nbsp; MIT
       </motion.div>
     </SlideLayout>
   );

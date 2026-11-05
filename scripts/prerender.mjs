@@ -116,7 +116,11 @@ const llms = `# OpenEye
 
 > Open-source "Ollama for vision": a CLI-first perception engine that turns raw video into structured world models for robots, VLA models, and autonomous agents. Install with \`pipx install openeye-sh\`.
 
-OpenEye runs vision models (YOLO, RF-DETR, Grounding DINO, Depth Anything V2, SAM 2, SmolVLA) locally on CPU, NVIDIA CUDA, or Apple Silicon. \`openeye pull <model>\` downloads weights, \`openeye run <model> <image>\` prints JSON, and \`openeye serve <model>\` exposes REST and WebSocket APIs. It also ships an MCP server (\`openeye-mcp\`) for AI agents. Source at https://github.com/aw3-technology/openeye.sh. Full docs as one file: ${SITE}/llms-full.txt
+OpenEye runs vision models (YOLO, RF-DETR, Grounding DINO, Depth Anything V2, SAM 2, SmolVLA) locally on CPU, NVIDIA CUDA, or Apple Silicon. \`openeye pull <model>\` downloads weights, \`openeye run <model> <image>\` prints JSON, and \`openeye serve <model>\` exposes REST and WebSocket APIs. Source at https://github.com/aw3-technology/openeye.sh. Full docs as one file: ${SITE}/llms-full.txt
+
+- Hosted API: \`https://openeye.sh/v1\` with \`Authorization: Bearer oe_...\` (keys at ${SITE}/dashboard/settings/api-keys). \`POST /v1/detect\` (YOLOv8, 1 credit), \`GET /v1/models\`, \`GET /v1/usage\`; \`/v1/describe\` returns 503 until enabled; depth and streaming are self-hosted only. CLI: \`openeye api detect <image>\` with \`OPENEYE_API_KEY\`.
+- MCP server: \`openeye-mcp\` (install \`openeye-sh[mcp]\`) exposes local tools (openeye_list, openeye_pull, openeye_run, openeye_serve, openeye_health, openeye_bench, openeye_remove, openeye_nebius_stats) and hosted tools (openeye_api_detect, openeye_api_describe, openeye_api_models, openeye_api_usage; need \`OPENEYE_API_KEY\`).
+- Dashboard: ${SITE}/dashboard for API keys, credits, inference history, fleet management and observation memory; connect it to a local \`openeye serve\` at http://localhost:8000 for live inference.
 
 ${groups
   .map(

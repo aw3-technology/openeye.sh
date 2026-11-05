@@ -46,7 +46,7 @@ export const pricingTiers: PricingPlanTier[] = [
       { text: "Fleet management CLI", included: true },
       { text: "Safety governance framework", included: true },
       { text: "GPU acceleration (CUDA + Apple MPS)", included: true },
-      { text: "Apache 2.0 license", included: true },
+      { text: "MIT license", included: true },
       { text: "Community support (GitHub)", included: true },
     ],
   },
@@ -233,7 +233,7 @@ export const pricingFaq: FaqItem[] = [
   {
     question: "Is OpenEye really free to use?",
     answer:
-      "Yes. The CLI, all model adapters, the dashboard, MLOps pipeline, fleet management, and the local API server are open source under the Apache 2.0 license. You can self-host everything on your own hardware at no cost.",
+      "Yes. The CLI, all model adapters, the dashboard, MLOps pipeline, fleet management, and the local API server are open source under the MIT license. You can self-host everything on your own hardware at no cost.",
   },
   {
     question: "When will the hosted Cloud tier be available?",

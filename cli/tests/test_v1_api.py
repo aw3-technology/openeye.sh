@@ -67,7 +67,7 @@ def test_v1_detect_requires_auth(v1_client, jpeg_bytes):
     resp = v1_client.post(
         "/v1/detect", files={"file": ("img.jpg", jpeg_bytes, "image/jpeg")}
     )
-    assert resp.status_code == 422  # missing header
+    assert resp.status_code == 401  # missing key
 
 
 def test_v1_detect_rejects_bad_key(v1_client, jpeg_bytes):
@@ -154,7 +154,7 @@ def test_v1_describe_success(v1_client, jpeg_bytes):
     )
     assert resp.status_code == 200
     data = resp.json()
-    assert data["credits_used"] == 5
+    assert data["credits_used"] == 3
     assert "inference_ms" in data
 
 
@@ -222,7 +222,7 @@ def test_v1_usage_accumulates(v1_client, jpeg_bytes):
 
 def test_v1_usage_requires_auth(v1_client):
     resp = v1_client.get("/v1/usage")
-    assert resp.status_code == 422
+    assert resp.status_code == 401
 
 
 def test_v1_usage_days_param(v1_client):
@@ -230,3 +230,110 @@ def test_v1_usage_days_param(v1_client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["credits_remaining"] == 1000
+
+
+# ── Hosted-API parity ───────────────────────────────────────────────
+
+
+def test_v1_accepts_x_api_key_header(v1_client):
+    resp = v1_client.get("/v1/usage", headers={"X-API-Key": "oe_testkey123"})
+    assert resp.status_code == 200
+
+
+def test_v1_x_api_key_rejects_bad_key(v1_client):
+    resp = v1_client.get("/v1/usage", headers={"X-API-Key": "bad_key"})
+    assert resp.status_code == 401
+
+
+def test_v1_detect_confidence_form_field(v1_client, jpeg_bytes):
+    resp = v1_client.post(
+        "/v1/detect",
+        files={"file": ("photo.jpg", jpeg_bytes, "image/jpeg")},
+        data={"confidence": "0.5"},
+        headers=_AUTH,
+    )
+    assert resp.status_code == 200
+    labels = [o["label"] for o in resp.json()["objects"]]
+    assert labels == ["person"]
+
+
+def test_v1_detect_confidence_form_wins_over_query(v1_client, jpeg_bytes):
+    resp = v1_client.post(
+        "/v1/detect",
+        files={"file": ("photo.jpg", jpeg_bytes, "image/jpeg")},
+        data={"confidence": "0.1"},
+        params={"confidence": 0.9},
+        headers=_AUTH,
+    )
+    assert resp.status_code == 200
+    assert len(resp.json()["objects"]) == 2
+
+
+def test_v1_detect_confidence_out_of_range(v1_client, jpeg_bytes):
+    resp = v1_client.post(
+        "/v1/detect",
+        files={"file": ("photo.jpg", jpeg_bytes, "image/jpeg")},
+        data={"confidence": "1.5"},
+        headers=_AUTH,
+    )
+    assert resp.status_code == 400
+
+
+def test_v1_describe_prompt_form_field(v1_client, jpeg_bytes):
+    seen: list[str] = []
+
+    def _predict_with_prompt(img, prompt):
+        seen.append(prompt)
+        return {"description": "ok", "inference_ms": 1.0}
+
+    v1_client.app.state.server.adapter.predict_with_prompt = _predict_with_prompt
+    resp = v1_client.post(
+        "/v1/describe",
+        files={"file": ("img.jpg", jpeg_bytes, "image/jpeg")},
+        data={"prompt": "Count the people"},
+        headers=_AUTH,
+    )
+    assert resp.status_code == 200
+    assert seen == ["Count the people"]
+    data = resp.json()
+    assert data["description"] == "ok"
+    assert data["credits_used"] == 3
+
+
+def test_v1_depth_documented_schema(v1_client, jpeg_bytes):
+    data = v1_client.post(
+        "/v1/depth",
+        files={"file": ("img.jpg", jpeg_bytes, "image/jpeg")},
+        headers=_AUTH,
+    ).json()
+    assert data["model"] == "test-model"
+    assert data["image"] == {"width": 10, "height": 10}
+    # legacy top-level fields kept for compatibility
+    assert data["width"] == 10 and data["height"] == 10
+
+
+def test_v1_usage_hosted_keys(v1_client, jpeg_bytes):
+    for endpoint in ("/v1/detect", "/v1/describe"):
+        v1_client.post(
+            endpoint,
+            files={"file": ("img.jpg", jpeg_bytes, "image/jpeg")},
+            headers=_AUTH,
+        )
+    data = v1_client.get("/v1/usage", headers=_AUTH).json()
+    for key in (
+        "balance",
+        "credits_remaining",
+        "total_requests",
+        "total_calls",
+        "total_credits_used",
+        "credits_used",
+        "by_endpoint",
+        "daily_credits",
+        "truncated",
+    ):
+        assert key in data
+    assert data["by_endpoint"] == {"/v1/detect": 1, "/v1/describe": 1}
+    assert data["total_credits_used"] == 4  # detect 1 + describe 3
+    assert data["balance"] == 996
+    assert sum(data["daily_credits"].values()) == 4
+    assert data["truncated"] is False

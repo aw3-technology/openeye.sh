@@ -4,13 +4,38 @@ End-to-end guide for managing edge AI devices at scale with `openeye fleet` — 
 
 ## Prerequisites
 
-- OpenEye CLI installed (`pip install openeye-ai`)
-- Fleet server running (`openeye serve` or cloud account)
-- `OPENEYE_TOKEN` environment variable set
+- OpenEye CLI installed (`pipx install openeye-sh`)
+- A self-hosted fleet control plane (not `openeye serve`, which is the inference server)
+- A Better Auth session token for a user in the control plane's database
+
+### Run the control plane
+
+The control plane is a FastAPI app in `backend/src/fleet/` that stores its data in Postgres (Neon or any Postgres). In short:
 
 ```bash
-export OPENEYE_TOKEN=<your-token>
+# 1. Create the tables (from the repo root)
+psql "$DATABASE_URL" -f db/schema.sql     # or: npm run db:migrate
+
+# 2. Start it
+make install-backend
+cd backend/src
+DATABASE_URL="postgresql://...?sslmode=require" \
+  uvicorn fleet.app:create_fleet_app --factory --host 0.0.0.0 --port 8001
 ```
+
+All environment variables, auth details, and the schema notes are in [Backend Configuration → Fleet Control Plane](../backend/configuration.md#fleet-control-plane).
+
+### Point the CLI at it
+
+```bash
+export OPENEYE_FLEET_URL=http://localhost:8001   # the default
+export OPENEYE_TOKEN=<better-auth-session-token>
+```
+
+The control plane checks `OPENEYE_TOKEN` against the `session` table in its own database, so sign up through a copy of the website running on the same `DATABASE_URL` (for example `vercel dev`) and use that session's token.
+
+!!! note "openeye.sh dashboard"
+    The fleet pages on openeye.sh keep their records in openeye.sh's own database, not in your control plane. Use the CLI (or the API directly) to manage a self-hosted control plane.
 
 ## 1. Register Devices
 
@@ -22,11 +47,20 @@ openeye fleet register arm-1 --type robot
 openeye fleet register gateway-west --type gateway
 ```
 
-On success, the CLI prints the device ID and a one-time API key — save it immediately:
+On success, the CLI prints the device ID and a one-time API key — save it immediately. Only its SHA-256 hash is stored:
 
 ```
 Device registered: a1b2c3d4-...
 API Key (save now!): oek_xxxx...
+```
+
+### Run the device agent
+
+On the device itself, start the agent with that key. It sends heartbeats (every 15 seconds by default) and authenticates with `X-Device-API-Key`:
+
+```bash
+export OPENEYE_DEVICE_API_KEY=oek_xxxx...
+openeye fleet agent --device-id <device-id> --server http://<control-plane-host>:8001
 ```
 
 | Flag | Description |
@@ -155,7 +189,7 @@ openeye fleet rollback <deployment-id>
 
 ### Alerts
 
-View unresolved alerts (default):
+View all alerts:
 
 ```bash
 openeye fleet alerts
@@ -191,6 +225,13 @@ Send a batch command to devices matching a tag filter:
 
 ```bash
 openeye fleet batch restart --tag zone=loading
+```
+
+Commands are queued for the device agent to pick up. List what's pending:
+
+```bash
+openeye fleet commands
+openeye fleet commands --device <device-id>
 ```
 
 ### Maintenance Windows
