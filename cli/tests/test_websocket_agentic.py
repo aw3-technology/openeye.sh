@@ -6,15 +6,11 @@ import base64
 import io
 import json
 import time
-from pathlib import Path
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from PIL import Image
-
 from openeye_ai.server.agentic_session import AgenticConfig, AgenticSession
-
+from PIL import Image
 
 # ── Helpers ──────────────────────────────────────────────────────────
 

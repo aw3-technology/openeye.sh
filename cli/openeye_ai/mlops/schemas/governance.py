@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 
-from .base import ApprovalStatus, ModelStage, PipelineStatus, ShadowStatus
-
+from .base import ApprovalStatus, ModelStage, ShadowStatus
 
 # ── Story 183: Stage promotion + approval gates ──────────────────────
 

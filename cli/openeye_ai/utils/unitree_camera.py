@@ -100,7 +100,7 @@ class G1Camera:
     def _init_sdk(self) -> None:
         """Connect via Unitree SDK2 video channel."""
         try:
-            from unitree_sdk2py.core.channel import ChannelFactory
+            from unitree_sdk2py.core.channel import ChannelFactory  # noqa: F401  (SDK presence check)
             from unitree_sdk2py.go2.video import VideoClient
         except ImportError:
             raise ImportError(

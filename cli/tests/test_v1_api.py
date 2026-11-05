@@ -7,13 +7,12 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from PIL import Image
-from starlette.testclient import TestClient
-
 from openeye_ai.adapters.base import ModelAdapter
 from openeye_ai.server.app import create_app
 from openeye_ai.server.rate_limit import limiter
 from openeye_ai.server.routes.v1 import _UsageLedger
+from PIL import Image
+from starlette.testclient import TestClient
 
 _AUTH = {"Authorization": "Bearer oe_testkey123"}
 

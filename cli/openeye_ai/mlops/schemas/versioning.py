@@ -8,13 +8,12 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 from .base import (
+    _SAFE_KEY_RE,
     ExportFormat,
     ModelFormat,
     ModelStage,
     TrainingMetrics,
-    _SAFE_KEY_RE,
 )
-
 
 # ── Story 181: Upload custom model + register ────────────────────────
 

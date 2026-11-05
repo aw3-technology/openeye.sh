@@ -11,7 +11,6 @@ from openeye_ai.config import OPENEYE_HOME
 
 from .persistence import atomic_save_yaml, safe_load_yaml_list
 from .schemas import (
-    PipelineStatus,
     ValidationConditionResult,
     ValidationTest,
     ValidationTestRun,

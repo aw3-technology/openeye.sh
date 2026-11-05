@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 import json
-import shutil
-from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from typer.testing import CliRunner
-
 from openeye_ai.cli import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

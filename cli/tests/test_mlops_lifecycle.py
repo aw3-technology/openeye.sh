@@ -142,7 +142,11 @@ class TestLifecycle:
     def test_approve_promotion(self, _seed_registry):
         from openeye_ai.mlops.lifecycle import approve_promotion, request_promotion
         from openeye_ai.mlops.model_registry import get_version
-        from openeye_ai.mlops.schemas import ApprovalStatus, ModelStage, PromotionRequest
+        from openeye_ai.mlops.schemas import (
+            ApprovalStatus,
+            ModelStage,
+            PromotionRequest,
+        )
 
         # DEV -> STAGING is auto-approved (accuracy gate with no required_approvers).
         # The seeded model has no training metrics, so auto-approve won't fire.
@@ -175,7 +179,11 @@ class TestLifecycle:
 
     def test_reject_promotion(self, _seed_registry):
         from openeye_ai.mlops.lifecycle import reject_promotion, request_promotion
-        from openeye_ai.mlops.schemas import ApprovalStatus, ModelStage, PromotionRequest
+        from openeye_ai.mlops.schemas import (
+            ApprovalStatus,
+            ModelStage,
+            PromotionRequest,
+        )
 
         # Request DEV -> STAGING; seeded model has no metrics so stays PENDING
         record = request_promotion(
@@ -214,6 +222,10 @@ class TestLifecycle:
 
     def test_auto_approve_promotion_with_high_accuracy(self, _seed_registry):
         """DEV -> STAGING with accuracy > 0.90 should be auto-approved."""
+        # Add a version with high accuracy metrics
+        import tempfile
+        from pathlib import Path
+
         from openeye_ai.mlops.lifecycle import request_promotion
         from openeye_ai.mlops.model_registry import add_version, get_version
         from openeye_ai.mlops.schemas import (
@@ -222,10 +234,6 @@ class TestLifecycle:
             ModelStage,
             PromotionRequest,
         )
-
-        # Add a version with high accuracy metrics
-        import tempfile
-        from pathlib import Path
 
         with tempfile.NamedTemporaryFile(suffix=".pt", delete=False) as f:
             f.write(b"\x00" * 512)

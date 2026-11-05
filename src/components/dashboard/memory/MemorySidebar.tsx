@@ -1,9 +1,10 @@
 import { Brain, Eye, Tag } from "lucide-react";
 import type { Observation } from "@/types/agent";
-import { allTags, allLabels, demoObservations } from "./data";
+import { tagsOf, labelsOf } from "./data";
 import { SignificanceDot } from "./SignificanceDot";
 
 export function MemorySidebar({
+  observations,
   recallQuery,
   onRecallQueryChange,
   onRecall,
@@ -15,6 +16,7 @@ export function MemorySidebar({
   onShowFilters,
   onSearchByLabel,
 }: {
+  observations: Observation[];
   recallQuery: string;
   onRecallQueryChange: (v: string) => void;
   onRecall: () => void;
@@ -100,11 +102,11 @@ export function MemorySidebar({
           </span>
         </div>
         <div className="space-y-1.5">
-          {allLabels.map((label) => {
-            const appearances = demoObservations.filter((o) =>
+          {labelsOf(observations).map((label) => {
+            const appearances = observations.filter((o) =>
               o.detections.some((d) => d.label === label)
             ).length;
-            const ratio = appearances / demoObservations.length;
+            const ratio = appearances / observations.length;
             return (
               <div key={label} className="space-y-1">
                 <div className="flex items-center justify-between text-[10px] font-mono">
@@ -115,7 +117,7 @@ export function MemorySidebar({
                     {label}
                   </button>
                   <span className="text-muted-foreground tabular-nums">
-                    {appearances}/{demoObservations.length}
+                    {appearances}/{observations.length}
                   </span>
                 </div>
                 <div className="h-1 bg-foreground/5 rounded-full overflow-hidden">
@@ -139,11 +141,11 @@ export function MemorySidebar({
           </span>
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {allTags.map((tag) => {
-            const count = demoObservations.filter((o) =>
+          {tagsOf(observations).map((tag) => {
+            const count = observations.filter((o) =>
               o.tags.includes(tag)
             ).length;
-            const weight = count / demoObservations.length;
+            const weight = count / observations.length;
             return (
               <button
                 key={tag}

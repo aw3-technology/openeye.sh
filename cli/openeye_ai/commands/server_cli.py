@@ -8,7 +8,9 @@ import typer
 from rich import print as rprint
 from rich.table import Table
 
-from openeye_ai._cli_helpers import SERVER_URL as _SERVER_URL, err_console as console, http_request
+from openeye_ai._cli_helpers import SERVER_URL as _SERVER_URL
+from openeye_ai._cli_helpers import err_console as console
+from openeye_ai._cli_helpers import http_request
 
 
 def _server_url(server: str | None) -> str:

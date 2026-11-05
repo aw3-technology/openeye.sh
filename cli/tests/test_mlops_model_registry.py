@@ -15,7 +15,10 @@ class TestModelRegistry:
         assert len(h) == 64  # SHA-256 hex digest
 
     def test_upload_and_list(self, model_file):
-        from openeye_ai.mlops.model_registry import list_registered_models, upload_and_register
+        from openeye_ai.mlops.model_registry import (
+            list_registered_models,
+            upload_and_register,
+        )
         from openeye_ai.mlops.schemas import ModelFormat, ModelUploadRequest
 
         upload_and_register(

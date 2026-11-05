@@ -42,7 +42,12 @@ from typing import Any
 
 from rich.live import Live
 
-from openeye_ai.demos.display import build_display, console, print_startup_banner, print_summary
+from openeye_ai.demos.display import (
+    build_display,
+    console,
+    print_startup_banner,
+    print_summary,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -187,8 +192,8 @@ def run_demo(args: argparse.Namespace) -> None:
     # Safety Guardian
     from openeye_ai._cli_helpers import ensure_backend_path
     ensure_backend_path()
-    from perception.safety import SafetyGuardian
     from perception.models import BBox2D, DetectedObject3D, Position3D
+    from perception.safety import SafetyGuardian
 
     guardian = SafetyGuardian(danger_m=args.danger_m, caution_m=args.caution_m)
 

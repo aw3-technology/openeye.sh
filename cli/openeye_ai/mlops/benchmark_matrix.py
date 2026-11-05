@@ -6,7 +6,7 @@ Compare model performance across hardware targets (Jetson vs A100 vs CPU).
 from __future__ import annotations
 
 import time
-from typing import Any, Optional
+from typing import Optional
 
 from openeye_ai.config import OPENEYE_HOME
 

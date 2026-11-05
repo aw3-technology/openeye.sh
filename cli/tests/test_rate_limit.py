@@ -1,8 +1,6 @@
 """Tests for rate limiting."""
 
-import io
 
-from PIL import Image
 
 
 def test_predict_rate_limit(app_client, tiny_image_bytes):

@@ -52,3 +52,4 @@ backend/uv.lock
 .vercel
 .env*.local
 .env*
+.claude/worktrees/

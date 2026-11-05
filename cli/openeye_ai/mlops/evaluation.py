@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import json
-import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 from PIL import Image
 
@@ -207,7 +206,6 @@ def evaluate_model(
         for conf, is_tp in preds:
             if is_tp:
                 tp_cumsum += 1
-            p = tp_cumsum / len(precisions + [1])  # Current index+1
             r = tp_cumsum / n_gt if n_gt > 0 else 0.0
             precisions.append(tp_cumsum / (len(precisions) + 1))
             recalls_list.append(r)

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from openeye_ai.cli import app
-from .conftest import make_deployment
 
 
 class TestDeploy:

@@ -10,10 +10,7 @@ from rich import print as rprint
 
 def _format_pretty(result) -> str:
     """Format a PredictionResult as human-readable colored text for the terminal."""
-    from rich.console import Console
-    from rich.text import Text
 
-    buf_console = Console(file=None, force_terminal=True, width=80)
     parts: list[str] = []
 
     # Header

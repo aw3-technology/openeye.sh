@@ -41,9 +41,9 @@ def _resolve_stdin(*, allow_raw: bool = True):
         raise typer.Exit(code=1)
 
     try:
-        from PIL import Image
-
         import io
+
+        from PIL import Image
 
         Image.open(io.BytesIO(raw)).verify()
     except Exception:

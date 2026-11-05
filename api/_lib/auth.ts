@@ -1,6 +1,10 @@
 import { betterAuth } from "better-auth";
+import { genericOAuth } from "better-auth/plugins";
 import type { SocialProviders } from "better-auth/social-providers";
 import { pool } from "./db.js";
+
+const ONEPROFILE_ISSUER =
+  process.env.ONEPROFILE_ISSUER || "https://lluoavnspwejosiuqymg.supabase.co/functions/v1/oauth";
 
 const vercelHost =
   process.env.VERCEL_ENV === "production"
@@ -34,6 +38,7 @@ export const auth = betterAuth({
     "https://openeye.sh",
     "https://www.openeye.sh",
     "https://appleid.apple.com",
+    "https://1profile.com",
     "http://localhost:3000",
     "http://localhost:8080",
     // Production alias and preview deployments of the openeye project
@@ -47,10 +52,27 @@ export const auth = betterAuth({
     minPasswordLength: 6,
   },
   socialProviders,
+  plugins: [
+    // Sign in with 1Profile (OIDC). OpenEye is a public client (PKCE, no secret), registered
+    // with redirect URIs <origin>/api/auth/callback/1profile for openeye.sh and localhost:8080.
+    genericOAuth({
+      config: [
+        {
+          providerId: "1profile",
+          discoveryUrl: `${ONEPROFILE_ISSUER}/.well-known/openid-configuration`,
+          clientId: process.env.ONEPROFILE_CLIENT_ID ?? "client_5239446173344611bdddf84a23d4cf2b",
+          tokenEndpointAuth: { method: "none" },
+          pkce: true,
+          scopes: ["openid", "email", "profile"],
+        },
+      ],
+    }),
+  ],
   account: {
     // Users imported from Lovable Cloud have no password; let them sign in
-    // with Google/Apple on the same email and get linked to their account.
-    accountLinking: { enabled: true, trustedProviders: ["google", "apple"] },
+    // with 1Profile/Google/Apple on the same email and get linked to their account.
+    // 1Profile verifies emails, so linking on it is safe.
+    accountLinking: { enabled: true, trustedProviders: ["1profile", "google", "apple"] },
   },
   advanced: {
     // Keep UUID ids so imported Supabase user ids stay valid.

@@ -4,18 +4,16 @@ from __future__ import annotations
 
 import json
 
-import pytest
-
 from openeye_ai.cli import app
-from .conftest import make_device
 
+from .conftest import make_device
 
 # ── Story 51: register ───────────────────────────────────────────
 
 
 class TestRegister:
     def test_register_returns_id_and_api_key(self, fleet_runner, mock_request):
-        mock = mock_request({"id": "dev-uuid-1", "api_key": "oek_secret123"})
+        mock_request({"id": "dev-uuid-1", "api_key": "oek_secret123"})
         result = fleet_runner.invoke(app, ["fleet", "register", "cam-front"])
         assert result.exit_code == 0
         assert "dev-uuid-1" in result.output

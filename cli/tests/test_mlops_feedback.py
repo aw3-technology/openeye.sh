@@ -117,7 +117,11 @@ class TestFeedback:
         assert len(list_annotations(annotation_label=AnnotationLabel.MISCLASSIFICATION)) == 1
 
     def test_list_feedback_batches(self, tmp_path):
-        from openeye_ai.mlops.feedback import annotate_failure, create_feedback_batch, list_feedback_batches
+        from openeye_ai.mlops.feedback import (
+            annotate_failure,
+            create_feedback_batch,
+            list_feedback_batches,
+        )
         from openeye_ai.mlops.schemas import AnnotationLabel
 
         ann = annotate_failure(
@@ -133,7 +137,11 @@ class TestFeedback:
 
     def test_execute_feedback_batch_skips_missing_annotation(self, tmp_path):
         """Batch with a non-existent annotation ID should skip it without error."""
-        from openeye_ai.mlops.feedback import annotate_failure, create_feedback_batch, execute_feedback_batch
+        from openeye_ai.mlops.feedback import (
+            annotate_failure,
+            create_feedback_batch,
+            execute_feedback_batch,
+        )
         from openeye_ai.mlops.schemas import AnnotationLabel, PipelineStatus
 
         ann = annotate_failure(

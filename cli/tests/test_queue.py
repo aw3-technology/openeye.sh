@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from openeye_ai.server.queue import InferenceQueue, QueueFullError
 
 

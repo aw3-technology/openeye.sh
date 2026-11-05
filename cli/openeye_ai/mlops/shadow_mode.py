@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
@@ -19,6 +19,9 @@ from .schemas import (
     ShadowDeploymentConfig,
     ShadowStatus,
 )
+
+if TYPE_CHECKING:
+    from PIL import Image
 
 _SHADOW_PATH = OPENEYE_HOME / "shadow_deployments.yaml"
 

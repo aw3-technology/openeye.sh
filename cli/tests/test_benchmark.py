@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from typer.testing import CliRunner
-
 from openeye_ai.cli import app
 from openeye_ai.utils.benchmark import BenchmarkResult, run_benchmark
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -186,7 +184,6 @@ def _make_registry() -> dict[str, dict[str, Any]]:
 
 def _patch_bench(monkeypatch, tmp_openeye_home, downloaded=True, variant_downloaded=False):
     """Patch bench command dependencies."""
-    import openeye_ai.commands.inference.bench  # noqa: F811
 
     bench_mod = sys.modules["openeye_ai.commands.inference.bench"]
     registry = _make_registry()

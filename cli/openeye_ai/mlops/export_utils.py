@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from openeye_ai.config import MODELS_DIR
 
 from .schemas import ModelFormat
+
+if TYPE_CHECKING:
+    import torch
 
 
 def _detect_source_format(model_path: Path) -> ModelFormat:

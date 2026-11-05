@@ -25,13 +25,9 @@ def serve(
         rprint(f"[red]Invalid port {port}. Must be between 1 and 65535.[/red]")
         raise typer.Exit(code=1)
 
-    import threading
 
     import uvicorn
-
-    from rich.live import Live
     from rich.panel import Panel
-    from rich.text import Text
 
     from openeye_ai.server.app import create_app
 
@@ -99,7 +95,6 @@ def _run_demo_mode(fastapi_app, host: str, port: int, model: str, console) -> No
     import threading
 
     import uvicorn
-
     from rich.live import Live
     from rich.panel import Panel
     from rich.text import Text

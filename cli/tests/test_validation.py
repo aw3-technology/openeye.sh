@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from openeye_ai.utils.validation import ValidationError, validate_model_entry
 
 

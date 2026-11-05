@@ -69,7 +69,7 @@ async def _query_vlm(
         base_url=base_url,
         api_key=api_key,
         default_headers={
-            "HTTP-Referer": "https://perceptify.dev",
+            "HTTP-Referer": "https://openeye.sh",
             "X-Title": "OpenEye",
         },
     )

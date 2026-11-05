@@ -30,7 +30,11 @@ class TestSchemas:
         assert v2.version == v.version
 
     def test_model_registry_entry_latest_version(self):
-        from openeye_ai.mlops.schemas import ModelFormat, ModelRegistryEntry, ModelVersion
+        from openeye_ai.mlops.schemas import (
+            ModelFormat,
+            ModelRegistryEntry,
+            ModelVersion,
+        )
 
         entry = ModelRegistryEntry(
             key="my-model",
@@ -46,8 +50,8 @@ class TestSchemas:
         assert entry.production_version is None
 
     def test_model_upload_request_key_validation(self):
-        from pydantic import ValidationError
         from openeye_ai.mlops.schemas import ModelFormat, ModelUploadRequest
+        from pydantic import ValidationError
 
         with pytest.raises(ValidationError):
             ModelUploadRequest(
@@ -56,8 +60,8 @@ class TestSchemas:
             )
 
     def test_ab_test_config_versions_must_differ(self):
-        from pydantic import ValidationError
         from openeye_ai.mlops.schemas import ABTestConfig
+        from pydantic import ValidationError
 
         with pytest.raises(ValidationError, match="must be different"):
             ABTestConfig(
@@ -65,8 +69,8 @@ class TestSchemas:
             )
 
     def test_shadow_deployment_config_versions_must_differ(self):
-        from pydantic import ValidationError
         from openeye_ai.mlops.schemas import ShadowDeploymentConfig
+        from pydantic import ValidationError
 
         with pytest.raises(ValidationError, match="must be different"):
             ShadowDeploymentConfig(

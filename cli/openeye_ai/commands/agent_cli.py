@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import signal
-import sys
-import time
 
 import typer
 from rich import print as rprint
-from rich.live import Live
-from rich.panel import Panel
 from rich.table import Table
 
-from openeye_ai._cli_helpers import SERVER_URL as _SERVER_URL, err_console as console, http_request
+from openeye_ai._cli_helpers import SERVER_URL as _SERVER_URL
+from openeye_ai._cli_helpers import err_console as console
+from openeye_ai._cli_helpers import http_request
 
 agent_app = typer.Typer(help="Agentic perception loop — perceive, reason, act.")
 

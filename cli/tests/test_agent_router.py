@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import pytest
-from starlette.testclient import TestClient
-
 from openeye_ai.server import agent_router
 
 

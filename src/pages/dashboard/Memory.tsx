@@ -1,14 +1,26 @@
-import { Brain, Activity } from "lucide-react";
+import { Brain, Activity, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useState, useMemo, useCallback } from "react";
 import type { Observation } from "@/types/agent";
-import { demoObservations, allTags, allLabels } from "@/components/dashboard/memory/data";
+import { tagsOf, labelsOf } from "@/components/dashboard/memory/data";
+import { useObservations } from "@/hooks/useObservations";
 import { MemoryStatsRow } from "@/components/dashboard/memory/MemoryStatsRow";
 import { SignificanceTimeline } from "@/components/dashboard/memory/SignificanceTimeline";
 import { MemorySearchFilters } from "@/components/dashboard/memory/MemorySearchFilters";
 import { ObservationList } from "@/components/dashboard/memory/ObservationList";
 import { MemorySidebar } from "@/components/dashboard/memory/MemorySidebar";
 
+const TIME_RANGE_MS: Record<string, number> = {
+  last_1h: 60 * 60 * 1000,
+  last_24h: 24 * 60 * 60 * 1000,
+  last_7d: 7 * 24 * 60 * 60 * 1000,
+};
+
+const EMPTY: Observation[] = [];
+
 export default function Memory() {
+  const { data, isLoading, error } = useObservations();
+  const observations = data?.observations ?? EMPTY;
   const [query, setQuery] = useState("");
   const [timeRange, setTimeRange] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -19,7 +31,7 @@ export default function Memory() {
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredObservations = useMemo(() => {
-    let results = demoObservations;
+    let results = observations;
 
     if (query.trim()) {
       const keywords = query.toLowerCase().split(/\s+/);
@@ -38,30 +50,30 @@ export default function Memory() {
       results = results.filter((obs) => obs.significance >= minSignificance);
     }
 
-    if (timeRange !== "all") {
-      results = results;
+    const windowMs = TIME_RANGE_MS[timeRange];
+    if (windowMs) {
+      const since = Date.now() - windowMs;
+      results = results.filter((obs) => new Date(obs.timestamp).getTime() >= since);
     }
 
     return results;
-  }, [query, timeRange, activeTag, minSignificance]);
+  }, [observations, query, timeRange, activeTag, minSignificance]);
 
   const stats = useMemo(() => {
-    const highSig = demoObservations.filter((o) => o.significance >= 0.7).length;
-    const withChanges = demoObservations.filter(
-      (o) => o.change_description
-    ).length;
-    const avgSig =
-      demoObservations.reduce((sum, o) => sum + o.significance, 0) /
-      demoObservations.length;
+    const highSig = observations.filter((o) => o.significance >= 0.7).length;
+    const withChanges = observations.filter((o) => o.change_description).length;
+    const avgSig = observations.length
+      ? observations.reduce((sum, o) => sum + o.significance, 0) / observations.length
+      : 0;
     return {
-      total: demoObservations.length,
+      total: observations.length,
       highSignificance: highSig,
       changes: withChanges,
-      uniqueObjects: allLabels.length,
-      uniqueTags: allTags.length,
+      uniqueObjects: labelsOf(observations).length,
+      uniqueTags: tagsOf(observations).length,
       avgSignificance: avgSig,
     };
-  }, []);
+  }, [observations]);
 
   const handleRecall = useCallback(() => {
     if (!recallQuery.trim()) {
@@ -69,7 +81,7 @@ export default function Memory() {
       return;
     }
     const keywords = recallQuery.toLowerCase().split(/\s+/);
-    const matches = demoObservations
+    const matches = observations
       .filter((obs) => {
         const text =
           `${obs.scene_summary} ${obs.change_description} ${obs.tags.join(" ")}`.toLowerCase();
@@ -78,7 +90,7 @@ export default function Memory() {
       .sort((a, b) => b.significance - a.significance)
       .slice(0, 5);
     setRecallResults(matches);
-  }, [recallQuery]);
+  }, [observations, recallQuery]);
 
   const toggleExpand = useCallback(
     (id: string) => setExpandedId((prev) => (prev === id ? null : id)),
@@ -93,16 +105,35 @@ export default function Memory() {
           <Brain className="h-5 w-5 text-blue-400" />
           <h1 className="text-xl font-semibold">Observation Memory</h1>
           <span className="text-xs font-mono text-muted-foreground">
-            {demoObservations.length} observations stored
+            {observations.length} observations stored
           </span>
         </div>
-        <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-terminal-green" />
-            online
+        {data?.isSample && (
+          <span className="rounded-full border border-foreground/10 px-2.5 py-0.5 text-xs text-muted-foreground">
+            Sample session
           </span>
-        </div>
+        )}
       </div>
+
+      {isLoading && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading observations…
+        </div>
+      )}
+      {error && (
+        <p className="text-sm text-destructive">Couldn't load observations: {(error as Error).message}</p>
+      )}
+      {!isLoading && !error && observations.length === 0 && (
+        <div className="rounded-lg border border-foreground/5 bg-card p-8 text-center">
+          <p className="font-medium">No observations yet</p>
+          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+            Observations are saved here when you run the agent loop in live mode against your OpenEye server.
+          </p>
+          <Link to="/dashboard/agent" className="mt-4 inline-block text-sm text-primary hover:underline">
+            Open the agent loop
+          </Link>
+        </div>
+      )}
 
       <MemoryStatsRow stats={stats} />
 
@@ -115,13 +146,14 @@ export default function Memory() {
           </span>
         </div>
         <SignificanceTimeline
-          observations={demoObservations}
+          observations={observations}
           onTickClick={(obs) => toggleExpand(obs.id)}
           expandedId={expandedId}
         />
       </div>
 
       <MemorySearchFilters
+        observations={observations}
         query={query}
         onQueryChange={setQuery}
         timeRange={timeRange}
@@ -133,7 +165,7 @@ export default function Memory() {
         showFilters={showFilters}
         onShowFiltersChange={setShowFilters}
         filteredCount={filteredObservations.length}
-        totalCount={demoObservations.length}
+        totalCount={observations.length}
       />
 
       {/* Main Content: two-column on large screens */}
@@ -148,6 +180,7 @@ export default function Memory() {
         />
 
         <MemorySidebar
+          observations={observations}
           recallQuery={recallQuery}
           onRecallQueryChange={setRecallQuery}
           onRecall={handleRecall}

@@ -19,6 +19,7 @@ async def upload_model(
     """Upload a custom-trained model and register it."""
     import os
     import tempfile
+
     from ..model_registry import upload_and_register
     with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as tmp:
         contents = await file.read()
@@ -74,6 +75,7 @@ async def add_model_version(
     """Add a new version to an existing model."""
     import os
     import tempfile
+
     from ..model_registry import add_version
     with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as tmp:
         contents = await file.read()

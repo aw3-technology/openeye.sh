@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-import time
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+from conftest import StubAdapter
+from openeye_ai.cli import app
 from PIL import Image
 from typer.testing import CliRunner
-
-from openeye_ai.cli import app
-
-from conftest import StubAdapter
 
 runner = CliRunner()
 

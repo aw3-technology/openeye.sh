@@ -7,10 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from PIL import Image
-
 from openeye_ai.adapters.base import ModelAdapter
-
+from PIL import Image
 
 # ── Shared test helpers ──────────────────────────────────────────────
 
@@ -212,10 +210,9 @@ def tmp_openeye_home(tmp_path, monkeypatch):
 @pytest.fixture()
 def app_client(fake_adapter):
     """Return a TestClient wrapping the FastAPI app with a FakeAdapter."""
-    from starlette.testclient import TestClient
-
     from openeye_ai.server.app import create_app
     from openeye_ai.server.rate_limit import limiter
+    from starlette.testclient import TestClient
 
     # Reset rate limiter state between tests
     limiter.reset()

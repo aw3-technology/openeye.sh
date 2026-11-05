@@ -6,19 +6,16 @@ import subprocess
 import uuid
 from collections import deque
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
 from .persistence import atomic_save_yaml, safe_load_yaml_list
-
 from .schemas import (
-    DriftDetectionConfig,
     PipelineStatus,
     RetrainingPipelineConfig,
     RetrainingRun,
     RetrainingTrigger,
-    TrainingMetrics,
 )
 
 _PIPELINES_PATH = OPENEYE_HOME / "retraining_pipelines.yaml"

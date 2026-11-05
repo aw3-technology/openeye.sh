@@ -9,13 +9,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import pytest
+from conftest import make_test_registry
+from openeye_ai.cli import app
 from PIL import Image
 from typer.testing import CliRunner
-
-from openeye_ai.cli import app
-
-from conftest import make_test_registry
 
 runner = CliRunner()
 
@@ -102,7 +99,6 @@ class _SegmentationAdapter:
 
 
 def _get_run_mod():
-    import openeye_ai.commands.inference.run  # noqa: F811
     return sys.modules["openeye_ai.commands.inference.run"]
 
 

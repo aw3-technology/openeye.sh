@@ -19,13 +19,16 @@ class TestBenchmarkMatrix:
 
     def test_get_benchmark_results_with_version_filter(self):
         """Filtering by model_version should narrow results."""
-        from openeye_ai.mlops.benchmark_matrix import get_benchmark_results
-        from openeye_ai.mlops.persistence import atomic_save_yaml
-
-        from openeye_ai.mlops.schemas import BenchmarkMatrixResult, HardwareBenchmarkEntry, HardwareTarget
-
         # Manually persist two benchmark entries
-        from openeye_ai.mlops.benchmark_matrix import _BENCHMARKS_PATH, _save_benchmarks
+        from openeye_ai.mlops.benchmark_matrix import (
+            _save_benchmarks,
+            get_benchmark_results,
+        )
+        from openeye_ai.mlops.schemas import (
+            BenchmarkMatrixResult,
+            HardwareBenchmarkEntry,
+            HardwareTarget,
+        )
 
         entries = [
             BenchmarkMatrixResult(

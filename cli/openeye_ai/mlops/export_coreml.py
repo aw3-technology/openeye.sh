@@ -32,7 +32,6 @@ def export_to_coreml(
         else:
             raise ValueError(f"Cannot convert {model_path.suffix} to CoreML. Use ONNX, TorchScript, or SafeTensors.")
 
-        example_input = torch.randn(*shape)
         model = ct.convert(traced, inputs=[ct.TensorType(shape=shape)])
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -9,6 +9,15 @@ import typer
 from rich import print as rprint
 
 from openeye_ai._cli_helpers import dependency_error, err_console
+from openeye_ai.commands.inference.result_formatter import (
+    _format_pretty,
+    _merge_pipeline,
+    _save_visualization,
+)
+from openeye_ai.commands.inference.stdin_resolver import (
+    _collect_images,
+    _resolve_stdin,
+)
 from openeye_ai.config import MODELS_DIR
 from openeye_ai.registry import (
     get_adapter,
@@ -17,9 +26,6 @@ from openeye_ai.registry import (
     is_downloaded,
     is_variant_downloaded,
 )
-
-from openeye_ai.commands.inference.stdin_resolver import _resolve_stdin, _IMAGE_EXTENSIONS, _collect_images
-from openeye_ai.commands.inference.result_formatter import _format_pretty, _merge_pipeline, _save_visualization
 
 
 def _run_single(
@@ -35,7 +41,6 @@ def _run_single(
     piped_data: dict | None,
 ) -> str:
     """Run inference on a single image and return JSON output string."""
-    import json
 
     from PIL import Image, UnidentifiedImageError
 

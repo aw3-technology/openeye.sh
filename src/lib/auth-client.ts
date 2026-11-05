@@ -26,7 +26,7 @@ interface AuthClient {
   signOut(): Result;
   signIn: {
     email(body: { email: string; password: string }): Result;
-    social(body: { provider: "google" | "apple"; callbackURL?: string; errorCallbackURL?: string }): Result;
+    social(body: { provider: "1profile" | "google" | "apple"; callbackURL?: string; errorCallbackURL?: string }): Result;
   };
   signUp: {
     email(body: { email: string; password: string; name: string }): Result;

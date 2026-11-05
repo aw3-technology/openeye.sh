@@ -10,6 +10,8 @@ import {
 } from "@/lib/safety-thresholds";
 import { safetyLevelTextColor } from "@/lib/safety-utils";
 
+const SCENE_CLEAR_INTERVAL_MS = 5000;
+
 interface SafetyLogEntry {
   id: number;
   message: string;
@@ -33,6 +35,7 @@ export function SafetyLog({ isStreaming, objects }: {
   const logRef = useRef<HTMLDivElement>(null);
   const prevObjCountRef = useRef(0);
   const counterRef = useRef(0);
+  const lastClearLogRef = useRef(0);
 
   useEffect(() => {
     if (!isStreaming || objects.length === 0) return;
@@ -73,8 +76,10 @@ export function SafetyLog({ isStreaming, objects }: {
       });
     }
 
-    // Scene clear occasionally
-    if (entries.length === 0 && Math.random() < 0.03) {
+    // "Scene clear" at most every few seconds
+    const now = Date.now();
+    if (entries.length === 0 && now - lastClearLogRef.current >= SCENE_CLEAR_INTERVAL_MS) {
+      lastClearLogRef.current = now;
       entries.push({
         id: ++counterRef.current,
         message: `Scene clear — ${objects.length} objects, 0 hazards`,

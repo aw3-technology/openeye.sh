@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-from typer.testing import CliRunner
-
 from openeye_ai.commands.governance import govern_app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

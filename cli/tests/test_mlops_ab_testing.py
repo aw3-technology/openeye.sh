@@ -123,7 +123,11 @@ class TestABTesting:
         assert result in ("v1", "v2")
 
     def test_route_request_non_running(self):
-        from openeye_ai.mlops.ab_testing import complete_ab_test, create_ab_test, route_request
+        from openeye_ai.mlops.ab_testing import (
+            complete_ab_test,
+            create_ab_test,
+            route_request,
+        )
         from openeye_ai.mlops.schemas import ABTestConfig
 
         config = ABTestConfig(name="route-done", model_key="m", version_a="v1", version_b="v2")

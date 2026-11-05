@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
+import { z } from "zod";
 import {
   BBoxSchema,
   DetectedObjectResponseSchema,
@@ -307,7 +308,6 @@ describe("validateApiResponse", () => {
   });
 
   it("validates array of DeviceResponses", () => {
-    const { z } = require("zod");
     const arraySchema = z.array(DeviceResponseSchema);
     const result = validateApiResponse(arraySchema, [VALID_DEVICE_RESPONSE], "listDevices");
     expect(result).toHaveLength(1);

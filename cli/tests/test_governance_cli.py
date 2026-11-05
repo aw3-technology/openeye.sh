@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 import yaml
 from typer.testing import CliRunner
 
@@ -15,15 +14,12 @@ _BACKEND_SRC = str(Path(__file__).resolve().parents[2] / "backend" / "src")
 if _BACKEND_SRC not in sys.path:
     sys.path.insert(0, _BACKEND_SRC)
 
-from governance.audit import AuditLog
 from governance.models import (
     AuditEntry,
     GovernanceConfig,
-    GovernanceStatus,
     PolicyConfig,
     PolicyDecision,
     PolicyDomain,
-    PolicyInfo,
     Severity,
 )
 from openeye_ai.cli import app

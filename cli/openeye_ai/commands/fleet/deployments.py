@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 import typer
 from rich import print as rprint
 from rich.table import Table

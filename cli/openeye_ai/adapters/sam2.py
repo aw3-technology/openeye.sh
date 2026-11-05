@@ -28,8 +28,8 @@ class Adapter(ModelAdapter):
         )
 
     def _do_load(self, model_dir: Path) -> None:
-        from sam2.build_sam import build_sam2
         from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
+        from sam2.build_sam import build_sam2
 
         checkpoint = model_dir / "sam2_hiera_small.pt"
         if not checkpoint.exists():

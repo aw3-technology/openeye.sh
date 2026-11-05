@@ -23,7 +23,11 @@ def setup_middleware(app: FastAPI) -> None:
     # CORS
     allowed_origins = [
         o.strip()
-        for o in os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,http://localhost:8080").split(",")
+        for o in os.environ.get(
+            "CORS_ORIGINS",
+            "https://openeye.sh,https://www.openeye.sh,"
+            "http://localhost:5173,http://localhost:3000,http://localhost:8080",
+        ).split(",")
         if o.strip()
     ]
     app.add_middleware(
@@ -33,6 +37,15 @@ def setup_middleware(app: FastAPI) -> None:
         allow_methods=["GET", "POST", "PUT", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization", "X-API-Key"],
     )
+
+    # Chrome's Private Network Access: a public HTTPS page (the openeye.sh
+    # dashboard) may only call this local server if the preflight opts in.
+    @app.middleware("http")
+    async def private_network_access(request: Request, call_next):
+        response = await call_next(request)
+        if request.headers.get("access-control-request-private-network") == "true":
+            response.headers["Access-Control-Allow-Private-Network"] = "true"
+        return response
 
     # Metrics middleware
     @app.middleware("http")

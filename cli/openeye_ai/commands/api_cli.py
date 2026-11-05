@@ -10,7 +10,9 @@ import typer
 from rich import print as rprint
 from rich.table import Table
 
-from openeye_ai._cli_helpers import API_URL as _API_URL, err_console as console, http_request
+from openeye_ai._cli_helpers import API_URL as _API_URL
+from openeye_ai._cli_helpers import err_console as console
+from openeye_ai._cli_helpers import http_request
 
 api_app = typer.Typer(help="Hosted inference API — detect, describe, and manage credits.")
 _API_KEY = os.environ.get("OPENEYE_API_KEY", "")

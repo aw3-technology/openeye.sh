@@ -107,7 +107,11 @@ class TestRetraining:
             get_run("retrain-nonexistent")
 
     def test_get_run_success(self):
-        from openeye_ai.mlops.retraining import create_pipeline, get_run, trigger_retraining
+        from openeye_ai.mlops.retraining import (
+            create_pipeline,
+            get_run,
+            trigger_retraining,
+        )
         from openeye_ai.mlops.schemas import RetrainingPipelineConfig
 
         create_pipeline(RetrainingPipelineConfig(name="get-run", model_key="m", training_script="x"))
@@ -117,7 +121,11 @@ class TestRetraining:
         assert fetched.pipeline_name == "get-run"
 
     def test_list_runs(self):
-        from openeye_ai.mlops.retraining import create_pipeline, list_runs, trigger_retraining
+        from openeye_ai.mlops.retraining import (
+            create_pipeline,
+            list_runs,
+            trigger_retraining,
+        )
         from openeye_ai.mlops.schemas import RetrainingPipelineConfig
 
         create_pipeline(RetrainingPipelineConfig(name="lr1", model_key="m1", training_script="x"))

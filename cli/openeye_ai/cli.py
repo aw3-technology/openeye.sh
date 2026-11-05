@@ -106,7 +106,12 @@ app.add_typer(api_app, name="api")
 
 # ── Server utility commands ──────────────────────────────────────────
 
-from openeye_ai.commands.server_cli import health, nebius_stats, server_config_get, server_config_set
+from openeye_ai.commands.server_cli import (
+    health,
+    nebius_stats,
+    server_config_get,
+    server_config_set,
+)
 
 app.command("health")(health)
 app.command("nebius-stats")(nebius_stats)

@@ -7,11 +7,10 @@ tracking versions with metadata: training dataset, metrics, author, changelog.
 from __future__ import annotations
 
 import hashlib
+import logging
 import shutil
 from pathlib import Path
 from typing import Any, Optional
-
-import logging
 
 from openeye_ai.config import MODELS_DIR, OPENEYE_HOME
 

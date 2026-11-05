@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from typing import Optional
 
 from openeye_ai.config import OPENEYE_HOME
 
+from .model_registry import (
+    _load_enterprise_registry,
+    _save_enterprise_registry,
+    get_version,
+)
 from .persistence import atomic_save_yaml, safe_load_yaml_list
-
-from .model_registry import _load_enterprise_registry, _save_enterprise_registry, get_version
 from .schemas import (
     ApprovalGate,
     ApprovalStatus,
@@ -175,8 +179,6 @@ def _find_gate(from_stage: ModelStage, to_stage: ModelStage) -> Optional[Approva
             return gate
     return None
 
-
-import re
 
 # Pattern: "metric_name operator threshold"
 _GATE_CONDITION_RE = re.compile(r"^(\w+)\s*(>=|<=|>|<|==|!=)\s*([\d.]+)$")

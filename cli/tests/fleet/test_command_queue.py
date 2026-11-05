@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
-
 from openeye_ai.cli import app
+
 from .conftest import make_device
 
 
@@ -118,7 +117,7 @@ class TestConfigOverride:
 
 class TestResources:
     def test_resources_with_data(self, fleet_runner, mock_request):
-        mock = mock_request([
+        mock_request([
             {"timestamp": "2025-01-01T00:00:00Z", "cpu_percent": 45.2,
              "memory_percent": 60.0, "disk_percent": 30.0,
              "inference_rate": 12, "gpu_percent": 80.0},

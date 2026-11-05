@@ -3,13 +3,9 @@
 from __future__ import annotations
 
 import sys
-import types
 from unittest.mock import MagicMock
 
-import pytest
-
 from openeye_ai.utils.hardware import detect_hardware, format_hardware_tags
-
 
 # ── detect_hardware ──────────────────────────────────────────────────
 
@@ -21,7 +17,6 @@ def test_always_has_cpu():
 
 def test_without_torch(monkeypatch):
     """When torch is not installed, only CPU should be detected."""
-    import openeye_ai.utils.hardware as hw_mod
 
     original_import = __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
 

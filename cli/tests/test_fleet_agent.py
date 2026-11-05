@@ -6,10 +6,8 @@ import sys
 from types import ModuleType
 from unittest.mock import MagicMock
 
-import pytest
-from typer.testing import CliRunner
-
 from openeye_ai.cli import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

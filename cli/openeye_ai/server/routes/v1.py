@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from .v1_inference import describe, detect, depth
-from .v1_usage import _UsageLedger, _default_ledger, models, usage
+from .v1_inference import depth, describe, detect
+from .v1_usage import models, usage
 
 router = APIRouter(prefix="/v1", tags=["hosted-api"])
 

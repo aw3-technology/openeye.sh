@@ -74,7 +74,7 @@ class G1Connector:
     def _init_sdk(self) -> None:
         """Initialize Unitree SDK2 sport client."""
         try:
-            from unitree_sdk2py.core.channel import ChannelFactory
+            from unitree_sdk2py.core.channel import ChannelFactory  # noqa: F401  (SDK presence check)
             from unitree_sdk2py.g1.sport import SportClient
         except ImportError:
             raise ImportError(

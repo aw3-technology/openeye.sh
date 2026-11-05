@@ -20,9 +20,9 @@ async def get_lineage_endpoint(model_key: str, version: str):
 @router.get("/lineage/{model_key}/{version}/chain")
 async def get_lineage_chain_endpoint(model_key: str, version: str):
     from ..lineage import get_lineage_chain
-    return [l.model_dump() for l in get_lineage_chain(model_key, version)]
+    return [entry.model_dump() for entry in get_lineage_chain(model_key, version)]
 
 @router.get("/lineage")
 async def list_lineage_endpoint(model_key: Optional[str] = None):
     from ..lineage import list_lineage
-    return [l.model_dump() for l in list_lineage(model_key)]
+    return [entry.model_dump() for entry in list_lineage(model_key)]

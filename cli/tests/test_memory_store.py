@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import time
-
 from openeye_ai.memory.store import ObservationMemoryStore
 from openeye_ai.schema import BBox, DetectedObject, Observation, RecallQuery
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from openeye_ai.cli import app
+
 from .conftest import make_device, make_group
 
 

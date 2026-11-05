@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import time
 from typing import Any
 
 from fastapi import APIRouter, Request
@@ -16,7 +15,6 @@ from openeye_ai.schema import (
     AgentTickEvent,
     Observation,
     RecallQuery,
-    RecallResult,
 )
 
 router = APIRouter(prefix="/agent", tags=["agent"])
@@ -106,7 +104,6 @@ async def recall_memory(request: Request) -> JSONResponse:
 @router.get("/demo/stream")
 async def demo_stream() -> StreamingResponse:
     """SSE stream of scripted demo data for frontend without real backend."""
-    from openeye_ai.schema import BBox, DetectedObject
 
     demo_ticks = _generate_demo_ticks()
 
@@ -138,7 +135,7 @@ def _generate_demo_ticks() -> list[AgentTickEvent]:
                     DetectedObject(label="laptop", confidence=0.92, bbox=BBox(x=0.3, y=0.35, w=0.2, h=0.15)),
                     DetectedObject(label="cup", confidence=0.88, bbox=BBox(x=0.7, y=0.4, w=0.08, h=0.12)),
                 ],
-                scene_summary=f"3 objects — desk, laptop, cup",
+                scene_summary="3 objects — desk, laptop, cup",
                 change_description="" if i > 1 else "",
                 significance=0.1,
                 tags=["desk", "laptop", "cup"],
@@ -204,7 +201,7 @@ def _generate_demo_ticks() -> list[AgentTickEvent]:
             ),
             reasoning=AgentReasoning(
                 observation_summary="Person is working with tools at the desk.",
-                memory_context=f"Tick 4: person arrived. Now using screwdriver.",
+                memory_context="Tick 4: person arrived. Now using screwdriver.",
                 chain_of_thought="Person is handling tools safely. Screwdriver is within normal workspace zone. No hazards detected.",
                 current_plan=["Track person position", "Monitor hand proximity to tools", "Alert if hands near hazards"],
                 decided_action="continue monitoring — person working safely",

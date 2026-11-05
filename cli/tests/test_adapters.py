@@ -10,17 +10,12 @@ import base64
 import importlib
 import io
 import sys
-import time
-from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-from PIL import Image
-
 from openeye_ai.adapters.base import ModelAdapter, ModelNotLoadedError
-
+from PIL import Image
 
 # ── Helpers ──────────────────────────────────────────────────────────
 

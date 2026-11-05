@@ -63,8 +63,8 @@ def init_safety_guardian(safety: bool, danger_m: float, caution_m: float):
     try:
         from openeye_ai._cli_helpers import ensure_backend_path
         ensure_backend_path()
-        from perception.safety import SafetyGuardian
         from perception.models import BBox2D, DetectedObject3D, Position3D
+        from perception.safety import SafetyGuardian
 
         guardian = SafetyGuardian(danger_m=danger_m, caution_m=caution_m)
         rprint(f"[green]Safety Guardian enabled:[/green] danger < {danger_m}m, caution < {caution_m}m")

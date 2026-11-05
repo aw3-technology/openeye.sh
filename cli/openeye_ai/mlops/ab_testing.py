@@ -7,11 +7,9 @@ accuracy/latency metrics side by side.
 from __future__ import annotations
 
 import random
-import statistics
-import time
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
 
 from openeye_ai.config import OPENEYE_HOME
 

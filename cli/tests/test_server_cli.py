@@ -4,14 +4,17 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-from typer.testing import CliRunner
-
 import typer
 
 # The server_cli module exports functions, not a Typer app.
 # We build a small test app to invoke them.
-from openeye_ai.commands.server_cli import health, nebius_stats, server_config_get, server_config_set
+from openeye_ai.commands.server_cli import (
+    health,
+    nebius_stats,
+    server_config_get,
+    server_config_set,
+)
+from typer.testing import CliRunner
 
 _app = typer.Typer()
 _app.command("health")(health)
@@ -89,7 +92,6 @@ def test_health_without_queue():
     mock_resp.json.return_value = {"model": "yolov8", "loaded": False, "uptime": "5m"}
     mock_resp.raise_for_status = MagicMock()
 
-    import httpx
 
     with (
         patch("httpx.request", return_value=mock_resp),

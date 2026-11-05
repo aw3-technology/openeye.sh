@@ -1,9 +1,25 @@
 [
   {
+    "version": "0.6.0",
+    "date": "2026-11-04",
+    "title": "New home on Vercel and Neon",
+    "tag": "latest",
+    "description": "OpenEye's website and dashboard moved off Lovable Cloud onto Vercel, Neon Postgres and Better Auth, with a refreshed homepage.",
+    "changes": [
+      { "type": "changed", "text": "Hosting moved to Vercel; dashboard data now lives in Neon Postgres behind owner-scoped API routes instead of Supabase row-level security" },
+      { "type": "changed", "text": "Sign-in now uses Better Auth (email and password; Google and Apple when configured)" },
+      { "type": "changed", "text": "Avatars are stored in Vercel Blob" },
+      { "type": "added", "text": "Observation Memory saves live agent-loop observations to your account" },
+      { "type": "added", "text": "Registering a device from the dashboard now issues its device API key" },
+      { "type": "added", "text": "`openeye serve` allows the openeye.sh dashboard by default (CORS and Chrome Private Network Access)" },
+      { "type": "changed", "text": "Homepage redesign with a live detection demo under the hero" },
+      { "type": "fixed", "text": "Saving inference history from the dashboard" }
+    ]
+  },
+  {
     "version": "0.5.1",
     "date": "2026-03-15",
     "title": "Demo login & dependency fix",
-    "tag": "latest",
     "description": "Demo-ready auth bypass for hackathon presentations and missing numpy dependency fix.",
     "changes": [
       { "type": "added", "text": "Demo login mode — \"Continue as Demo User\" button on the login page bypasses Supabase auth for local demos" },

@@ -8,16 +8,13 @@ NEBIUS_API_KEY, and update-registry.
 from __future__ import annotations
 
 import shutil
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from typer.testing import CliRunner
-
-from openeye_ai.cli import app
-
 from conftest import StubAdapter, make_test_registry
+from openeye_ai.cli import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -419,7 +416,6 @@ class TestStory5OptionalExtras:
     def test_dependency_error_helper_exits(self, tmp_openeye_home):
         """dependency_error() prints message and raises typer.Exit."""
         from click.exceptions import Exit as ClickExit
-
         from openeye_ai._cli_helpers import dependency_error
 
         exc = ImportError("No module named 'ultralytics'", name="ultralytics")
@@ -430,7 +426,6 @@ class TestStory5OptionalExtras:
         """Running inference with missing deps shows install instructions."""
         import sys
 
-        import openeye_ai.commands.inference.run
         run_mod = sys.modules["openeye_ai.commands.inference.run"]
 
         registry = _make_registry()
@@ -514,8 +509,8 @@ class TestStory7NebiusApiKey:
 
     def _make_state(self, runtime_config=None):
         """Create a ServerState for testing."""
-        from openeye_ai.server.state import ServerState
         from openeye_ai.server.queue import InferenceQueue
+        from openeye_ai.server.state import ServerState
 
         return ServerState(
             adapter=None,
@@ -681,7 +676,6 @@ class TestStory8UpdateRegistry:
     def test_fetch_remote_registry_http_error(self):
         """fetch_remote_registry propagates HTTP errors."""
         import httpx
-
         from openeye_ai.utils.registry_update import fetch_remote_registry
 
         with patch("httpx.get") as mock_get:
@@ -747,7 +741,6 @@ class TestStory8UpdateRegistry:
     def test_update_registry_full_roundtrip(self, tmp_path):
         """Full roundtrip: write local YAML, merge remote, verify file updated."""
         import yaml
-
         from openeye_ai.utils.registry_update import merge_registries
 
         local = {

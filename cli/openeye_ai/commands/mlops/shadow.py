@@ -17,8 +17,8 @@ def mlops_shadow_mode(
     max_samples: int | None = typer.Option(None, "--max-samples", help="Stop after N samples"),
 ) -> None:
     """Test a new model in shadow mode without affecting production."""
-    from openeye_ai.mlops.shadow_mode import create_shadow_deployment
     from openeye_ai.mlops.schemas import ShadowDeploymentConfig
+    from openeye_ai.mlops.shadow_mode import create_shadow_deployment
 
     # Auto-detect model key
     model_key = model or (champion.rsplit("-v", 1)[0] if "-v" in champion else champion)

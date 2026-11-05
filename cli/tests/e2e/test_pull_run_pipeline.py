@@ -11,9 +11,7 @@ import time
 
 import httpx
 import pytest
-
 from openeye_ai.cli import app as cli_app
-
 
 pytestmark = pytest.mark.integration
 

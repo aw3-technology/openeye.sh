@@ -47,5 +47,5 @@ openeye watch --models yolov8
 
 ## Links
 
-- [Homepage](https://perceptify.dev)
+- [Homepage](https://openeye.sh)
 - [Repository](https://github.com/aw3-technology/openeye.sh)

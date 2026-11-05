@@ -2,19 +2,15 @@
 
 from __future__ import annotations
 
-import io
 import shutil
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch
-
-import pytest
-from PIL import Image
-from typer.testing import CliRunner
-
-from openeye_ai.cli import app
+from unittest.mock import MagicMock
 
 from conftest import StubAdapter, make_test_registry
+from openeye_ai.cli import app
+from PIL import Image
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -156,7 +152,7 @@ def test_remove_not_downloaded(tmp_openeye_home, monkeypatch):
 
 def test_run_model_not_downloaded(tmp_openeye_home, monkeypatch):
     import sys
-    import openeye_ai.commands.inference.run  # noqa: F811
+
     run_mod = sys.modules["openeye_ai.commands.inference.run"]
 
     registry = _make_registry()
@@ -171,7 +167,7 @@ def test_run_model_not_downloaded(tmp_openeye_home, monkeypatch):
 
 def test_run_missing_image(tmp_openeye_home, monkeypatch):
     import sys
-    import openeye_ai.commands.inference.run  # noqa: F811
+
     run_mod = sys.modules["openeye_ai.commands.inference.run"]
 
     registry = _make_registry()
@@ -186,7 +182,7 @@ def test_run_missing_image(tmp_openeye_home, monkeypatch):
 
 def test_run_success(tmp_openeye_home, tmp_path, monkeypatch):
     import sys
-    import openeye_ai.commands.inference.run  # noqa: F811
+
     run_mod = sys.modules["openeye_ai.commands.inference.run"]
 
     registry = _make_registry()
@@ -365,7 +361,7 @@ def test_register_adapter_bad_file(tmp_openeye_home, monkeypatch, tmp_path):
 
 def test_serve_not_downloaded(tmp_openeye_home, monkeypatch):
     import sys
-    import openeye_ai.commands.inference.serve  # noqa: F811
+
     serve_mod = sys.modules["openeye_ai.commands.inference.serve"]
 
     registry = _make_registry()

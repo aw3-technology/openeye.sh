@@ -7,7 +7,7 @@ import os
 import typer
 from rich import print as rprint
 
-from openeye_ai._cli_helpers import FLEET_URL as _BASE_URL, err_console
+from openeye_ai._cli_helpers import FLEET_URL as _BASE_URL
 
 fleet_app = typer.Typer(help="Fleet & device management for edge AI.")
 
