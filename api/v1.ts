@@ -192,6 +192,7 @@ async function handleUsage(ctx: ApiKeyContext, query: URLSearchParams) {
     balance,
     credits_remaining: balance,
     total_requests: totals[0].requests,
+    total_calls: totals[0].requests,
     total_credits_used: totals[0].credits,
     credits_used: totals[0].credits,
     by_endpoint: Object.fromEntries(byEndpoint.map((r) => [r.endpoint, r.n])),

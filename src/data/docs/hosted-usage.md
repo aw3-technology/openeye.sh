@@ -14,6 +14,7 @@ curl "https://openeye.sh/v1/usage?days=7" \
   "balance": 480,
   "credits_remaining": 480,
   "total_requests": 20,
+  "total_calls": 20,
   "total_credits_used": 20,
   "credits_used": 20,
   "by_endpoint": { "/v1/detect": 20 },
