@@ -94,8 +94,8 @@ typecheck: ## Type-check frontend (tsc --noEmit)
 dev: ## Start frontend dev server (Vite)
 	npm run dev
 
-dev-backend: ## Start backend with uvicorn --reload
-	cd backend && uvicorn src.fleet.app:app --reload
+dev-backend: ## Start the fleet control plane on :8001 (needs DATABASE_URL)
+	cd backend && uvicorn src.fleet.app:app --reload --port 8001
 
 # ---------------------------------------------------------------------------
 # Clean
