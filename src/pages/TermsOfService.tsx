@@ -14,7 +14,7 @@ export default function TermsOfService() {
       <Navbar />
       <main>
         <PageHero size="sm" eyebrow="Legal" title="Terms of Service">
-          <span className="text-sm">Last updated: March 15, 2026</span>
+          <span className="text-sm">Last updated: November 5, 2026</span>
         </PageHero>
         <div className="container max-w-3xl mx-auto px-4 pt-12 pb-20">
 
@@ -29,14 +29,14 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-3">2. Description of Service</h2>
               <p>
-                OpenEye is an open-source perception engine for robots and autonomous agents. The Service includes the OpenEye CLI, model registry, perception pipeline, fleet management tools, hosted APIs, documentation, and the openeye.sh website. The core software is licensed under the Apache 2.0 License.
+                OpenEye is an open-source perception engine for robots and autonomous agents. The Service includes the OpenEye CLI, model registry, perception pipeline, fleet management tools, hosted APIs, documentation, and the openeye.sh website. The core software is licensed under the MIT License.
               </p>
             </section>
 
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-3">3. Open-Source License</h2>
               <p>
-                The OpenEye software is made available under the Apache License, Version 2.0. Your use of the open-source software is governed by that license. These Terms govern your use of the hosted services, website, and any proprietary features or services we may offer. In the event of a conflict between the Apache 2.0 License and these Terms regarding the open-source software, the Apache 2.0 License prevails.
+                The OpenEye software is made available under the MIT License. Your use of the open-source software is governed by that license. These Terms govern your use of the hosted services, website, and any proprietary features or services we may offer. In the event of a conflict between the MIT License and these Terms regarding the open-source software, the MIT License prevails.
               </p>
             </section>
 
@@ -70,7 +70,7 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-3">7. Intellectual Property</h2>
               <p>
-                Except for the open-source components licensed under Apache 2.0, all intellectual property rights in the Service, including trademarks, logos, and proprietary features, are owned by AW3 Technology, Inc. The OpenEye name and logo are trademarks of AW3 Technology, Inc.
+                Except for the open-source components licensed under the MIT License, all intellectual property rights in the Service, including trademarks, logos, and proprietary features, are owned by AW3 Technology, Inc. The OpenEye name and logo are trademarks of AW3 Technology, Inc.
               </p>
             </section>
 

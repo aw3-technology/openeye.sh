@@ -57,7 +57,7 @@ export const values: Value[] = [
     icon: <Lock className="w-5 h-5 text-terminal-amber" />,
     label: "Open source, open trust",
     detail:
-      "Safety-critical software must be inspectable. Apache 2.0 licensing means anyone can audit, modify, and deploy OpenEye. Transparency builds trust.",
+      "Safety-critical software must be inspectable. MIT licensing means anyone can audit, modify, and deploy OpenEye. Transparency builds trust.",
   },
   {
     icon: <Lightbulb className="w-5 h-5 text-blue-400" />,
@@ -86,7 +86,7 @@ export const milestones: Milestone[] = [
   },
   {
     date: "Mar 2026",
-    event: "Open-sourced under Apache 2.0",
+    event: "Open-sourced under the MIT license",
   },
   {
     date: "Mar 2026",

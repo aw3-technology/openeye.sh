@@ -47,5 +47,5 @@ export const valueProps: ValueProp[] = [
   { label: "Safety-first", description: "Real-time human detection and robot halt" },
   { label: "Model-agnostic", description: "8 models: YOLO, YOLO26, RF-DETR, DINO, SAM 2, Depth Anything, SmolVLA, Qwen2.5-VL" },
   { label: "Self-hosted", description: "All inference runs locally — your data never leaves your network" },
-  { label: "Open source", description: "Apache 2.0 — inspect, modify, deploy freely" },
+  { label: "Open source", description: "MIT — inspect, modify, deploy freely" },
 ];

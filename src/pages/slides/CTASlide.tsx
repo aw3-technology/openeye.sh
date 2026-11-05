@@ -53,7 +53,7 @@ export function CTASlide() {
         >
           <span>github.com/aw3-technology/openeye.sh</span>
           <span className="text-primary">&middot;</span>
-          <span>Apache 2.0</span>
+          <span>MIT</span>
           <span className="text-primary">&middot;</span>
           <span>openeye.sh</span>
         </motion.div>
