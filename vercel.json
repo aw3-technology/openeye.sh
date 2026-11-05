@@ -39,7 +39,16 @@
   },
   "headers": [
     {
-      "source": "/(llms.txt|llms-full.txt|docs/(.*).md)",
+      "source": "/(llms\\.txt|llms-full\\.txt)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/docs/(.*)\\.md",
       "headers": [
         {
           "key": "Content-Type",
