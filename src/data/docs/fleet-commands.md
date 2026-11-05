@@ -4,12 +4,12 @@ title: Commands & Heartbeats
 
 ### Heartbeat Protocol
 
-Edge devices send heartbeats every 15 seconds via `POST /heartbeats`. The server responds with any pending commands. If 4 consecutive heartbeats are missed (>60s), the device is marked offline.
+Edge devices running openeye fleet agent send heartbeats every 15 seconds (--interval) via `POST /heartbeats`, authenticated with their oek_ device key. The server responds with any pending commands.
 
 ```json
 // Device sends:
 POST /heartbeats
-X-Device-API-Key: dev_abc123
+X-Device-API-Key: oek_abc123...
 
 {
   "device_id": "d290f1ee-...",
@@ -53,8 +53,17 @@ Commands are queued for devices and delivered via the heartbeat response. Availa
 | decommission | Gracefully decommission device |
 | collect_logs | Request device logs upload |
 
-### CLI — Queue Command
+### CLI — Queue and Inspect Commands
 
 ```bash
 openeye fleet config <device-id> '{"confidence_threshold": 0.4}'
+openeye fleet restart <device-id>
+openeye fleet batch restart --tag site=warehouse
+openeye fleet commands --device <device-id> --status pending
 ```
+
+Devices report completion with `POST /commands/{id}/device-complete` (device key); users can mark a command done with `POST /commands/{id}/complete`.
+
+### From the openeye.sh Dashboard
+
+The hosted dashboard can queue the same command types from a device's page; they are stored in your account's device_commands table with status pending. They reach a device only through a control plane connected to that database.

@@ -1,6 +1,18 @@
 # Server API Reference
 
-The OpenEye server (`openeye serve`) exposes REST and WebSocket endpoints on port 8000 by default.
+The OpenEye server (`openeye serve`) exposes REST and WebSocket endpoints on port 8000 by default. It runs entirely on your machine; inference is free.
+
+## Connect the openeye.sh dashboard
+
+The web dashboard at [openeye.sh/dashboard](https://openeye.sh/dashboard) can drive a server running on your own computer:
+
+1. Start a server: `openeye serve yolov8` (listens on `http://localhost:8000`).
+2. Sign in at openeye.sh, open the dashboard **Overview**, and click **Server**.
+3. In the **OpenEye Server URL** dialog enter `http://localhost:8000` (or the HTTPS URL of a server you host) and save.
+
+The browser talks to your server directly; images never pass through openeye.sh. Pages such as Inference, Live, Scene Graph, Metrics, Benchmark, Config, Governance, MLOps, and the live Agent loop need this connection. Overview, History, API Keys, Credits, and fleet records work without it.
+
+This works because the server's CORS defaults allow `https://openeye.sh` and `https://www.openeye.sh` (plus `http://localhost:5173`, `:3000`, and `:8080` for local frontend development), and it answers Chrome's Private Network Access preflight with `Access-Control-Allow-Private-Network: true`. Override the allowed origins with `CORS_ORIGINS` (comma-separated); if you do, keep `https://openeye.sh` in the list to keep using the hosted dashboard. If your browser still blocks the connection, serve the API over HTTPS.
 
 ## REST Endpoints
 
@@ -13,8 +25,11 @@ Health check endpoint.
 {
   "status": "ok",
   "model": "yolov8",
+  "model_display_name": "YOLOv8",
+  "task": "detection",
   "model_loaded": true,
-  "uptime_seconds": 123.4
+  "uptime_seconds": 123.4,
+  "queue": {"active": 0, "queued": 0}
 }
 ```
 
@@ -52,6 +67,14 @@ Run inference on an uploaded image. Rate-limited.
 - `429` — Rate limit exceeded (30 requests/minute per IP)
 - `500` — Inference failed
 - `503` — Server busy (queue full)
+
+### `POST /perception`
+
+Run the full perception pipeline on one uploaded image (multipart `file`, max 20 MB). Returns the same scene graph, safety alerts, and spatial relationships as `/ws/perception`.
+
+### `POST /vlm/analyze`
+
+Send an uploaded image (multipart `file`) to the configured VLM and get structured JSON back. Optional `prompt` query parameter. Returns `503` when no VLM provider is configured.
 
 ### `GET /config`
 
@@ -92,6 +115,27 @@ Inference queue status (pending items, capacity).
 ### `GET /`
 
 Browser dashboard (HTML). Provides a built-in web UI for testing inference.
+
+## `/v1` Endpoints (hosted-API compatible)
+
+The server also mounts the same routes as the hosted API at `https://openeye.sh/v1`, so code written against one works against the other:
+
+| Method | Endpoint | Notes |
+|--------|----------|-------|
+| POST | /v1/detect | multipart `file`; `confidence` query parameter (default `0.25`) |
+| POST | /v1/depth | multipart `file`; use with `openeye serve depth-anything` |
+| POST | /v1/describe | multipart `file`; `prompt` query parameter |
+| GET | /v1/models | Model list with credit costs |
+| GET | /v1/usage | Usage recorded by this server process |
+
+Auth is `Authorization: Bearer <key>`. Any key starting with `oe_` is accepted unless `OPENEYE_SERVER_API_KEY` is set, in which case only that exact key is. Credits are tallied in memory for the life of the process; nothing is charged. Max upload is 20 MB.
+
+```bash
+openeye serve yolov8
+curl -X POST "http://localhost:8000/v1/detect?confidence=0.3" \
+  -H "Authorization: Bearer oe_local" \
+  -F "file=@photo.jpg"
+```
 
 ## WebSocket Endpoints
 

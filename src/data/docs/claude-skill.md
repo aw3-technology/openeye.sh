@@ -10,7 +10,7 @@ A Claude Skill is a structured knowledge file that teaches Claude about a specif
 
 ## Prerequisites
 
-- **Claude Code** (CLI) or **Claude Desktop** with MCP support
+- **Claude Code** (CLI), or **Claude Desktop** / another MCP client for the MCP server
 - **OpenEye CLI** installed (`pipx install openeye-sh`)
 - A terminal or development environment
 
@@ -41,15 +41,41 @@ What OpenEye models are available and how do I pull one?
 
 Claude will reference the skill files and give you accurate, project-specific answers.
 
-## Setup — Claude Desktop (MCP)
+## Setup — MCP Server (Claude Desktop and other MCP clients)
 
-### Step 1: Add the OpenEye skill as a project
+The CLI ships an MCP server, openeye-mcp, that lets Claude call OpenEye directly: list, pull, and remove models, run inference on an image, start a server, check its health, benchmark, and read Nebius stats. It runs over stdio on your machine.
 
-Open Claude Desktop, create a new Project, and add the OpenEye repository folder as project context. Claude will read the `.claude/` directory and load the skill.
+### Step 1: Install with the mcp extra
 
-### Step 2: Chat with context
+```bash
+pipx install "openeye-sh[mcp]"
+```
 
-Once the project is loaded, Claude has full knowledge of OpenEye's CLI, API, and architecture.
+### Step 2: Register the server
+
+Claude Code:
+
+```bash
+claude mcp add openeye -- openeye-mcp
+```
+
+Claude Desktop — add it to claude_desktop_config.json (Settings → Developer → Edit Config), then restart the app:
+
+```json
+{
+  "mcpServers": {
+    "openeye": { "command": "openeye-mcp" }
+  }
+}
+```
+
+If Claude Desktop can't find the command, use the full path from which openeye-mcp.
+
+### Step 3: Ask for something
+
+```text
+List the OpenEye models and run yolov8 on ~/Pictures/desk.jpg
+```
 
 ## Example Prompts
 
@@ -66,7 +92,7 @@ What quantized model variants are available?
 ```
 
 ```text
-Benchmark the depth_anything model with 50 runs
+Benchmark the depth-anything model with 50 runs
 ```
 
 ### Server & API
@@ -117,18 +143,20 @@ The skill is organized under `.claude/` in the OpenEye repository:
 .claude/
   skills/
     openeye/
-      OVERVIEW.md           # Project summary & quick reference
+      SKILL.md              # Skill entry point: overview & quick reference
       CLI_REFERENCE.md      # All CLI commands with options
       API_REFERENCE.md      # Server endpoints, TypeScript clients, hooks
       ARCHITECTURE.md       # Backend pipeline, mode system, plugins
+    openeye-run/
+      SKILL.md              # /openeye-run: execute OpenEye CLI workflows
 ```
 
-> [!info] Claude reads these files automatically when working in the OpenEye project directory. You don't need to paste documentation into your prompts.
+> [!info] Claude Code reads these files automatically when working in the OpenEye project directory. You don't need to paste documentation into your prompts.
 
 ## Tips for Best Results
 
 - **Be specific** — Instead of "run a model," say "run YOLOv8 on image.png with pretty output"
-- **Chain tasks** — "Pull depth_anything, benchmark it, then start serving it on port 9000"
+- **Chain tasks** — "Pull depth-anything, benchmark it, then start serving it on port 9000"
 - **Ask for code** — "Write a JavaScript client that calls the /predict endpoint and displays bounding boxes on a canvas"
 - **Debug with context** — Paste error messages and ask Claude to diagnose using its knowledge of OpenEye's error codes and architecture
 - **Reference the docs** — "According to the OpenEye API reference, what query parameters does /predict accept?"
