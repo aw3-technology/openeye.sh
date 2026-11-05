@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from ..db import Database
 
@@ -76,23 +76,31 @@ class HeartbeatService:
 
         return pending
 
-    def detect_offline_devices(self, user_id: str) -> List[str]:
-        """Find devices that missed heartbeats and mark them offline. Returns IDs."""
+    def detect_offline_devices(self, user_id: Optional[str] = None) -> List[str]:
+        """Find devices that missed heartbeats and mark them offline. Returns IDs.
+
+        ``user_id=None`` sweeps every user's devices — used by the control
+        plane's periodic background sweeper (see ``fleet.offline_sweeper``).
+        """
         threshold = (
             datetime.now(timezone.utc) - timedelta(seconds=OFFLINE_THRESHOLD_SECONDS)
         ).isoformat()
+        query = self.db.table("devices").select("id, last_heartbeat_at")
+        if user_id is not None:
+            query = query.eq("user_id", user_id)
         result = (
-            self.db.table("devices")
-            .select("id, last_heartbeat_at")
-            .eq("user_id", user_id)
-            .eq("status", DeviceStatus.ONLINE.value)
+            query.eq("status", DeviceStatus.ONLINE.value)
             .lt("last_heartbeat_at", threshold)
             .execute()
         )
         offline_ids = [d["id"] for d in (result.data or [])]
         for did in offline_ids:
+            # Re-check staleness in the UPDATE so a heartbeat that lands between
+            # the SELECT and here isn't overwritten with "offline".
             self.db.table("devices").update({"status": DeviceStatus.OFFLINE.value}).eq(
                 "id", did
+            ).eq("status", DeviceStatus.ONLINE.value).lt(
+                "last_heartbeat_at", threshold
             ).execute()
             logger.warning("Device %s marked offline (missed heartbeats)", did)
         return offline_ids
