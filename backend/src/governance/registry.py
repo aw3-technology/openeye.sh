@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 from typing import Type
 
-from governance.models import PolicyConfig, PolicyDomain, PolicyInfo
+from governance.models import PolicyConfig, PolicyInfo
 from governance.policies.base import GovernancePolicy
 
 logger = logging.getLogger(__name__)

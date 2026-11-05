@@ -7,10 +7,8 @@ input sensor for the cortex runtime.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
-import time
-from typing import List, Optional
+from typing import Optional
 
 import cv2
 import numpy as np

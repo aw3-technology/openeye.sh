@@ -19,7 +19,7 @@ class TestAgentConfig:
         cfg = AgentConfig()
         assert cfg.device_id == ""
         assert cfg.api_key == ""
-        assert cfg.server_url == "http://localhost:8001"
+        assert cfg.server_url == "https://localhost:8001"
         assert cfg.heartbeat_interval == 15.0
         assert cfg.model_cache_dir == "/tmp/openeye/models"
         assert cfg.firmware_dir == "/tmp/openeye/firmware"
@@ -331,7 +331,7 @@ class TestReportCommandResult:
 
         mock_client.post.assert_awaited_once()
         call_args = mock_client.post.call_args
-        assert "/commands/cmd-99/complete" in call_args[0][0]
+        assert "/commands/cmd-99/device-complete" in call_args[0][0]
         assert call_args[1]["json"] == {"status": "done"}
         assert call_args[1]["headers"]["X-Device-API-Key"] == "key-r"
 

@@ -1,7 +1,7 @@
 """End-to-end fleet lifecycle integration tests.
 
 These tests exercise the full path through the FastAPI app with real service
-classes but an in-memory Supabase fake.  The service layer is **not** mocked —
+classes but an in-memory database fake.  The service layer is **not** mocked —
 only the database and auth are fakes.
 
 Lifecycle covered:
@@ -17,7 +17,7 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from .conftest import TEST_USER_ID, InMemorySupabase
+from .conftest import TEST_USER_ID, InMemoryDB
 
 pytestmark = pytest.mark.integration
 
@@ -25,9 +25,9 @@ pytestmark = pytest.mark.integration
 # ── Helpers ───────────────────────────────────────────────────────────
 
 
-def _seed_device_for_heartbeat(fake_sb: InMemorySupabase, device_id: str) -> None:
+def _seed_device_for_heartbeat(fake_db: InMemoryDB, device_id: str) -> None:
     """Ensure the device row exists in the store so HeartbeatService can find it."""
-    rows = fake_sb.store.setdefault("devices", [])
+    rows = fake_db.store.setdefault("devices", [])
     for r in rows:
         if r["id"] == device_id:
             return  # already present
@@ -37,7 +37,7 @@ def _seed_device_for_heartbeat(fake_sb: InMemorySupabase, device_id: str) -> Non
 
 
 class TestDeviceLifecycle:
-    def test_register_and_list(self, client: TestClient, fake_supabase: InMemorySupabase):
+    def test_register_and_list(self, client: TestClient, fake_db: InMemoryDB):
         """Register a device and verify it shows up in GET /devices."""
         # Register
         resp = client.post("/devices", json={
@@ -190,7 +190,7 @@ class TestHeartbeatIntegration:
         client.app.dependency_overrides[get_device_api_key] = lambda: device_id
 
     def test_heartbeat_updates_device_to_online(
-        self, client: TestClient, registered_device, fake_supabase: InMemorySupabase
+        self, client: TestClient, registered_device, fake_db: InMemoryDB
     ):
         device_id = registered_device["id"]
         self._override_device_key(client, device_id)
@@ -223,7 +223,7 @@ class TestHeartbeatIntegration:
         assert resp.json()["firmware_version"] == "1.1.0"
 
     def test_heartbeat_returns_pending_commands(
-        self, client: TestClient, registered_device, fake_supabase: InMemorySupabase
+        self, client: TestClient, registered_device, fake_db: InMemoryDB
     ):
         device_id = registered_device["id"]
         self._override_device_key(client, device_id)
@@ -249,7 +249,7 @@ class TestHeartbeatIntegration:
 
 class TestAlertLifecycle:
     def test_create_and_resolve_alert(
-        self, client: TestClient, registered_device, fake_supabase: InMemorySupabase
+        self, client: TestClient, registered_device, fake_db: InMemoryDB
     ):
         device_id = registered_device["id"]
 
@@ -257,7 +257,7 @@ class TestAlertLifecycle:
         # is not exposed via a REST endpoint — alerts are created internally).
         from fleet.services.alert_service import AlertService
 
-        svc = AlertService(fake_supabase)
+        svc = AlertService(fake_db)
         alert = svc.create_alert(
             user_id=TEST_USER_ID,
             alert_type="device_offline",
@@ -300,7 +300,7 @@ class TestAlertLifecycle:
 
 
 class TestBatchCommand:
-    def test_batch_restart_by_tag(self, client: TestClient, fake_supabase: InMemorySupabase):
+    def test_batch_restart_by_tag(self, client: TestClient, fake_db: InMemoryDB):
         """Register two devices with matching tags, batch restart them."""
         # Register device A
         resp = client.post("/devices", json={
@@ -334,7 +334,7 @@ class TestBatchCommand:
         assert dev_b in device_ids_in_commands
 
         # Verify commands were actually enqueued
-        commands = fake_supabase.dump("device_commands")
+        commands = fake_db.dump("device_commands")
         restart_cmds = [c for c in commands if c["command_type"] == "restart"]
         target_ids = {c["device_id"] for c in restart_cmds}
         assert dev_a in target_ids
@@ -360,7 +360,7 @@ class TestBatchCommand:
 
 class TestCommandLifecycle:
     def test_enqueue_and_complete_command(
-        self, client: TestClient, registered_device, fake_supabase: InMemorySupabase
+        self, client: TestClient, registered_device, fake_db: InMemoryDB
     ):
         device_id = registered_device["id"]
 
@@ -380,7 +380,7 @@ class TestCommandLifecycle:
         assert resp.json()["status"] == "completed"
 
     def test_device_complete_command(
-        self, client: TestClient, registered_device, fake_supabase: InMemorySupabase
+        self, client: TestClient, registered_device, fake_db: InMemoryDB
     ):
         device_id = registered_device["id"]
 
@@ -392,7 +392,7 @@ class TestCommandLifecycle:
         # We need to fix the device_id filter to match the overridden one
         # First update the command's device_id in the store to match the
         # device_api_key override ('dev-integ-device')
-        cmds = fake_supabase.store.get("device_commands", [])
+        cmds = fake_db.store.get("device_commands", [])
         for c in cmds:
             if c["id"] == cmd_id:
                 c["device_id"] = "dev-integ-device"
@@ -411,7 +411,7 @@ class TestCommandLifecycle:
 
 class TestFullLifecycle:
     def test_register_deploy_heartbeat_alert_batch(
-        self, client: TestClient, fake_supabase: InMemorySupabase
+        self, client: TestClient, fake_db: InMemoryDB
     ):
         """End-to-end: register -> deploy -> heartbeat -> alert -> batch."""
         from fleet.deps import get_device_api_key
@@ -439,7 +439,6 @@ class TestFullLifecycle:
             ],
         })
         assert resp.status_code == 201
-        dep_id = resp.json()["id"]
 
         # 3. Send heartbeat — device goes online
         # Override device key to return the actual registered device ID
@@ -461,7 +460,7 @@ class TestFullLifecycle:
         # 4. Create and resolve an alert
         from fleet.services.alert_service import AlertService
 
-        alert = AlertService(fake_supabase).create_alert(
+        alert = AlertService(fake_db).create_alert(
             user_id=TEST_USER_ID,
             alert_type="high_resource_usage",
             severity="warning",

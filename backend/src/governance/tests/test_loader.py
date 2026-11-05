@@ -1,8 +1,6 @@
 """Tests for YAML config loading and validation."""
 
 import pytest
-import tempfile
-from pathlib import Path
 
 from governance.loader import load_yaml, load_preset, list_presets, validate_yaml, resolve_config
 from governance.models import GovernanceConfig, PolicyConfig

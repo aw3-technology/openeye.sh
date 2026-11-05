@@ -86,28 +86,31 @@ class ResourceRegistry:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan: create shared services, tear them down on exit."""
-    from .deps import get_supabase
-    from .services.credits_service import CreditsService
+    from .db import close_database
+    from .deps import get_db
+    from .services.credits_service import CreditsService, db_email_lookup
     from .services.inference_service import InferenceService
 
     registry = ResourceRegistry()
 
-    # Supabase client (sync client — no async close needed, but register for
-    # discoverability)
-    sb = get_supabase()
-    registry.register("supabase", sb)
+    # Neon Postgres pool (sync close — handled explicitly on shutdown below)
+    db = get_db()
+    registry.register("db", db)
 
     # Long-lived HTTP-backed services
-    credits_svc = CreditsService()
+    credits_svc = CreditsService(email_lookup=db_email_lookup(db))
     registry.register("credits_service", credits_svc)
 
     inference_svc = InferenceService()
     registry.register("inference_service", inference_svc)
 
     app.state.registry = registry
-    logger.info("Resource registry initialised with %d resources", len(registry._resources))
+    logger.info(
+        "Resource registry initialised with %d resources", len(registry._resources)
+    )
 
     yield
 
     await registry.close_all()
+    close_database()
     logger.info("Resource registry shut down")

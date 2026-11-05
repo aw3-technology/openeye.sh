@@ -4,14 +4,14 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from supabase import Client
+from ..db import Database
 
 logger = logging.getLogger(__name__)
 
 
 class AlertService:
-    def __init__(self, sb: Client):
-        self.sb = sb
+    def __init__(self, db: Database):
+        self.db = db
 
     def create_alert(
         self,
@@ -32,7 +32,7 @@ class AlertService:
             "device_id": device_id,
             "deployment_id": deployment_id,
         }
-        result = self.sb.table("fleet_alerts").insert(row).execute()
+        result = self.db.table("fleet_alerts").insert(row).execute()
         if not result.data:
             raise RuntimeError("Failed to insert alert")
         return result.data[0]
@@ -43,7 +43,7 @@ class AlertService:
         resolved: Optional[bool] = None,
         severity: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
-        q = self.sb.table("fleet_alerts").select("*").eq("user_id", user_id)
+        q = self.db.table("fleet_alerts").select("*").eq("user_id", user_id)
         if resolved is not None:
             q = q.eq("resolved", resolved)
         if severity:
@@ -54,7 +54,7 @@ class AlertService:
     def resolve_alert(self, user_id: str, alert_id: str) -> Dict[str, Any]:
         now = datetime.now(timezone.utc).isoformat()
         result = (
-            self.sb.table("fleet_alerts")
+            self.db.table("fleet_alerts")
             .update({"resolved": True, "resolved_at": now})
             .eq("id", alert_id)
             .eq("user_id", user_id)

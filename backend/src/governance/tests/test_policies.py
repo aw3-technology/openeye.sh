@@ -1,7 +1,6 @@
 """Tests for individual governance policies."""
 
-import pytest
-from governance.context import GovernanceContext, RoboticsContext, DesktopContext, UIElement, ScreenRegion
+from governance.context import GovernanceContext, RoboticsContext, DesktopContext
 from governance.models import PolicyConfig, PolicyDecision, Severity
 from governance.policies.zone_policy import ZonePolicy
 from governance.policies.object_restriction import ObjectRestrictionPolicy

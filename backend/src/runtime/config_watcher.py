@@ -4,7 +4,7 @@ import os
 import time
 from typing import Callable, Optional
 
-from runtime.config import ModeSystemConfig, load_mode_config
+from runtime.config import load_mode_config
 
 
 class ConfigWatcher:

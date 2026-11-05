@@ -1,7 +1,6 @@
 """System resource monitoring using psutil (and pynvml for GPU)."""
 
 import logging
-from typing import Optional
 
 from ..models import ResourceUsage
 

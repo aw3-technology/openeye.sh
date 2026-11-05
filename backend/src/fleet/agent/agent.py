@@ -6,7 +6,6 @@ from typing import Any, Dict, List
 
 import httpx
 
-from .bandwidth_limiter import BandwidthLimiter
 from .config import AgentConfig
 from .heartbeat import HeartbeatSender
 from .model_cache import ModelCache
@@ -81,13 +80,12 @@ class DeviceAgent:
             raise ValueError("model_version is required in deploy payload")
         model_url = payload.get("model_url")
         checksum = payload.get("model_checksum")
-        bw_limit = payload.get("bandwidth_limit_mbps")
 
         if self.model_cache.has_version(version):
             logger.info("Model %s already cached", version)
         elif model_url:
             # Stream download directly to disk to avoid holding full model in memory
-            import tempfile, shutil
+            import tempfile
             async with httpx.AsyncClient(timeout=300) as client:
                 async with client.stream("GET", model_url) as resp:
                     resp.raise_for_status()
@@ -117,7 +115,7 @@ class DeviceAgent:
             if key not in payload:
                 raise ValueError(f"Missing required OTA payload key: {key}")
         # Run synchronous download in a thread to avoid blocking the event loop
-        path = await asyncio.to_thread(
+        await asyncio.to_thread(
             self.ota_updater.download_and_verify,
             url=payload["firmware_url"],
             version=payload["firmware_version"],

@@ -6,8 +6,7 @@ status codes, request parsing, error handling, and response shapes.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -24,11 +23,11 @@ def client():
     app = create_fleet_app()
 
     # Override auth dependencies to return fixed values
-    from fleet.deps import get_current_user_id, get_device_api_key, get_supabase
+    from fleet.deps import get_current_user_id, get_device_api_key, get_db
 
     app.dependency_overrides[get_current_user_id] = lambda: "user-test-1"
     app.dependency_overrides[get_device_api_key] = lambda: "dev-device-1"
-    app.dependency_overrides[get_supabase] = lambda: _FakeSupabase()
+    app.dependency_overrides[get_db] = lambda: _FakeDB()
 
     yield TestClient(app, raise_server_exceptions=False)
 
@@ -36,7 +35,7 @@ def client():
 
 
 class _ChainMock(MagicMock):
-    """Mock that supports Supabase-style chaining."""
+    """Mock that supports query-builder-style chaining."""
 
     def __init__(self, data=None, count=None, **kwargs):
         super().__init__(**kwargs)
@@ -58,8 +57,8 @@ class _ChainMock(MagicMock):
         self.execute = MagicMock(return_value=result)
 
 
-class _FakeSupabase:
-    """Fake Supabase client that returns predictable data."""
+class _FakeDB:
+    """Fake database client that returns predictable data."""
 
     def __init__(self):
         self._overrides: dict[str, list[_ChainMock]] = {}
@@ -399,12 +398,12 @@ class TestDeploymentRoutes:
 
 class TestDeviceGroupRoutes:
     def test_create_group(self, client):
-        """Group creation goes directly to Supabase (no service)."""
+        """Group creation goes directly to the database (no service)."""
         app = client.app
-        sb = _FakeSupabase()
-        sb.override("device_groups", _ChainMock(data=[_group_row()]))
-        from fleet.deps import get_supabase
-        app.dependency_overrides[get_supabase] = lambda: sb
+        db = _FakeDB()
+        db.override("device_groups", _ChainMock(data=[_group_row()]))
+        from fleet.deps import get_db
+        app.dependency_overrides[get_db] = lambda: db
 
         resp = client.post("/groups", json={"name": "Test Group"})
         assert resp.status_code == 201
@@ -416,72 +415,72 @@ class TestDeviceGroupRoutes:
 
     def test_list_groups(self, client):
         app = client.app
-        sb = _FakeSupabase()
-        sb.override("device_groups", _ChainMock(data=[_group_row()]))
-        sb.override("device_group_members", _ChainMock(data=[], count=3))
-        from fleet.deps import get_supabase
-        app.dependency_overrides[get_supabase] = lambda: sb
+        db = _FakeDB()
+        db.override("device_groups", _ChainMock(data=[_group_row()]))
+        db.override("group_members", _ChainMock(data=[], count=3))
+        from fleet.deps import get_db
+        app.dependency_overrides[get_db] = lambda: db
 
         resp = client.get("/groups")
         assert resp.status_code == 200
 
     def test_get_group_not_found(self, client):
         app = client.app
-        sb = _FakeSupabase()
-        sb.override("device_groups", _ChainMock(data=[]))
-        from fleet.deps import get_supabase
-        app.dependency_overrides[get_supabase] = lambda: sb
+        db = _FakeDB()
+        db.override("device_groups", _ChainMock(data=[]))
+        from fleet.deps import get_db
+        app.dependency_overrides[get_db] = lambda: db
 
         resp = client.get("/groups/grp-missing")
         assert resp.status_code == 404
 
     def test_delete_group_not_found(self, client):
         app = client.app
-        sb = _FakeSupabase()
-        sb.override("device_groups", _ChainMock(data=[]))
-        from fleet.deps import get_supabase
-        app.dependency_overrides[get_supabase] = lambda: sb
+        db = _FakeDB()
+        db.override("device_groups", _ChainMock(data=[]))
+        from fleet.deps import get_db
+        app.dependency_overrides[get_db] = lambda: db
 
         resp = client.delete("/groups/grp-missing")
         assert resp.status_code == 404
 
     def test_delete_group_with_active_deployments(self, client):
         app = client.app
-        sb = _FakeSupabase()
-        sb.override("device_groups", _ChainMock(data=[{"id": "grp-1"}]))
-        sb.override("deployments", _ChainMock(data=[], count=2))
-        from fleet.deps import get_supabase
-        app.dependency_overrides[get_supabase] = lambda: sb
+        db = _FakeDB()
+        db.override("device_groups", _ChainMock(data=[{"id": "grp-1"}]))
+        db.override("deployments", _ChainMock(data=[], count=2))
+        from fleet.deps import get_db
+        app.dependency_overrides[get_db] = lambda: db
 
         resp = client.delete("/groups/grp-1")
         assert resp.status_code == 409
 
     def test_add_member_group_not_found(self, client):
         app = client.app
-        sb = _FakeSupabase()
-        sb.override("device_groups", _ChainMock(data=[]))
-        from fleet.deps import get_supabase
-        app.dependency_overrides[get_supabase] = lambda: sb
+        db = _FakeDB()
+        db.override("device_groups", _ChainMock(data=[]))
+        from fleet.deps import get_db
+        app.dependency_overrides[get_db] = lambda: db
 
         resp = client.post("/groups/grp-missing/members?device_id=dev-1")
         assert resp.status_code == 404
 
     def test_list_members_group_not_found(self, client):
         app = client.app
-        sb = _FakeSupabase()
-        sb.override("device_groups", _ChainMock(data=[]))
-        from fleet.deps import get_supabase
-        app.dependency_overrides[get_supabase] = lambda: sb
+        db = _FakeDB()
+        db.override("device_groups", _ChainMock(data=[]))
+        from fleet.deps import get_db
+        app.dependency_overrides[get_db] = lambda: db
 
         resp = client.get("/groups/grp-missing/members")
         assert resp.status_code == 404
 
     def test_set_scaling_not_found(self, client):
         app = client.app
-        sb = _FakeSupabase()
-        sb.override("device_groups", _ChainMock(data=[]))
-        from fleet.deps import get_supabase
-        app.dependency_overrides[get_supabase] = lambda: sb
+        db = _FakeDB()
+        db.override("device_groups", _ChainMock(data=[]))
+        from fleet.deps import get_db
+        app.dependency_overrides[get_db] = lambda: db
 
         resp = client.put("/groups/grp-missing/scaling", json={
             "enabled": True,

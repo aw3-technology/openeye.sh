@@ -27,9 +27,9 @@ def generate_scene_description(
         return "Empty scene."
     labels = [o.label for o in objects]
     counts: dict[str, int] = {}
-    for l in labels:
-        counts[l] = counts.get(l, 0) + 1
-    parts = [f"{c}x {l}" if c > 1 else l for l, c in counts.items()]
+    for label in labels:
+        counts[label] = counts.get(label, 0) + 1
+    parts = [f"{c}x {label}" if c > 1 else label for label, c in counts.items()]
     desc = f"Scene contains {', '.join(parts)}."
     if relationships:
         top_rels = relationships[:3]

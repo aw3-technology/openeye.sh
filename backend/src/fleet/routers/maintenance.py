@@ -1,18 +1,19 @@
 """Maintenance window CRUD."""
 
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from ..deps import get_current_user_id, get_supabase
+from ..deps import get_current_user_id, get_db
 from ..models import MaintenanceWindowCreateRequest, MaintenanceWindowResponse
 from ..services.maintenance_service import MaintenanceService
 
 
 class MaintenanceWindowUpdateRequest(BaseModel):
     """Whitelisted fields for PATCH updates."""
+
     name: Optional[str] = None
     description: Optional[str] = None
     device_ids: Optional[List[str]] = None
@@ -22,6 +23,7 @@ class MaintenanceWindowUpdateRequest(BaseModel):
     recurrence: Optional[str] = None
     is_active: Optional[bool] = None
 
+
 router = APIRouter()
 
 
@@ -29,9 +31,9 @@ router = APIRouter()
 async def create_maintenance_window(
     req: MaintenanceWindowCreateRequest,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = MaintenanceService(sb)
+    svc = MaintenanceService(db)
     return svc.create(user_id, req)
 
 
@@ -39,9 +41,9 @@ async def create_maintenance_window(
 async def list_maintenance_windows(
     active_only: bool = False,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = MaintenanceService(sb)
+    svc = MaintenanceService(db)
     return svc.list_windows(user_id, active_only)
 
 
@@ -49,9 +51,9 @@ async def list_maintenance_windows(
 async def get_maintenance_window(
     window_id: str,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = MaintenanceService(sb)
+    svc = MaintenanceService(db)
     try:
         return svc.get_window(user_id, window_id)
     except KeyError:
@@ -63,13 +65,13 @@ async def update_maintenance_window(
     window_id: str,
     updates: MaintenanceWindowUpdateRequest,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
     # Only pass non-None fields to the service
     filtered = {k: v for k, v in updates.model_dump().items() if v is not None}
     if not filtered:
         raise HTTPException(status_code=400, detail="No valid fields to update")
-    svc = MaintenanceService(sb)
+    svc = MaintenanceService(db)
     try:
         return svc.update_window(user_id, window_id, filtered)
     except KeyError:
@@ -80,7 +82,7 @@ async def update_maintenance_window(
 async def delete_maintenance_window(
     window_id: str,
     user_id: str = Depends(get_current_user_id),
-    sb=Depends(get_supabase),
+    db=Depends(get_db),
 ):
-    svc = MaintenanceService(sb)
+    svc = MaintenanceService(db)
     svc.delete_window(user_id, window_id)

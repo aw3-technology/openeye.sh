@@ -9,8 +9,8 @@ import logging
 import threading
 import time
 from collections import deque
-from dataclasses import dataclass, field
-from typing import Any, Deque, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Deque, Dict, List
 
 from .singleton import singleton
 

@@ -8,10 +8,9 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from governance.engine import GovernanceEngine
-from governance.loader import list_presets, validate_yaml
+from governance.loader import list_presets
 from governance.models import (
     AuditEntry,
-    GovernanceConfig,
     GovernanceStatus,
     PolicyInfo,
 )

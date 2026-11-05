@@ -2,7 +2,7 @@
 
 import sys
 from types import ModuleType
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 

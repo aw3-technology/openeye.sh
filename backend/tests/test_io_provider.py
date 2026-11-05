@@ -1,7 +1,6 @@
 """Tests for IOProvider."""
 
 import threading
-import time
 
 
 def test_add_get_input(io_provider):

@@ -157,7 +157,6 @@ class LLMHistoryManager:
                     self.history_manager.frame_index += 1
                     return response
                 self.agent_name = self._config.agent_name
-                cycle = self.history_manager.frame_index
                 current_tick = self.io_provider.tick_counter
                 formatted_inputs = f"{self.agent_name} sensed the following: "
                 for input_type, input_info in self.io_provider.inputs.items():

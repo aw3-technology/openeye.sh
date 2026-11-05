@@ -17,7 +17,7 @@ import queue
 import threading
 import time
 from concurrent import futures
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 try:
     import grpc

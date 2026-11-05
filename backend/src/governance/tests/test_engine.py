@@ -1,16 +1,11 @@
 """Tests for the governance engine — evaluation and aggregation."""
 
-import pytest
 from governance.engine import GovernanceEngine
 from governance.context import GovernanceContext, RoboticsContext, DesktopContext
 from governance.models import (
     GovernanceConfig,
-    GovernanceSettings,
     PolicyConfig,
     PolicyDecision,
-    PolicyDomain,
-    Severity,
-    Enforcement,
 )
 from perception.models import (
     ActionSuggestion,

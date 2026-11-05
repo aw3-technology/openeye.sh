@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from runtime.config import (
     LifecycleHookType,

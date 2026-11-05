@@ -6,7 +6,7 @@ Story 49: Consistent object identity across frames via track IDs.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from perception.models import BBox2D
 

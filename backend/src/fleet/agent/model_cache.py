@@ -2,7 +2,6 @@
 
 import hashlib
 import logging
-import os
 import shutil
 from pathlib import Path
 from typing import Optional

@@ -5,7 +5,6 @@ Usage:
 """
 
 import json
-import sys
 from pathlib import Path
 
 from src.fleet.app import create_fleet_app

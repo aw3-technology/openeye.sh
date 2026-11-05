@@ -16,7 +16,9 @@ def _correlation_id(request: Request) -> str | None:
     # Check request state first (set by middleware), then fall back to header
     cid: str | None = getattr(request.state, "correlation_id", None)
     if not cid:
-        cid = request.headers.get("X-Correlation-ID") or request.headers.get("X-Request-ID")
+        cid = request.headers.get("X-Correlation-ID") or request.headers.get(
+            "X-Request-ID"
+        )
     return cid
 
 
@@ -58,11 +60,13 @@ async def validation_exception_handler(
     cid = _correlation_id(request)
     field_errors = []
     for err in exc.errors():
-        field_errors.append({
-            "loc": list(err.get("loc", [])),
-            "msg": err.get("msg", ""),
-            "type": err.get("type", ""),
-        })
+        field_errors.append(
+            {
+                "loc": list(err.get("loc", [])),
+                "msg": err.get("msg", ""),
+                "type": err.get("type", ""),
+            }
+        )
 
     return JSONResponse(
         status_code=422,
@@ -78,11 +82,12 @@ async def validation_exception_handler(
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     cid = _correlation_id(request) or str(uuid.uuid4())
-    logger.exception(
+    logger.error(
         "Unhandled exception [correlation_id=%s] %s %s",
         cid,
         request.method,
         request.url.path,
+        exc_info=exc,
     )
     return JSONResponse(
         status_code=500,
