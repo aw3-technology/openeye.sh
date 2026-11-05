@@ -1,5 +1,5 @@
 /**
- * Typed interfaces for Supabase JSON columns.
+ * Typed interfaces for jsonb columns.
  * Replaces loose `Json` and `Record<string, unknown>` usage with narrower types
  * that describe the actual shape stored in each JSON column.
  */

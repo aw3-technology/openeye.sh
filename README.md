@@ -155,7 +155,7 @@ openeye.sh/
 
 **Frontend**: React, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query
 
-**Auth**: Supabase (Google/Apple OAuth)
+**Auth**: Better Auth on Neon Postgres (email/password, Google/Apple OAuth), hosted on Vercel
 
 **AI/ML**: Ultralytics (YOLO), Transformers, ONNX Runtime, TensorRT, LangChain
 

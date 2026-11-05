@@ -156,7 +156,7 @@ export function CodeExamples() {
           <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
             Integrations
           </div>
-          <h2 className="text-3xl md:text-4xl font-semibold font-display mb-4">
+          <h2 className="font-display text-4xl md:text-5xl font-light leading-[1.08] tracking-[-0.01em] mb-4">
             Works with your stack.
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl">

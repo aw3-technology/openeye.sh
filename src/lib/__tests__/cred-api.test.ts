@@ -1,19 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
-// Mock supabase client
-vi.mock("@/integrations/supabase/client", () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn().mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-      }),
-    },
-  },
-}));
-
-vi.stubEnv("VITE_SUPABASE_PROJECT_ID", "test-project");
-vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "test-key");
-
 const { credApi } = await import("../cred-api");
 
 function mockFetchOk(data: unknown) {
@@ -24,17 +10,21 @@ function mockFetchOk(data: unknown) {
   });
 }
 
-describe("credApi (edge function proxy)", () => {
+describe("credApi (/api/cred proxy)", () => {
   const originalFetch = globalThis.fetch;
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
   });
 
-  it("getBalance calls edge function", async () => {
-    globalThis.fetch = mockFetchOk({ user_id: "u1", balances: [{ balance: 100 }] });
+  it("getBalance calls the same-origin proxy", async () => {
+    const fetchMock = mockFetchOk({ user_id: "u1", balances: [{ balance: 100 }] });
+    globalThis.fetch = fetchMock;
     const result = await credApi.getBalance();
     expect(result.balances[0].balance).toBe(100);
+    const [url, opts] = fetchMock.mock.calls[0];
+    expect(url).toBe("/api/cred/balance");
+    expect(opts.headers).not.toHaveProperty("Authorization");
   });
 
   it("deduct sends amount and reason", async () => {

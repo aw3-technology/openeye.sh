@@ -4,7 +4,7 @@
  */
 
 const CLOUD_HOSTNAMES = ["openeye.sh", "www.openeye.sh"];
-const CLOUD_HOSTNAME_SUFFIXES = [".lovable.app", ".lovableproject.com"];
+const CLOUD_HOSTNAME_SUFFIXES = [".vercel.app"];
 
 /**
  * Returns true when the app is running on a cloud/production host.

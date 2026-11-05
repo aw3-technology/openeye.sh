@@ -101,7 +101,7 @@ function MegaDropdown({ menu, isActive }: { menu: MegaMenu; isActive: (href: str
       <button
         ref={triggerRef}
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-1 uppercase tracking-widest transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
+        className={`flex items-center gap-1 transition-colors rounded-sm focus-visible:ring-2 focus-visible:ring-foreground/50 outline-none ${
           hasActive || open ? "text-foreground" : "text-muted-foreground hover:text-foreground"
         }`}
         aria-expanded={open}
@@ -178,7 +178,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden lg:flex items-center gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+        <div className="hidden lg:flex items-center gap-7 text-sm text-muted-foreground">
           {publicMegaMenus.map((menu) => (
             <MegaDropdown key={menu.label} menu={menu} isActive={isActive} />
           ))}
@@ -211,15 +211,15 @@ export function Navbar() {
                   onClick={signOut}
                   className="text-muted-foreground hover:text-foreground transition-colors focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background outline-none rounded-sm"
                 >
-                  Sign Out
+                  Sign out
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => navigate("/login")}
-                className="bg-primary text-primary-foreground px-4 py-2 rounded-inner hover:bg-primary/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
+                className="bg-primary text-primary-foreground text-sm font-medium px-4 py-1.5 rounded-full hover:bg-primary/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
               >
-                Sign In
+                Sign in
               </button>
             )
           )}
@@ -314,7 +314,7 @@ export function Navbar() {
                         onClick={() => { signOut(); setMobileOpen(false); }}
                         className="text-xs text-muted-foreground hover:text-foreground transition-colors focus-visible:ring-2 focus-visible:ring-foreground/50 rounded-sm outline-none"
                       >
-                        Sign Out
+                        Sign out
                       </button>
                     </div>
                   ) : (
@@ -322,7 +322,7 @@ export function Navbar() {
                       onClick={() => { navigate("/login"); setMobileOpen(false); }}
                       className="w-full bg-foreground text-background px-4 py-2.5 rounded-inner text-xs font-medium hover:bg-foreground/90 transition-colors active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-foreground/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
                     >
-                      Sign In
+                      Sign in
                     </button>
                   )
                 )}

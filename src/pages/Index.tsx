@@ -8,7 +8,7 @@ import { CodeExamples } from "@/components/CodeExamples";
 import { GetStarted } from "@/components/GetStarted";
 import { DemoVideo } from "@/components/DemoVideo";
 import { HeroSection } from "@/components/HeroSection";
-import { VisionDemoSection } from "@/components/VisionDemoSection";
+import { ModelStrip } from "@/components/ModelStrip";
 import { SafetyGuardianSection } from "@/components/SafetyGuardianSection";
 import { PerceptionLoopSection } from "@/components/PerceptionLoopSection";
 import { ArchitectureSection } from "@/components/ArchitectureSection";
@@ -55,22 +55,26 @@ export default function Index() {
         ]}
       />
       <Navbar />
-      <main>
-      <HeroSection />
-      <VisionDemoSection />
-      <SafetyGuardianSection />
-      <PerceptionLoopSection />
-      <ArchitectureSection />
-      <TechEcosystem />
-      <CodeExamples />
-      <CLICommandsSection />
-      <DemoVideo />
-      <UseCasesSection />
-      <ProductionDashboardSection />
-      <GetStarted />
-      <DeployAnywhereSection />
-      <BuiltWithSection />
-      <FinalCTA />
+      <main className="px-0 sm:px-4">
+        <div className="oe-frame">
+          <HeroSection />
+          <div className="oe-rule">
+            <ModelStrip />
+          </div>
+          <div className="oe-rule"><SafetyGuardianSection /></div>
+          <div className="oe-rule"><PerceptionLoopSection /></div>
+          <div className="oe-rule"><ArchitectureSection /></div>
+          <div className="oe-rule"><TechEcosystem /></div>
+          <div className="oe-rule"><CodeExamples /></div>
+          <div className="oe-rule"><CLICommandsSection /></div>
+          <div className="oe-rule"><DemoVideo /></div>
+          <div className="oe-rule"><UseCasesSection /></div>
+          <div className="oe-rule"><ProductionDashboardSection /></div>
+          <div className="oe-rule"><GetStarted /></div>
+          <div className="oe-rule"><DeployAnywhereSection /></div>
+          <div className="oe-rule"><BuiltWithSection /></div>
+          <div className="oe-rule"><FinalCTA /></div>
+        </div>
       </main>
       <Footer />
     </div>

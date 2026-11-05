@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { vi } from "vitest";
 
 // Mock heavy child components to keep tests fast and focused
@@ -24,8 +25,8 @@ vi.mock("@/components/DemoVideo", () => ({
 vi.mock("@/components/HeroSection", () => ({
   HeroSection: () => <section data-testid="hero-section">Open-source eyes for the agent era.</section>,
 }));
-vi.mock("@/components/VisionDemoSection", () => ({
-  VisionDemoSection: () => <div data-testid="vision-demo">VisionDemo</div>,
+vi.mock("@/components/ModelStrip", () => ({
+  ModelStrip: () => <div data-testid="model-strip">ModelStrip</div>,
 }));
 vi.mock("@/components/SafetyGuardianSection", () => ({
   SafetyGuardianSection: () => <div data-testid="safety-guardian">SafetyGuardian</div>,
@@ -56,9 +57,11 @@ import Index from "../Index";
 
 function renderIndex() {
   return render(
-    <MemoryRouter>
-      <Index />
-    </MemoryRouter>
+    <HelmetProvider>
+      <MemoryRouter>
+        <Index />
+      </MemoryRouter>
+    </HelmetProvider>
   );
 }
 
@@ -75,7 +78,7 @@ describe("Index page", () => {
 
     expect(screen.getByTestId("navbar")).toBeInTheDocument();
     expect(screen.getByTestId("hero-section")).toBeInTheDocument();
-    expect(screen.getByTestId("vision-demo")).toBeInTheDocument();
+    expect(screen.getByTestId("model-strip")).toBeInTheDocument();
     expect(screen.getByTestId("safety-guardian")).toBeInTheDocument();
     expect(screen.getByTestId("arch-section")).toBeInTheDocument();
     expect(screen.getByTestId("tech-ecosystem")).toBeInTheDocument();

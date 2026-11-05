@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { authClient } from "@/lib/auth-client";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
   User,
@@ -28,7 +29,15 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(meta.avatar_url ?? null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const provider = user?.app_metadata?.provider ?? "email";
+  const [provider, setProvider] = useState(user?.app_metadata?.provider ?? "email");
+
+  useEffect(() => {
+    if (!user || user.app_metadata?.provider) return;
+    authClient.listAccounts().then(({ data }) => {
+      const social = data?.find((a) => a.providerId !== "credential");
+      if (social) setProvider(social.providerId);
+    });
+  }, [user]);
   const createdAt = user?.created_at
     ? new Date(user.created_at).toLocaleDateString(undefined, {
         year: "numeric",
@@ -51,28 +60,16 @@ export default function Profile() {
     }
 
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const filePath = `${user.id}/avatar.${ext}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(filePath, file, { upsert: true });
-
-    if (uploadError) {
-      toast.error("Upload failed: " + uploadError.message);
+    let newUrl: string;
+    try {
+      ({ url: newUrl } = await api.uploadAvatar(file));
+    } catch (err) {
+      toast.error("Upload failed: " + (err instanceof Error ? err.message : String(err)));
       setUploading(false);
       return;
     }
 
-    const { data: publicUrlData } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(filePath);
-
-    const newUrl = publicUrlData.publicUrl + "?t=" + Date.now();
-
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { avatar_url: newUrl },
-    });
+    const { error: updateError } = await authClient.updateUser({ image: newUrl });
 
     if (updateError) {
       toast.error("Failed to save avatar: " + updateError.message);
@@ -86,9 +83,7 @@ export default function Profile() {
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.auth.updateUser({
-      data: { full_name: displayName },
-    });
+    const { error } = await authClient.updateUser({ name: displayName });
     if (error) {
       toast.error("Failed to update profile: " + error.message);
     } else {

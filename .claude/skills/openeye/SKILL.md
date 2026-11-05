@@ -93,8 +93,8 @@ openeye mlops batch custom v1.0.0 ./images ./output --batch-size 32
 | `OPENAI_API_KEY` | — | Required for VLM perception mode |
 | `GOOGLE_API_KEY` | — | Optional: Gemini VLM |
 | `CAMERA_INDEX` | `0` | Default camera device index |
-| `VITE_SUPABASE_URL` | — | Supabase project URL (frontend) |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | — | Supabase anon key (frontend) |
+| `DATABASE_URL` | — | Neon Postgres connection string (Vercel functions) |
+| `BETTER_AUTH_SECRET` | — | Session signing secret (Vercel functions) |
 
 ## Available Models & Adapters
 

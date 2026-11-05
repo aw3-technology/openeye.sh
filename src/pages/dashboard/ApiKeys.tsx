@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useApiKeys } from "@/hooks/useOpenEyeQueries";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,21 +26,15 @@ export default function ApiKeys() {
     const hash = await sha256(rawKey);
     const prefix = rawKey.slice(0, 7);
 
-    const { error } = await supabase
-      .from("api_keys" as any)
-      .insert({ user_id: user.id, name, key_prefix: prefix, key_hash: hash });
-
-    if (error) throw error;
+    await api.create("api_keys", { name, key_prefix: prefix, key_hash: hash });
     qc.invalidateQueries({ queryKey: ["openeye", "api_keys"] });
     return rawKey;
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from("api_keys" as any)
-      .delete()
-      .eq("id", id);
-    if (error) {
+    try {
+      await api.remove("api_keys", id);
+    } catch (error) {
       toastMutationError("Key deletion", error);
       return;
     }
