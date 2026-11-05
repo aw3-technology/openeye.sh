@@ -1,6 +1,6 @@
 # OpenEye CLI Reference
 
-Built with Typer. Package `openeye-sh` 0.2.0 (Python >= 3.12). Entry points in `cli/pyproject.toml`:
+Built with Typer. Package `openeye-sh` 0.3.0 (Python >= 3.12). Entry points in `cli/pyproject.toml`:
 
 - `openeye = "openeye_ai.cli:app"`
 - `openeye-mcp = "openeye_ai.mcp.server:main"`
