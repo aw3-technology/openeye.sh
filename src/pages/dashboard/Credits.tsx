@@ -90,10 +90,10 @@ export default function Credits() {
         <div role="alert" className="flex items-start gap-3 rounded-lg border border-foreground/10 bg-card p-4">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <div className="text-sm">
-            <p className="font-medium">Credits aren't available yet</p>
+            <p className="font-medium">Couldn't load your credit balance</p>
             <p className="mt-1 text-muted-foreground">
-              Credits pay for the hosted API, which hasn't launched. Self-hosted inference with{" "}
-              <code className="rounded bg-muted px-1 py-0.5 text-[11px]">openeye serve</code> is free and needs none.
+              Try again in a moment. Self-hosted inference with{" "}
+              <code className="rounded bg-muted px-1 py-0.5 text-[11px]">openeye serve</code> doesn't use credits.
             </p>
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function Credits() {
             </p>
           )}
           {tiers.isError && balance.isError && (
-            <p className="col-span-full text-sm text-muted-foreground">Credit packs will appear here when the hosted API launches.</p>
+            <p className="col-span-full text-sm text-muted-foreground">Credit packs couldn't be loaded. Refresh to try again.</p>
           )}
         </div>
       </div>

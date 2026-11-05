@@ -29,7 +29,7 @@ openeye api usage --days 7
 
 | Flag | Description |
 |------|-------------|
-| --server <url> | API server URL (default: $OPENEYE_API_URL) |
+| --server <url> | API server URL (default: $OPENEYE_API_URL, or https://openeye.sh) |
 | --pretty | Pretty-print JSON output |
 | --confidence <float> | Minimum confidence threshold (detect only) |
 | --prompt <text> | Custom prompt (describe only) |

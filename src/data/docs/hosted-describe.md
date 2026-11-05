@@ -2,12 +2,29 @@
 title: POST /v1/describe
 ---
 
-> [!warning] The hosted API endpoint is not yet available. This page describes planned functionality.
+> [!warning] Scene description is being enabled on the hosted API. Until then this endpoint returns `503`; `GET /v1/models` shows `"available": true` once it's on.
 
-### Planned Functionality
+Describe an image, or ask a question about it, with the Qwen2.5-VL vision-language model. Costs **3 credits** per call.
 
-Scene description via a vision-language model. Send an image and an optional text prompt, receive a natural language description.
+### Request
 
-### Self-Hosted Alternative
+`multipart/form-data` with the image in `file` and an optional `prompt` (up to 2,000 characters; default "Describe what you see in this image.").
 
-You can run VLM-based scene description today via the backend's cortex runtime with a VLM provider configured. See the Architecture section for details on configuring VLM providers.
+```bash
+curl -X POST https://openeye.sh/v1/describe \
+  -H "Authorization: Bearer oe_your_key_here" \
+  -F "file=@scene.jpg" \
+  -F "prompt=Is anyone standing near the robot arm?"
+```
+
+### Response
+
+```json
+{
+  "model": "qwen/qwen2.5-vl-72b-instruct",
+  "description": "A person is standing about a metre from the robot arm...",
+  "image": { "width": 1280, "height": 720 },
+  "inference_ms": 2140.5,
+  "credits_used": 3
+}
+```
