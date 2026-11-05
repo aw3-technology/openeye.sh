@@ -3,7 +3,8 @@
  * Used when the app is running in development mode, hitting the local Python fleet server.
  */
 
-import { BaseApiClient } from "./base-api-client";
+import { AuthenticationError, BaseApiClient } from "./base-api-client";
+import { authClient } from "./auth-client";
 import type {
   DeviceRegisterRequest,
   DeviceResponse,
@@ -35,13 +36,50 @@ export function setFleetServerUrl(url: string) {
   localStorage.setItem(FLEET_SERVER_URL_KEY, url);
 }
 
-class FleetApiClient extends BaseApiClient {}
+export const FLEET_SIGN_IN_MESSAGE = "Sign in to use your fleet control plane";
+
+/** Resolves the Better Auth session token, or null when signed out (incl. the demo user). */
+export type SessionTokenProvider = () => Promise<string | null>;
+
+export const getBetterAuthSessionToken: SessionTokenProvider = async () => {
+  try {
+    const { data } = await authClient.getSession();
+    return data?.session?.token ?? null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * HTTP client for the self-hosted fleet control plane (backend/src/fleet).
+ * Every route there requires `Authorization: Bearer <Better Auth session token>`
+ * (see deps.get_current_user_id), so each request carries the current token.
+ * Without a session no request is sent and a sign-in error is raised instead.
+ */
+class FleetApiClient extends BaseApiClient {
+  constructor(
+    baseUrl: string,
+    private readonly getToken: SessionTokenProvider,
+  ) {
+    super(baseUrl);
+  }
+
+  protected async request<T>(path: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
+    const token = await this.getToken();
+    if (!token) throw new AuthenticationError(FLEET_SIGN_IN_MESSAGE);
+    const headers = {
+      ...((init?.headers as Record<string, string>) || {}),
+      Authorization: `Bearer ${token}`,
+    };
+    return super.request<T>(path, { ...init, headers }, timeoutMs);
+  }
+}
 
 export class LocalFleetClient implements FleetClientInterface {
   private api: FleetApiClient;
 
-  constructor(baseUrl?: string) {
-    this.api = new FleetApiClient(baseUrl || getFleetServerUrl());
+  constructor(baseUrl?: string, getToken: SessionTokenProvider = getBetterAuthSessionToken) {
+    this.api = new FleetApiClient(baseUrl || getFleetServerUrl(), getToken);
   }
 
   // ── Devices ──────────────────────────────────────────────────
