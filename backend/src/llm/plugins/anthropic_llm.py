@@ -71,11 +71,13 @@ class AnthropicLLM(LLM[R]):
         tools = []
         for schema in openai_schemas:
             func = schema.get("function", {})
-            tools.append({
-                "name": func.get("name", ""),
-                "description": func.get("description", ""),
-                "input_schema": func.get("parameters", {}),
-            })
+            tools.append(
+                {
+                    "name": func.get("name", ""),
+                    "description": func.get("description", ""),
+                    "input_schema": func.get("parameters", {}),
+                }
+            )
         return tools
 
     @LLMHistoryManager.update_history()
@@ -110,8 +112,7 @@ class AnthropicLLM(LLM[R]):
 
             # Extract tool use blocks from response
             tool_use_blocks = [
-                block for block in response.content
-                if block.type == "tool_use"
+                block for block in response.content if block.type == "tool_use"
             ]
 
             if tool_use_blocks:

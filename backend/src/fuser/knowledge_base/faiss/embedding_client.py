@@ -18,7 +18,13 @@ class EmbeddingClient(BaseEmbeddingClient):
     exposes a compatible API.
     """
 
-    def __init__(self, base_url: str = os.environ.get("EMBEDDING_SERVICE_URL", "http://localhost:8100"), timeout: float = 30.0):
+    def __init__(
+        self,
+        base_url: str = os.environ.get(
+            "EMBEDDING_SERVICE_URL", "http://localhost:8100"
+        ),
+        timeout: float = 30.0,
+    ):
         """
         Initialize the embedding client.
 

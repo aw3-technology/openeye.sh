@@ -5,7 +5,7 @@ import logging
 import secrets
 from typing import Any, Dict, List, Optional
 
-from supabase import Client
+from ..db import Database
 
 from ..models import DeviceRegisterRequest, DeviceStatus, DeviceUpdateRequest
 
@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class DeviceService:
-    def __init__(self, sb: Client):
-        self.sb = sb
+    def __init__(self, db: Database):
+        self.db = db
 
     def register(self, user_id: str, req: DeviceRegisterRequest) -> Dict[str, Any]:
         """Register a new device, returning the row + plaintext API key."""
@@ -27,12 +27,14 @@ class DeviceService:
             "device_type": req.device_type.value,
             "status": DeviceStatus.PENDING.value,
             "api_key_hash": api_key_hash,
-            "hardware_specs": req.hardware_specs.model_dump() if req.hardware_specs else {},
+            "hardware_specs": req.hardware_specs.model_dump()
+            if req.hardware_specs
+            else {},
             "tags": req.tags,
             "firmware_version": req.firmware_version,
             "ip_address": req.ip_address,
         }
-        result = self.sb.table("devices").insert(row).execute()
+        result = self.db.table("devices").insert(row).execute()
         if not result.data:
             raise RuntimeError("Failed to insert device")
         device = result.data[0]
@@ -49,7 +51,7 @@ class DeviceService:
         limit: int = 200,
         offset: int = 0,
     ) -> List[Dict[str, Any]]:
-        q = self.sb.table("devices").select("*").eq("user_id", user_id)
+        q = self.db.table("devices").select("*").eq("user_id", user_id)
         if status_filter:
             q = q.eq("status", status_filter)
         if device_type:
@@ -63,7 +65,7 @@ class DeviceService:
 
     def get_device(self, user_id: str, device_id: str) -> Dict[str, Any]:
         result = (
-            self.sb.table("devices")
+            self.db.table("devices")
             .select("*")
             .eq("id", device_id)
             .eq("user_id", user_id)
@@ -74,12 +76,18 @@ class DeviceService:
             raise KeyError(f"Device {device_id} not found")
         return result.data[0]
 
-    def update_device(self, user_id: str, device_id: str, req: DeviceUpdateRequest) -> Dict[str, Any]:
+    def update_device(
+        self, user_id: str, device_id: str, req: DeviceUpdateRequest
+    ) -> Dict[str, Any]:
         updates = req.model_dump(exclude_none=True)
         if "device_type" in updates:
-            updates["device_type"] = updates["device_type"].value if hasattr(updates["device_type"], "value") else updates["device_type"]
+            updates["device_type"] = (
+                updates["device_type"].value
+                if hasattr(updates["device_type"], "value")
+                else updates["device_type"]
+            )
         result = (
-            self.sb.table("devices")
+            self.db.table("devices")
             .update(updates)
             .eq("id", device_id)
             .eq("user_id", user_id)
@@ -89,9 +97,11 @@ class DeviceService:
             raise KeyError(f"Device {device_id} not found")
         return result.data[0]
 
-    def set_tags(self, user_id: str, device_id: str, tags: Dict[str, str]) -> Dict[str, Any]:
+    def set_tags(
+        self, user_id: str, device_id: str, tags: Dict[str, str]
+    ) -> Dict[str, Any]:
         result = (
-            self.sb.table("devices")
+            self.db.table("devices")
             .update({"tags": tags})
             .eq("id", device_id)
             .eq("user_id", user_id)
@@ -101,9 +111,11 @@ class DeviceService:
             raise KeyError(f"Device {device_id} not found")
         return result.data[0]
 
-    def set_config_overrides(self, user_id: str, device_id: str, config: Dict[str, Any]) -> Dict[str, Any]:
+    def set_config_overrides(
+        self, user_id: str, device_id: str, config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         result = (
-            self.sb.table("devices")
+            self.db.table("devices")
             .update({"config_overrides": config})
             .eq("id", device_id)
             .eq("user_id", user_id)
@@ -113,9 +125,11 @@ class DeviceService:
             raise KeyError(f"Device {device_id} not found")
         return result.data[0]
 
-    def decommission(self, user_id: str, device_id: str, reason: str = "") -> Dict[str, Any]:
+    def decommission(
+        self, user_id: str, device_id: str, reason: str = ""
+    ) -> Dict[str, Any]:
         result = (
-            self.sb.table("devices")
+            self.db.table("devices")
             .update({"status": DeviceStatus.DECOMMISSIONED.value})
             .eq("id", device_id)
             .eq("user_id", user_id)
@@ -126,7 +140,9 @@ class DeviceService:
         logger.info("Device %s decommissioned: %s", device_id, reason)
         return result.data[0]
 
-    def get_devices_by_tags(self, user_id: str, tag_filter: Dict[str, str]) -> List[Dict[str, Any]]:
+    def get_devices_by_tags(
+        self, user_id: str, tag_filter: Dict[str, str]
+    ) -> List[Dict[str, Any]]:
         """Return all user devices matching every key-value pair in tag_filter."""
         all_devices = self.list_devices(user_id)
         matched = []

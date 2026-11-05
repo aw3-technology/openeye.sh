@@ -1,7 +1,6 @@
 """System resource monitoring using psutil (and pynvml for GPU)."""
 
 import logging
-from typing import Optional
 
 from ..models import ResourceUsage
 
@@ -55,9 +54,15 @@ class ResourceMonitor:
                 handle = pynvml.nvmlDeviceGetHandleByIndex(0)
                 util = pynvml.nvmlDeviceGetUtilizationRates(handle)
                 mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-                temp = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
+                temp = pynvml.nvmlDeviceGetTemperature(
+                    handle, pynvml.NVML_TEMPERATURE_GPU
+                )
                 usage.gpu_percent = util.gpu
-                usage.gpu_memory_percent = round(mem_info.used / mem_info.total * 100, 1) if mem_info.total else 0
+                usage.gpu_memory_percent = (
+                    round(mem_info.used / mem_info.total * 100, 1)
+                    if mem_info.total
+                    else 0
+                )
                 usage.gpu_temp_celsius = temp
             except Exception as exc:
                 logger.debug("GPU metrics unavailable: %s", exc)

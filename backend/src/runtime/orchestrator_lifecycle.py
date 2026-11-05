@@ -47,7 +47,9 @@ class OrchestratorLifecycle:
         # Generation counter for cortex loop cancellations during transitions
         self._cortex_loop_generation = 0
 
-    async def initialize_mode(self, mode_name: str, mode_config: ModeSystemConfig) -> None:
+    async def initialize_mode(
+        self, mode_name: str, mode_config: ModeSystemConfig
+    ) -> None:
         config = mode_config.modes[mode_name]
         config.load_components(mode_config)
         self.current_config = config.to_runtime_config(mode_config)
@@ -62,7 +64,9 @@ class OrchestratorLifecycle:
 
         logging.info(f"Mode '{mode_name}' initialized successfully")
 
-    async def start_orchestrators(self, run_cortex_loop, start_transition_handler) -> None:
+    async def start_orchestrators(
+        self, run_cortex_loop, start_transition_handler
+    ) -> None:
         if not self.current_config:
             raise RuntimeError("No current config available")
 
@@ -131,7 +135,9 @@ class OrchestratorLifecycle:
                 )
                 if pending:
                     pending_names = [
-                        name for name, task in tasks_to_cancel.items() if task in pending
+                        name
+                        for name, task in tasks_to_cancel.items()
+                        if task in pending
                     ]
                     completed_names = [
                         name for name, task in tasks_to_cancel.items() if task in done

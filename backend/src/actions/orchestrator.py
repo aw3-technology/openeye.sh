@@ -135,7 +135,13 @@ class ActionOrchestrator:
     def _normalize_action(self, action: Action) -> Action:
         at = action.type.lower()
         av = action.value
-        move_shortcuts = {"stand still", "turn left", "turn right", "move forwards", "move back"}
+        move_shortcuts = {
+            "stand still",
+            "turn left",
+            "turn right",
+            "move forwards",
+            "move back",
+        }
         if at in move_shortcuts and av == "":
             action.type = "move"
             action.value = at

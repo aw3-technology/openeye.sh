@@ -1,6 +1,5 @@
 """Tests for governance data models."""
 
-import pytest
 from governance.models import (
     GovernanceConfig,
     GovernanceResult,

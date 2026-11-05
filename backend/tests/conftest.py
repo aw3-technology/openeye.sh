@@ -2,6 +2,13 @@
 
 import pytest
 
+# Import torch (when installed) before any test stubs modules in sys.modules;
+# torch's first import inspects source files and breaks on a MagicMock module.
+try:
+    import torch  # noqa: F401
+except ImportError:
+    pass
+
 
 @pytest.fixture(autouse=True)
 def reset_singletons():

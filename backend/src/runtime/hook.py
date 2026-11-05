@@ -43,13 +43,17 @@ class CommandHookConfig(HookConfig):
 
 
 class FunctionHookConfig(HookConfig):
-    module_name: str = Field(description="Name of the module file (without .py extension) in the hooks directory")
+    module_name: str = Field(
+        description="Name of the module file (without .py extension) in the hooks directory"
+    )
     function: str = Field(description="Name of the function to call")
 
 
 class ActionHookConfig(HookConfig):
     action_type: str = Field(description="The type/name of the action to execute")
-    action_config: Dict[str, Any] = Field(default_factory=dict, description="Configuration dictionary for the action")
+    action_config: Dict[str, Any] = Field(
+        default_factory=dict, description="Configuration dictionary for the action"
+    )
 
 
 class LifecycleHookHandler:
@@ -102,7 +106,9 @@ class CommandHookHandler(LifecycleHookHandler):
                     logging.info(f"Hook command output: {stdout.decode().strip()}")
                 return True
             else:
-                logging.error(f"Hook command failed with code {process.returncode}: {stderr.decode().strip()}")
+                logging.error(
+                    f"Hook command failed with code {process.returncode}: {stderr.decode().strip()}"
+                )
                 return False
         except Exception as e:
             logging.error(f"Error executing lifecycle command: {e}")
@@ -116,7 +122,9 @@ class FunctionHookHandler(LifecycleHookHandler):
 
     async def execute(self, context: Dict[str, Any]) -> bool:
         try:
-            func = self._find_function_in_module(self.config.module_name, self.config.function)
+            func = self._find_function_in_module(
+                self.config.module_name, self.config.function
+            )
             if not func:
                 return False
             merged_context = {**self.config.model_dump(), **context}
@@ -139,12 +147,15 @@ class FunctionHookHandler(LifecycleHookHandler):
                 return None
             module_file = os.path.join(hooks_dir, f"{module_name}.py")
             if not os.path.exists(module_file):
-                logging.error(f"Module file {module_name}.py not found in hooks directory")
+                logging.error(
+                    f"Module file {module_name}.py not found in hooks directory"
+                )
                 return None
             with open(module_file, "r", encoding="utf-8") as f:
                 file_content = f.read()
             function_pattern = re.compile(
-                rf"^(?:async\s+)?def\s+{re.escape(function_name)}\s*\(", re.MULTILINE,
+                rf"^(?:async\s+)?def\s+{re.escape(function_name)}\s*\(",
+                re.MULTILINE,
             )
             if not function_pattern.search(file_content):
                 logging.error(f"Function {function_name} not found in {module_name}.py")
@@ -154,10 +165,14 @@ class FunctionHookHandler(LifecycleHookHandler):
                 func = getattr(module, function_name)
                 return func
             else:
-                logging.error(f"Function {function_name} found in file but not importable from hooks.{module_name}")
+                logging.error(
+                    f"Function {function_name} found in file but not importable from hooks.{module_name}"
+                )
                 return None
         except Exception as e:
-            logging.error(f"Error searching for function {function_name} in module {module_name}: {e}")
+            logging.error(
+                f"Error searching for function {function_name} in module {module_name}: {e}"
+            )
             return None
 
 
@@ -171,8 +186,12 @@ class ActionHookHandler(LifecycleHookHandler):
         if not self.action:
             try:
                 from actions import load_action
+
                 self.action = load_action(
-                    {"type": self.config.action_type, "config": self.config.action_config}
+                    {
+                        "type": self.config.action_type,
+                        "config": self.config.action_config,
+                    }
                 )
             except Exception as e:
                 logging.error(f"Error loading action for lifecycle hook: {e}")
@@ -265,13 +284,19 @@ async def execute_lifecycle_hooks(
                 if not success:
                     all_successful = False
                     if hook.on_failure == "abort":
-                        logging.error("Lifecycle hook failed with abort policy, stopping execution")
+                        logging.error(
+                            "Lifecycle hook failed with abort policy, stopping execution"
+                        )
                         return False
             else:
-                logging.error(f"Failed to create handler for lifecycle hook: {hook.handler_type}")
+                logging.error(
+                    f"Failed to create handler for lifecycle hook: {hook.handler_type}"
+                )
                 all_successful = False
         except asyncio.TimeoutError:
-            logging.error(f"Lifecycle hook timed out after {hook.timeout_seconds} seconds")
+            logging.error(
+                f"Lifecycle hook timed out after {hook.timeout_seconds} seconds"
+            )
             all_successful = False
             if hook.on_failure == "abort":
                 return False

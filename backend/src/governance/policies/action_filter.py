@@ -13,7 +13,9 @@ class ActionFilterPolicy(GovernancePolicy):
     name = "action_filter"
     version = "1.0"
     domain = PolicyDomain.UNIVERSAL
-    description = "Allow/deny actions by pattern regex. Speed limits, action type restrictions."
+    description = (
+        "Allow/deny actions by pattern regex. Speed limits, action type restrictions."
+    )
 
     def _setup(self, params: dict) -> None:
         self.deny_patterns: list[str] = params.get("deny_patterns", [])
@@ -31,7 +33,10 @@ class ActionFilterPolicy(GovernancePolicy):
                     results.append(r)
 
             # Speed limit check
-            if self.max_speed is not None and context.robotics.robot_velocity is not None:
+            if (
+                self.max_speed is not None
+                and context.robotics.robot_velocity is not None
+            ):
                 if context.robotics.robot_velocity > self.max_speed:
                     results.append(
                         GovernanceResult(
@@ -52,7 +57,9 @@ class ActionFilterPolicy(GovernancePolicy):
 
         return results
 
-    def _check_action(self, action: str, target_id: str | None = None) -> GovernanceResult | None:
+    def _check_action(
+        self, action: str, target_id: str | None = None
+    ) -> GovernanceResult | None:
         action_lower = action.lower()
 
         for pattern in self.deny_patterns:

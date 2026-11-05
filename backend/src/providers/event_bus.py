@@ -163,6 +163,7 @@ class EventBus:
                 logging.error(f"EventBus sync callback error: {e}")
 
         if async_cbs and loop is not None and not loop.is_closed():
+
             def _on_done(f):
                 if f.cancelled():
                     return

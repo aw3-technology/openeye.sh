@@ -5,12 +5,13 @@ mocked inference backend, and verify rate-limit headers + credit deduction
 through the /v1/usage endpoint.
 
 The actual ML model loading is mocked — everything else (auth, rate limiting,
-usage logging) runs against the in-memory Supabase fake.
+usage logging) runs against the in-memory database fake.
 """
 
 from __future__ import annotations
 
 import io
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -21,12 +22,16 @@ from fleet.deps import get_credits_service, get_inference_service
 from fleet.services.credits_service import CreditsService
 from fleet.services.inference_service import InferenceService
 
-from .conftest import TEST_USER_ID, InMemorySupabase
+from .conftest import TEST_USER_ID, InMemoryDB
 
 pytestmark = pytest.mark.integration
 
 
 # ── Helpers ───────────────────────────────────────────────────────────
+
+
+def _hours_ago(hours: int) -> str:
+    return (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
 
 
 def _make_test_image(width: int = 64, height: int = 64, color: str = "red") -> bytes:
@@ -109,7 +114,7 @@ def mock_inference():
 
 
 @pytest.fixture()
-def v1_client(fleet_app, fake_supabase, mock_credits, mock_inference) -> TestClient:
+def v1_client(fleet_app, fake_db, mock_credits, mock_inference) -> TestClient:
     """TestClient with API key auth + mocked credits/inference services."""
     from fleet.deps import ApiKeyContext, get_api_key_auth
 
@@ -159,7 +164,7 @@ class TestModelListing:
 
 
 class TestDetectEndpoint:
-    def test_detect_success(self, v1_client: TestClient, mock_inference, fake_supabase):
+    def test_detect_success(self, v1_client: TestClient, mock_inference, fake_db):
         image_bytes = _make_test_image()
 
         resp = v1_client.post(
@@ -180,13 +185,16 @@ class TestDetectEndpoint:
         assert "x-ratelimit-remaining" in resp.headers
         assert "x-ratelimit-reset" in resp.headers
 
-    def test_detect_insufficient_credits(self, fleet_app, fake_supabase, mock_inference):
+    def test_detect_insufficient_credits(self, fleet_app, fake_db, mock_inference):
         from fleet.deps import ApiKeyContext, get_api_key_auth
 
         credits_svc = _mock_credits_service(deduct_ok=False)
         fleet_app.dependency_overrides[get_api_key_auth] = lambda: ApiKeyContext(
-            user_id=TEST_USER_ID, api_key_id="ak-integ-1",
-            key_prefix="oe_test_", scopes=["inference"], rate_limit=100,
+            user_id=TEST_USER_ID,
+            api_key_id="ak-integ-1",
+            key_prefix="oe_test_",
+            scopes=["inference"],
+            rate_limit=100,
         )
         fleet_app.dependency_overrides[get_credits_service] = lambda: credits_svc
         fleet_app.dependency_overrides[get_inference_service] = lambda: mock_inference
@@ -198,14 +206,19 @@ class TestDetectEndpoint:
         )
         assert resp.status_code == 402
 
-    def test_detect_refunds_on_inference_failure(self, fleet_app, fake_supabase):
+    def test_detect_refunds_on_inference_failure(self, fleet_app, fake_db):
         from fleet.deps import ApiKeyContext, get_api_key_auth
 
         credits_svc = _mock_credits_service()
-        inference_svc = _mock_inference_service(detect_error=RuntimeError("Model crashed"))
+        inference_svc = _mock_inference_service(
+            detect_error=RuntimeError("Model crashed")
+        )
         fleet_app.dependency_overrides[get_api_key_auth] = lambda: ApiKeyContext(
-            user_id=TEST_USER_ID, api_key_id="ak-integ-1",
-            key_prefix="oe_test_", scopes=["inference"], rate_limit=100,
+            user_id=TEST_USER_ID,
+            api_key_id="ak-integ-1",
+            key_prefix="oe_test_",
+            scopes=["inference"],
+            rate_limit=100,
         )
         fleet_app.dependency_overrides[get_credits_service] = lambda: credits_svc
         fleet_app.dependency_overrides[get_inference_service] = lambda: inference_svc
@@ -218,7 +231,7 @@ class TestDetectEndpoint:
         assert resp.status_code == 500
         credits_svc.refund.assert_called_once()
 
-    def test_detect_no_auth_returns_401(self, fleet_app, fake_supabase):
+    def test_detect_no_auth_returns_401(self, fleet_app, fake_db):
         """Without API key auth, /v1 endpoints should return 401."""
         from fleet.deps import get_api_key_auth
 
@@ -238,7 +251,7 @@ class TestDetectEndpoint:
 
 
 class TestDepthEndpoint:
-    def test_depth_success(self, v1_client: TestClient, mock_inference, fake_supabase):
+    def test_depth_success(self, v1_client: TestClient, mock_inference, fake_db):
         resp = v1_client.post(
             "/v1/depth",
             files={"file": ("test.jpg", _make_test_image(), "image/jpeg")},
@@ -254,7 +267,7 @@ class TestDepthEndpoint:
 
 
 class TestDescribeEndpoint:
-    def test_describe_success(self, v1_client: TestClient, mock_inference, fake_supabase):
+    def test_describe_success(self, v1_client: TestClient, mock_inference, fake_db):
         resp = v1_client.post(
             "/v1/describe",
             files={"file": ("test.jpg", _make_test_image(), "image/jpeg")},
@@ -281,33 +294,35 @@ class TestDescribeEndpoint:
 
 class TestUsageEndpoint:
     def test_usage_returns_balance_and_stats(
-        self, v1_client: TestClient, mock_credits, fake_supabase: InMemorySupabase
+        self, v1_client: TestClient, mock_credits, fake_db: InMemoryDB
     ):
         # Seed some usage log rows
-        fake_supabase.store.setdefault("api_usage_log", []).extend([
-            {
-                "id": "usage-1",
-                "api_key_id": "ak-integ-1",
-                "user_id": TEST_USER_ID,
-                "endpoint": "/v1/detect",
-                "model": "yolov8",
-                "credits_used": 1,
-                "inference_ms": 12.0,
-                "status_code": 200,
-                "created_at": "2026-03-22T10:00:00Z",
-            },
-            {
-                "id": "usage-2",
-                "api_key_id": "ak-integ-1",
-                "user_id": TEST_USER_ID,
-                "endpoint": "/v1/depth",
-                "model": "depth-anything-v2",
-                "credits_used": 2,
-                "inference_ms": 25.0,
-                "status_code": 200,
-                "created_at": "2026-03-22T11:00:00Z",
-            },
-        ])
+        fake_db.store.setdefault("api_usage_log", []).extend(
+            [
+                {
+                    "id": "usage-1",
+                    "api_key_id": "ak-integ-1",
+                    "user_id": TEST_USER_ID,
+                    "endpoint": "/v1/detect",
+                    "model": "yolov8",
+                    "credits_used": 1,
+                    "inference_ms": 12.0,
+                    "status_code": 200,
+                    "created_at": _hours_ago(2),
+                },
+                {
+                    "id": "usage-2",
+                    "api_key_id": "ak-integ-1",
+                    "user_id": TEST_USER_ID,
+                    "endpoint": "/v1/depth",
+                    "model": "depth-anything-v2",
+                    "credits_used": 2,
+                    "inference_ms": 25.0,
+                    "status_code": 200,
+                    "created_at": _hours_ago(1),
+                },
+            ]
+        )
 
         resp = v1_client.get("/v1/usage?days=30")
         assert resp.status_code == 200
@@ -318,7 +333,7 @@ class TestUsageEndpoint:
         assert "/v1/detect" in body["by_endpoint"]
 
     def test_usage_with_custom_days(
-        self, v1_client: TestClient, mock_credits, fake_supabase: InMemorySupabase
+        self, v1_client: TestClient, mock_credits, fake_db: InMemoryDB
     ):
         mock_credits.get_balance = AsyncMock(return_value=200)
         resp = v1_client.get("/v1/usage?days=7")
@@ -344,8 +359,7 @@ class TestImageValidation:
 
 class TestDetectThenUsage:
     def test_detect_then_usage_reflects_call(
-        self, v1_client: TestClient, mock_credits, mock_inference,
-        fake_supabase: InMemorySupabase
+        self, v1_client: TestClient, mock_credits, mock_inference, fake_db: InMemoryDB
     ):
         """Run detection, then verify /v1/usage reflects the API call."""
         # Make a detection call
@@ -356,8 +370,8 @@ class TestDetectThenUsage:
         assert resp.status_code == 200
 
         # The RateLimitService.log_usage inserts into api_usage_log
-        # via the fake supabase, so it should be there now
-        usage_rows = fake_supabase.dump("api_usage_log")
+        # via the fake database, so it should be there now
+        usage_rows = fake_db.dump("api_usage_log")
         detect_rows = [r for r in usage_rows if r.get("endpoint") == "/v1/detect"]
         assert len(detect_rows) >= 1
 

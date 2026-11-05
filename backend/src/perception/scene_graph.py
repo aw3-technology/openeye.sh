@@ -65,12 +65,14 @@ def build_scene_graph(
             for rel in relationships
             if rel.object_id == obj.track_id and rel.relation == RelationType.ON
         ]
-        nodes.append(SceneGraphNode(
-            track_id=obj.track_id,
-            label=obj.label,
-            position_3d=obj.position_3d,
-            children=children,
-        ))
+        nodes.append(
+            SceneGraphNode(
+                track_id=obj.track_id,
+                label=obj.label,
+                position_3d=obj.position_3d,
+                children=children,
+            )
+        )
 
     # Add scene root linking all top-level objects
     root_children = [n.track_id for n in nodes if n.track_id not in child_set]

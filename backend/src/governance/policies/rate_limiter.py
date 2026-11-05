@@ -34,7 +34,9 @@ class RateLimiterPolicy(GovernancePolicy):
         # Prune old entries
         while self._action_times and now - self._action_times[0] > self.window_seconds:
             self._action_times.popleft()
-        while self._error_times and now - self._error_times[0] > self.error_window_seconds:
+        while (
+            self._error_times and now - self._error_times[0] > self.error_window_seconds
+        ):
             self._error_times.popleft()
 
         # Check error cooldown

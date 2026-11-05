@@ -1,9 +1,9 @@
 """Maintenance window management service."""
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from supabase import Client
+from ..db import Database
 
 from ..models import MaintenanceWindowCreateRequest
 
@@ -11,10 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class MaintenanceService:
-    def __init__(self, sb: Client):
-        self.sb = sb
+    def __init__(self, db: Database):
+        self.db = db
 
-    def create(self, user_id: str, req: MaintenanceWindowCreateRequest) -> Dict[str, Any]:
+    def create(
+        self, user_id: str, req: MaintenanceWindowCreateRequest
+    ) -> Dict[str, Any]:
         if req.ends_at <= req.starts_at:
             raise ValueError("ends_at must be after starts_at")
         row = {
@@ -27,13 +29,15 @@ class MaintenanceService:
             "ends_at": req.ends_at.isoformat(),
             "recurrence": req.recurrence,
         }
-        result = self.sb.table("maintenance_windows").insert(row).execute()
+        result = self.db.table("maintenance_windows").insert(row).execute()
         if not result.data:
             raise RuntimeError("Failed to insert maintenance window")
         return result.data[0]
 
-    def list_windows(self, user_id: str, active_only: bool = False) -> List[Dict[str, Any]]:
-        q = self.sb.table("maintenance_windows").select("*").eq("user_id", user_id)
+    def list_windows(
+        self, user_id: str, active_only: bool = False
+    ) -> List[Dict[str, Any]]:
+        q = self.db.table("maintenance_windows").select("*").eq("user_id", user_id)
         if active_only:
             q = q.eq("is_active", True)
         q = q.order("starts_at", desc=True)
@@ -41,7 +45,7 @@ class MaintenanceService:
 
     def get_window(self, user_id: str, window_id: str) -> Dict[str, Any]:
         result = (
-            self.sb.table("maintenance_windows")
+            self.db.table("maintenance_windows")
             .select("*")
             .eq("id", window_id)
             .eq("user_id", user_id)
@@ -52,9 +56,11 @@ class MaintenanceService:
             raise KeyError(f"Maintenance window {window_id} not found")
         return result.data[0]
 
-    def update_window(self, user_id: str, window_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+    def update_window(
+        self, user_id: str, window_id: str, updates: Dict[str, Any]
+    ) -> Dict[str, Any]:
         result = (
-            self.sb.table("maintenance_windows")
+            self.db.table("maintenance_windows")
             .update(updates)
             .eq("id", window_id)
             .eq("user_id", user_id)
@@ -65,4 +71,6 @@ class MaintenanceService:
         return result.data[0]
 
     def delete_window(self, user_id: str, window_id: str) -> None:
-        self.sb.table("maintenance_windows").delete().eq("id", window_id).eq("user_id", user_id).execute()
+        self.db.table("maintenance_windows").delete().eq("id", window_id).eq(
+            "user_id", user_id
+        ).execute()

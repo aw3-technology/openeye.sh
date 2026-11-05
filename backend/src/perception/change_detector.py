@@ -26,38 +26,48 @@ class ChangeDetector:
         appeared = current_ids - prev_ids
         for tid in appeared:
             obj = current_map[tid]
-            alerts.append(ChangeAlert(
-                change_type=ChangeType.OBJECT_APPEARED,
-                description=f"{obj.label} appeared in scene",
-                affected_track_ids=[tid],
-                magnitude=0.6,
-            ))
+            alerts.append(
+                ChangeAlert(
+                    change_type=ChangeType.OBJECT_APPEARED,
+                    description=f"{obj.label} appeared in scene",
+                    affected_track_ids=[tid],
+                    magnitude=0.6,
+                )
+            )
 
         # Disappeared objects
         disappeared = prev_ids - current_ids
         for tid in disappeared:
             obj = self._prev_objects[tid]
-            alerts.append(ChangeAlert(
-                change_type=ChangeType.OBJECT_DISAPPEARED,
-                description=f"{obj.label} disappeared from scene",
-                affected_track_ids=[tid],
-                magnitude=0.6,
-            ))
+            alerts.append(
+                ChangeAlert(
+                    change_type=ChangeType.OBJECT_DISAPPEARED,
+                    description=f"{obj.label} disappeared from scene",
+                    affected_track_ids=[tid],
+                    magnitude=0.6,
+                )
+            )
 
         # Moved objects
         for tid in current_ids & prev_ids:
             cur = current_map[tid]
             prev = self._prev_objects[tid]
-            dx = abs((cur.bbox.x1 + cur.bbox.x2) / 2 - (prev.bbox.x1 + prev.bbox.x2) / 2)
-            dy = abs((cur.bbox.y1 + cur.bbox.y2) / 2 - (prev.bbox.y1 + prev.bbox.y2) / 2)
+            dx = abs(
+                (cur.bbox.x1 + cur.bbox.x2) / 2 - (prev.bbox.x1 + prev.bbox.x2) / 2
+            )
+            dy = abs(
+                (cur.bbox.y1 + cur.bbox.y2) / 2 - (prev.bbox.y1 + prev.bbox.y2) / 2
+            )
             if dx > self._movement_threshold or dy > self._movement_threshold:
                 mag = min(1.0, (dx + dy) / (self._movement_threshold * 5))
-                alerts.append(ChangeAlert(
-                    change_type=ChangeType.OBJECT_MOVED,
-                    description=f"{cur.label} moved significantly",
-                    affected_track_ids=[tid],
-                    magnitude=round(mag, 2),
-                ))
+                alerts.append(
+                    ChangeAlert(
+                        change_type=ChangeType.OBJECT_MOVED,
+                        description=f"{cur.label} moved significantly",
+                        affected_track_ids=[tid],
+                        magnitude=round(mag, 2),
+                    )
+                )
 
         # Overall scene change
         cur_labels = {o.label for o in objects}
@@ -70,12 +80,14 @@ class ChangeDetector:
                     parts.append(f"added: {', '.join(sorted(added))}")
                 if removed:
                     parts.append(f"removed: {', '.join(sorted(removed))}")
-                alerts.append(ChangeAlert(
-                    change_type=ChangeType.SCENE_CHANGED,
-                    description=f"Scene composition changed ({'; '.join(parts)})",
-                    affected_track_ids=list(appeared | disappeared),
-                    magnitude=min(1.0, 0.3 + 0.1 * (len(added) + len(removed))),
-                ))
+                alerts.append(
+                    ChangeAlert(
+                        change_type=ChangeType.SCENE_CHANGED,
+                        description=f"Scene composition changed ({'; '.join(parts)})",
+                        affected_track_ids=list(appeared | disappeared),
+                        magnitude=min(1.0, 0.3 + 0.1 * (len(added) + len(removed))),
+                    )
+                )
 
         self._prev_objects = current_map
         self._prev_labels = cur_labels

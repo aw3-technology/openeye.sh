@@ -1,7 +1,6 @@
 """Tests for individual governance policies."""
 
-import pytest
-from governance.context import GovernanceContext, RoboticsContext, DesktopContext, UIElement, ScreenRegion
+from governance.context import GovernanceContext, RoboticsContext, DesktopContext
 from governance.models import PolicyConfig, PolicyDecision, Severity
 from governance.policies.zone_policy import ZonePolicy
 from governance.policies.object_restriction import ObjectRestrictionPolicy
@@ -29,23 +28,38 @@ def _obj(label: str, x=0.0, y=0.0, z=0.0, track_id="t1") -> DetectedObject3D:
 
 def _robotics_ctx(**kwargs) -> GovernanceContext:
     return GovernanceContext(
-        frame_id=1, timestamp=1000.0,
+        frame_id=1,
+        timestamp=1000.0,
         robotics=RoboticsContext(**kwargs),
     )
 
 
 def _desktop_ctx(**kwargs) -> GovernanceContext:
     return GovernanceContext(
-        frame_id=1, timestamp=1000.0,
+        frame_id=1,
+        timestamp=1000.0,
         desktop=DesktopContext(**kwargs),
     )
 
 
 class TestZonePolicy:
     def test_circle_zone_detection(self):
-        pc = PolicyConfig(name="zone", type="zone_policy", config={
-            "zones": [{"name": "danger", "level": "danger", "shape": "circle", "center": [0, 0, 0], "radius_m": 1.0, "on_violation": "halt"}],
-        })
+        pc = PolicyConfig(
+            name="zone",
+            type="zone_policy",
+            config={
+                "zones": [
+                    {
+                        "name": "danger",
+                        "level": "danger",
+                        "shape": "circle",
+                        "center": [0, 0, 0],
+                        "radius_m": 1.0,
+                        "on_violation": "halt",
+                    }
+                ],
+            },
+        )
         policy = ZonePolicy(pc)
         ctx = _robotics_ctx(objects=[_obj("person", x=0.3)])
         results = policy.evaluate(ctx)
@@ -53,18 +67,44 @@ class TestZonePolicy:
         assert results[0].decision == PolicyDecision.DENY
 
     def test_box_zone_detection(self):
-        pc = PolicyConfig(name="zone", type="zone_policy", config={
-            "zones": [{"name": "restricted", "level": "danger", "shape": "box", "min": [-1, -1, -1], "max": [1, 1, 1], "on_violation": "halt"}],
-        })
+        pc = PolicyConfig(
+            name="zone",
+            type="zone_policy",
+            config={
+                "zones": [
+                    {
+                        "name": "restricted",
+                        "level": "danger",
+                        "shape": "box",
+                        "min": [-1, -1, -1],
+                        "max": [1, 1, 1],
+                        "on_violation": "halt",
+                    }
+                ],
+            },
+        )
         policy = ZonePolicy(pc)
         ctx = _robotics_ctx(objects=[_obj("box", x=0.5, y=0.5, z=0.5)])
         results = policy.evaluate(ctx)
         assert len(results) == 1
 
     def test_no_violation_outside_zone(self):
-        pc = PolicyConfig(name="zone", type="zone_policy", config={
-            "zones": [{"name": "danger", "level": "danger", "shape": "circle", "center": [0, 0, 0], "radius_m": 0.5, "on_violation": "halt"}],
-        })
+        pc = PolicyConfig(
+            name="zone",
+            type="zone_policy",
+            config={
+                "zones": [
+                    {
+                        "name": "danger",
+                        "level": "danger",
+                        "shape": "circle",
+                        "center": [0, 0, 0],
+                        "radius_m": 0.5,
+                        "on_violation": "halt",
+                    }
+                ],
+            },
+        )
         policy = ZonePolicy(pc)
         ctx = _robotics_ctx(objects=[_obj("cup", x=5.0, z=5.0)])
         results = policy.evaluate(ctx)
@@ -73,9 +113,14 @@ class TestZonePolicy:
 
 class TestObjectRestriction:
     def test_deny_label(self):
-        pc = PolicyConfig(name="obj", type="object_restriction", config={
-            "deny_labels": ["knife"], "on_violation": "deny",
-        })
+        pc = PolicyConfig(
+            name="obj",
+            type="object_restriction",
+            config={
+                "deny_labels": ["knife"],
+                "on_violation": "deny",
+            },
+        )
         policy = ObjectRestrictionPolicy(pc)
         ctx = _robotics_ctx(objects=[_obj("knife")])
         results = policy.evaluate(ctx)
@@ -83,9 +128,14 @@ class TestObjectRestriction:
         assert results[0].decision == PolicyDecision.DENY
 
     def test_deny_pattern(self):
-        pc = PolicyConfig(name="obj", type="object_restriction", config={
-            "deny_patterns": ["sharp"], "on_violation": "deny",
-        })
+        pc = PolicyConfig(
+            name="obj",
+            type="object_restriction",
+            config={
+                "deny_patterns": ["sharp"],
+                "on_violation": "deny",
+            },
+        )
         policy = ObjectRestrictionPolicy(pc)
         ctx = _robotics_ctx(objects=[_obj("sharp_tool")])
         results = policy.evaluate(ctx)
@@ -94,9 +144,13 @@ class TestObjectRestriction:
 
 class TestActionFilter:
     def test_deny_action_pattern(self):
-        pc = PolicyConfig(name="af", type="action_filter", config={
-            "deny_patterns": ["throw"],
-        })
+        pc = PolicyConfig(
+            name="af",
+            type="action_filter",
+            config={
+                "deny_patterns": ["throw"],
+            },
+        )
         policy = ActionFilterPolicy(pc)
         actions = [ActionSuggestion(action="throw_ball", reason="test", priority=0.5)]
         ctx = _robotics_ctx(action_suggestions=actions)
@@ -115,9 +169,14 @@ class TestActionFilter:
 
 class TestPIIFilter:
     def test_detect_email(self):
-        pc = PolicyConfig(name="pii", type="pii_filter", domain="desktop_agent", config={
-            "redact_patterns": [{"type": "email", "action": "redact"}],
-        })
+        pc = PolicyConfig(
+            name="pii",
+            type="pii_filter",
+            domain="desktop_agent",
+            config={
+                "redact_patterns": [{"type": "email", "action": "redact"}],
+            },
+        )
         policy = PIIFilterPolicy(pc)
         ctx = _desktop_ctx(screen_text="Email me at test@example.com")
         results = policy.evaluate(ctx)
@@ -125,9 +184,14 @@ class TestPIIFilter:
         assert results[0].decision == PolicyDecision.MODIFY
 
     def test_detect_ssn_blocks(self):
-        pc = PolicyConfig(name="pii", type="pii_filter", domain="desktop_agent", config={
-            "redact_patterns": [{"type": "ssn", "action": "block_and_alert"}],
-        })
+        pc = PolicyConfig(
+            name="pii",
+            type="pii_filter",
+            domain="desktop_agent",
+            config={
+                "redact_patterns": [{"type": "ssn", "action": "block_and_alert"}],
+            },
+        )
         policy = PIIFilterPolicy(pc)
         ctx = _desktop_ctx(screen_text="SSN: 123-45-6789")
         results = policy.evaluate(ctx)
@@ -135,9 +199,14 @@ class TestPIIFilter:
         assert results[0].decision == PolicyDecision.DENY
 
     def test_no_pii(self):
-        pc = PolicyConfig(name="pii", type="pii_filter", domain="desktop_agent", config={
-            "redact_patterns": [{"type": "email", "action": "redact"}],
-        })
+        pc = PolicyConfig(
+            name="pii",
+            type="pii_filter",
+            domain="desktop_agent",
+            config={
+                "redact_patterns": [{"type": "email", "action": "redact"}],
+            },
+        )
         policy = PIIFilterPolicy(pc)
         ctx = _desktop_ctx(screen_text="Hello world, no PII here")
         results = policy.evaluate(ctx)
@@ -146,9 +215,14 @@ class TestPIIFilter:
 
 class TestInteractionBoundary:
     def test_denied_app(self):
-        pc = PolicyConfig(name="ib", type="interaction_boundary", domain="desktop_agent", config={
-            "denied_apps": ["terminal"],
-        })
+        pc = PolicyConfig(
+            name="ib",
+            type="interaction_boundary",
+            domain="desktop_agent",
+            config={
+                "denied_apps": ["terminal"],
+            },
+        )
         policy = InteractionBoundaryPolicy(pc)
         ctx = _desktop_ctx(active_app="Terminal")
         results = policy.evaluate(ctx)
@@ -156,18 +230,28 @@ class TestInteractionBoundary:
         assert results[0].decision == PolicyDecision.DENY
 
     def test_denied_url(self):
-        pc = PolicyConfig(name="ib", type="interaction_boundary", domain="desktop_agent", config={
-            "denied_urls": ["admin\\."],
-        })
+        pc = PolicyConfig(
+            name="ib",
+            type="interaction_boundary",
+            domain="desktop_agent",
+            config={
+                "denied_urls": ["admin\\."],
+            },
+        )
         policy = InteractionBoundaryPolicy(pc)
         ctx = _desktop_ctx(active_url="https://admin.example.com")
         results = policy.evaluate(ctx)
         assert len(results) == 1
 
     def test_read_only_app(self):
-        pc = PolicyConfig(name="ib", type="interaction_boundary", domain="desktop_agent", config={
-            "read_only_apps": ["banking"],
-        })
+        pc = PolicyConfig(
+            name="ib",
+            type="interaction_boundary",
+            domain="desktop_agent",
+            config={
+                "read_only_apps": ["banking"],
+            },
+        )
         policy = InteractionBoundaryPolicy(pc)
         ctx = _desktop_ctx(active_app="Banking App", pending_action="click")
         results = policy.evaluate(ctx)
@@ -176,18 +260,28 @@ class TestInteractionBoundary:
 
 class TestRateLimiter:
     def test_under_limit(self):
-        pc = PolicyConfig(name="rl", type="rate_limiter", config={
-            "max_actions": 10, "window_seconds": 60,
-        })
+        pc = PolicyConfig(
+            name="rl",
+            type="rate_limiter",
+            config={
+                "max_actions": 10,
+                "window_seconds": 60,
+            },
+        )
         policy = RateLimiterPolicy(pc)
         ctx = _robotics_ctx()
         results = policy.evaluate(ctx)
         assert len(results) == 0
 
     def test_over_limit(self):
-        pc = PolicyConfig(name="rl", type="rate_limiter", config={
-            "max_actions": 3, "window_seconds": 60,
-        })
+        pc = PolicyConfig(
+            name="rl",
+            type="rate_limiter",
+            config={
+                "max_actions": 3,
+                "window_seconds": 60,
+            },
+        )
         policy = RateLimiterPolicy(pc)
         ctx = _robotics_ctx()
         # Burn through the limit
@@ -198,9 +292,14 @@ class TestRateLimiter:
         assert results[0].decision == PolicyDecision.DENY
 
     def test_error_cooldown(self):
-        pc = PolicyConfig(name="rl", type="rate_limiter", config={
-            "max_actions": 100, "error_cooldown_seconds": 10,
-        })
+        pc = PolicyConfig(
+            name="rl",
+            type="rate_limiter",
+            config={
+                "max_actions": 100,
+                "error_cooldown_seconds": 10,
+            },
+        )
         policy = RateLimiterPolicy(pc)
         policy.record_error()
         ctx = _robotics_ctx()

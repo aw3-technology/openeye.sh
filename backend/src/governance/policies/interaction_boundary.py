@@ -13,7 +13,9 @@ class InteractionBoundaryPolicy(GovernancePolicy):
     name = "interaction_boundary"
     version = "1.0"
     domain = PolicyDomain.DESKTOP_AGENT
-    description = "Screen region allow/deny lists, app restrictions, URL pattern blocking."
+    description = (
+        "Screen region allow/deny lists, app restrictions, URL pattern blocking."
+    )
 
     def _setup(self, params: dict) -> None:
         self.allowed_regions: list[dict] = params.get("allowed_regions", [])
@@ -37,7 +39,9 @@ class InteractionBoundaryPolicy(GovernancePolicy):
         if desktop.active_app:
             app_lower = desktop.active_app.lower()
 
-            if self.denied_apps and any(d.lower() in app_lower for d in self.denied_apps):
+            if self.denied_apps and any(
+                d.lower() in app_lower for d in self.denied_apps
+            ):
                 results.append(
                     GovernanceResult(
                         policy_name=self.config.name,
@@ -47,7 +51,9 @@ class InteractionBoundaryPolicy(GovernancePolicy):
                     )
                 )
 
-            if self.allowed_apps and not any(a.lower() in app_lower for a in self.allowed_apps):
+            if self.allowed_apps and not any(
+                a.lower() in app_lower for a in self.allowed_apps
+            ):
                 results.append(
                     GovernanceResult(
                         policy_name=self.config.name,
@@ -59,7 +65,11 @@ class InteractionBoundaryPolicy(GovernancePolicy):
 
             # Read-only mode for certain apps
             if any(ro.lower() in app_lower for ro in self.read_only_apps):
-                if desktop.pending_action and desktop.pending_action not in ("read", "scroll", "navigate"):
+                if desktop.pending_action and desktop.pending_action not in (
+                    "read",
+                    "scroll",
+                    "navigate",
+                ):
                     results.append(
                         GovernanceResult(
                             policy_name=self.config.name,
@@ -98,7 +108,10 @@ class InteractionBoundaryPolicy(GovernancePolicy):
 
         # Action type restrictions
         if desktop.pending_action and self.deny_action_types:
-            if any(re.search(p, desktop.pending_action.lower()) for p in self.deny_action_types):
+            if any(
+                re.search(p, desktop.pending_action.lower())
+                for p in self.deny_action_types
+            ):
                 results.append(
                     GovernanceResult(
                         policy_name=self.config.name,

@@ -1,10 +1,14 @@
 """Tests for YAML config loading and validation."""
 
 import pytest
-import tempfile
-from pathlib import Path
 
-from governance.loader import load_yaml, load_preset, list_presets, validate_yaml, resolve_config
+from governance.loader import (
+    load_yaml,
+    load_preset,
+    list_presets,
+    validate_yaml,
+    resolve_config,
+)
 from governance.models import GovernanceConfig, PolicyConfig
 
 
@@ -91,7 +95,9 @@ class TestResolveConfig:
             name="custom",
             extends=["minimal"],
             policies=[
-                PolicyConfig(name="custom_zone", type="zone_policy", config={"zones": []}),
+                PolicyConfig(
+                    name="custom_zone", type="zone_policy", config={"zones": []}
+                ),
             ],
         )
         resolved = resolve_config(config)
@@ -105,7 +111,11 @@ class TestResolveConfig:
             name="custom",
             extends=["minimal"],
             policies=[
-                PolicyConfig(name="audit_actions", type="action_filter", config={"deny_patterns": ["throw"]}),
+                PolicyConfig(
+                    name="audit_actions",
+                    type="action_filter",
+                    config={"deny_patterns": ["throw"]},
+                ),
             ],
         )
         resolved = resolve_config(config)

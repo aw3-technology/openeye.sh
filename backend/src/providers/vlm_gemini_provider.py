@@ -22,7 +22,9 @@ class VLMGeminiProvider:
         self.model: str = model
         self.api_client: AsyncOpenAI = AsyncOpenAI(api_key=api_key, base_url=base_url)
         self.video_stream: VideoStream = VideoStream(
-            frame_callback=self._process_frame, fps=fps, device_index=camera_index,
+            frame_callback=self._process_frame,
+            fps=fps,
+            device_index=camera_index,
         )
         self.message_callback: Optional[Callable] = None
 
