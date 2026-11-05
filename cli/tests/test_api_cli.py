@@ -252,7 +252,12 @@ def test_api_models_success(monkeypatch):
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = {
         "models": [
-            {"name": "yolov8", "task": "detection", "credits_per_call": 1, "description": "Fast detection"},
+            {
+                "name": "yolov8",
+                "task": "detection",
+                "credits_per_call": 1,
+                "description": "Fast detection",
+            },
         ]
     }
 

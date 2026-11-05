@@ -42,7 +42,9 @@ async def health(request: Request):
         "model": state.model_name,
         "model_display_name": state.model_info.get("name", state.model_name),
         "task": state.model_info.get("task", "unknown"),
-        "model_loaded": state.adapter._loaded if hasattr(state.adapter, "_loaded") else True,
+        "model_loaded": state.adapter._loaded
+        if hasattr(state.adapter, "_loaded")
+        else True,
         "uptime_seconds": round(time.time() - state.start_time, 1),
         "queue": {
             "active": state.inference_queue.active_count,
@@ -62,7 +64,9 @@ async def predict(
     contents = await file.read()
     if len(contents) > _MAX_UPLOAD_BYTES:
         return JSONResponse(
-            {"error": f"File too large ({len(contents)} bytes). Max: {_MAX_UPLOAD_BYTES}."},
+            {
+                "error": f"File too large ({len(contents)} bytes). Max: {_MAX_UPLOAD_BYTES}."
+            },
             status_code=413,
         )
 
@@ -92,7 +96,9 @@ async def predict(
         )
     except Exception as e:
         logger.error("Inference failed: %s", e)
-        return JSONResponse({"error": "Inference failed. Please try again."}, status_code=500)
+        return JSONResponse(
+            {"error": "Inference failed. Please try again."}, status_code=500
+        )
 
     result = PredictionResult(
         model=state.model_name,
@@ -238,7 +244,9 @@ async def vlm_analyze(
                         "content": [
                             {
                                 "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"},
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{img_b64}"
+                                },
                             },
                             {"type": "text", "text": prompt or default_prompt},
                         ],
@@ -254,7 +262,9 @@ async def vlm_analyze(
         # Track stats
         nebius_stats["total_calls"] += 1
         nebius_stats["total_latency_ms"] += latency_ms
-        nebius_stats["avg_latency_ms"] = nebius_stats["total_latency_ms"] / nebius_stats["total_calls"]
+        nebius_stats["avg_latency_ms"] = (
+            nebius_stats["total_latency_ms"] / nebius_stats["total_calls"]
+        )
         nebius_stats["last_call_at"] = time.time()
 
         # Try to extract JSON from the response
@@ -361,7 +371,9 @@ async def perception_rest(
         result = PredictionResult(
             model=state.model_name,
             task=state.model_info["task"],
-            image=ImageInfo(width=img_w, height=img_h, source=file.filename or "upload"),
+            image=ImageInfo(
+                width=img_w, height=img_h, source=file.filename or "upload"
+            ),
             **result_data,
         )
         return JSONResponse(result.model_dump())

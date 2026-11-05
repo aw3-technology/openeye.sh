@@ -13,8 +13,10 @@ class TestFeedback:
         from openeye_ai.mlops.schemas import AnnotationLabel
 
         ann = annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/img.jpg", correct_label="forklift",
+            model_key="m",
+            model_version="1.0",
+            image_source="/img.jpg",
+            correct_label="forklift",
             annotation_label=AnnotationLabel.MISCLASSIFICATION,
             predicted_label="person",
         )
@@ -30,8 +32,10 @@ class TestFeedback:
         from openeye_ai.mlops.schemas import AnnotationLabel
 
         annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/img.jpg", correct_label="x",
+            model_key="m",
+            model_version="1.0",
+            image_source="/img.jpg",
+            correct_label="x",
             annotation_label=AnnotationLabel.FALSE_POSITIVE,
         )
         assert len(list_annotations(unfed_only=True)) == 1
@@ -53,8 +57,10 @@ class TestFeedback:
         from openeye_ai.mlops.schemas import AnnotationLabel, PipelineStatus
 
         ann = annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/img.jpg", correct_label="truck",
+            model_key="m",
+            model_version="1.0",
+            image_source="/img.jpg",
+            correct_label="truck",
             annotation_label=AnnotationLabel.MISCLASSIFICATION,
             notes="Was labelled as car",
         )
@@ -91,8 +97,10 @@ class TestFeedback:
         from openeye_ai.mlops.schemas import AnnotationLabel
 
         ann = annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/img.jpg", correct_label="truck",
+            model_key="m",
+            model_version="1.0",
+            image_source="/img.jpg",
+            correct_label="truck",
             annotation_label=AnnotationLabel.MISCLASSIFICATION,
         )
         fetched = get_annotation(ann.id)
@@ -104,17 +112,26 @@ class TestFeedback:
         from openeye_ai.mlops.schemas import AnnotationLabel
 
         annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/a.jpg", correct_label="x",
+            model_key="m",
+            model_version="1.0",
+            image_source="/a.jpg",
+            correct_label="x",
             annotation_label=AnnotationLabel.FALSE_POSITIVE,
         )
         annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/b.jpg", correct_label="y",
+            model_key="m",
+            model_version="1.0",
+            image_source="/b.jpg",
+            correct_label="y",
             annotation_label=AnnotationLabel.MISCLASSIFICATION,
         )
-        assert len(list_annotations(annotation_label=AnnotationLabel.FALSE_POSITIVE)) == 1
-        assert len(list_annotations(annotation_label=AnnotationLabel.MISCLASSIFICATION)) == 1
+        assert (
+            len(list_annotations(annotation_label=AnnotationLabel.FALSE_POSITIVE)) == 1
+        )
+        assert (
+            len(list_annotations(annotation_label=AnnotationLabel.MISCLASSIFICATION))
+            == 1
+        )
 
     def test_list_feedback_batches(self, tmp_path):
         from openeye_ai.mlops.feedback import (
@@ -125,8 +142,10 @@ class TestFeedback:
         from openeye_ai.mlops.schemas import AnnotationLabel
 
         ann = annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/img.jpg", correct_label="x",
+            model_key="m",
+            model_version="1.0",
+            image_source="/img.jpg",
+            correct_label="x",
             annotation_label=AnnotationLabel.FALSE_POSITIVE,
         )
         create_feedback_batch("m", str(tmp_path / "out.jsonl"), annotation_ids=[ann.id])
@@ -145,13 +164,16 @@ class TestFeedback:
         from openeye_ai.mlops.schemas import AnnotationLabel, PipelineStatus
 
         ann = annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/img.jpg", correct_label="truck",
+            model_key="m",
+            model_version="1.0",
+            image_source="/img.jpg",
+            correct_label="truck",
             annotation_label=AnnotationLabel.MISCLASSIFICATION,
         )
         output = tmp_path / "corrections.jsonl"
         batch = create_feedback_batch(
-            "m", str(output),
+            "m",
+            str(output),
             annotation_ids=[ann.id, "ann-does-not-exist"],
         )
         result = execute_feedback_batch(batch.id)
@@ -166,13 +188,17 @@ class TestFeedback:
         from openeye_ai.mlops.schemas import AnnotationLabel
 
         annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/a.jpg", correct_label="x",
+            model_key="m",
+            model_version="1.0",
+            image_source="/a.jpg",
+            correct_label="x",
             annotation_label=AnnotationLabel.FALSE_POSITIVE,
         )
         annotate_failure(
-            model_key="m", model_version="1.0",
-            image_source="/b.jpg", correct_label="y",
+            model_key="m",
+            model_version="1.0",
+            image_source="/b.jpg",
+            correct_label="y",
             annotation_label=AnnotationLabel.MISCLASSIFICATION,
         )
         batch = create_feedback_batch("m", "/tmp/out.jsonl")

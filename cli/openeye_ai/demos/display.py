@@ -32,12 +32,16 @@ def build_display(
     stats.add_column("key", style="dim", ratio=1)
     stats.add_column("val", ratio=2)
     stats.add_row("Frame", f"[bold]{frame_count}[/bold]")
-    fps_style = "bold green" if fps >= 10 else ("bold yellow" if fps >= 5 else "bold red")
+    fps_style = (
+        "bold green" if fps >= 10 else ("bold yellow" if fps >= 5 else "bold red")
+    )
     stats.add_row("FPS", Text(f"{fps:.1f}", style=fps_style))
     stats.add_row("Objects", f"[bold]{n_objects}[/bold]")
     stats.add_row("Humans", f"[bold cyan]{n_humans}[/bold cyan]")
     stats.add_row("Source", f"[dim]{source_label}[/dim]")
-    stats_panel = Panel(stats, title="[bold]Stats[/bold]", border_style="cyan", width=28)
+    stats_panel = Panel(
+        stats, title="[bold]Stats[/bold]", border_style="cyan", width=28
+    )
 
     # Latency panel
     latency_content = Group(
@@ -47,7 +51,9 @@ def build_display(
         Text(),
         Text("  Target: < 30ms", style="dim"),
     )
-    latency_panel = Panel(latency_content, title="[bold]Latency[/bold]", border_style="cyan", width=38)
+    latency_panel = Panel(
+        latency_content, title="[bold]Latency[/bold]", border_style="cyan", width=38
+    )
 
     # Safety Shield
     shield_panel = safety_shield(danger_m, caution_m, zones, status["state"])
@@ -68,10 +74,20 @@ def build_display(
 
     if zones:
         for z in zones:
-            zone_val = z.zone.value if hasattr(z, "zone") else str(z.get("zone", "safe"))
-            track_id = z.human_track_id if hasattr(z, "human_track_id") else z.get("human_track_id", "?")
-            distance = z.distance_m if hasattr(z, "distance_m") else z.get("distance_m", 0)
-            bearing = z.bearing_deg if hasattr(z, "bearing_deg") else z.get("bearing_deg", 0)
+            zone_val = (
+                z.zone.value if hasattr(z, "zone") else str(z.get("zone", "safe"))
+            )
+            track_id = (
+                z.human_track_id
+                if hasattr(z, "human_track_id")
+                else z.get("human_track_id", "?")
+            )
+            distance = (
+                z.distance_m if hasattr(z, "distance_m") else z.get("distance_m", 0)
+            )
+            bearing = (
+                z.bearing_deg if hasattr(z, "bearing_deg") else z.get("bearing_deg", 0)
+            )
             zone_table.add_row(
                 zone_badge(zone_val),
                 str(track_id),
@@ -90,7 +106,11 @@ def build_display(
     alert_lines: list[Text] = []
     if alerts:
         for a in alerts:
-            halt = a.halt_recommended if hasattr(a, "halt_recommended") else a.get("halt_recommended", False)
+            halt = (
+                a.halt_recommended
+                if hasattr(a, "halt_recommended")
+                else a.get("halt_recommended", False)
+            )
             msg = a.message if hasattr(a, "message") else a.get("message", "")
             style = "bold red" if halt else "yellow"
             alert_lines.append(Text(f"  {msg}", style=style))
@@ -169,12 +189,14 @@ def print_startup_banner(
         f"[bold green]*[/bold green] Caution:     [bold yellow]< {caution_m}m[/bold yellow]",
         f"[bold green]*[/bold green] Clear time:  [bold]{clear_duration}s[/bold] before resume",
     ]
-    console.print(Panel(
-        "\n".join(banner_lines),
-        title="[bold cyan]OpenEye Safety Guardian[/bold cyan]",
-        subtitle="[dim]Unitree G1 Demo[/dim]",
-        border_style="cyan",
-    ))
+    console.print(
+        Panel(
+            "\n".join(banner_lines),
+            title="[bold cyan]OpenEye Safety Guardian[/bold cyan]",
+            subtitle="[dim]Unitree G1 Demo[/dim]",
+            border_style="cyan",
+        )
+    )
 
 
 def print_summary(frame_count: int, halt_count: int, resume_count: int) -> None:
@@ -187,8 +209,10 @@ def print_summary(frame_count: int, halt_count: int, resume_count: int) -> None:
     summary_table.add_row("Resumes issued", str(resume_count))
 
     console.print()
-    console.print(Panel(
-        summary_table,
-        title="[bold]Demo Complete[/bold]",
-        border_style="cyan",
-    ))
+    console.print(
+        Panel(
+            summary_table,
+            title="[bold]Demo Complete[/bold]",
+            border_style="cyan",
+        )
+    )

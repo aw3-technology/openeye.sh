@@ -28,8 +28,12 @@ class ModelUploadRequest(BaseModel):
     description: str = ""
     author: str = ""
     tags: list[str] = Field(default_factory=list)
-    file_path: str = Field(description="Path to model file (ONNX, TorchScript, SafeTensors)")
-    adapter: str = Field(default="onnx_generic", description="Adapter key or custom path")
+    file_path: str = Field(
+        description="Path to model file (ONNX, TorchScript, SafeTensors)"
+    )
+    adapter: str = Field(
+        default="onnx_generic", description="Adapter key or custom path"
+    )
 
 
 # ── Story 182: Version metadata tracking ─────────────────────────────
@@ -38,7 +42,9 @@ class ModelUploadRequest(BaseModel):
 class ModelVersion(BaseModel):
     """A single version of a model in the registry."""
 
-    version: str = Field(description="Semantic version, e.g. 1.0.0", pattern=_SAFE_KEY_RE)
+    version: str = Field(
+        description="Semantic version, e.g. 1.0.0", pattern=_SAFE_KEY_RE
+    )
     model_key: str = Field(pattern=_SAFE_KEY_RE)
     format: ModelFormat
     file_path: str
@@ -47,11 +53,17 @@ class ModelVersion(BaseModel):
     stage: ModelStage = ModelStage.DEV
     author: str = ""
     changelog: str = ""
-    training_dataset: str = Field(default="", description="Dataset name or path used for training")
+    training_dataset: str = Field(
+        default="", description="Dataset name or path used for training"
+    )
     training_metrics: TrainingMetrics = Field(default_factory=TrainingMetrics)
     hyperparameters: dict[str, Any] = Field(default_factory=dict)
-    code_commit: str = Field(default="", description="Git commit SHA that produced this version")
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    code_commit: str = Field(
+        default="", description="Git commit SHA that produced this version"
+    )
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -65,8 +77,12 @@ class ModelRegistryEntry(BaseModel):
     adapter: str
     tags: list[str] = Field(default_factory=list)
     versions: list[ModelVersion] = Field(default_factory=list)
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
+    updated_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
 
     @property
     def latest_version(self) -> Optional[ModelVersion]:
@@ -103,7 +119,9 @@ class ModelLineage(BaseModel):
     environment: dict[str, str] = Field(
         default_factory=dict, description="CUDA version, Python version, etc."
     )
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
 
 
 # ── Story 190: Model export ──────────────────────────────────────────
@@ -115,7 +133,9 @@ class ExportRequest(BaseModel):
     model_key: str
     model_version: str
     target_format: ExportFormat
-    output_path: Optional[str] = Field(default=None, description="Override output location")
+    output_path: Optional[str] = Field(
+        default=None, description="Override output location"
+    )
     opset_version: Optional[int] = Field(default=None, description="ONNX opset version")
     quantize: bool = Field(default=False, description="Apply INT8 quantization")
     input_shape: Optional[list[int]] = Field(
@@ -134,4 +154,6 @@ class ExportResult(BaseModel):
     output_size_mb: float
     quantized: bool = False
     export_duration_seconds: float = 0.0
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )

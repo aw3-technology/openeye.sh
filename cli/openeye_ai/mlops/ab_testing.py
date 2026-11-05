@@ -68,7 +68,9 @@ def route_request(test_id: str) -> str:
     """
     test = get_ab_test(test_id)
     if test.status != ABTestStatus.RUNNING:
-        raise RuntimeError(f"A/B test '{test_id}' is not running (status: {test.status.value})")
+        raise RuntimeError(
+            f"A/B test '{test_id}' is not running (status: {test.status.value})"
+        )
 
     if random.random() < test.config.traffic_split:
         return test.config.version_b

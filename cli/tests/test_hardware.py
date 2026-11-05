@@ -18,7 +18,9 @@ def test_always_has_cpu():
 def test_without_torch(monkeypatch):
     """When torch is not installed, only CPU should be detected."""
 
-    original_import = __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
+    original_import = (
+        __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
+    )
 
     def _fake_import(name, *args, **kwargs):
         if name == "torch":

@@ -82,8 +82,11 @@ class TestBatchInference:
         from openeye_ai.mlops.schemas import BatchInferenceConfig
 
         config = BatchInferenceConfig(
-            name="job1", model_key="m", model_version="1.0",
-            input_path="/data/images", output_path="/data/results",
+            name="job1",
+            model_key="m",
+            model_version="1.0",
+            input_path="/data/images",
+            output_path="/data/results",
         )
         job = create_batch_job(config)
         assert job.id.startswith("batch-")
@@ -101,14 +104,24 @@ class TestBatchInference:
         from openeye_ai.mlops.batch_inference import create_batch_job, list_batch_jobs
         from openeye_ai.mlops.schemas import BatchInferenceConfig
 
-        create_batch_job(BatchInferenceConfig(
-            name="j1", model_key="m1", model_version="1.0",
-            input_path="/data1", output_path="/out1",
-        ))
-        create_batch_job(BatchInferenceConfig(
-            name="j2", model_key="m2", model_version="1.0",
-            input_path="/data2", output_path="/out2",
-        ))
+        create_batch_job(
+            BatchInferenceConfig(
+                name="j1",
+                model_key="m1",
+                model_version="1.0",
+                input_path="/data1",
+                output_path="/out1",
+            )
+        )
+        create_batch_job(
+            BatchInferenceConfig(
+                name="j2",
+                model_key="m2",
+                model_version="1.0",
+                input_path="/data2",
+                output_path="/out2",
+            )
+        )
         assert len(list_batch_jobs()) == 2
         assert len(list_batch_jobs(model_key="m1")) == 1
         assert len(list_batch_jobs(model_key="nonexistent")) == 0

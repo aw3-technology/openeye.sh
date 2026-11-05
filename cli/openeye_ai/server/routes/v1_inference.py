@@ -22,7 +22,9 @@ _MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 MB
 async def _read_image(file: UploadFile) -> Image.Image:
     contents = await file.read()
     if len(contents) > _MAX_UPLOAD_BYTES:
-        raise _upload_error(f"File too large ({len(contents)} bytes). Max: {_MAX_UPLOAD_BYTES}.")
+        raise _upload_error(
+            f"File too large ({len(contents)} bytes). Max: {_MAX_UPLOAD_BYTES}."
+        )
     if not contents:
         raise _upload_error("Empty file.")
     try:
@@ -33,6 +35,7 @@ async def _read_image(file: UploadFile) -> Image.Image:
 
 def _upload_error(detail: str):
     from fastapi import HTTPException
+
     return HTTPException(status_code=400, detail=detail)
 
 
@@ -60,7 +63,8 @@ async def detect(
 
     # Filter by confidence
     objects = [
-        obj for obj in result_data.get("objects", [])
+        obj
+        for obj in result_data.get("objects", [])
         if obj.get("confidence", 0) >= confidence
     ]
     result_data["objects"] = objects
@@ -105,13 +109,15 @@ async def depth(
     ledger = _get_ledger(request)
     ledger.record(api_key, state.model_name, "depth", credits_used)
 
-    return JSONResponse({
-        "width": w,
-        "height": h,
-        "credits_used": credits_used,
-        "depth_map": result_data.get("depth_map"),
-        "inference_ms": result_data.get("inference_ms", 0),
-    })
+    return JSONResponse(
+        {
+            "width": w,
+            "height": h,
+            "credits_used": credits_used,
+            "depth_map": result_data.get("depth_map"),
+            "inference_ms": result_data.get("inference_ms", 0),
+        }
+    )
 
 
 async def describe(
@@ -142,8 +148,10 @@ async def describe(
     ledger.record(api_key, state.model_name, "describe", credits_used)
 
     description = result_data.get("description", result_data.get("text", ""))
-    return JSONResponse({
-        "description": description,
-        "credits_used": credits_used,
-        "inference_ms": result_data.get("inference_ms", 0),
-    })
+    return JSONResponse(
+        {
+            "description": description,
+            "credits_used": credits_used,
+            "inference_ms": result_data.get("inference_ms", 0),
+        }
+    )

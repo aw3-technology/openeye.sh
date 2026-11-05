@@ -12,17 +12,22 @@ router = APIRouter()
 @router.get("/lineage/{model_key}/{version}")
 async def get_lineage_endpoint(model_key: str, version: str):
     from ..lineage import get_lineage
+
     try:
         return get_lineage(model_key, version).model_dump()
     except KeyError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+
 @router.get("/lineage/{model_key}/{version}/chain")
 async def get_lineage_chain_endpoint(model_key: str, version: str):
     from ..lineage import get_lineage_chain
+
     return [entry.model_dump() for entry in get_lineage_chain(model_key, version)]
+
 
 @router.get("/lineage")
 async def list_lineage_endpoint(model_key: Optional[str] = None):
     from ..lineage import list_lineage
+
     return [entry.model_dump() for entry in list_lineage(model_key)]

@@ -8,12 +8,20 @@ from rich import print as rprint
 
 def mlops_batch_create(
     model: str = typer.Option(..., "--model", "-m", help="Model key"),
-    input_path: str = typer.Option(..., "--input", "-i", help="Input dataset path (local dir, s3://, gs://)"),
-    output_path: str = typer.Option("", "--output", "-o", help="Output path for results (default: auto)"),
-    version: str = typer.Option("latest", "--version", "-v", help="Model version (default: latest)"),
+    input_path: str = typer.Option(
+        ..., "--input", "-i", help="Input dataset path (local dir, s3://, gs://)"
+    ),
+    output_path: str = typer.Option(
+        "", "--output", "-o", help="Output path for results (default: auto)"
+    ),
+    version: str = typer.Option(
+        "latest", "--version", "-v", help="Model version (default: latest)"
+    ),
     batch_size: int = typer.Option(32, "--batch-size", help="Batch size"),
     workers: int = typer.Option(4, "--workers", help="Number of workers"),
-    output_format: str = typer.Option("jsonl", "--format", help="Output format: jsonl, csv"),
+    output_format: str = typer.Option(
+        "jsonl", "--format", help="Output format: jsonl, csv"
+    ),
 ) -> None:
     """Create a batch inference job on a dataset."""
     from openeye_ai.mlops.batch_inference import create_batch_job

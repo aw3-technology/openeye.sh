@@ -93,11 +93,15 @@ def list_validation_tests(model_key: Optional[str] = None) -> list[ValidationTes
     return result
 
 
-def _evaluate_condition(condition: str, metrics: dict[str, float]) -> ValidationConditionResult:
+def _evaluate_condition(
+    condition: str, metrics: dict[str, float]
+) -> ValidationConditionResult:
     """Evaluate a single condition against computed metrics."""
     match = _CONDITION_PATTERN.match(condition.strip())
     if not match:
-        return ValidationConditionResult(condition=condition, actual_value=0.0, passed=False)
+        return ValidationConditionResult(
+            condition=condition, actual_value=0.0, passed=False
+        )
 
     metric_name = match.group(1)
     operator = match.group(2)
@@ -155,7 +159,9 @@ def run_validation_test(
 
     image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
     images = sorted(
-        p for p in dataset_path.rglob("*") if p.is_file() and p.suffix.lower() in image_extensions
+        p
+        for p in dataset_path.rglob("*")
+        if p.is_file() and p.suffix.lower() in image_extensions
     )
 
     if not images:
@@ -195,9 +201,15 @@ def run_validation_test(
     metrics = {
         "accuracy": correct / total if total > 0 else 0.0,
         "latency_ms": statistics.mean(latencies) if latencies else 0.0,
-        "p95_latency_ms": sorted(latencies)[min(int(len(latencies) * 0.95), len(latencies) - 1)] if latencies else 0.0,
+        "p95_latency_ms": sorted(latencies)[
+            min(int(len(latencies) * 0.95), len(latencies) - 1)
+        ]
+        if latencies
+        else 0.0,
         "total_images": float(total),
-        "detection_rate": sum(1 for p in all_predictions if p.get("objects")) / total if total > 0 else 0.0,
+        "detection_rate": sum(1 for p in all_predictions if p.get("objects")) / total
+        if total > 0
+        else 0.0,
     }
 
     # Compute mAP if ground truth is available

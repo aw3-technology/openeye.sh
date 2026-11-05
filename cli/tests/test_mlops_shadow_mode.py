@@ -14,8 +14,10 @@ class TestShadowMode:
         )
 
         config = ShadowDeploymentConfig(
-            name="s1", model_key="m",
-            production_version="v1", shadow_version="v2",
+            name="s1",
+            model_key="m",
+            production_version="v1",
+            shadow_version="v2",
         )
         dep = create_shadow_deployment(config)
         assert dep.id.startswith("shadow-")
@@ -34,8 +36,10 @@ class TestShadowMode:
         )
 
         config = ShadowDeploymentConfig(
-            name="s2", model_key="m",
-            production_version="v1", shadow_version="v2",
+            name="s2",
+            model_key="m",
+            production_version="v1",
+            shadow_version="v2",
         )
         dep = create_shadow_deployment(config)
         completed = complete_shadow_deployment(dep.id)
@@ -62,8 +66,10 @@ class TestShadowMode:
         )
 
         config = ShadowDeploymentConfig(
-            name="get-test", model_key="m",
-            production_version="v1", shadow_version="v2",
+            name="get-test",
+            model_key="m",
+            production_version="v1",
+            shadow_version="v2",
         )
         dep = create_shadow_deployment(config)
         fetched = get_shadow_deployment(dep.id)

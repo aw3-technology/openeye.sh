@@ -96,9 +96,7 @@ def request_promotion(request: PromotionRequest) -> PromotionRecord:
     return record
 
 
-def approve_promotion(
-    model_key: str, version: str, approver: str
-) -> PromotionRecord:
+def approve_promotion(model_key: str, version: str, approver: str) -> PromotionRecord:
     """Approve a pending promotion request."""
     records = _load_promotions()
 
@@ -161,7 +159,9 @@ def _apply_promotion(record: PromotionRecord) -> None:
     data = _load_enterprise_registry()
     model = data["models"].get(record.model_key)
     if model is None:
-        raise KeyError(f"Model '{record.model_key}' not found in registry during promotion.")
+        raise KeyError(
+            f"Model '{record.model_key}' not found in registry during promotion."
+        )
 
     versions = model.get("versions", [])
     for v in versions:
@@ -170,7 +170,9 @@ def _apply_promotion(record: PromotionRecord) -> None:
             _save_enterprise_registry(data)
             return
 
-    raise KeyError(f"Version '{record.version}' not found for model '{record.model_key}' during promotion.")
+    raise KeyError(
+        f"Version '{record.version}' not found for model '{record.model_key}' during promotion."
+    )
 
 
 def _find_gate(from_stage: ModelStage, to_stage: ModelStage) -> Optional[ApprovalGate]:

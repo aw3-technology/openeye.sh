@@ -14,7 +14,9 @@ class TestExport:
 
         assert _detect_source_format(Path("model.onnx")) == ModelFormat.ONNX
         assert _detect_source_format(Path("model.pt")) == ModelFormat.PYTORCH
-        assert _detect_source_format(Path("model.safetensors")) == ModelFormat.SAFETENSORS
+        assert (
+            _detect_source_format(Path("model.safetensors")) == ModelFormat.SAFETENSORS
+        )
         assert _detect_source_format(Path("model.engine")) == ModelFormat.TENSORRT
         assert _detect_source_format(Path("model.mlmodel")) == ModelFormat.COREML
 

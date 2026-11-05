@@ -75,7 +75,9 @@ class TestDeviceInfo:
 class TestTag:
     def test_tag_key_value_pairs(self, fleet_runner, mock_request):
         mock = mock_request({})
-        fleet_runner.invoke(app, ["fleet", "tag", "dev-1", "location=warehouse-a", "zone=loading"])
+        fleet_runner.invoke(
+            app, ["fleet", "tag", "dev-1", "location=warehouse-a", "zone=loading"]
+        )
         mock.assert_called_once()
         path = mock.call_args[0][1]
         data = mock.call_args[0][2]
@@ -84,7 +86,9 @@ class TestTag:
 
     def test_tag_invalid_format_exits_1(self, fleet_runner, mock_request):
         mock_request({})
-        result = fleet_runner.invoke(app, ["fleet", "tag", "dev-1", "bad-tag-no-equals"])
+        result = fleet_runner.invoke(
+            app, ["fleet", "tag", "dev-1", "bad-tag-no-equals"]
+        )
         assert result.exit_code == 1
         assert "Invalid tag format" in result.output
 

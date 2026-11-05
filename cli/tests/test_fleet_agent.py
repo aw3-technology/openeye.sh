@@ -42,33 +42,53 @@ def _inject_fleet_agent_mocks(monkeypatch) -> tuple[MagicMock, MagicMock]:
 
 
 def test_fleet_agent_missing_api_key():
-    result = runner.invoke(app, [
-        "fleet", "agent",
-        "--device-id", "dev-1",
-        "--api-key", "",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "fleet",
+            "agent",
+            "--device-id",
+            "dev-1",
+            "--api-key",
+            "",
+        ],
+    )
     assert result.exit_code == 1
     assert "API key is required" in result.output
 
 
 def test_fleet_agent_invalid_server_url():
-    result = runner.invoke(app, [
-        "fleet", "agent",
-        "--device-id", "dev-1",
-        "--api-key", "key-123",
-        "--server", "ftp://bad-url",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "fleet",
+            "agent",
+            "--device-id",
+            "dev-1",
+            "--api-key",
+            "key-123",
+            "--server",
+            "ftp://bad-url",
+        ],
+    )
     assert result.exit_code == 1
     assert "must start with http" in result.output
 
 
 def test_fleet_agent_invalid_interval():
-    result = runner.invoke(app, [
-        "fleet", "agent",
-        "--device-id", "dev-1",
-        "--api-key", "key-123",
-        "--interval", "0.5",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "fleet",
+            "agent",
+            "--device-id",
+            "dev-1",
+            "--api-key",
+            "key-123",
+            "--interval",
+            "0.5",
+        ],
+    )
     assert result.exit_code == 1
     assert "at least 1 second" in result.output
 
@@ -77,12 +97,19 @@ def test_fleet_agent_successful_start(monkeypatch):
     mock_config_cls, mock_agent_cls = _inject_fleet_agent_mocks(monkeypatch)
     monkeypatch.setattr("asyncio.run", lambda coro: None)
 
-    result = runner.invoke(app, [
-        "fleet", "agent",
-        "--device-id", "dev-1",
-        "--api-key", "key-123",
-        "--server", "http://localhost:8001",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "fleet",
+            "agent",
+            "--device-id",
+            "dev-1",
+            "--api-key",
+            "key-123",
+            "--server",
+            "http://localhost:8001",
+        ],
+    )
     assert result.exit_code == 0
     assert "Starting device agent" in result.output
     mock_config_cls.assert_called_once()
@@ -97,11 +124,17 @@ def test_fleet_agent_graceful_stop_on_sigint(monkeypatch):
 
     monkeypatch.setattr("asyncio.run", _raise_keyboard_interrupt)
 
-    result = runner.invoke(app, [
-        "fleet", "agent",
-        "--device-id", "dev-1",
-        "--api-key", "key-123",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "fleet",
+            "agent",
+            "--device-id",
+            "dev-1",
+            "--api-key",
+            "key-123",
+        ],
+    )
     assert result.exit_code == 0
     assert "Agent stopped" in result.output
     mock_agent_cls.return_value.stop.assert_called_once()
@@ -112,10 +145,15 @@ def test_fleet_agent_api_key_from_env(monkeypatch):
     monkeypatch.setattr("asyncio.run", lambda coro: None)
     monkeypatch.setenv("OPENEYE_DEVICE_API_KEY", "env-key-456")
 
-    result = runner.invoke(app, [
-        "fleet", "agent",
-        "--device-id", "dev-1",
-    ])
+    result = runner.invoke(
+        app,
+        [
+            "fleet",
+            "agent",
+            "--device-id",
+            "dev-1",
+        ],
+    )
     assert result.exit_code == 0
     assert "Starting device agent" in result.output
 

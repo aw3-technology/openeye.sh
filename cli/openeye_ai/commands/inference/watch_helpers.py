@@ -25,7 +25,9 @@ def load_adapters(model_list: list[str], demo: bool) -> dict:
             raise typer.Exit(code=1)
         model_dir = MODELS_DIR / m
         if not is_downloaded(m):
-            rprint(f"[yellow]Model '{m}' not downloaded. Run: openeye pull {m}[/yellow]")
+            rprint(
+                f"[yellow]Model '{m}' not downloaded. Run: openeye pull {m}[/yellow]"
+            )
             raise typer.Exit(code=1)
         try:
             adapter = get_adapter(m)
@@ -47,7 +49,9 @@ def load_adapters(model_list: list[str], demo: bool) -> dict:
                 with console.status(f"[bold]Warming up {m} (demo mode)...[/bold]"):
                     warmup_adapter(adapter, m)
             except Exception as e:
-                rprint(f"[yellow]Warm-up failed for {m} ({e}), continuing anyway...[/yellow]")
+                rprint(
+                    f"[yellow]Warm-up failed for {m} ({e}), continuing anyway...[/yellow]"
+                )
 
     return adapters
 
@@ -62,12 +66,15 @@ def init_safety_guardian(safety: bool, danger_m: float, caution_m: float):
 
     try:
         from openeye_ai._cli_helpers import ensure_backend_path
+
         ensure_backend_path()
         from perception.models import BBox2D, DetectedObject3D, Position3D
         from perception.safety import SafetyGuardian
 
         guardian = SafetyGuardian(danger_m=danger_m, caution_m=caution_m)
-        rprint(f"[green]Safety Guardian enabled:[/green] danger < {danger_m}m, caution < {caution_m}m")
+        rprint(
+            f"[green]Safety Guardian enabled:[/green] danger < {danger_m}m, caution < {caution_m}m"
+        )
         return guardian, DetectedObject3D, BBox2D, Position3D
     except Exception as e:
         rprint(f"[yellow]Failed to load Safety Guardian: {e}[/yellow]")
@@ -108,10 +115,7 @@ def open_input_source(camera: int, video: str | None):
         except ImportError:
             from openeye_ai._cli_helpers import _install_hint
 
-            rprint(
-                "[red]Missing opencv-python.[/red]\n"
-                + _install_hint("camera")
-            )
+            rprint("[red]Missing opencv-python.[/red]\n" + _install_hint("camera"))
             if not video:
                 raise typer.Exit(code=1)
         except RuntimeError as e:
@@ -130,12 +134,16 @@ def open_input_source(camera: int, video: str | None):
                     try:
                         cam = VideoPlayer(str(demo_path))
                         source_label = f"demo: {demo_path.name}"
-                        rprint(f"[green]Falling back to demo video:[/green] {demo_path}")
+                        rprint(
+                            f"[green]Falling back to demo video:[/green] {demo_path}"
+                        )
                     except (FileNotFoundError, RuntimeError) as de:
                         rprint(f"[red]Cannot open demo video: {de}[/red]")
                         raise typer.Exit(code=1)
                 else:
-                    rprint("[yellow]Tip: Place a demo.mp4 in ~/.openeye/ or use --video <path>[/yellow]")
+                    rprint(
+                        "[yellow]Tip: Place a demo.mp4 in ~/.openeye/ or use --video <path>[/yellow]"
+                    )
                     raise typer.Exit(code=1)
 
     if cam is None:
@@ -164,18 +172,22 @@ def run_detections(adapters: dict, frame, rich_escape):
                 conf_str = f"[yellow]{conf:.1%}[/yellow]"
             else:
                 conf_str = f"[red]{conf:.1%}[/red]"
-            all_rows.append((
-                m,
-                rich_escape(obj["label"]),
-                conf_str,
-                f"({obj['bbox']['x']:.2f}, {obj['bbox']['y']:.2f})",
-                f"{inf_ms:.1f}",
-            ))
+            all_rows.append(
+                (
+                    m,
+                    rich_escape(obj["label"]),
+                    conf_str,
+                    f"({obj['bbox']['x']:.2f}, {obj['bbox']['y']:.2f})",
+                    f"{inf_ms:.1f}",
+                )
+            )
 
     return all_rows, all_objects, total_inference_ms
 
 
-def build_safety_panel(guardian, all_objects, DetectedObject3D, BBox2D, Position3D, Group):
+def build_safety_panel(
+    guardian, all_objects, DetectedObject3D, BBox2D, Position3D, Group
+):
     """Build the Safety Guardian Rich panel."""
     from rich.panel import Panel
     from rich.text import Text
@@ -186,22 +198,25 @@ def build_safety_panel(guardian, all_objects, DetectedObject3D, BBox2D, Position
         bbox = obj.get("bbox", {})
         bbox_h = bbox.get("h", 0.1)
         estimated_depth = max(0.3, 1.8 / max(bbox_h, 0.01))
-        objects_3d.append(DetectedObject3D(
-            track_id=f"obj_{i}",
-            label=obj.get("label", "unknown"),
-            confidence=obj.get("confidence", 0.0),
-            bbox=BBox2D(
-                x1=bbox.get("x", 0),
-                y1=bbox.get("y", 0),
-                x2=bbox.get("x", 0) + bbox.get("w", 0),
-                y2=bbox.get("y", 0) + bbox.get("h", 0),
-            ),
-            position_3d=Position3D(
-                x=(bbox.get("x", 0.5) + bbox.get("w", 0) / 2 - 0.5) * estimated_depth,
-                y=0.0,
-                z=estimated_depth,
-            ),
-        ))
+        objects_3d.append(
+            DetectedObject3D(
+                track_id=f"obj_{i}",
+                label=obj.get("label", "unknown"),
+                confidence=obj.get("confidence", 0.0),
+                bbox=BBox2D(
+                    x1=bbox.get("x", 0),
+                    y1=bbox.get("y", 0),
+                    x2=bbox.get("x", 0) + bbox.get("w", 0),
+                    y2=bbox.get("y", 0) + bbox.get("h", 0),
+                ),
+                position_3d=Position3D(
+                    x=(bbox.get("x", 0.5) + bbox.get("w", 0) / 2 - 0.5)
+                    * estimated_depth,
+                    y=0.0,
+                    z=estimated_depth,
+                ),
+            )
+        )
 
     alerts, zones = guardian.evaluate(objects_3d)
     n_humans = sum(1 for o in objects_3d if o.label.lower() in human_labels)

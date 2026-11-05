@@ -54,7 +54,9 @@ def export_to_onnx(
         from onnxruntime.quantization import QuantType, quantize_dynamic
 
         quantized_path = output_path.with_stem(output_path.stem + "_int8")
-        quantize_dynamic(str(output_path), str(quantized_path), weight_type=QuantType.QUInt8)
+        quantize_dynamic(
+            str(output_path), str(quantized_path), weight_type=QuantType.QUInt8
+        )
         return quantized_path
 
     return output_path

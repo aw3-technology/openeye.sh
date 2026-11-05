@@ -23,8 +23,11 @@ class TestModelRegistry:
 
         upload_and_register(
             ModelUploadRequest(
-                name="UploadTest", key="upload-test", format=ModelFormat.PYTORCH,
-                task="detection", file_path=str(model_file),
+                name="UploadTest",
+                key="upload-test",
+                format=ModelFormat.PYTORCH,
+                task="detection",
+                file_path=str(model_file),
             )
         )
         models = list_registered_models()
@@ -39,8 +42,11 @@ class TestModelRegistry:
         with pytest.raises(ValueError, match="extension"):
             upload_and_register(
                 ModelUploadRequest(
-                    name="Bad", key="bad-ext", format=ModelFormat.ONNX,
-                    task="detection", file_path=str(f),
+                    name="Bad",
+                    key="bad-ext",
+                    format=ModelFormat.ONNX,
+                    task="detection",
+                    file_path=str(f),
                 )
             )
 
@@ -51,8 +57,11 @@ class TestModelRegistry:
         with pytest.raises(FileNotFoundError):
             upload_and_register(
                 ModelUploadRequest(
-                    name="Missing", key="missing", format=ModelFormat.PYTORCH,
-                    task="detection", file_path="/nonexistent/model.pt",
+                    name="Missing",
+                    key="missing",
+                    format=ModelFormat.PYTORCH,
+                    task="detection",
+                    file_path="/nonexistent/model.pt",
                 )
             )
 
@@ -63,8 +72,11 @@ class TestModelRegistry:
         with pytest.raises(ValueError, match="already exists"):
             upload_and_register(
                 ModelUploadRequest(
-                    name="Dup", key="test-model", format=ModelFormat.PYTORCH,
-                    task="detection", file_path=str(model_file),
+                    name="Dup",
+                    key="test-model",
+                    format=ModelFormat.PYTORCH,
+                    task="detection",
+                    file_path=str(model_file),
                 )
             )
 
@@ -87,8 +99,11 @@ class TestModelRegistry:
         f2 = tmp_path / "v2.pt"
         f2.write_bytes(b"\x00" * 512)
         add_version(
-            "test-model", file_path=str(f2), version="2.0.0",
-            format=ModelFormat.PYTORCH, author="tester",
+            "test-model",
+            file_path=str(f2),
+            version="2.0.0",
+            format=ModelFormat.PYTORCH,
+            author="tester",
         )
         versions = list_versions("test-model")
         assert len(versions) == 2
@@ -102,7 +117,9 @@ class TestModelRegistry:
         f2.write_bytes(b"\x00" * 512)
         with pytest.raises(ValueError, match="already exists"):
             add_version(
-                "test-model", file_path=str(f2), version="1.0.0",
+                "test-model",
+                file_path=str(f2),
+                version="1.0.0",
                 format=ModelFormat.PYTORCH,
             )
 
@@ -124,16 +141,21 @@ class TestModelRegistry:
         from openeye_ai.mlops.persistence import atomic_save_yaml
 
         registry_path = tmp_openeye_home / "registry.yaml"
-        atomic_save_yaml(registry_path, {
-            "schema_version": 3,
-            "models": {
-                "good": {
-                    "name": "Good", "task": "detection", "adapter": "yolo",
-                    "versions": [],
+        atomic_save_yaml(
+            registry_path,
+            {
+                "schema_version": 3,
+                "models": {
+                    "good": {
+                        "name": "Good",
+                        "task": "detection",
+                        "adapter": "yolo",
+                        "versions": [],
+                    },
+                    "corrupt": "not a dict",
                 },
-                "corrupt": "not a dict",
             },
-        })
+        )
         models = list_registered_models()
         assert len(models) == 1
         assert models[0].key == "good"
@@ -144,7 +166,9 @@ class TestModelRegistry:
 
         with pytest.raises(FileNotFoundError):
             add_version(
-                "test-model", file_path="/nonexistent/v2.pt", version="2.0.0",
+                "test-model",
+                file_path="/nonexistent/v2.pt",
+                version="2.0.0",
                 format=ModelFormat.PYTORCH,
             )
 
@@ -156,7 +180,9 @@ class TestModelRegistry:
         f.write_bytes(b"\x00" * 512)
         with pytest.raises(KeyError, match="not found"):
             add_version(
-                "nonexistent-model", file_path=str(f), version="1.0.0",
+                "nonexistent-model",
+                file_path=str(f),
+                version="1.0.0",
                 format=ModelFormat.PYTORCH,
             )
 
@@ -193,8 +219,11 @@ class TestModelRegistry:
         f = tmp_path / "v2.pt"
         f.write_bytes(b"\x00" * 512)
         add_version(
-            "test-model", file_path=str(f), version="2.0.0",
-            format=ModelFormat.PYTORCH, author="tester",
+            "test-model",
+            file_path=str(f),
+            version="2.0.0",
+            format=ModelFormat.PYTORCH,
+            author="tester",
             training_metrics={"accuracy": 0.95, "loss": 0.1},
         )
         v = get_version("test-model", "2.0.0")

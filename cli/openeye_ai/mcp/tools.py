@@ -22,8 +22,7 @@ def _resolve_binary() -> str:
         return found
 
     raise FileNotFoundError(
-        "Could not find the 'openeye' binary. "
-        "Install it with: pip install -e '.[all]'"
+        "Could not find the 'openeye' binary. Install it with: pip install -e '.[all]'"
     )
 
 

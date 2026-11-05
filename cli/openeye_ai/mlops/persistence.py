@@ -30,7 +30,9 @@ def safe_load_yaml(path: Path, *, default: Any = None) -> Any:
     Logs a warning on corrupt files rather than crashing.
     """
     if not path.exists():
-        return default() if callable(default) else (default if default is not None else {})
+        return (
+            default() if callable(default) else (default if default is not None else {})
+        )
 
     try:
         with open(path, encoding="utf-8") as f:
@@ -44,10 +46,14 @@ def safe_load_yaml(path: Path, *, default: Any = None) -> Any:
             logger.warning("Corrupt file backed up to %s", backup)
         except OSError:
             pass
-        return default() if callable(default) else (default if default is not None else {})
+        return (
+            default() if callable(default) else (default if default is not None else {})
+        )
 
     if data is None:
-        return default() if callable(default) else (default if default is not None else {})
+        return (
+            default() if callable(default) else (default if default is not None else {})
+        )
     return data
 
 

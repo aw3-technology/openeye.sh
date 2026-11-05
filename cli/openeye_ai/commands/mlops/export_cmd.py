@@ -13,8 +13,12 @@ from openeye_ai._cli_helpers import console
 
 def mlops_export(
     model_key: str = typer.Argument(help="Model key"),
-    format: str = typer.Option(..., "--format", "-f", help="Export format: onnx, tensorrt, coreml"),
-    version: str = typer.Option("latest", "--version", "-v", help="Model version (default: latest)"),
+    format: str = typer.Option(
+        ..., "--format", "-f", help="Export format: onnx, tensorrt, coreml"
+    ),
+    version: str = typer.Option(
+        "latest", "--version", "-v", help="Model version (default: latest)"
+    ),
     output: Path | None = typer.Option(None, "--output", "-o", help="Output path"),
     quantize: bool = typer.Option(False, "--quantize", help="Apply INT8 quantization"),
 ) -> None:
@@ -52,17 +56,23 @@ def mlops_export(
     )
 
     try:
-        with console.status(f"Exporting {model_key} v{resolved_version} to {format}..."):
+        with console.status(
+            f"Exporting {model_key} v{resolved_version} to {format}..."
+        ):
             result = export_model(request)
         rprint(f"[green]Exported to: {result.output_path}[/green]")
-        rprint(f"  Size: {result.output_size_mb:.1f} MB | Duration: {result.export_duration_seconds:.1f}s")
+        rprint(
+            f"  Size: {result.output_size_mb:.1f} MB | Duration: {result.export_duration_seconds:.1f}s"
+        )
     except (FileNotFoundError, ValueError, NotImplementedError) as e:
         rprint(f"[red]{e}[/red]")
         raise typer.Exit(code=1)
 
 
 def mlops_exports(
-    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    model_key: str | None = typer.Option(
+        None, "--model", "-m", help="Filter by model key"
+    ),
 ) -> None:
     """List previous model exports."""
     from openeye_ai.mlops.export import list_exports
@@ -117,7 +127,9 @@ def mlops_lineage(
     for i, lineage in enumerate(chain):
         indent = "    " * i
         rprint(f"{indent}[cyan]{lineage.model_key}[/cyan] v{lineage.version}")
-        rprint(f"{indent}    Dataset: {lineage.dataset} ({lineage.dataset_size or '?'} samples)")
+        rprint(
+            f"{indent}    Dataset: {lineage.dataset} ({lineage.dataset_size or '?'} samples)"
+        )
         commit = lineage.code_commit[:8] if lineage.code_commit else dash
         rprint(f"{indent}    Commit: {commit}")
         framework = lineage.training_framework or dash

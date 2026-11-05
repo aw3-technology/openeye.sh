@@ -47,8 +47,12 @@ class TestLifecycle:
         version = MagicMock()
         version.training_metrics = TrainingMetrics(accuracy=0.95, loss=0.3)
 
-        assert _evaluate_gate_condition("accuracy > 0.90 and loss < 0.5", version) is True
-        assert _evaluate_gate_condition("accuracy > 0.90 and loss < 0.1", version) is False
+        assert (
+            _evaluate_gate_condition("accuracy > 0.90 and loss < 0.5", version) is True
+        )
+        assert (
+            _evaluate_gate_condition("accuracy > 0.90 and loss < 0.1", version) is False
+        )
 
     def test_evaluate_gate_condition_missing_metric(self):
         from openeye_ai.mlops.lifecycle import _evaluate_gate_condition
@@ -105,8 +109,10 @@ class TestLifecycle:
         with pytest.raises(ValueError, match="Cannot promote"):
             request_promotion(
                 PromotionRequest(
-                    model_key="test-model", version="1.0.0",
-                    target_stage=ModelStage.PRODUCTION, requester="tester",
+                    model_key="test-model",
+                    version="1.0.0",
+                    target_stage=ModelStage.PRODUCTION,
+                    requester="tester",
                 )
             )
 
@@ -116,8 +122,10 @@ class TestLifecycle:
 
         record = request_promotion(
             PromotionRequest(
-                model_key="test-model", version="1.0.0",
-                target_stage=ModelStage.STAGING, requester="tester",
+                model_key="test-model",
+                version="1.0.0",
+                target_stage=ModelStage.STAGING,
+                requester="tester",
             )
         )
         assert record.from_stage == ModelStage.DEV
@@ -129,8 +137,10 @@ class TestLifecycle:
 
         request_promotion(
             PromotionRequest(
-                model_key="test-model", version="1.0.0",
-                target_stage=ModelStage.STAGING, requester="tester",
+                model_key="test-model",
+                version="1.0.0",
+                target_stage=ModelStage.STAGING,
+                requester="tester",
             )
         )
         records = list_promotions()
@@ -153,8 +163,10 @@ class TestLifecycle:
         # This means the promotion stays PENDING.
         record = request_promotion(
             PromotionRequest(
-                model_key="test-model", version="1.0.0",
-                target_stage=ModelStage.STAGING, requester="tester",
+                model_key="test-model",
+                version="1.0.0",
+                target_stage=ModelStage.STAGING,
+                requester="tester",
             )
         )
         # If it was auto-approved, we need to go further; otherwise approve manually
@@ -168,8 +180,10 @@ class TestLifecycle:
             # Auto-approved, request staging -> production (requires manual approval)
             request_promotion(
                 PromotionRequest(
-                    model_key="test-model", version="1.0.0",
-                    target_stage=ModelStage.PRODUCTION, requester="tester",
+                    model_key="test-model",
+                    version="1.0.0",
+                    target_stage=ModelStage.PRODUCTION,
+                    requester="tester",
                 )
             )
             approved = approve_promotion("test-model", "1.0.0", approver="ml-lead")
@@ -188,23 +202,31 @@ class TestLifecycle:
         # Request DEV -> STAGING; seeded model has no metrics so stays PENDING
         record = request_promotion(
             PromotionRequest(
-                model_key="test-model", version="1.0.0",
-                target_stage=ModelStage.STAGING, requester="tester",
+                model_key="test-model",
+                version="1.0.0",
+                target_stage=ModelStage.STAGING,
+                requester="tester",
             )
         )
         if record.status == ApprovalStatus.PENDING:
-            rejected = reject_promotion("test-model", "1.0.0", approver="ml-lead", reason="not ready")
+            rejected = reject_promotion(
+                "test-model", "1.0.0", approver="ml-lead", reason="not ready"
+            )
             assert rejected.status == ApprovalStatus.REJECTED
             assert rejected.reason == "not ready"
         else:
             # Auto-approved; request next stage and reject that
             request_promotion(
                 PromotionRequest(
-                    model_key="test-model", version="1.0.0",
-                    target_stage=ModelStage.PRODUCTION, requester="tester",
+                    model_key="test-model",
+                    version="1.0.0",
+                    target_stage=ModelStage.PRODUCTION,
+                    requester="tester",
                 )
             )
-            rejected = reject_promotion("test-model", "1.0.0", approver="ml-lead", reason="not ready")
+            rejected = reject_promotion(
+                "test-model", "1.0.0", approver="ml-lead", reason="not ready"
+            )
             assert rejected.status == ApprovalStatus.REJECTED
             assert rejected.reason == "not ready"
 
@@ -240,16 +262,21 @@ class TestLifecycle:
             tmp_file = f.name
         try:
             add_version(
-                "test-model", file_path=tmp_file, version="2.0.0",
-                format=ModelFormat.PYTORCH, training_metrics={"accuracy": 0.95},
+                "test-model",
+                file_path=tmp_file,
+                version="2.0.0",
+                format=ModelFormat.PYTORCH,
+                training_metrics={"accuracy": 0.95},
             )
         finally:
             Path(tmp_file).unlink(missing_ok=True)
 
         record = request_promotion(
             PromotionRequest(
-                model_key="test-model", version="2.0.0",
-                target_stage=ModelStage.STAGING, requester="tester",
+                model_key="test-model",
+                version="2.0.0",
+                target_stage=ModelStage.STAGING,
+                requester="tester",
             )
         )
         assert record.status == ApprovalStatus.APPROVED

@@ -112,8 +112,18 @@ class TestAgenticSession:
         config = AgenticConfig(active_object_window=5.0)
         session = self._make_session(config=config)
         session.objects_seen = {
-            "t1": {"label": "person", "first_seen": time.time(), "last_seen": time.time(), "count": 1},
-            "t2": {"label": "car", "first_seen": time.time() - 100, "last_seen": time.time() - 100, "count": 1},
+            "t1": {
+                "label": "person",
+                "first_seen": time.time(),
+                "last_seen": time.time(),
+                "count": 1,
+            },
+            "t2": {
+                "label": "car",
+                "first_seen": time.time() - 100,
+                "last_seen": time.time() - 100,
+                "count": 1,
+            },
         }
         snapshot = session.build_active_objects_snapshot()
         assert "t1" in snapshot
@@ -121,6 +131,7 @@ class TestAgenticSession:
 
     def test_run_vlm_reasoning_no_client(self):
         import asyncio
+
         session = self._make_session(vlm_client=None)
         result = asyncio.get_event_loop().run_until_complete(
             session.run_vlm_reasoning("base64data", "scene desc", "goal")
@@ -130,6 +141,7 @@ class TestAgenticSession:
 
     def test_run_vlm_reasoning_success(self):
         import asyncio
+
         mock_client = AsyncMock()
         mock_resp = MagicMock()
         mock_resp.choices = [MagicMock()]
@@ -162,6 +174,7 @@ class TestAgenticSession:
 
     def test_run_vlm_reasoning_error(self):
         import asyncio
+
         mock_client = AsyncMock()
         mock_client.chat.completions.create.side_effect = RuntimeError("API error")
 
@@ -265,10 +278,19 @@ class TestWebSocketAgentic:
             data = ws.receive_json()
 
             required_keys = {
-                "type", "frame_id", "goal", "detections", "scene_graph",
-                "scene_description", "vlm_reasoning", "action_plan",
-                "safety_zones", "safety_alerts", "change_alerts",
-                "memory", "latency",
+                "type",
+                "frame_id",
+                "goal",
+                "detections",
+                "scene_graph",
+                "scene_description",
+                "vlm_reasoning",
+                "action_plan",
+                "safety_zones",
+                "safety_alerts",
+                "change_alerts",
+                "memory",
+                "latency",
             }
             assert required_keys.issubset(data.keys())
 

@@ -6,17 +6,35 @@ import typer
 
 
 def g1_demo(
-    transport: str = typer.Option("webcam", help="Camera: webcam, usb, rtsp, sdk, auto"),
+    transport: str = typer.Option(
+        "webcam", help="Camera: webcam, usb, rtsp, sdk, auto"
+    ),
     host: str = typer.Option("192.168.123.161", help="G1 IP address"),
-    camera_index: int = typer.Option(0, "--camera", "-c", help="USB camera device index"),
-    control_mode: str = typer.Option("dry_run", "--control-mode", help="Robot control: sdk, http, dry_run"),
+    camera_index: int = typer.Option(
+        0, "--camera", "-c", help="USB camera device index"
+    ),
+    control_mode: str = typer.Option(
+        "dry_run", "--control-mode", help="Robot control: sdk, http, dry_run"
+    ),
     model: str = typer.Option("yolov8", "--model", "-m", help="Detection model"),
-    danger_m: float = typer.Option(0.5, "--danger-m", help="Danger zone threshold (metres)"),
-    caution_m: float = typer.Option(1.5, "--caution-m", help="Caution zone threshold (metres)"),
-    clear_duration: float = typer.Option(2.0, "--clear-duration", help="Seconds clear before resume"),
+    danger_m: float = typer.Option(
+        0.5, "--danger-m", help="Danger zone threshold (metres)"
+    ),
+    caution_m: float = typer.Option(
+        1.5, "--caution-m", help="Caution zone threshold (metres)"
+    ),
+    clear_duration: float = typer.Option(
+        2.0, "--clear-duration", help="Seconds clear before resume"
+    ),
     max_fps: float = typer.Option(15.0, "--max-fps", help="Max frame rate from camera"),
-    video: str | None = typer.Option(None, "--video", "-v", help="Video file path (fallback if camera fails)"),
-    demo: bool = typer.Option(False, "--demo", help="Demo mode: warm up model before starting for zero cold-start"),
+    video: str | None = typer.Option(
+        None, "--video", "-v", help="Video file path (fallback if camera fails)"
+    ),
+    demo: bool = typer.Option(
+        False,
+        "--demo",
+        help="Demo mode: warm up model before starting for zero cold-start",
+    ),
 ) -> None:
     """Run the Unitree G1 Safety Guardian demo.
 
@@ -46,15 +64,22 @@ def g1_demo(
 
 
 def vlm_demo(
-    image: str = typer.Option("src/assets/demo/scene-warehouse.jpg", "--image", help="Path to image file"),
-    model: str = typer.Option("qwen/qwen3-vl-235b:free", "--model", "-m", help="OpenRouter model ID"),
+    image: str = typer.Option(
+        "src/assets/demo/scene-warehouse.jpg", "--image", help="Path to image file"
+    ),
+    model: str = typer.Option(
+        "qwen/qwen3-vl-235b:free", "--model", "-m", help="OpenRouter model ID"
+    ),
     prompt: str = typer.Option(
         "Describe what you see in this image in detail. "
         "Focus on objects, people, spatial layout, and any notable activities or hazards.",
-        "--prompt", "-p",
+        "--prompt",
+        "-p",
         help="Custom prompt to send with the image",
     ),
-    all_models: bool = typer.Option(False, "--all-models", help="Compare all free VLM models side-by-side"),
+    all_models: bool = typer.Option(
+        False, "--all-models", help="Compare all free VLM models side-by-side"
+    ),
 ) -> None:
     """Run a VLM (Vision Language Model) demo via OpenRouter.
 

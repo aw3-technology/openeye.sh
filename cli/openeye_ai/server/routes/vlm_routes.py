@@ -108,7 +108,9 @@ async def vlm_analyze(
                         "content": [
                             {
                                 "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"},
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{img_b64}"
+                                },
                             },
                             {"type": "text", "text": prompt or _DEFAULT_PROMPT},
                         ],
@@ -123,7 +125,9 @@ async def vlm_analyze(
 
         nebius_stats["total_calls"] += 1
         nebius_stats["total_latency_ms"] += latency_ms
-        nebius_stats["avg_latency_ms"] = nebius_stats["total_latency_ms"] / nebius_stats["total_calls"]
+        nebius_stats["avg_latency_ms"] = (
+            nebius_stats["total_latency_ms"] / nebius_stats["total_calls"]
+        )
         nebius_stats["last_call_at"] = time.time()
 
         result: dict = {"raw": content, "inference_ms": round(latency_ms, 1)}

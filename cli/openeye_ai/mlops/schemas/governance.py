@@ -46,7 +46,9 @@ class PromotionRecord(BaseModel):
     approver: Optional[str] = None
     reason: str = ""
     reviewed_at: Optional[str] = None
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
 
 
 # ── Story 188: Model validation tests ────────────────────────────────
@@ -63,7 +65,9 @@ class ValidationTest(BaseModel):
     conditions: list[str] = Field(
         description='Conditions like "accuracy > 0.95", "latency_ms < 50", "mAP > 0.80"'
     )
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
 
 
 class ValidationConditionResult(BaseModel):
@@ -139,5 +143,7 @@ class ShadowDeployment(BaseModel):
             production_version="", shadow_version=""
         )
     )
-    started_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    started_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
     completed_at: Optional[str] = None

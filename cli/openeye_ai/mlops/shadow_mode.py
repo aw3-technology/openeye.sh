@@ -121,8 +121,12 @@ def run_shadow_inference(
     comp = deployment.comparison
     n = comp.total_samples
     comp.total_samples = n + 1
-    comp.production_mean_latency_ms = (comp.production_mean_latency_ms * n + prod_latency) / (n + 1)
-    comp.shadow_mean_latency_ms = (comp.shadow_mean_latency_ms * n + shadow_latency) / (n + 1)
+    comp.production_mean_latency_ms = (
+        comp.production_mean_latency_ms * n + prod_latency
+    ) / (n + 1)
+    comp.shadow_mean_latency_ms = (comp.shadow_mean_latency_ms * n + shadow_latency) / (
+        n + 1
+    )
 
     # Check agreement (same labels detected)
     prod_labels = {o["label"] for o in prod_result.get("objects", [])}
@@ -136,7 +140,10 @@ def run_shadow_inference(
         comp.divergent_samples = comp.divergent_samples[-100:]
 
     # Check completion
-    if deployment.config.max_samples and comp.total_samples >= deployment.config.max_samples:
+    if (
+        deployment.config.max_samples
+        and comp.total_samples >= deployment.config.max_samples
+    ):
         deployment.status = ShadowStatus.COMPLETED
         deployment.completed_at = datetime.now(timezone.utc).isoformat()
 

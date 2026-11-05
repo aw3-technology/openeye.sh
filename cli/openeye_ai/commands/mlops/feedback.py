@@ -10,9 +10,15 @@ from openeye_ai._cli_helpers import console
 
 
 def mlops_feedback(
-    prediction_id: str = typer.Option(..., "--prediction-id", help="Prediction/image ID to correct"),
-    correct: str = typer.Option(..., "--correct", help="Whether the prediction was correct (true/false)"),
-    label: str = typer.Option("", "--label", help="Correct label (required if --correct false)"),
+    prediction_id: str = typer.Option(
+        ..., "--prediction-id", help="Prediction/image ID to correct"
+    ),
+    correct: str = typer.Option(
+        ..., "--correct", help="Whether the prediction was correct (true/false)"
+    ),
+    label: str = typer.Option(
+        "", "--label", help="Correct label (required if --correct false)"
+    ),
     model: str = typer.Option("default", "--model", "-m", help="Model key"),
     version: str = typer.Option("latest", "--version", "-v", help="Model version"),
     annotator: str = typer.Option("cli-user", "--annotator", help="Annotator name"),
@@ -51,10 +57,13 @@ def mlops_annotate(
     image: str = typer.Argument(help="Image path or URI"),
     correct_label: str = typer.Option(..., "--label", help="Correct label"),
     annotation_type: str = typer.Option(
-        "misclassification", "--type",
+        "misclassification",
+        "--type",
         help="Type: false_positive, false_negative, misclassification, wrong_bbox, low_confidence",
     ),
-    predicted: str | None = typer.Option(None, "--predicted", help="What the model predicted"),
+    predicted: str | None = typer.Option(
+        None, "--predicted", help="What the model predicted"
+    ),
     annotator: str = typer.Option("cli-user", "--annotator", help="Annotator name"),
     notes: str = typer.Option("", "--notes", help="Additional notes"),
 ) -> None:
@@ -65,7 +74,9 @@ def mlops_annotate(
     try:
         label = AnnotationLabel(annotation_type)
     except ValueError:
-        rprint(f"[red]Invalid type '{annotation_type}'. Use: false_positive, false_negative, misclassification, wrong_bbox, low_confidence[/red]")
+        rprint(
+            f"[red]Invalid type '{annotation_type}'. Use: false_positive, false_negative, misclassification, wrong_bbox, low_confidence[/red]"
+        )
         raise typer.Exit(code=1)
 
     ann = annotate_failure(
@@ -79,7 +90,9 @@ def mlops_annotate(
         notes=notes,
     )
     rprint(f"[green]Annotation created: {ann.id}[/green]")
-    rprint(f"  {annotation_type}: predicted={predicted or '—'} -> correct={correct_label}")
+    rprint(
+        f"  {annotation_type}: predicted={predicted or '—'} -> correct={correct_label}"
+    )
 
 
 def mlops_feedback_generate(
@@ -101,9 +114,15 @@ def mlops_feedback_generate(
 
 
 def mlops_annotations(
-    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
-    label: str | None = typer.Option(None, "--label", "-l", help="Filter by annotation type"),
-    unfed_only: bool = typer.Option(False, "--unfed", help="Show only unfed annotations"),
+    model_key: str | None = typer.Option(
+        None, "--model", "-m", help="Filter by model key"
+    ),
+    label: str | None = typer.Option(
+        None, "--label", "-l", help="Filter by annotation type"
+    ),
+    unfed_only: bool = typer.Option(
+        False, "--unfed", help="Show only unfed annotations"
+    ),
 ) -> None:
     """List inference failure annotations."""
     from openeye_ai.mlops.feedback import list_annotations
@@ -111,10 +130,13 @@ def mlops_annotations(
     annotation_label = None
     if label:
         from openeye_ai.mlops.schemas import AnnotationLabel
+
         try:
             annotation_label = AnnotationLabel(label)
         except ValueError:
-            rprint(f"[red]Invalid label '{label}'. Use: false_positive, false_negative, misclassification, wrong_bbox, low_confidence[/red]")
+            rprint(
+                f"[red]Invalid label '{label}'. Use: false_positive, false_negative, misclassification, wrong_bbox, low_confidence[/red]"
+            )
             raise typer.Exit(code=1)
 
     annotations = list_annotations(model_key, annotation_label, unfed_only)
@@ -137,7 +159,9 @@ def mlops_annotations(
             a.id[:12],
             a.model_key,
             a.model_version,
-            a.annotation_label.value if hasattr(a.annotation_label, "value") else str(a.annotation_label),
+            a.annotation_label.value
+            if hasattr(a.annotation_label, "value")
+            else str(a.annotation_label),
             a.predicted_label or "—",
             a.correct_label,
             "[green]Yes[/green]" if a.fed_back else "[dim]No[/dim]",
@@ -147,7 +171,9 @@ def mlops_annotations(
 
 
 def mlops_feedback_batches(
-    model_key: str | None = typer.Option(None, "--model", "-m", help="Filter by model key"),
+    model_key: str | None = typer.Option(
+        None, "--model", "-m", help="Filter by model key"
+    ),
 ) -> None:
     """List feedback batch history."""
     from openeye_ai.mlops.feedback import list_feedback_batches
@@ -166,12 +192,16 @@ def mlops_feedback_batches(
     table.add_column("Created")
 
     for b in batches:
-        status_style = {"completed": "green", "running": "yellow", "failed": "red"}.get(b.status.value, "")
+        status_style = {"completed": "green", "running": "yellow", "failed": "red"}.get(
+            b.status.value, ""
+        )
         table.add_row(
             b.id[:12],
             b.model_key,
             str(b.total_annotations),
-            f"[{status_style}]{b.status.value}[/{status_style}]" if status_style else b.status.value,
+            f"[{status_style}]{b.status.value}[/{status_style}]"
+            if status_style
+            else b.status.value,
             b.output_dataset_path,
             b.created_at[:10] if b.created_at else "—",
         )

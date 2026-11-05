@@ -74,6 +74,7 @@ async def perception_rest(
             logger.error("Perception pipeline failed: %s", e)
             return JSONResponse({"error": "Pipeline failed."}, status_code=500)
     else:
+
         def run_basic():
             t0 = time.time()
             data = state.adapter.predict(img)
@@ -95,7 +96,9 @@ async def perception_rest(
         result = PredictionResult(
             model=state.model_name,
             task=state.model_info["task"],
-            image=ImageInfo(width=img_w, height=img_h, source=file.filename or "upload"),
+            image=ImageInfo(
+                width=img_w, height=img_h, source=file.filename or "upload"
+            ),
             **result_data,
         )
         return JSONResponse(result.model_dump())

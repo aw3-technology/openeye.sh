@@ -10,10 +10,20 @@ from .conftest import make_device
 class TestCommandQueue:
     def test_commands_list_no_filters(self, fleet_runner, mock_request):
         commands = [
-            {"id": "cmd-1", "device_id": "dev-1", "command_type": "restart",
-             "status": "pending", "created_at": "2025-01-01T00:00:00Z"},
-            {"id": "cmd-2", "device_id": "dev-2", "command_type": "deploy_model",
-             "status": "completed", "created_at": "2025-01-01T01:00:00Z"},
+            {
+                "id": "cmd-1",
+                "device_id": "dev-1",
+                "command_type": "restart",
+                "status": "pending",
+                "created_at": "2025-01-01T00:00:00Z",
+            },
+            {
+                "id": "cmd-2",
+                "device_id": "dev-2",
+                "command_type": "deploy_model",
+                "status": "completed",
+                "created_at": "2025-01-01T01:00:00Z",
+            },
         ]
         mock_request(commands)
         result = fleet_runner.invoke(app, ["fleet", "commands"])
@@ -41,11 +51,17 @@ class TestCommandQueue:
 class TestOTACommand:
     def test_ota_basic(self, fleet_runner, mock_request):
         mock = mock_request({"id": "ota-1", "target_count": 5})
-        result = fleet_runner.invoke(app, [
-            "fleet", "ota",
-            "--url", "https://example.com/fw.bin",
-            "--version", "2.0.0",
-        ])
+        result = fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "ota",
+                "--url",
+                "https://example.com/fw.bin",
+                "--version",
+                "2.0.0",
+            ],
+        )
         assert result.exit_code == 0
         payload = mock.call_args[0][2]
         assert payload["firmware_url"] == "https://example.com/fw.bin"
@@ -54,34 +70,54 @@ class TestOTACommand:
 
     def test_ota_with_group(self, fleet_runner, mock_request):
         mock = mock_request({"id": "ota-2", "target_count": 3})
-        fleet_runner.invoke(app, [
-            "fleet", "ota",
-            "--url", "https://example.com/fw.bin",
-            "--version", "2.0.0",
-            "--group", "grp-1",
-        ])
+        fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "ota",
+                "--url",
+                "https://example.com/fw.bin",
+                "--version",
+                "2.0.0",
+                "--group",
+                "grp-1",
+            ],
+        )
         payload = mock.call_args[0][2]
         assert payload["target_group_id"] == "grp-1"
 
     def test_ota_with_device_ids(self, fleet_runner, mock_request):
         mock = mock_request({"id": "ota-3", "target_count": 2})
-        fleet_runner.invoke(app, [
-            "fleet", "ota",
-            "--url", "https://example.com/fw.bin",
-            "--version", "2.0.0",
-            "--devices", "dev-1,dev-2",
-        ])
+        fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "ota",
+                "--url",
+                "https://example.com/fw.bin",
+                "--version",
+                "2.0.0",
+                "--devices",
+                "dev-1,dev-2",
+            ],
+        )
         payload = mock.call_args[0][2]
         assert payload["target_device_ids"] == ["dev-1", "dev-2"]
 
     def test_ota_force_flag(self, fleet_runner, mock_request):
         mock = mock_request({"id": "ota-4", "target_count": 1})
-        fleet_runner.invoke(app, [
-            "fleet", "ota",
-            "--url", "https://example.com/fw.bin",
-            "--version", "2.0.0",
-            "--force",
-        ])
+        fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "ota",
+                "--url",
+                "https://example.com/fw.bin",
+                "--version",
+                "2.0.0",
+                "--force",
+            ],
+        )
         payload = mock.call_args[0][2]
         assert payload["force"] is True
 
@@ -103,7 +139,9 @@ class TestAdvanceAndPause:
 class TestConfigOverride:
     def test_config_valid_json(self, fleet_runner, mock_request):
         mock = mock_request({})
-        result = fleet_runner.invoke(app, ["fleet", "config", "dev-1", '{"threshold": 0.5}'])
+        result = fleet_runner.invoke(
+            app, ["fleet", "config", "dev-1", '{"threshold": 0.5}']
+        )
         assert result.exit_code == 0
         data = mock.call_args[0][2]
         assert data == {"threshold": 0.5}
@@ -117,11 +155,18 @@ class TestConfigOverride:
 
 class TestResources:
     def test_resources_with_data(self, fleet_runner, mock_request):
-        mock_request([
-            {"timestamp": "2025-01-01T00:00:00Z", "cpu_percent": 45.2,
-             "memory_percent": 60.0, "disk_percent": 30.0,
-             "inference_rate": 12, "gpu_percent": 80.0},
-        ])
+        mock_request(
+            [
+                {
+                    "timestamp": "2025-01-01T00:00:00Z",
+                    "cpu_percent": 45.2,
+                    "memory_percent": 60.0,
+                    "disk_percent": 30.0,
+                    "inference_rate": 12,
+                    "gpu_percent": 80.0,
+                },
+            ]
+        )
         result = fleet_runner.invoke(app, ["fleet", "resources", "dev-1"])
         assert result.exit_code == 0
 
@@ -141,10 +186,20 @@ class TestResources:
 class TestGroupScaling:
     def test_group_scaling_enabled(self, fleet_runner, mock_request):
         mock = mock_request({})
-        result = fleet_runner.invoke(app, [
-            "fleet", "group-scaling", "grp-1",
-            "--min", "2", "--max", "20", "--target-cpu", "80",
-        ])
+        result = fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "group-scaling",
+                "grp-1",
+                "--min",
+                "2",
+                "--max",
+                "20",
+                "--target-cpu",
+                "80",
+            ],
+        )
         assert result.exit_code == 0
         data = mock.call_args[0][2]
         assert data["enabled"] is True
@@ -154,9 +209,15 @@ class TestGroupScaling:
 
     def test_group_scaling_disabled(self, fleet_runner, mock_request):
         mock = mock_request({})
-        result = fleet_runner.invoke(app, [
-            "fleet", "group-scaling", "grp-1", "--disabled",
-        ])
+        result = fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "group-scaling",
+                "grp-1",
+                "--disabled",
+            ],
+        )
         assert result.exit_code == 0
         data = mock.call_args[0][2]
         assert data["enabled"] is False
@@ -173,31 +234,51 @@ class TestGroupRemove:
 class TestAgentCommand:
     def test_agent_missing_api_key(self, fleet_runner, mock_request):
         mock_request({})
-        result = fleet_runner.invoke(app, [
-            "fleet", "agent", "--device-id", "dev-1",
-        ])
+        result = fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "agent",
+                "--device-id",
+                "dev-1",
+            ],
+        )
         assert result.exit_code == 1
         assert "API key is required" in result.output
 
     def test_agent_invalid_server_url(self, fleet_runner, mock_request):
         mock_request({})
-        result = fleet_runner.invoke(app, [
-            "fleet", "agent",
-            "--device-id", "dev-1",
-            "--api-key", "test-key",
-            "--server", "not-a-url",
-        ])
+        result = fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "agent",
+                "--device-id",
+                "dev-1",
+                "--api-key",
+                "test-key",
+                "--server",
+                "not-a-url",
+            ],
+        )
         assert result.exit_code == 1
         assert "http://" in result.output
 
     def test_agent_invalid_interval(self, fleet_runner, mock_request):
         mock_request({})
-        result = fleet_runner.invoke(app, [
-            "fleet", "agent",
-            "--device-id", "dev-1",
-            "--api-key", "test-key",
-            "--interval", "0.5",
-        ])
+        result = fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "agent",
+                "--device-id",
+                "dev-1",
+                "--api-key",
+                "test-key",
+                "--interval",
+                "0.5",
+            ],
+        )
         assert result.exit_code == 1
         assert "at least 1 second" in result.output
 
@@ -205,12 +286,19 @@ class TestAgentCommand:
 class TestDeployWithModelURL:
     def test_deploy_with_model_url(self, fleet_runner, mock_request):
         mock = mock_request({"id": "dep-url-1"})
-        result = fleet_runner.invoke(app, [
-            "fleet", "deploy",
-            "--model", "yolov8",
-            "--version", "3.0",
-            "--url", "https://example.com/model.pt",
-        ])
+        result = fleet_runner.invoke(
+            app,
+            [
+                "fleet",
+                "deploy",
+                "--model",
+                "yolov8",
+                "--version",
+                "3.0",
+                "--url",
+                "https://example.com/model.pt",
+            ],
+        )
         assert result.exit_code == 0
         payload = mock.call_args[0][2]
         assert payload["model_url"] == "https://example.com/model.pt"

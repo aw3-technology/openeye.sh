@@ -31,7 +31,9 @@ def test_status_with_server():
     }
 
     with patch("httpx.get", return_value=mock_resp):
-        result = runner.invoke(govern_app, ["status", "--server", "http://localhost:8000"])
+        result = runner.invoke(
+            govern_app, ["status", "--server", "http://localhost:8000"]
+        )
     assert result.exit_code == 0
     assert "Governance Status" in result.output
 
@@ -40,7 +42,9 @@ def test_status_with_server_error():
     import httpx
 
     with patch("httpx.get", side_effect=httpx.ConnectError("refused")):
-        result = runner.invoke(govern_app, ["status", "--server", "http://localhost:8000"])
+        result = runner.invoke(
+            govern_app, ["status", "--server", "http://localhost:8000"]
+        )
     assert result.exit_code == 1
     assert "Error" in result.output
 
@@ -95,7 +99,9 @@ def test_enable_with_server():
     mock_resp.raise_for_status = MagicMock()
 
     with patch("httpx.post", return_value=mock_resp):
-        result = runner.invoke(govern_app, ["enable", "zone_policy", "--server", "http://localhost:8000"])
+        result = runner.invoke(
+            govern_app, ["enable", "zone_policy", "--server", "http://localhost:8000"]
+        )
     assert result.exit_code == 0
     assert "Enabled" in result.output
 
@@ -129,7 +135,9 @@ def test_disable_with_server():
     mock_resp.raise_for_status = MagicMock()
 
     with patch("httpx.post", return_value=mock_resp):
-        result = runner.invoke(govern_app, ["disable", "zone_policy", "--server", "http://localhost:8000"])
+        result = runner.invoke(
+            govern_app, ["disable", "zone_policy", "--server", "http://localhost:8000"]
+        )
     assert result.exit_code == 0
     assert "Disabled" in result.output
 
@@ -158,7 +166,10 @@ def test_disable_local_not_found():
 
 
 def test_presets_with_names():
-    with patch("governance.loader.list_presets", return_value=["robotics-safe", "desktop-default"]):
+    with patch(
+        "governance.loader.list_presets",
+        return_value=["robotics-safe", "desktop-default"],
+    ):
         result = runner.invoke(govern_app, ["presets"])
     assert result.exit_code == 0
     assert "robotics-safe" in result.output
@@ -176,14 +187,19 @@ def test_presets_empty():
 
 
 def test_validate_valid():
-    with patch("governance.loader.validate_yaml", return_value=(True, "Config is valid")):
+    with patch(
+        "governance.loader.validate_yaml", return_value=(True, "Config is valid")
+    ):
         result = runner.invoke(govern_app, ["validate", "config.yaml"])
     assert result.exit_code == 0
     assert "Valid" in result.output
 
 
 def test_validate_invalid():
-    with patch("governance.loader.validate_yaml", return_value=(False, "Missing required field")):
+    with patch(
+        "governance.loader.validate_yaml",
+        return_value=(False, "Missing required field"),
+    ):
         result = runner.invoke(govern_app, ["validate", "config.yaml"])
     assert result.exit_code == 1
     assert "Invalid" in result.output
@@ -204,7 +220,9 @@ def test_init_default(tmp_path):
 
 def test_init_robotics_domain(tmp_path):
     output = tmp_path / "gov.yaml"
-    result = runner.invoke(govern_app, ["init", "--domain", "robotics", "--output", str(output)])
+    result = runner.invoke(
+        govern_app, ["init", "--domain", "robotics", "--output", str(output)]
+    )
     assert result.exit_code == 0
     content = output.read_text()
     assert "robotics" in content
@@ -212,7 +230,9 @@ def test_init_robotics_domain(tmp_path):
 
 def test_init_desktop_agent_domain(tmp_path):
     output = tmp_path / "gov.yaml"
-    result = runner.invoke(govern_app, ["init", "--domain", "desktop_agent", "--output", str(output)])
+    result = runner.invoke(
+        govern_app, ["init", "--domain", "desktop_agent", "--output", str(output)]
+    )
     assert result.exit_code == 0
     content = output.read_text()
     assert "desktop_agent" in content
@@ -226,11 +246,19 @@ def test_audit_with_server():
     mock_resp.status_code = 200
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = [
-        {"timestamp": "2026-01-01T00:00:00Z", "policy_name": "zone_policy", "decision": "allow", "severity": "low", "reason": "ok"},
+        {
+            "timestamp": "2026-01-01T00:00:00Z",
+            "policy_name": "zone_policy",
+            "decision": "allow",
+            "severity": "low",
+            "reason": "ok",
+        },
     ]
 
     with patch("httpx.get", return_value=mock_resp):
-        result = runner.invoke(govern_app, ["audit", "--server", "http://localhost:8000"])
+        result = runner.invoke(
+            govern_app, ["audit", "--server", "http://localhost:8000"]
+        )
     assert result.exit_code == 0
     assert "zone_policy" in result.output
 
@@ -253,11 +281,19 @@ def test_violations_with_server():
     mock_resp.status_code = 200
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = [
-        {"timestamp": "2026-01-01T00:00:00Z", "policy_name": "zone_policy", "decision": "deny", "severity": "critical", "reason": "out of bounds"},
+        {
+            "timestamp": "2026-01-01T00:00:00Z",
+            "policy_name": "zone_policy",
+            "decision": "deny",
+            "severity": "critical",
+            "reason": "out of bounds",
+        },
     ]
 
     with patch("httpx.get", return_value=mock_resp):
-        result = runner.invoke(govern_app, ["violations", "--server", "http://localhost:8000"])
+        result = runner.invoke(
+            govern_app, ["violations", "--server", "http://localhost:8000"]
+        )
     assert result.exit_code == 0
     assert "zone_policy" in result.output
 
@@ -266,7 +302,9 @@ def test_violations_server_error():
     import httpx
 
     with patch("httpx.get", side_effect=httpx.ConnectError("refused")):
-        result = runner.invoke(govern_app, ["violations", "--server", "http://localhost:8000"])
+        result = runner.invoke(
+            govern_app, ["violations", "--server", "http://localhost:8000"]
+        )
     assert result.exit_code == 1
     assert "Error" in result.output
 
@@ -280,7 +318,9 @@ def test_load_preset_via_server():
     mock_resp.raise_for_status = MagicMock()
 
     with patch("httpx.post", return_value=mock_resp):
-        result = runner.invoke(govern_app, ["load", "robotics-safe", "--server", "http://localhost:8000"])
+        result = runner.invoke(
+            govern_app, ["load", "robotics-safe", "--server", "http://localhost:8000"]
+        )
     assert result.exit_code == 0
     assert "Loaded preset" in result.output
 
@@ -298,7 +338,9 @@ def test_load_local_preset():
 
 
 def test_load_local_preset_error():
-    with patch("governance.loader.load_preset", side_effect=FileNotFoundError("not found")):
+    with patch(
+        "governance.loader.load_preset", side_effect=FileNotFoundError("not found")
+    ):
         result = runner.invoke(govern_app, ["load", "no-such-preset"])
     assert result.exit_code == 1
     assert "Error" in result.output

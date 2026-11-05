@@ -27,7 +27,9 @@ class Adapter(ModelAdapter):
         from transformers import AutoModelForZeroShotObjectDetection, AutoProcessor
 
         self._processor = AutoProcessor.from_pretrained(str(model_dir))
-        self._model_obj = AutoModelForZeroShotObjectDetection.from_pretrained(str(model_dir))
+        self._model_obj = AutoModelForZeroShotObjectDetection.from_pretrained(
+            str(model_dir)
+        )
 
     def _do_predict(self, image: Image.Image) -> dict[str, Any]:
         return self.predict_with_prompt(image, "object")
@@ -35,7 +37,10 @@ class Adapter(ModelAdapter):
     def predict_with_prompt(self, image: Image.Image, prompt: str) -> dict[str, Any]:
         if not self._loaded:
             from openeye_ai.adapters.base import ModelNotLoadedError
-            raise ModelNotLoadedError("Model not loaded. Call load() before predict_with_prompt().")
+
+            raise ModelNotLoadedError(
+                "Model not loaded. Call load() before predict_with_prompt()."
+            )
 
         import torch
 
@@ -63,16 +68,18 @@ class Adapter(ModelAdapter):
             results["boxes"].tolist(),
         ):
             x1, y1, x2, y2 = box
-            objects.append({
-                "label": label,
-                "confidence": round(score, 4),
-                "bbox": {
-                    "x": round(x1 / w_img, 4),
-                    "y": round(y1 / h_img, 4),
-                    "w": round((x2 - x1) / w_img, 4),
-                    "h": round((y2 - y1) / h_img, 4),
-                },
-            })
+            objects.append(
+                {
+                    "label": label,
+                    "confidence": round(score, 4),
+                    "bbox": {
+                        "x": round(x1 / w_img, 4),
+                        "y": round(y1 / h_img, 4),
+                        "w": round((x2 - x1) / w_img, 4),
+                        "h": round((y2 - y1) / h_img, 4),
+                    },
+                }
+            )
 
         return {
             "objects": objects,

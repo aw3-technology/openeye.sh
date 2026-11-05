@@ -27,7 +27,9 @@ def _detect_source_format(model_path: Path) -> ModelFormat:
     }
     fmt = mapping.get(ext)
     if fmt is None:
-        raise ValueError(f"Unrecognized model file extension '{ext}'. Supported: {list(mapping.keys())}")
+        raise ValueError(
+            f"Unrecognized model file extension '{ext}'. Supported: {list(mapping.keys())}"
+        )
     return fmt
 
 
@@ -38,7 +40,12 @@ def _find_model_file(model_key: str, model_version: str) -> Path:
     if version_dir.exists():
         for f in version_dir.iterdir():
             if f.is_file() and f.suffix.lower() in {
-                ".onnx", ".pt", ".pth", ".safetensors", ".engine", ".bin"
+                ".onnx",
+                ".pt",
+                ".pth",
+                ".safetensors",
+                ".engine",
+                ".bin",
             }:
                 return f
 
@@ -47,7 +54,12 @@ def _find_model_file(model_key: str, model_version: str) -> Path:
     if base_dir.exists():
         for f in base_dir.iterdir():
             if f.is_file() and f.suffix.lower() in {
-                ".onnx", ".pt", ".pth", ".safetensors", ".engine", ".bin"
+                ".onnx",
+                ".pt",
+                ".pth",
+                ".safetensors",
+                ".engine",
+                ".bin",
             }:
                 return f
 

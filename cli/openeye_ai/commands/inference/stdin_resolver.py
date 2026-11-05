@@ -37,7 +37,9 @@ def _resolve_stdin(*, allow_raw: bool = True):
 
     # Raw image bytes — write to temp file
     if not allow_raw:
-        rprint("[red]Invalid piped data. Expected JSON from a previous openeye run.[/red]")
+        rprint(
+            "[red]Invalid piped data. Expected JSON from a previous openeye run.[/red]"
+        )
         raise typer.Exit(code=1)
 
     try:
@@ -60,6 +62,8 @@ def _resolve_stdin(*, allow_raw: bool = True):
 def _collect_images(directory: Path) -> list[Path]:
     """Collect image files from a directory, sorted by name."""
     images = sorted(
-        p for p in directory.iterdir() if p.is_file() and p.suffix.lower() in _IMAGE_EXTENSIONS
+        p
+        for p in directory.iterdir()
+        if p.is_file() and p.suffix.lower() in _IMAGE_EXTENSIONS
     )
     return images

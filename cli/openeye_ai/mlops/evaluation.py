@@ -74,10 +74,17 @@ def _load_coco_annotations(dataset_path: Path) -> dict[str, list[dict]]:
         img_w, img_h = id_to_size.get(ann["image_id"], (1, 1))
         cat = id_to_cat.get(ann["category_id"], "unknown")
         # Normalize pixel coordinates to 0-1 range for consistent IoU computation
-        result[fname].append({
-            "label": cat,
-            "bbox": {"x": bbox[0] / img_w, "y": bbox[1] / img_h, "w": bbox[2] / img_w, "h": bbox[3] / img_h},
-        })
+        result[fname].append(
+            {
+                "label": cat,
+                "bbox": {
+                    "x": bbox[0] / img_w,
+                    "y": bbox[1] / img_h,
+                    "w": bbox[2] / img_w,
+                    "h": bbox[3] / img_h,
+                },
+            }
+        )
     return dict(result)
 
 
@@ -148,8 +155,7 @@ def evaluate_model(
 
         # Filter by confidence
         predictions = [
-            p for p in predictions
-            if p.get("confidence", 1.0) >= confidence_threshold
+            p for p in predictions if p.get("confidence", 1.0) >= confidence_threshold
         ]
 
         total_preds += len(predictions)
@@ -192,7 +198,11 @@ def evaluate_model(
     # Compute overall metrics
     precision = all_tp / (all_tp + all_fp) if (all_tp + all_fp) > 0 else 0.0
     recall = all_tp / (all_tp + all_fn) if (all_tp + all_fn) > 0 else 0.0
-    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall) > 0
+        else 0.0
+    )
 
     # Compute per-class AP and mAP
     per_class_ap: dict[str, float] = {}

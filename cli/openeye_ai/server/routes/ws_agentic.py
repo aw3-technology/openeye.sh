@@ -100,11 +100,14 @@ async def websocket_agentic(ws: WebSocket):
             t_detect_start = time.time()
 
             if pipeline is not None:
+
                 def run_agentic_pipeline():
                     return pipeline.process_frame(frame=frame_np)
 
                 try:
-                    perception_frame = await state.inference_queue.submit(run_agentic_pipeline)
+                    perception_frame = await state.inference_queue.submit(
+                        run_agentic_pipeline
+                    )
                     frame_dict = perception_frame.model_dump()
                     frame_dict = normalize_frame_bboxes(frame_dict, img_w, img_h)
                 except QueueFullError:
@@ -119,17 +122,25 @@ async def websocket_agentic(ws: WebSocket):
                 def run_basic_detect():
                     t0 = time.time()
                     result = state.adapter.predict(img)
-                    INFERENCE_LATENCY.labels(model=state.model_name).observe(time.time() - t0)
+                    INFERENCE_LATENCY.labels(model=state.model_name).observe(
+                        time.time() - t0
+                    )
                     return result
 
                 try:
-                    detection_result = await state.inference_queue.submit(run_basic_detect)
+                    detection_result = await state.inference_queue.submit(
+                        run_basic_detect
+                    )
                 except (QueueFullError, Exception):
                     await ws.send_json({"error": "Server busy."})
                     continue
                 frame_dict = {
                     "objects": detection_result.get("objects", []),
-                    "scene_graph": {"nodes": [], "relationships": [], "root_id": "scene"},
+                    "scene_graph": {
+                        "nodes": [],
+                        "relationships": [],
+                        "root_id": "scene",
+                    },
                     "scene_description": "",
                     "safety_alerts": [],
                     "safety_zones": [],
@@ -143,12 +154,14 @@ async def websocket_agentic(ws: WebSocket):
             memory_changes = session.update_memory(frame_dict.get("objects", []))
             for change in memory_changes:
                 if change not in (frame_dict.get("change_alerts") or []):
-                    frame_dict.setdefault("change_alerts", []).append({
-                        "change_type": f"object_{change['type']}",
-                        "description": f"{change['label']} {change['type']}",
-                        "affected_track_ids": [change["track_id"]],
-                        "magnitude": 1.0,
-                    })
+                    frame_dict.setdefault("change_alerts", []).append(
+                        {
+                            "change_type": f"object_{change['type']}",
+                            "description": f"{change['label']} {change['type']}",
+                            "affected_track_ids": [change["track_id"]],
+                            "magnitude": 1.0,
+                        }
+                    )
 
             # --- Stage 3: VLM reasoning (throttled) ---
             vlm_result = session.last_vlm_result
@@ -163,19 +176,23 @@ async def websocket_agentic(ws: WebSocket):
                 session.last_vlm_time = now
                 session.last_vlm_result = vlm_result
                 vlm_ms = vlm_result.get("latency_ms", 0)
-                session.add_timeline_event("vlm_reasoning", vlm_result.get("description", "")[:100])
+                session.add_timeline_event(
+                    "vlm_reasoning", vlm_result.get("description", "")[:100]
+                )
 
             # --- Stage 4: Build action plan ---
             action_plan = frame_dict.get("action_suggestions", [])
             if session.current_goal and vlm_result:
                 vlm_desc = vlm_result.get("description", "")
                 if vlm_desc and not vlm_desc.startswith("VLM"):
-                    action_plan.append({
-                        "action": "vlm_guided",
-                        "target_id": None,
-                        "reason": vlm_desc[:200],
-                        "priority": 0.6,
-                    })
+                    action_plan.append(
+                        {
+                            "action": "vlm_guided",
+                            "target_id": None,
+                            "reason": vlm_desc[:200],
+                            "priority": 0.6,
+                        }
+                    )
 
             t_total_ms = (time.time() - t_start) * 1000
 

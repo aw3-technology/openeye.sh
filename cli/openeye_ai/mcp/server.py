@@ -37,11 +37,15 @@ async def openeye_pull(model: str) -> str:
     result = await run_cli("pull", model, timeout=300)
     if result["returncode"] != 0:
         return f"Error: {result['stderr']}"
-    return result["stdout"] or result["stderr"] or f"Model '{model}' pulled successfully."
+    return (
+        result["stdout"] or result["stderr"] or f"Model '{model}' pulled successfully."
+    )
 
 
 @mcp.tool()
-async def openeye_run(model: str, image: str, prompt: str | None = None, pretty: bool = False) -> str:
+async def openeye_run(
+    model: str, image: str, prompt: str | None = None, pretty: bool = False
+) -> str:
     """Run inference on an image and return detections as JSON.
 
     Args:
@@ -82,7 +86,8 @@ async def openeye_serve(model: str, port: int = 8000) -> str:
 
     args = ["serve", model, "--port", str(port)]
     proc = await asyncio.create_subprocess_exec(
-        OPENEYE, *args,
+        OPENEYE,
+        *args,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
@@ -154,6 +159,7 @@ async def openeye_nebius_stats() -> str:
 
 
 # ── Entry point ──────────────────────────────────────────────────────────
+
 
 def main():
     mcp.run(transport="stdio")

@@ -32,7 +32,9 @@ def test_agent_run_success():
         patch("openeye_ai.utils.camera.Camera", return_value=camera),
         patch("openeye_ai.agent.loop.AgentLoop", return_value=loop_instance),
     ):
-        result = runner.invoke(agent_app, ["run", "--model", "yolov8", "--goal", "test"])
+        result = runner.invoke(
+            agent_app, ["run", "--model", "yolov8", "--goal", "test"]
+        )
     assert result.exit_code == 0
     adapter.load.assert_called_once()
     loop_instance.on_tick.assert_called_once()
@@ -49,7 +51,10 @@ def test_agent_run_vlm_missing_openai():
         patch("openeye_ai.registry.get_adapter", return_value=adapter),
         patch("openeye_ai.utils.camera.Camera", return_value=MagicMock()),
         patch("openeye_ai.agent.loop.AgentLoop", return_value=loop_instance),
-        patch("openeye_ai.vlm.nebius.create_vlm_caller", side_effect=ImportError("no openai")),
+        patch(
+            "openeye_ai.vlm.nebius.create_vlm_caller",
+            side_effect=ImportError("no openai"),
+        ),
     ):
         result = runner.invoke(agent_app, ["run", "--model", "yolov8", "--vlm"])
     assert result.exit_code == 0
@@ -130,7 +135,13 @@ def test_agent_memory_success():
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = [
-        {"tick": 1, "scene_summary": "person at desk", "change_description": "", "significance": 0.5, "tags": ["person"]},
+        {
+            "tick": 1,
+            "scene_summary": "person at desk",
+            "change_description": "",
+            "significance": 0.5,
+            "tags": ["person"],
+        },
     ]
     mock_response.raise_for_status = MagicMock()
 

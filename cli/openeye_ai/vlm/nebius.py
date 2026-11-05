@@ -16,18 +16,14 @@ def _resolve_provider() -> tuple[str, str, str]:
     model = os.environ.get("NEBIUS_MODEL", "Qwen/Qwen2.5-VL-72B-Instruct")
 
     # OpenRouter model IDs use lowercase org/model or contain ":free"
-    is_openrouter = "/" in model and (
-        model.split("/")[0].islower() or ":free" in model
-    )
+    is_openrouter = "/" in model and (model.split("/")[0].islower() or ":free" in model)
 
     if is_openrouter:
         api_key = os.environ.get("OPENROUTER_API_KEY", "")
         base_url = "https://openrouter.ai/api/v1"
     else:
         api_key = os.environ.get("NEBIUS_API_KEY", "")
-        base_url = os.environ.get(
-            "NEBIUS_BASE_URL", "https://api.studio.nebius.com/v1"
-        )
+        base_url = os.environ.get("NEBIUS_BASE_URL", "https://api.studio.nebius.com/v1")
 
     return api_key, base_url, model
 
@@ -81,7 +77,9 @@ def create_vlm_caller(max_tokens: int = 400) -> Callable[[str], str]:
     api_key, base_url, model = _resolve_provider()
 
     if not api_key:
-        provider = "OPENROUTER_API_KEY" if "openrouter" in base_url else "NEBIUS_API_KEY"
+        provider = (
+            "OPENROUTER_API_KEY" if "openrouter" in base_url else "NEBIUS_API_KEY"
+        )
         raise RuntimeError(
             f"No API key found. Set the {provider} environment variable."
         )

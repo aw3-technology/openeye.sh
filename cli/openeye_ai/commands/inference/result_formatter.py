@@ -48,11 +48,15 @@ def _format_pretty(result) -> str:
     # Depth map
     if result.depth_map:
         depth_size = len(result.depth_map)
-        parts.append(f"[bold]Depth Map:[/bold] [dim]{depth_size:,} bytes (base64)[/dim]")
+        parts.append(
+            f"[bold]Depth Map:[/bold] [dim]{depth_size:,} bytes (base64)[/dim]"
+        )
 
     # Segmentation masks
     if result.segmentation_masks:
-        parts.append(f"[bold]Segmentation Masks ({len(result.segmentation_masks)}):[/bold]")
+        parts.append(
+            f"[bold]Segmentation Masks ({len(result.segmentation_masks)}):[/bold]"
+        )
         for i, mask in enumerate(result.segmentation_masks, 1):
             parts.append(
                 f"  {i:>2}. area={mask.area:>8,}px  "
@@ -111,16 +115,31 @@ def _save_visualization(result, img, image_path: Path) -> None:
             save_depth_map(result.depth_map, depth_path)
             rprint(f"[green]Depth map saved to {depth_path}[/green]", file=sys.stderr)
         if result.segmentation_masks:
-            annotated = draw_masks(img, [m.model_dump() for m in result.segmentation_masks])
+            annotated = draw_masks(
+                img, [m.model_dump() for m in result.segmentation_masks]
+            )
             mask_path = image_path.with_name(f"{image_path.stem}_masks.png")
             annotated.save(mask_path)
-            rprint(f"[green]Segmentation masks saved to {mask_path}[/green]", file=sys.stderr)
+            rprint(
+                f"[green]Segmentation masks saved to {mask_path}[/green]",
+                file=sys.stderr,
+            )
         if result.objects:
             annotated = draw_boxes(img, [o.model_dump() for o in result.objects])
             annotated_path = image_path.with_name(f"{image_path.stem}_annotated.png")
             annotated.save(annotated_path)
-            rprint(f"[green]Annotated image saved to {annotated_path}[/green]", file=sys.stderr)
-        if not result.depth_map and not result.objects and not result.segmentation_masks:
-            rprint("[yellow]No objects, depth map, or masks to visualize.[/yellow]", file=sys.stderr)
+            rprint(
+                f"[green]Annotated image saved to {annotated_path}[/green]",
+                file=sys.stderr,
+            )
+        if (
+            not result.depth_map
+            and not result.objects
+            and not result.segmentation_masks
+        ):
+            rprint(
+                "[yellow]No objects, depth map, or masks to visualize.[/yellow]",
+                file=sys.stderr,
+            )
     except OSError as e:
         rprint(f"[red]Failed to save visualization: {e}[/red]", file=sys.stderr)

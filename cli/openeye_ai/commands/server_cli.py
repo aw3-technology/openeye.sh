@@ -45,7 +45,9 @@ def health(
 
     table.add_row("Status", "[green]Healthy[/green]")
     table.add_row("Model", health_data.get("model", "—"))
-    table.add_row("Loaded", "[green]Yes[/green]" if health_data.get("loaded") else "[red]No[/red]")
+    table.add_row(
+        "Loaded", "[green]Yes[/green]" if health_data.get("loaded") else "[red]No[/red]"
+    )
     table.add_row("Uptime", str(health_data.get("uptime", "—")))
 
     if queue_data:
@@ -78,7 +80,10 @@ def nebius_stats(
 
     if data.get("by_model"):
         for model_name, stats in data["by_model"].items():
-            table.add_row(f"  {model_name}", f"{stats.get('calls', 0)} calls, {stats.get('tokens', 0)} tokens")
+            table.add_row(
+                f"  {model_name}",
+                f"{stats.get('calls', 0)} calls, {stats.get('tokens', 0)} tokens",
+            )
 
     console.print(table)
 

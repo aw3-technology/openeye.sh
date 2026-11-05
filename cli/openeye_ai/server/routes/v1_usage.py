@@ -58,7 +58,11 @@ class _UsageLedger:
             name: {"calls": r.calls, "credits": r.credits}
             for name, r in by_model.items()
         }
-        recent = [h for h in self._history if h["api_key"] == api_key and h["timestamp"] >= cutoff]
+        recent = [
+            h
+            for h in self._history
+            if h["api_key"] == api_key and h["timestamp"] >= cutoff
+        ]
         return {
             "credits_remaining": max(self.starting_credits - total_credits, 0),
             "credits_used": total_credits,
@@ -82,16 +86,18 @@ async def models(
     """List available models and credit costs."""
     state = get_state(request)
     task = state.model_info.get("task", "detection")
-    return JSONResponse({
-        "models": [
-            {
-                "name": state.model_name,
-                "task": task,
-                "credits_per_call": _CREDITS.get(task, 1),
-                "description": state.model_info.get("description", ""),
-            }
-        ]
-    })
+    return JSONResponse(
+        {
+            "models": [
+                {
+                    "name": state.model_name,
+                    "task": task,
+                    "credits_per_call": _CREDITS.get(task, 1),
+                    "description": state.model_info.get("description", ""),
+                }
+            ]
+        }
+    )
 
 
 async def usage(

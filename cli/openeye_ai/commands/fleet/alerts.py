@@ -11,7 +11,9 @@ from ._helpers import _get, _post, err_console, fleet_app
 
 @fleet_app.command("alerts")
 def list_alerts(
-    resolved: bool | None = typer.Option(None, "--resolved", help="Filter by resolved state (true/false)"),
+    resolved: bool | None = typer.Option(
+        None, "--resolved", help="Filter by resolved state (true/false)"
+    ),
 ) -> None:
     """List fleet alerts."""
     params = {}
@@ -26,9 +28,13 @@ def list_alerts(
     tbl.add_column("Resolved")
     tbl.add_column("Time")
     for a in alerts:
-        sev_style = {"critical": "bold red", "error": "red", "warning": "yellow"}.get(a["severity"], "")
+        sev_style = {"critical": "bold red", "error": "red", "warning": "yellow"}.get(
+            a["severity"], ""
+        )
         tbl.add_row(
-            f"[{sev_style}]{a['severity']}[/{sev_style}]" if sev_style else a["severity"],
+            f"[{sev_style}]{a['severity']}[/{sev_style}]"
+            if sev_style
+            else a["severity"],
             a["alert_type"],
             a["title"],
             "[green]Yes[/green]" if a["resolved"] else "[dim]No[/dim]",

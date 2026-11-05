@@ -24,8 +24,16 @@ class _FakeAdapter(ModelAdapter):
     def _do_predict(self, image: Image.Image) -> dict[str, Any]:
         return {
             "objects": [
-                {"label": "person", "confidence": 0.95, "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4}},
-                {"label": "cat", "confidence": 0.40, "bbox": {"x": 0.5, "y": 0.5, "w": 0.2, "h": 0.2}},
+                {
+                    "label": "person",
+                    "confidence": 0.95,
+                    "bbox": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4},
+                },
+                {
+                    "label": "cat",
+                    "confidence": 0.40,
+                    "bbox": {"x": 0.5, "y": 0.5, "w": 0.2, "h": 0.2},
+                },
             ],
             "inference_ms": 2.5,
         }
@@ -56,7 +64,9 @@ def jpeg_bytes():
 
 
 def test_v1_detect_requires_auth(v1_client, jpeg_bytes):
-    resp = v1_client.post("/v1/detect", files={"file": ("img.jpg", jpeg_bytes, "image/jpeg")})
+    resp = v1_client.post(
+        "/v1/detect", files={"file": ("img.jpg", jpeg_bytes, "image/jpeg")}
+    )
     assert resp.status_code == 422  # missing header
 
 

@@ -11,17 +11,27 @@ from ._helpers import _get, _post, err_console, fleet_app
 
 @fleet_app.command("deploy")
 def deploy(
-    name: str | None = typer.Option(None, "--name", "-n", help="Deployment name (auto-generated if omitted)"),
+    name: str | None = typer.Option(
+        None, "--name", "-n", help="Deployment name (auto-generated if omitted)"
+    ),
     model_id: str = typer.Option(..., "--model", "-m", help="Model ID"),
     model_version: str = typer.Option(..., "--version", "-v", help="Model version"),
-    strategy: str = typer.Option("canary", "--strategy", help="canary|rolling|blue_green|all_at_once"),
-    group_id: str | None = typer.Option(None, "--group", "-g", help="Target device group ID"),
-    model_url: str | None = typer.Option(None, "--url", help="Direct URL to model weights file"),
+    strategy: str = typer.Option(
+        "canary", "--strategy", help="canary|rolling|blue_green|all_at_once"
+    ),
+    group_id: str | None = typer.Option(
+        None, "--group", "-g", help="Target device group ID"
+    ),
+    model_url: str | None = typer.Option(
+        None, "--url", help="Direct URL to model weights file"
+    ),
 ) -> None:
     """Create a staged model deployment."""
     valid_strategies = {"canary", "rolling", "blue_green", "all_at_once"}
     if strategy not in valid_strategies:
-        rprint(f"[red]Invalid strategy '{strategy}'. Must be one of: {', '.join(sorted(valid_strategies))}[/red]")
+        rprint(
+            f"[red]Invalid strategy '{strategy}'. Must be one of: {', '.join(sorted(valid_strategies))}[/red]"
+        )
         raise typer.Exit(code=1)
     resolved_name = name or f"{model_id}-{model_version}"
     payload = {
@@ -49,7 +59,12 @@ def rollback(
 
 @fleet_app.command("deployments")
 def list_deployments(
-    status: str | None = typer.Option(None, "--status", "-s", help="Filter by status: pending, in_progress, completed, failed, rolled_back"),
+    status: str | None = typer.Option(
+        None,
+        "--status",
+        "-s",
+        help="Filter by status: pending, in_progress, completed, failed, rolled_back",
+    ),
 ) -> None:
     """List deployments."""
     params = {"status": status} if status else None
@@ -81,7 +96,9 @@ def advance_deployment(
 ) -> None:
     """Advance a canary deployment to the next stage."""
     result = _post(f"/deployments/{deployment_id}/advance")
-    rprint(f"[green]Deployment advanced:[/green] stage {result.get('current_stage', '?')}")
+    rprint(
+        f"[green]Deployment advanced:[/green] stage {result.get('current_stage', '?')}"
+    )
 
 
 @fleet_app.command("pause-deployment")
@@ -97,9 +114,15 @@ def pause_deployment(
 def ota_update(
     firmware_url: str = typer.Option(..., "--url", "-u", help="Firmware/software URL"),
     version: str = typer.Option(..., "--version", "-v", help="Target version string"),
-    group_id: str | None = typer.Option(None, "--group", "-g", help="Target device group"),
-    device_ids: str | None = typer.Option(None, "--devices", "-d", help="Comma-separated device IDs"),
-    force: bool = typer.Option(False, "--force", help="Force update even if same version"),
+    group_id: str | None = typer.Option(
+        None, "--group", "-g", help="Target device group"
+    ),
+    device_ids: str | None = typer.Option(
+        None, "--devices", "-d", help="Comma-separated device IDs"
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Force update even if same version"
+    ),
 ) -> None:
     """Push an OTA firmware/software update to devices."""
     payload: dict = {

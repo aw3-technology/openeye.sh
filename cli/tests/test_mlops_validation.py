@@ -49,7 +49,9 @@ class TestValidation:
 
         with pytest.raises(ValueError, match="Invalid condition"):
             create_validation_test(
-                name="bad", model_key="m", test_dataset="/tmp/d",
+                name="bad",
+                model_key="m",
+                test_dataset="/tmp/d",
                 conditions=["not a real condition"],
             )
 
@@ -60,7 +62,9 @@ class TestValidation:
         )
 
         create_validation_test(
-            name="smoke", model_key="mymodel", test_dataset="/data",
+            name="smoke",
+            model_key="mymodel",
+            test_dataset="/data",
             conditions=["accuracy > 0.8", "latency_ms < 100"],
         )
         tests = list_validation_tests()
@@ -84,7 +88,9 @@ class TestValidation:
         )
 
         test = create_validation_test(
-            name="get-test", model_key="m", test_dataset="/data",
+            name="get-test",
+            model_key="m",
+            test_dataset="/data",
             conditions=["accuracy > 0.8"],
         )
         fetched = get_validation_test(test.id)

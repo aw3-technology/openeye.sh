@@ -14,7 +14,9 @@ from openeye_ai._cli_helpers import API_URL as _API_URL
 from openeye_ai._cli_helpers import err_console as console
 from openeye_ai._cli_helpers import http_request
 
-api_app = typer.Typer(help="Hosted inference API — detect, describe, and manage credits.")
+api_app = typer.Typer(
+    help="Hosted inference API — detect, describe, and manage credits."
+)
 _API_KEY = os.environ.get("OPENEYE_API_KEY", "")
 
 
@@ -42,9 +44,13 @@ def _auth_headers() -> dict:
 @api_app.command("detect")
 def api_detect(
     image: Path = typer.Argument(help="Path to image file"),
-    confidence: float = typer.Option(0.25, "--confidence", "-c", help="Min confidence (0-1)"),
+    confidence: float = typer.Option(
+        0.25, "--confidence", "-c", help="Min confidence (0-1)"
+    ),
     server: str | None = typer.Option(None, "--server", "-s", help="API server URL"),
-    pretty: bool = typer.Option(False, "--pretty", "-p", help="Pretty-print JSON output"),
+    pretty: bool = typer.Option(
+        False, "--pretty", "-p", help="Pretty-print JSON output"
+    ),
 ) -> None:
     """Run object detection on an image via the hosted API."""
     url = _api_url(server)
@@ -67,7 +73,9 @@ def api_detect(
         rprint(json.dumps(result, indent=2))
     else:
         objects = result.get("objects", [])
-        rprint(f"[green]{len(objects)} objects detected[/green] ({result.get('credits_used', 0)} credits)")
+        rprint(
+            f"[green]{len(objects)} objects detected[/green] ({result.get('credits_used', 0)} credits)"
+        )
         for obj in objects:
             rprint(f"  {obj.get('label', '?')} ({obj.get('confidence', 0):.0%})")
 
@@ -96,7 +104,9 @@ def api_depth(
         )
     result = r.json()
 
-    rprint(f"[green]Depth estimation complete[/green] ({result.get('credits_used', 0)} credits)")
+    rprint(
+        f"[green]Depth estimation complete[/green] ({result.get('credits_used', 0)} credits)"
+    )
     rprint(f"  Shape: {result.get('width', '?')}x{result.get('height', '?')}")
     if result.get("output_path"):
         rprint(f"  Output: {result['output_path']}")
@@ -108,7 +118,9 @@ def api_depth(
 @api_app.command("describe")
 def api_describe(
     image: Path = typer.Argument(help="Path to image file"),
-    prompt: str = typer.Option("Describe what you see in this image.", "--prompt", "-p", help="VLM prompt"),
+    prompt: str = typer.Option(
+        "Describe what you see in this image.", "--prompt", "-p", help="VLM prompt"
+    ),
     server: str | None = typer.Option(None, "--server", "-s", help="API server URL"),
 ) -> None:
     """Get a VLM scene description via the hosted API."""

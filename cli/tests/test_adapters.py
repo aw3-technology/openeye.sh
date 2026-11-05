@@ -44,7 +44,11 @@ class _FakeTensor:
     """Minimal tensor substitute that supports tolist(), indexing, len()."""
 
     def __init__(self, data):
-        self._data = np.array(data, dtype=np.float32) if len(data) else np.zeros((0,), dtype=np.float32)
+        self._data = (
+            np.array(data, dtype=np.float32)
+            if len(data)
+            else np.zeros((0,), dtype=np.float32)
+        )
 
     def __len__(self):
         return len(self._data)
@@ -157,6 +161,7 @@ class TestYOLOv8Adapter:
 
     def test_predict_before_load_raises(self):
         from openeye_ai.adapters.yolov8 import Adapter
+
         adapter = Adapter()
         # predict() checks _loaded before calling _do_load, so no import needed
         with pytest.raises(ModelNotLoadedError):
@@ -164,6 +169,7 @@ class TestYOLOv8Adapter:
 
     def test_instantiation(self):
         from openeye_ai.adapters.yolov8 import Adapter
+
         adapter = Adapter()
         assert adapter._model is None
         assert adapter._loaded is False
@@ -222,11 +228,13 @@ class TestGroundingDINOAdapter:
         mock_transformers = MagicMock()
         proc_inst = MagicMock()
         proc_inst.return_value = {"input_ids": torch.tensor([[1, 2, 3]])}
-        proc_inst.post_process_grounded_object_detection.return_value = [{
-            "scores": torch.tensor([0.95, 0.80]),
-            "text_labels": ["cat", "table"],
-            "boxes": torch.tensor([[10, 20, 50, 80], [30, 10, 90, 60]]),
-        }]
+        proc_inst.post_process_grounded_object_detection.return_value = [
+            {
+                "scores": torch.tensor([0.95, 0.80]),
+                "text_labels": ["cat", "table"],
+                "boxes": torch.tensor([[10, 20, 50, 80], [30, 10, 90, 60]]),
+            }
+        ]
         mock_transformers.AutoProcessor.from_pretrained.return_value = proc_inst
         mock_transformers.AutoModelForZeroShotObjectDetection.from_pretrained.return_value = MagicMock()
 
@@ -246,12 +254,14 @@ class TestGroundingDINOAdapter:
 
     def test_predict_before_load_raises(self):
         from openeye_ai.adapters.grounding_dino import Adapter
+
         adapter = Adapter()
         with pytest.raises(ModelNotLoadedError):
             adapter.predict(_rgb_image())
 
     def test_predict_with_prompt_before_load_raises(self):
         from openeye_ai.adapters.grounding_dino import Adapter
+
         adapter = Adapter()
         with pytest.raises(ModelNotLoadedError):
             adapter.predict_with_prompt(_rgb_image(), "cat")
@@ -263,7 +273,9 @@ class TestGroundingDINOAdapter:
 class TestDepthAnythingAdapter:
     def _load_adapter_with_mock(self, tmp_path, depth_img=None):
         if depth_img is None:
-            depth_img = Image.fromarray(np.random.randint(0, 255, (80, 100), dtype=np.uint8))
+            depth_img = Image.fromarray(
+                np.random.randint(0, 255, (80, 100), dtype=np.uint8)
+            )
 
         mock_transformers = MagicMock()
         pipe_inst = MagicMock()
@@ -321,11 +333,14 @@ class TestSAM2Adapter:
         gen_inst.generate.return_value = mask_data
         mock_sam2_mask.SAM2AutomaticMaskGenerator.return_value = gen_inst
 
-        with patch.dict(sys.modules, {
-            "sam2": MagicMock(),
-            "sam2.build_sam": mock_sam2_build,
-            "sam2.automatic_mask_generator": mock_sam2_mask,
-        }):
+        with patch.dict(
+            sys.modules,
+            {
+                "sam2": MagicMock(),
+                "sam2.build_sam": mock_sam2_build,
+                "sam2.automatic_mask_generator": mock_sam2_mask,
+            },
+        ):
             mod = importlib.import_module("openeye_ai.adapters.sam2")
             importlib.reload(mod)
             adapter = mod.Adapter()
@@ -335,11 +350,14 @@ class TestSAM2Adapter:
     def test_do_load_missing_weights(self, tmp_path):
         mock_sam2_build = MagicMock()
         mock_sam2_mask = MagicMock()
-        with patch.dict(sys.modules, {
-            "sam2": MagicMock(),
-            "sam2.build_sam": mock_sam2_build,
-            "sam2.automatic_mask_generator": mock_sam2_mask,
-        }):
+        with patch.dict(
+            sys.modules,
+            {
+                "sam2": MagicMock(),
+                "sam2.build_sam": mock_sam2_build,
+                "sam2.automatic_mask_generator": mock_sam2_mask,
+            },
+        ):
             mod = importlib.import_module("openeye_ai.adapters.sam2")
             importlib.reload(mod)
             adapter = mod.Adapter()
@@ -381,13 +399,16 @@ class TestSmolVLAAdapter:
         mock_lerobot = MagicMock()
         mock_lerobot.common.policies.smolvla.modeling_smolvla.SmolVLAPolicy.from_pretrained.return_value = policy_inst
 
-        with patch.dict(sys.modules, {
-            "lerobot": mock_lerobot,
-            "lerobot.common": mock_lerobot.common,
-            "lerobot.common.policies": mock_lerobot.common.policies,
-            "lerobot.common.policies.smolvla": mock_lerobot.common.policies.smolvla,
-            "lerobot.common.policies.smolvla.modeling_smolvla": mock_lerobot.common.policies.smolvla.modeling_smolvla,
-        }):
+        with patch.dict(
+            sys.modules,
+            {
+                "lerobot": mock_lerobot,
+                "lerobot.common": mock_lerobot.common,
+                "lerobot.common.policies": mock_lerobot.common.policies,
+                "lerobot.common.policies.smolvla": mock_lerobot.common.policies.smolvla,
+                "lerobot.common.policies.smolvla.modeling_smolvla": mock_lerobot.common.policies.smolvla.modeling_smolvla,
+            },
+        ):
             mod = importlib.import_module("openeye_ai.adapters.smolvla")
             importlib.reload(mod)
             adapter = mod.Adapter()
@@ -452,6 +473,7 @@ class TestRFDETRAdapter:
 class TestONNXAdapter:
     def _make_adapter(self):
         from openeye_ai.adapters.onnx_runtime import ONNXAdapter
+
         return ONNXAdapter()
 
     def _load_with_mock(self, tmp_path):
@@ -517,6 +539,7 @@ class TestONNXAdapter:
 class TestYOLOv8ONNXAdapter:
     def _make_adapter(self):
         from openeye_ai.adapters.yolov8_onnx import Adapter
+
         return Adapter()
 
     def test_preprocess_shape(self):
@@ -560,6 +583,7 @@ class TestYOLOv8ONNXAdapter:
 
     def test_coco_classes_length(self):
         from openeye_ai.adapters.yolov8_onnx import COCO_CLASSES
+
         assert len(COCO_CLASSES) == 80
 
 
@@ -569,6 +593,7 @@ class TestYOLOv8ONNXAdapter:
 class TestTensorRTAdapter:
     def _make_adapter(self):
         from openeye_ai.adapters.tensorrt_runtime import Adapter
+
         return Adapter()
 
     def test_get_providers_includes_tensorrt(self):
@@ -581,6 +606,7 @@ class TestTensorRTAdapter:
     def test_is_subclass_of_onnx_adapter(self):
         from openeye_ai.adapters.onnx_runtime import ONNXAdapter
         from openeye_ai.adapters.tensorrt_runtime import Adapter, TensorRTAdapter
+
         assert issubclass(TensorRTAdapter, ONNXAdapter)
         assert issubclass(Adapter, TensorRTAdapter)
 

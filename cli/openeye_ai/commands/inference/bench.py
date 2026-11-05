@@ -27,7 +27,9 @@ def bench(
 ) -> None:
     """Benchmark a model's inference speed."""
     if warmup < 0 or runs < 1 or width < 1 or height < 1:
-        rprint("[red]Invalid benchmark parameters: warmup >= 0, runs/width/height >= 1[/red]")
+        rprint(
+            "[red]Invalid benchmark parameters: warmup >= 0, runs/width/height >= 1[/red]"
+        )
         raise typer.Exit(code=1)
 
     from openeye_ai.utils.benchmark import run_benchmark
@@ -44,12 +46,16 @@ def bench(
     if variant:
         model_dir = MODELS_DIR / model / f".variant-{variant}"
         if not is_variant_downloaded(model, variant):
-            rprint(f"[yellow]Variant '{variant}' not downloaded. Run: openeye pull {model} --variant {variant}[/yellow]")
+            rprint(
+                f"[yellow]Variant '{variant}' not downloaded. Run: openeye pull {model} --variant {variant}[/yellow]"
+            )
             raise typer.Exit(code=1)
     else:
         model_dir = MODELS_DIR / model
         if not is_downloaded(model):
-            rprint(f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]")
+            rprint(
+                f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]"
+            )
             raise typer.Exit(code=1)
 
     try:
@@ -66,7 +72,9 @@ def bench(
         rprint(f"[red]Failed to load model: {e}[/red]")
         raise typer.Exit(code=1)
 
-    rprint(f"[bold]Benchmarking {info['name']} ({warmup} warmup, {runs} runs, {width}x{height})...[/bold]")
+    rprint(
+        f"[bold]Benchmarking {info['name']} ({warmup} warmup, {runs} runs, {width}x{height})...[/bold]"
+    )
     try:
         result = run_benchmark(
             adapter,

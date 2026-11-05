@@ -1,8 +1,6 @@
 """Tests for rate limiting."""
 
 
-
-
 def test_predict_rate_limit(app_client, tiny_image_bytes):
     """Verify that exceeding the rate limit returns 429."""
     responses = []

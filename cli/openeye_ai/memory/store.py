@@ -51,7 +51,8 @@ class ObservationMemoryStore:
         if query.time_range and query.time_range in _TIME_RANGES:
             cutoff = datetime.now(timezone.utc) - _TIME_RANGES[query.time_range]
             filtered = [
-                o for o in filtered
+                o
+                for o in filtered
                 if datetime.fromisoformat(o.timestamp.replace("Z", "+00:00")) >= cutoff
             ]
 
@@ -62,9 +63,11 @@ class ObservationMemoryStore:
         # Keyword search on scene_summary, change_description, and tags
         if query.query:
             keywords = query.query.lower().split()
+
             def matches(obs: Observation) -> bool:
                 text = f"{obs.scene_summary} {obs.change_description} {' '.join(obs.tags)}".lower()
                 return any(kw in text for kw in keywords)
+
             filtered = [o for o in filtered if matches(o)]
 
         total = len(filtered)
@@ -72,7 +75,9 @@ class ObservationMemoryStore:
         filtered = sorted(filtered, key=lambda o: o.timestamp, reverse=True)
         filtered = filtered[: query.limit]
 
-        return RecallResult(observations=filtered, query=query.query, total_matches=total)
+        return RecallResult(
+            observations=filtered, query=query.query, total_matches=total
+        )
 
     def recall_recent(self, n: int = 5) -> list[Observation]:
         """Return the last N observations."""

@@ -22,20 +22,34 @@ from openeye_ai.commands.inference.watch_helpers import (
 
 
 def watch(
-    models: str = typer.Option("yolov8", "--models", "-m", help="Comma-separated model names"),
+    models: str = typer.Option(
+        "yolov8", "--models", "-m", help="Comma-separated model names"
+    ),
     camera: int = typer.Option(0, "--camera", "-c", help="Camera index"),
-    video: str | None = typer.Option(None, "--video", "-v", help="Video file path (fallback if camera fails)"),
-    safety: bool = typer.Option(False, "--safety", "-s", help="Enable Safety Guardian overlay"),
-    danger_m: float = typer.Option(0.5, "--danger-m", help="Danger zone threshold in metres (requires --safety)"),
-    caution_m: float = typer.Option(1.5, "--caution-m", help="Caution zone threshold in metres (requires --safety)"),
-    demo: bool = typer.Option(False, "--demo", help="Demo mode: warm up models for zero cold-start"),
+    video: str | None = typer.Option(
+        None, "--video", "-v", help="Video file path (fallback if camera fails)"
+    ),
+    safety: bool = typer.Option(
+        False, "--safety", "-s", help="Enable Safety Guardian overlay"
+    ),
+    danger_m: float = typer.Option(
+        0.5, "--danger-m", help="Danger zone threshold in metres (requires --safety)"
+    ),
+    caution_m: float = typer.Option(
+        1.5, "--caution-m", help="Caution zone threshold in metres (requires --safety)"
+    ),
+    demo: bool = typer.Option(
+        False, "--demo", help="Demo mode: warm up models for zero cold-start"
+    ),
 ) -> None:
     """Live camera feed with real-time detections displayed in terminal."""
     if camera < 0:
         rprint(f"[red]Invalid camera index {camera}. Must be >= 0.[/red]")
         raise typer.Exit(code=1)
     if safety and danger_m >= caution_m:
-        rprint(f"[red]danger-m ({danger_m}) must be less than caution-m ({caution_m}).[/red]")
+        rprint(
+            f"[red]danger-m ({danger_m}) must be less than caution-m ({caution_m}).[/red]"
+        )
         raise typer.Exit(code=1)
 
     from rich.columns import Columns
@@ -48,7 +62,9 @@ def watch(
     model_list = [m.strip() for m in models.split(",")]
 
     adapters = load_adapters(model_list, demo)
-    guardian, _DetectedObject3D, _BBox2D, _Position3D = init_safety_guardian(safety, danger_m, caution_m)
+    guardian, _DetectedObject3D, _BBox2D, _Position3D = init_safety_guardian(
+        safety, danger_m, caution_m
+    )
 
     # Handle SIGTERM for graceful shutdown (e.g. systemd stop)
     def _sigterm_handler(signum, frame):
@@ -96,7 +112,9 @@ def watch(
                 dropped = 0
                 frame_count += 1
 
-                all_rows, all_objects, total_inference_ms = run_detections(adapters, frame, rich_escape)
+                all_rows, all_objects, total_inference_ms = run_detections(
+                    adapters, frame, rich_escape
+                )
                 total_detections += len(all_rows)
                 if total_inference_ms > 0:
                     latency_samples.append(total_inference_ms)
@@ -148,7 +166,11 @@ def watch(
                     table.add_row("--", "[dim]No detections[/dim]", "", "", "")
 
                 layout = Columns(
-                    [Panel(table, title="[bold]Detections[/bold]", border_style="blue")],
+                    [
+                        Panel(
+                            table, title="[bold]Detections[/bold]", border_style="blue"
+                        )
+                    ],
                     expand=True,
                 )
 
@@ -156,7 +178,12 @@ def watch(
 
                 if guardian is not None and _DetectedObject3D is not None:
                     safety_panel, n_danger, n_caution = build_safety_panel(
-                        guardian, all_objects, _DetectedObject3D, _BBox2D, _Position3D, Group,
+                        guardian,
+                        all_objects,
+                        _DetectedObject3D,
+                        _BBox2D,
+                        _Position3D,
+                        Group,
                     )
                     safety_danger_count += n_danger
                     safety_caution_count += n_caution

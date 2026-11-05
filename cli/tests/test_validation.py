@@ -73,7 +73,9 @@ def test_invalid_task_raises():
         validate_model_entry(_valid_entry(task="invalid-task"))
 
 
-@pytest.mark.parametrize("task", ["detection", "depth", "segmentation", "classification", "embedding", "vla"])
+@pytest.mark.parametrize(
+    "task", ["detection", "depth", "segmentation", "classification", "embedding", "vla"]
+)
 def test_all_valid_tasks_pass(task):
     validate_model_entry(_valid_entry(task=task))
 
@@ -111,12 +113,16 @@ def test_checksum_missing_keys_raises():
 
 def test_checksum_bad_algorithm_raises():
     with pytest.raises(ValidationError, match="Unsupported checksum"):
-        validate_model_entry(_valid_entry(checksum={"algorithm": "crc32", "value": "abc"}))
+        validate_model_entry(
+            _valid_entry(checksum={"algorithm": "crc32", "value": "abc"})
+        )
 
 
 def test_checksum_bad_hex_raises():
     with pytest.raises(ValidationError, match="Invalid SHA-256"):
-        validate_model_entry(_valid_entry(checksum={"algorithm": "sha256", "value": "not-hex"}))
+        validate_model_entry(
+            _valid_entry(checksum={"algorithm": "sha256", "value": "not-hex"})
+        )
 
 
 def test_md5_checksum_passes():

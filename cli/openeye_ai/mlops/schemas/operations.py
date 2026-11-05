@@ -33,7 +33,9 @@ class ABTestConfig(BaseModel):
         default=0.5, ge=0.0, le=1.0, description="Fraction of traffic to version B"
     )
     max_samples: Optional[int] = Field(default=None, description="Stop after N samples")
-    duration_hours: Optional[float] = Field(default=None, description="Stop after N hours")
+    duration_hours: Optional[float] = Field(
+        default=None, description="Stop after N hours"
+    )
 
     @model_validator(mode="after")
     def _versions_differ(self):
@@ -63,7 +65,9 @@ class ABTestResult(BaseModel):
     metrics_a: ABTestMetrics = Field(default_factory=lambda: ABTestMetrics(version=""))
     metrics_b: ABTestMetrics = Field(default_factory=lambda: ABTestMetrics(version=""))
     winner: Optional[str] = None
-    started_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    started_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
     completed_at: Optional[str] = None
 
 
@@ -75,7 +79,9 @@ class DriftDetectionConfig(BaseModel):
 
     metric: str = Field(default="accuracy", description="Metric to monitor")
     threshold: float = Field(default=0.05, description="Drift threshold (e.g. 5% drop)")
-    window_size: int = Field(default=1000, description="Number of recent inferences to evaluate")
+    window_size: int = Field(
+        default=1000, description="Number of recent inferences to evaluate"
+    )
     check_interval_minutes: int = 60
 
 
@@ -86,7 +92,9 @@ class RetrainingPipelineConfig(BaseModel):
     model_key: str
     trigger: RetrainingTrigger = RetrainingTrigger.ACCURACY_DRIFT
     drift_config: Optional[DriftDetectionConfig] = None
-    schedule_cron: Optional[str] = Field(default=None, description="Cron expression for scheduled trigger")
+    schedule_cron: Optional[str] = Field(
+        default=None, description="Cron expression for scheduled trigger"
+    )
     training_script: str = Field(description="Path to training script or command")
     training_args: dict[str, Any] = Field(default_factory=dict)
     dataset_path: str = ""
@@ -106,13 +114,17 @@ class RetrainingRun(BaseModel):
     model_key: str
     trigger: RetrainingTrigger
     status: PipelineStatus = PipelineStatus.IDLE
-    triggered_by: str = Field(default="", description="drift_detector, scheduler, or user")
+    triggered_by: str = Field(
+        default="", description="drift_detector, scheduler, or user"
+    )
     new_version: Optional[str] = None
     metrics: Optional[TrainingMetrics] = None
     logs: list[str] = Field(default_factory=list)
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
 
 
 # ── Story 186: Batch inference ───────────────────────────────────────
@@ -124,7 +136,9 @@ class BatchInferenceConfig(BaseModel):
     name: str
     model_key: str
     model_version: str
-    input_path: str = Field(description="Path to dataset (local dir, S3 URI, or GCS URI)")
+    input_path: str = Field(
+        description="Path to dataset (local dir, S3 URI, or GCS URI)"
+    )
     output_path: str = Field(description="Where to write results (S3/GCS/local)")
     storage_backend: StorageBackend = StorageBackend.LOCAL
     batch_size: int = Field(default=32, ge=1)
@@ -155,7 +169,9 @@ class BatchInferenceJob(BaseModel):
     progress: BatchInferenceProgress = Field(default_factory=BatchInferenceProgress)
     result_path: Optional[str] = None
     error: Optional[str] = None
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
 
@@ -183,7 +199,9 @@ class BenchmarkMatrixResult(BaseModel):
     image_size: tuple[int, int] = (640, 480)
     runs_per_target: int = 100
     entries: list[HardwareBenchmarkEntry] = Field(default_factory=list)
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
 
 
 # ── Story 192: Inference failure annotation + feedback loop ──────────
@@ -205,8 +223,12 @@ class InferenceFailureAnnotation(BaseModel):
     annotation_label: AnnotationLabel
     annotator: str = ""
     notes: str = ""
-    fed_back: bool = Field(default=False, description="Whether this has been added to training data")
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    fed_back: bool = Field(
+        default=False, description="Whether this has been added to training data"
+    )
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
 
 
 class FeedbackBatch(BaseModel):
@@ -218,6 +240,8 @@ class FeedbackBatch(BaseModel):
     total_annotations: int = 0
     output_dataset_path: str = Field(description="Path to generated correction dataset")
     status: PipelineStatus = PipelineStatus.IDLE
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
     completed_at: Optional[str] = None
     error: Optional[str] = None

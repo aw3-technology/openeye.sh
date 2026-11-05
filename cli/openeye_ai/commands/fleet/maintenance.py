@@ -14,7 +14,9 @@ def maintenance_create(
     name: str = typer.Option(..., "--name", "-n", help="Window name"),
     start: str = typer.Option(..., "--start", help="Start time (ISO 8601)"),
     end: str = typer.Option(..., "--end", help="End time (ISO 8601)"),
-    device_ids: str | None = typer.Option(None, "--devices", "-d", help="Comma-separated device IDs"),
+    device_ids: str | None = typer.Option(
+        None, "--devices", "-d", help="Comma-separated device IDs"
+    ),
     group_id: str | None = typer.Option(None, "--group", "-g", help="Target group ID"),
 ) -> None:
     """Create a maintenance window."""
@@ -33,7 +35,9 @@ def maintenance_create(
 
 @fleet_app.command("maintenance-list")
 def maintenance_list(
-    active_only: bool = typer.Option(False, "--active", help="Show only active windows"),
+    active_only: bool = typer.Option(
+        False, "--active", help="Show only active windows"
+    ),
 ) -> None:
     """List maintenance windows."""
     params = {"active_only": str(active_only).lower()}

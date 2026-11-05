@@ -16,15 +16,24 @@ def serve(
     model: str = typer.Argument(help="Model name to serve"),
     host: str = typer.Option("0.0.0.0", "--host", help="Bind host"),
     port: int = typer.Option(8000, "--port", help="Bind port"),
-    demo: bool = typer.Option(False, "--demo", help="Demo mode: warm up model, show live status bar"),
-    vlm_model: str | None = typer.Option(None, "--vlm-model", help="VLM model ID for perception (e.g. qwen/qwen3.5-9b, openrouter/healer-alpha)"),
-    cortex_llm: str | None = typer.Option(None, "--cortex-llm", help="Cortex LLM model ID for reasoning (e.g. z-ai/glm-5-turbo, openrouter/hunter-alpha)"),
+    demo: bool = typer.Option(
+        False, "--demo", help="Demo mode: warm up model, show live status bar"
+    ),
+    vlm_model: str | None = typer.Option(
+        None,
+        "--vlm-model",
+        help="VLM model ID for perception (e.g. qwen/qwen3.5-9b, openrouter/healer-alpha)",
+    ),
+    cortex_llm: str | None = typer.Option(
+        None,
+        "--cortex-llm",
+        help="Cortex LLM model ID for reasoning (e.g. z-ai/glm-5-turbo, openrouter/hunter-alpha)",
+    ),
 ) -> None:
     """Start a FastAPI server with REST API, WebSocket, and browser dashboard."""
     if port < 1 or port > 65535:
         rprint(f"[red]Invalid port {port}. Must be between 1 and 65535.[/red]")
         raise typer.Exit(code=1)
-
 
     import uvicorn
     from rich.panel import Panel
@@ -40,7 +49,9 @@ def serve(
     model_dir = MODELS_DIR / model
 
     if not is_downloaded(model):
-        rprint(f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]")
+        rprint(
+            f"[yellow]Model '{model}' not downloaded. Run: openeye pull {model}[/yellow]"
+        )
         raise typer.Exit(code=1)
 
     try:
@@ -81,8 +92,12 @@ def serve(
         f"  [dim]Metrics[/dim]   -> http://localhost:{port}/metrics"
     )
     if demo:
-        banner += "\n  [bold yellow]Demo mode[/bold yellow] -- model is warm, zero cold-start"
-    console.print(Panel(banner, title="[bold]OpenEye Server[/bold]", border_style="green"))
+        banner += (
+            "\n  [bold yellow]Demo mode[/bold yellow] -- model is warm, zero cold-start"
+        )
+    console.print(
+        Panel(banner, title="[bold]OpenEye Server[/bold]", border_style="green")
+    )
 
     if not demo:
         uvicorn.run(fastapi_app, host=host, port=port, log_level="info")
@@ -103,7 +118,10 @@ def _run_demo_mode(fastapi_app, host: str, port: int, model: str, console) -> No
 
     server_start = time.monotonic()
     server_config = uvicorn.Config(
-        fastapi_app, host=host, port=port, log_level="info",
+        fastapi_app,
+        host=host,
+        port=port,
+        log_level="info",
     )
     server = uvicorn.Server(server_config)
 

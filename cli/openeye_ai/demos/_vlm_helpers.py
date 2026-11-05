@@ -25,6 +25,7 @@ def _load_env() -> None:
     if env_file.exists():
         try:
             from dotenv import load_dotenv
+
             load_dotenv(env_file)
         except ImportError:
             # Manual fallback — parse KEY=VALUE lines

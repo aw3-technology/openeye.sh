@@ -68,7 +68,11 @@ def test_health_connection_error():
 def test_health_custom_server():
     mock_resp = MagicMock()
     mock_resp.status_code = 200
-    mock_resp.json.return_value = {"model": "depth-anything", "loaded": True, "uptime": "1h"}
+    mock_resp.json.return_value = {
+        "model": "depth-anything",
+        "loaded": True,
+        "uptime": "1h",
+    }
     mock_resp.raise_for_status = MagicMock()
 
     # Queue call may fail — that's ok, it's caught
@@ -91,7 +95,6 @@ def test_health_without_queue():
     mock_resp.status_code = 200
     mock_resp.json.return_value = {"model": "yolov8", "loaded": False, "uptime": "5m"}
     mock_resp.raise_for_status = MagicMock()
-
 
     with (
         patch("httpx.request", return_value=mock_resp),
@@ -172,7 +175,10 @@ def test_config_set_json_value():
     """Setting a JSON value (number)."""
     mock_get_resp = MagicMock()
     mock_get_resp.status_code = 200
-    mock_get_resp.json.return_value = {"confidence_threshold": 0.25, "max_batch_size": 4}
+    mock_get_resp.json.return_value = {
+        "confidence_threshold": 0.25,
+        "max_batch_size": 4,
+    }
     mock_get_resp.raise_for_status = MagicMock()
 
     mock_put_resp = MagicMock()

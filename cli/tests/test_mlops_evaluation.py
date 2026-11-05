@@ -72,7 +72,14 @@ class TestEvaluation:
         from openeye_ai.mlops.evaluation import _load_jsonl_annotations
 
         lines = [
-            json.dumps({"image": "a.jpg", "labels": [{"label": "car", "bbox": {"x": 0, "y": 0, "w": 1, "h": 1}}]}),
+            json.dumps(
+                {
+                    "image": "a.jpg",
+                    "labels": [
+                        {"label": "car", "bbox": {"x": 0, "y": 0, "w": 1, "h": 1}}
+                    ],
+                }
+            ),
             json.dumps({"image": "b.jpg", "labels": []}),
         ]
         p = tmp_path / "annotations.jsonl"
@@ -106,7 +113,14 @@ class TestEvaluation:
         from openeye_ai.mlops.evaluation import _load_jsonl_annotations
 
         lines = [
-            json.dumps({"image": "a.jpg", "labels": [{"label": "car", "bbox": {"x": 0, "y": 0, "w": 1, "h": 1}}]}),
+            json.dumps(
+                {
+                    "image": "a.jpg",
+                    "labels": [
+                        {"label": "car", "bbox": {"x": 0, "y": 0, "w": 1, "h": 1}}
+                    ],
+                }
+            ),
             "",
             "   ",
             json.dumps({"image": "b.jpg", "labels": []}),

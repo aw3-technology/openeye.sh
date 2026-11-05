@@ -12,7 +12,8 @@ class TestLineage:
         from openeye_ai.mlops.lineage import get_lineage, record_lineage
 
         lineage = record_lineage(
-            "model-a", "1.0.0",
+            "model-a",
+            "1.0.0",
             dataset="imagenet",
             code_commit="abc123",
             auto_detect_git=False,
@@ -32,8 +33,12 @@ class TestLineage:
     def test_record_lineage_replaces_existing(self):
         from openeye_ai.mlops.lineage import get_lineage, list_lineage, record_lineage
 
-        record_lineage("m", "1.0", dataset="d1", code_commit="c1", auto_detect_git=False)
-        record_lineage("m", "1.0", dataset="d2", code_commit="c2", auto_detect_git=False)
+        record_lineage(
+            "m", "1.0", dataset="d1", code_commit="c1", auto_detect_git=False
+        )
+        record_lineage(
+            "m", "1.0", dataset="d2", code_commit="c2", auto_detect_git=False
+        )
         assert len(list_lineage(model_key="m")) == 1
         assert get_lineage("m", "1.0").dataset == "d2"
 
@@ -48,9 +53,25 @@ class TestLineage:
     def test_lineage_chain(self):
         from openeye_ai.mlops.lineage import get_lineage_chain, record_lineage
 
-        record_lineage("m", "1.0", dataset="d1", code_commit="c1", auto_detect_git=False)
-        record_lineage("m", "2.0", dataset="d2", code_commit="c2", auto_detect_git=False, parent_model="1.0")
-        record_lineage("m", "3.0", dataset="d3", code_commit="c3", auto_detect_git=False, parent_model="2.0")
+        record_lineage(
+            "m", "1.0", dataset="d1", code_commit="c1", auto_detect_git=False
+        )
+        record_lineage(
+            "m",
+            "2.0",
+            dataset="d2",
+            code_commit="c2",
+            auto_detect_git=False,
+            parent_model="1.0",
+        )
+        record_lineage(
+            "m",
+            "3.0",
+            dataset="d3",
+            code_commit="c3",
+            auto_detect_git=False,
+            parent_model="2.0",
+        )
 
         chain = get_lineage_chain("m", "3.0")
         assert len(chain) == 3
@@ -62,8 +83,22 @@ class TestLineage:
         from openeye_ai.mlops.lineage import get_lineage_chain, record_lineage
 
         # Create a cycle: 1.0 -> 2.0 -> 1.0
-        record_lineage("cyc", "1.0", dataset="d", code_commit="c", auto_detect_git=False, parent_model="2.0")
-        record_lineage("cyc", "2.0", dataset="d", code_commit="c", auto_detect_git=False, parent_model="1.0")
+        record_lineage(
+            "cyc",
+            "1.0",
+            dataset="d",
+            code_commit="c",
+            auto_detect_git=False,
+            parent_model="2.0",
+        )
+        record_lineage(
+            "cyc",
+            "2.0",
+            dataset="d",
+            code_commit="c",
+            auto_detect_git=False,
+            parent_model="1.0",
+        )
 
         chain = get_lineage_chain("cyc", "1.0")
         # Should terminate without infinite loop
@@ -104,7 +139,9 @@ class TestLineage:
         """Chain with no parent should contain just the single version."""
         from openeye_ai.mlops.lineage import get_lineage_chain, record_lineage
 
-        record_lineage("solo", "1.0", dataset="d", code_commit="c", auto_detect_git=False)
+        record_lineage(
+            "solo", "1.0", dataset="d", code_commit="c", auto_detect_git=False
+        )
         chain = get_lineage_chain("solo", "1.0")
         assert len(chain) == 1
         assert chain[0].version == "1.0"
@@ -113,7 +150,14 @@ class TestLineage:
         """Chain should stop when a parent_model version doesn't exist."""
         from openeye_ai.mlops.lineage import get_lineage_chain, record_lineage
 
-        record_lineage("gap", "2.0", dataset="d", code_commit="c", auto_detect_git=False, parent_model="1.0")
+        record_lineage(
+            "gap",
+            "2.0",
+            dataset="d",
+            code_commit="c",
+            auto_detect_git=False,
+            parent_model="1.0",
+        )
         # "1.0" was never recorded
         chain = get_lineage_chain("gap", "2.0")
         assert len(chain) == 1

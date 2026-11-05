@@ -27,7 +27,12 @@ def version_callback(value: bool) -> None:
 @app.callback()
 def main(
     version: Optional[bool] = typer.Option(
-        None, "--version", "-v", help="Show version.", callback=version_callback, is_eager=True
+        None,
+        "--version",
+        "-v",
+        help="Show version.",
+        callback=version_callback,
+        is_eager=True,
     ),
 ) -> None:
     """OpenEye — Ollama for vision AI models."""

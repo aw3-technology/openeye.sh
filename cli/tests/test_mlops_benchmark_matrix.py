@@ -32,22 +32,34 @@ class TestBenchmarkMatrix:
 
         entries = [
             BenchmarkMatrixResult(
-                model_key="m", model_version="1.0",
-                image_size=(640, 480), runs_per_target=10,
-                entries=[HardwareBenchmarkEntry(
-                    hardware=HardwareTarget.CPU,
-                    mean_latency_ms=10.0, median_latency_ms=10.0,
-                    p95_latency_ms=12.0, throughput_fps=100.0,
-                )],
+                model_key="m",
+                model_version="1.0",
+                image_size=(640, 480),
+                runs_per_target=10,
+                entries=[
+                    HardwareBenchmarkEntry(
+                        hardware=HardwareTarget.CPU,
+                        mean_latency_ms=10.0,
+                        median_latency_ms=10.0,
+                        p95_latency_ms=12.0,
+                        throughput_fps=100.0,
+                    )
+                ],
             ).model_dump(),
             BenchmarkMatrixResult(
-                model_key="m", model_version="2.0",
-                image_size=(640, 480), runs_per_target=10,
-                entries=[HardwareBenchmarkEntry(
-                    hardware=HardwareTarget.CPU,
-                    mean_latency_ms=8.0, median_latency_ms=8.0,
-                    p95_latency_ms=10.0, throughput_fps=125.0,
-                )],
+                model_key="m",
+                model_version="2.0",
+                image_size=(640, 480),
+                runs_per_target=10,
+                entries=[
+                    HardwareBenchmarkEntry(
+                        hardware=HardwareTarget.CPU,
+                        mean_latency_ms=8.0,
+                        median_latency_ms=8.0,
+                        p95_latency_ms=10.0,
+                        throughput_fps=125.0,
+                    )
+                ],
             ).model_dump(),
         ]
         _save_benchmarks(entries)

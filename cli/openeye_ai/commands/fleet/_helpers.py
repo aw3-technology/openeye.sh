@@ -8,6 +8,7 @@ import typer
 from rich import print as rprint
 
 from openeye_ai._cli_helpers import FLEET_URL as _BASE_URL
+from openeye_ai._cli_helpers import err_console as err_console  # re-exported
 
 fleet_app = typer.Typer(help="Fleet & device management for edge AI.")
 
@@ -61,7 +62,9 @@ def _request(
             detail = exc.response.json().get("detail", "")
         except Exception:
             pass
-        rprint(f"[red]Error {exc.response.status_code}: {detail or exc.response.text[:200]}[/red]")
+        rprint(
+            f"[red]Error {exc.response.status_code}: {detail or exc.response.text[:200]}[/red]"
+        )
         raise typer.Exit(code=1)
     except httpx.TimeoutException:
         rprint("[red]Error: Request timed out[/red]")

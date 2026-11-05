@@ -21,16 +21,23 @@ def mlops_promote(
     try:
         target = ModelStage(to_stage)
     except ValueError:
-        rprint(f"[red]Invalid target stage '{to_stage}'. Use: staging, production, archived[/red]")
+        rprint(
+            f"[red]Invalid target stage '{to_stage}'. Use: staging, production, archived[/red]"
+        )
         raise typer.Exit(code=1)
 
     try:
         req = PromotionRequest(
-            model_key=model, version=version,
-            target_stage=target, requester=requester, reason=reason,
+            model_key=model,
+            version=version,
+            target_stage=target,
+            requester=requester,
+            reason=reason,
         )
         record = request_promotion(req)
-        rprint(f"[green]Promotion {record.from_stage.value} -> {record.to_stage.value}: {record.status.value}[/green]")
+        rprint(
+            f"[green]Promotion {record.from_stage.value} -> {record.to_stage.value}: {record.status.value}[/green]"
+        )
         if record.approver:
             rprint(f"  Approved by: {record.approver}")
     except (KeyError, ValueError) as e:
@@ -48,7 +55,9 @@ def mlops_approve_promotion(
 
     try:
         record = approve_promotion(model, version, approver)
-        rprint(f"[green]Promotion approved:[/green] {record.from_stage.value} -> {record.to_stage.value}")
+        rprint(
+            f"[green]Promotion approved:[/green] {record.from_stage.value} -> {record.to_stage.value}"
+        )
         rprint(f"  Approved by: {record.approver}")
     except (KeyError, ValueError) as e:
         rprint(f"[red]{e}[/red]")
@@ -66,7 +75,9 @@ def mlops_reject_promotion(
 
     try:
         record = reject_promotion(model, version, approver, reason)
-        rprint(f"[yellow]Promotion rejected:[/yellow] {record.from_stage.value} -> {record.to_stage.value}")
+        rprint(
+            f"[yellow]Promotion rejected:[/yellow] {record.from_stage.value} -> {record.to_stage.value}"
+        )
         if record.reason:
             rprint(f"  Reason: {record.reason}")
     except (KeyError, ValueError) as e:

@@ -254,7 +254,8 @@ def test_vlm_model_flag_sets_runtime_config():
     adapter = FakeAdapter()
     adapter.load(Path("/tmp/vlm"))
     app = create_app(
-        adapter, "test-model",
+        adapter,
+        "test-model",
         {"name": "Test", "task": "detection"},
         vlm_model="qwen/qwen3.5-9b",
     )
@@ -309,7 +310,10 @@ def test_metrics_endpoint_exists(app_client):
 
 def test_metrics_content_type(app_client):
     resp = app_client.get("/metrics")
-    assert "text/plain" in resp.headers["content-type"] or "text/openmetrics" in resp.headers["content-type"]
+    assert (
+        "text/plain" in resp.headers["content-type"]
+        or "text/openmetrics" in resp.headers["content-type"]
+    )
 
 
 def test_metrics_contains_openeye_metrics(app_client):

@@ -10,9 +10,17 @@ from openeye_ai.registry import add_model_to_registry
 
 def add_model(
     key: str = typer.Argument(help="Registry key (e.g. my-model)"),
-    name: str | None = typer.Option(None, "--name", help="Display name (defaults to key)"),
-    task: str = typer.Option(..., "--task", help="Task type (detection, depth, segmentation, classification, embedding)"),
-    adapter: str = typer.Option(..., "--adapter", help="Adapter key or path to .py file"),
+    name: str | None = typer.Option(
+        None, "--name", help="Display name (defaults to key)"
+    ),
+    task: str = typer.Option(
+        ...,
+        "--task",
+        help="Task type (detection, depth, segmentation, classification, embedding)",
+    ),
+    adapter: str = typer.Option(
+        ..., "--adapter", help="Adapter key or path to .py file"
+    ),
     hf_repo: str | None = typer.Option(None, "--hf-repo", help="HuggingFace repo ID"),
     filename: str | None = typer.Option(None, "--filename", help="Model filename"),
     size_mb: float | None = typer.Option(None, "--size-mb", help="Model size in MB"),

@@ -102,7 +102,9 @@ class TestStory30VideoInput:
         """When --video is given, _open_input_source creates a VideoPlayer."""
         mock_vp = MagicMock()
         with (
-            patch("openeye_ai.utils.camera.VideoPlayer", return_value=mock_vp) as vp_cls,
+            patch(
+                "openeye_ai.utils.camera.VideoPlayer", return_value=mock_vp
+            ) as vp_cls,
             patch("openeye_ai.utils.camera.Camera") as cam_cls,
         ):
             from openeye_ai.commands.inference.watch_helpers import open_input_source
@@ -361,7 +363,9 @@ class TestEdgeCases:
         with (
             patch(f"{_W}.load_adapters", return_value=adapters),
             patch(f"{_W}.init_safety_guardian", return_value=(None, None, None, None)),
-            patch(f"{_W}.open_input_source", return_value=(DroppingCamera(), "camera 0")),
+            patch(
+                f"{_W}.open_input_source", return_value=(DroppingCamera(), "camera 0")
+            ),
             patch(f"{_W}.time.sleep"),
             patch("rich.live.Live", NoOpLive),
         ):
