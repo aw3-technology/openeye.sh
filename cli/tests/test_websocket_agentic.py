@@ -133,7 +133,7 @@ class TestAgenticSession:
         import asyncio
 
         session = self._make_session(vlm_client=None)
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             session.run_vlm_reasoning("base64data", "scene desc", "goal")
         )
         assert "not configured" in result["description"].lower()
@@ -149,9 +149,7 @@ class TestAgenticSession:
         mock_client.chat.completions.create.return_value = mock_resp
 
         session = self._make_session(vlm_client=mock_client, vlm_model="test-vlm")
-        result = asyncio.get_event_loop().run_until_complete(
-            session.run_vlm_reasoning("b64", "desc", "find object")
-        )
+        result = asyncio.run(session.run_vlm_reasoning("b64", "desc", "find object"))
         assert result["description"] == "OBSERVATION: test scene"
         assert "test-vlm" in result["reasoning"]
         assert result["latency_ms"] >= 0
@@ -167,9 +165,7 @@ class TestAgenticSession:
 
         config = AgenticConfig(vlm_timeout=0.01)
         session = self._make_session(vlm_client=mock_client, config=config)
-        result = asyncio.get_event_loop().run_until_complete(
-            session.run_vlm_reasoning("b64", "desc", "goal")
-        )
+        result = asyncio.run(session.run_vlm_reasoning("b64", "desc", "goal"))
         assert "timed out" in result["description"].lower()
 
     def test_run_vlm_reasoning_error(self):
@@ -179,9 +175,7 @@ class TestAgenticSession:
         mock_client.chat.completions.create.side_effect = RuntimeError("API error")
 
         session = self._make_session(vlm_client=mock_client)
-        result = asyncio.get_event_loop().run_until_complete(
-            session.run_vlm_reasoning("b64", "desc", "goal")
-        )
+        result = asyncio.run(session.run_vlm_reasoning("b64", "desc", "goal"))
         assert "failed" in result["description"].lower()
 
     def test_goal_update(self):

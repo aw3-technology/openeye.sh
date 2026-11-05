@@ -266,8 +266,12 @@ def test_vlm_model_flag_sets_runtime_config():
     assert resp.json()["vlm_model"] == "qwen/qwen3.5-9b"
 
 
-def test_vlm_model_resolve_openrouter():
-    """OpenRouter-style model IDs should be detected correctly."""
+def test_vlm_model_resolve_openrouter(monkeypatch):
+    """OpenRouter-style model IDs should be detected correctly.
+
+    OpenRouter routing requires OPENROUTER_API_KEY to be set.
+    """
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-test-key")
     from openeye_ai.server.queue import InferenceQueue
     from openeye_ai.server.state import ServerState
 

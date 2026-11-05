@@ -277,7 +277,7 @@ class TestStory37DemoFallback:
 
     def test_no_demo_exits_with_code_1(self):
         """When camera fails and no demo video exists, exit 1."""
-        from click.exceptions import Exit as ClickExit
+        from typer import Exit as TyperExit
 
         with (
             patch(
@@ -288,7 +288,7 @@ class TestStory37DemoFallback:
         ):
             from openeye_ai.commands.inference.watch_helpers import open_input_source
 
-            with pytest.raises(ClickExit):
+            with pytest.raises(TyperExit):
                 open_input_source(0, None)
 
     def test_video_flag_fallback_on_camera_fail(self):

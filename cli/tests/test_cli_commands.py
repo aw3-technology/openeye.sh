@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
+import openeye_ai
 from conftest import StubAdapter, make_test_registry
 from openeye_ai.cli import app
 from PIL import Image
@@ -41,7 +42,7 @@ def test_version_flag():
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
     assert "openeye-sh" in result.output
-    assert "0.1.0" in result.output
+    assert openeye_ai.__version__ in result.output
 
 
 def test_help_flag():
@@ -55,12 +56,14 @@ def test_help_flag():
 
 def test_list_renders_table(tmp_openeye_home, monkeypatch):
     registry = _make_registry()
-    monkeypatch.setattr("openeye_ai.commands.models.load_registry", lambda: registry)
     monkeypatch.setattr(
-        "openeye_ai.commands.models.is_downloaded", lambda k: k == "yolov8"
+        "openeye_ai.commands.models_list.load_registry", lambda: registry
     )
     monkeypatch.setattr(
-        "openeye_ai.commands.models.is_variant_downloaded", lambda k, v: False
+        "openeye_ai.commands.models_list.is_downloaded", lambda k: k == "yolov8"
+    )
+    monkeypatch.setattr(
+        "openeye_ai.commands.models_list.is_variant_downloaded", lambda k, v: False
     )
 
     result = runner.invoke(app, ["list"])
@@ -75,14 +78,17 @@ def test_list_renders_table(tmp_openeye_home, monkeypatch):
 def test_pull_success(tmp_openeye_home, monkeypatch):
     registry = _make_registry()
     monkeypatch.setattr(
-        "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
-    )
-    monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-    monkeypatch.setattr(
-        "openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter()
+        "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
     )
     monkeypatch.setattr(
-        "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+        "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
+    )
+    monkeypatch.setattr(
+        "openeye_ai.commands.models_pull.get_adapter",
+        lambda m, variant=None: StubAdapter(),
+    )
+    monkeypatch.setattr(
+        "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
     )
     monkeypatch.setattr(
         "shutil.disk_usage",
@@ -101,7 +107,7 @@ def test_pull_success(tmp_openeye_home, monkeypatch):
 
 def test_pull_unknown_model(tmp_openeye_home, monkeypatch):
     monkeypatch.setattr(
-        "openeye_ai.commands.models.get_model_info",
+        "openeye_ai.commands.models_pull.get_model_info",
         lambda m: (_ for _ in ()).throw(KeyError(f"Unknown model '{m}'")),
     )
 
@@ -112,11 +118,11 @@ def test_pull_unknown_model(tmp_openeye_home, monkeypatch):
 def test_pull_already_downloaded(tmp_openeye_home, monkeypatch):
     registry = _make_registry()
     monkeypatch.setattr(
-        "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+        "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
     )
-    monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: True)
+    monkeypatch.setattr("openeye_ai.commands.models_pull.is_downloaded", lambda m: True)
     monkeypatch.setattr(
-        "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+        "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
     )
 
     result = runner.invoke(app, ["pull", "yolov8"])
@@ -126,16 +132,21 @@ def test_pull_already_downloaded(tmp_openeye_home, monkeypatch):
 
 def test_pull_all(tmp_openeye_home, monkeypatch):
     registry = _make_registry()
-    monkeypatch.setattr("openeye_ai.commands.models.load_registry", lambda: registry)
     monkeypatch.setattr(
-        "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
-    )
-    monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-    monkeypatch.setattr(
-        "openeye_ai.commands.models.get_adapter", lambda m, variant=None: StubAdapter()
+        "openeye_ai.commands.models_pull.load_registry", lambda: registry
     )
     monkeypatch.setattr(
-        "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+        "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
+    )
+    monkeypatch.setattr(
+        "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
+    )
+    monkeypatch.setattr(
+        "openeye_ai.commands.models_pull.get_adapter",
+        lambda m, variant=None: StubAdapter(),
+    )
+    monkeypatch.setattr(
+        "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
     )
     monkeypatch.setattr(
         "shutil.disk_usage",
@@ -163,11 +174,13 @@ def test_pull_no_model_no_all(tmp_openeye_home):
 def test_remove_not_downloaded(tmp_openeye_home, monkeypatch):
     registry = _make_registry()
     monkeypatch.setattr(
-        "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+        "openeye_ai.commands.models_remove.get_model_info", lambda m: registry[m]
     )
-    monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
     monkeypatch.setattr(
-        "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+        "openeye_ai.commands.models_remove.is_downloaded", lambda m: False
+    )
+    monkeypatch.setattr(
+        "openeye_ai.commands.models_remove.MODELS_DIR", tmp_openeye_home / "models"
     )
 
     result = runner.invoke(app, ["remove", "yolov8"])
@@ -311,7 +324,7 @@ class Adapter(ModelAdapter):
 def test_add_model_success(tmp_openeye_home, monkeypatch, tmp_path):
     """add-model adds a new entry to the registry."""
     monkeypatch.setattr(
-        "openeye_ai.commands.models.add_model_to_registry",
+        "openeye_ai.commands.models_registry.add_model_to_registry",
         lambda key, entry: None,
     )
     result = runner.invoke(
@@ -337,7 +350,9 @@ def test_add_model_duplicate_key(tmp_openeye_home, monkeypatch):
     def _raise(key, entry):
         raise ValueError(f"Model '{key}' already exists in registry")
 
-    monkeypatch.setattr("openeye_ai.commands.models.add_model_to_registry", _raise)
+    monkeypatch.setattr(
+        "openeye_ai.commands.models_registry.add_model_to_registry", _raise
+    )
     result = runner.invoke(
         app,
         [
@@ -362,7 +377,9 @@ def test_add_model_defaults_name_to_key(tmp_openeye_home, monkeypatch):
     def _capture(key, entry):
         captured.update(entry)
 
-    monkeypatch.setattr("openeye_ai.commands.models.add_model_to_registry", _capture)
+    monkeypatch.setattr(
+        "openeye_ai.commands.models_registry.add_model_to_registry", _capture
+    )
     result = runner.invoke(
         app,
         [
@@ -387,7 +404,7 @@ def test_register_adapter_success(tmp_openeye_home, monkeypatch, tmp_path):
     adapter_file.write_text(_VALID_ADAPTER_SRC)
 
     monkeypatch.setattr(
-        "openeye_ai.commands.models.add_model_to_registry", lambda k, e: None
+        "openeye_ai.commands.models_registry.add_model_to_registry", lambda k, e: None
     )
 
     result = runner.invoke(

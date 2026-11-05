@@ -30,7 +30,7 @@ def test_status_with_server():
         "enabled_policy_names": ["zone_policy", "action_filter"],
     }
 
-    with patch("httpx.get", return_value=mock_resp):
+    with patch("httpx.request", return_value=mock_resp):
         result = runner.invoke(
             govern_app, ["status", "--server", "http://localhost:8000"]
         )
@@ -41,7 +41,7 @@ def test_status_with_server():
 def test_status_with_server_error():
     import httpx
 
-    with patch("httpx.get", side_effect=httpx.ConnectError("refused")):
+    with patch("httpx.request", side_effect=httpx.ConnectError("refused")):
         result = runner.invoke(
             govern_app, ["status", "--server", "http://localhost:8000"]
         )
@@ -65,7 +65,10 @@ def test_status_local():
     }
     mock_engine.get_status.return_value = mock_status
 
-    with patch("openeye_ai.commands.governance._get_engine", return_value=mock_engine):
+    with patch(
+        "openeye_ai.commands.governance.policy_commands._get_engine",
+        return_value=mock_engine,
+    ):
         result = runner.invoke(govern_app, ["status"])
     assert result.exit_code == 0
     assert "local engine" in result.output.lower()
@@ -83,7 +86,10 @@ def test_ls():
     mock_policy.is_plugin = False
     mock_engine.list_available_types.return_value = [mock_policy]
 
-    with patch("openeye_ai.commands.governance._get_engine", return_value=mock_engine):
+    with patch(
+        "openeye_ai.commands.governance.policy_commands._get_engine",
+        return_value=mock_engine,
+    ):
         result = runner.invoke(govern_app, ["ls"])
     assert result.exit_code == 0
     assert "zone_policy" in result.output
@@ -98,7 +104,7 @@ def test_enable_with_server():
     mock_resp.status_code = 200
     mock_resp.raise_for_status = MagicMock()
 
-    with patch("httpx.post", return_value=mock_resp):
+    with patch("httpx.request", return_value=mock_resp):
         result = runner.invoke(
             govern_app, ["enable", "zone_policy", "--server", "http://localhost:8000"]
         )
@@ -110,7 +116,10 @@ def test_enable_local_success():
     mock_engine = MagicMock()
     mock_engine.enable_policy.return_value = True
 
-    with patch("openeye_ai.commands.governance._get_engine", return_value=mock_engine):
+    with patch(
+        "openeye_ai.commands.governance.policy_commands._get_engine",
+        return_value=mock_engine,
+    ):
         result = runner.invoke(govern_app, ["enable", "zone_policy"])
     assert result.exit_code == 0
     assert "Enabled" in result.output
@@ -120,7 +129,10 @@ def test_enable_local_not_found():
     mock_engine = MagicMock()
     mock_engine.enable_policy.return_value = False
 
-    with patch("openeye_ai.commands.governance._get_engine", return_value=mock_engine):
+    with patch(
+        "openeye_ai.commands.governance.policy_commands._get_engine",
+        return_value=mock_engine,
+    ):
         result = runner.invoke(govern_app, ["enable", "no_such_policy"])
     assert result.exit_code == 1
     assert "not found" in result.output.lower()
@@ -134,7 +146,7 @@ def test_disable_with_server():
     mock_resp.status_code = 200
     mock_resp.raise_for_status = MagicMock()
 
-    with patch("httpx.post", return_value=mock_resp):
+    with patch("httpx.request", return_value=mock_resp):
         result = runner.invoke(
             govern_app, ["disable", "zone_policy", "--server", "http://localhost:8000"]
         )
@@ -146,7 +158,10 @@ def test_disable_local_success():
     mock_engine = MagicMock()
     mock_engine.disable_policy.return_value = True
 
-    with patch("openeye_ai.commands.governance._get_engine", return_value=mock_engine):
+    with patch(
+        "openeye_ai.commands.governance.policy_commands._get_engine",
+        return_value=mock_engine,
+    ):
         result = runner.invoke(govern_app, ["disable", "zone_policy"])
     assert result.exit_code == 0
     assert "Disabled" in result.output
@@ -156,7 +171,10 @@ def test_disable_local_not_found():
     mock_engine = MagicMock()
     mock_engine.disable_policy.return_value = False
 
-    with patch("openeye_ai.commands.governance._get_engine", return_value=mock_engine):
+    with patch(
+        "openeye_ai.commands.governance.policy_commands._get_engine",
+        return_value=mock_engine,
+    ):
         result = runner.invoke(govern_app, ["disable", "no_such_policy"])
     assert result.exit_code == 1
     assert "not found" in result.output.lower()
@@ -255,7 +273,7 @@ def test_audit_with_server():
         },
     ]
 
-    with patch("httpx.get", return_value=mock_resp):
+    with patch("httpx.request", return_value=mock_resp):
         result = runner.invoke(
             govern_app, ["audit", "--server", "http://localhost:8000"]
         )
@@ -267,7 +285,10 @@ def test_audit_empty():
     mock_engine = MagicMock()
     mock_engine.audit.get_entries.return_value = []
 
-    with patch("openeye_ai.commands.governance._get_engine", return_value=mock_engine):
+    with patch(
+        "openeye_ai.commands.governance.audit_commands._get_engine",
+        return_value=mock_engine,
+    ):
         result = runner.invoke(govern_app, ["audit"])
     assert result.exit_code == 0
     assert "No" in result.output
@@ -290,7 +311,7 @@ def test_violations_with_server():
         },
     ]
 
-    with patch("httpx.get", return_value=mock_resp):
+    with patch("httpx.request", return_value=mock_resp):
         result = runner.invoke(
             govern_app, ["violations", "--server", "http://localhost:8000"]
         )
@@ -301,7 +322,7 @@ def test_violations_with_server():
 def test_violations_server_error():
     import httpx
 
-    with patch("httpx.get", side_effect=httpx.ConnectError("refused")):
+    with patch("httpx.request", side_effect=httpx.ConnectError("refused")):
         result = runner.invoke(
             govern_app, ["violations", "--server", "http://localhost:8000"]
         )
@@ -317,7 +338,7 @@ def test_load_preset_via_server():
     mock_resp.status_code = 200
     mock_resp.raise_for_status = MagicMock()
 
-    with patch("httpx.post", return_value=mock_resp):
+    with patch("httpx.request", return_value=mock_resp):
         result = runner.invoke(
             govern_app, ["load", "robotics-safe", "--server", "http://localhost:8000"]
         )

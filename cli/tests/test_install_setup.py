@@ -36,11 +36,13 @@ class TestStory1ZeroConfigList:
         """list command works on a fresh install with no config file."""
         registry = _make_registry()
         monkeypatch.setattr(
-            "openeye_ai.commands.models.load_registry", lambda: registry
+            "openeye_ai.commands.models_list.load_registry", lambda: registry
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda k: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.is_variant_downloaded", lambda k, v: False
+            "openeye_ai.commands.models_list.is_downloaded", lambda k: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_list.is_variant_downloaded", lambda k, v: False
         )
 
         result = runner.invoke(app, ["list"])
@@ -52,11 +54,13 @@ class TestStory1ZeroConfigList:
         """All models in registry appear in the table."""
         registry = _make_registry()
         monkeypatch.setattr(
-            "openeye_ai.commands.models.load_registry", lambda: registry
+            "openeye_ai.commands.models_list.load_registry", lambda: registry
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda k: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.is_variant_downloaded", lambda k, v: False
+            "openeye_ai.commands.models_list.is_downloaded", lambda k: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_list.is_variant_downloaded", lambda k, v: False
         )
 
         result = runner.invoke(app, ["list"])
@@ -68,13 +72,13 @@ class TestStory1ZeroConfigList:
         """Downloaded models are marked as downloaded, others as available."""
         registry = _make_registry()
         monkeypatch.setattr(
-            "openeye_ai.commands.models.load_registry", lambda: registry
+            "openeye_ai.commands.models_list.load_registry", lambda: registry
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.is_downloaded", lambda k: k == "yolov8"
+            "openeye_ai.commands.models_list.is_downloaded", lambda k: k == "yolov8"
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.is_variant_downloaded", lambda k, v: False
+            "openeye_ai.commands.models_list.is_variant_downloaded", lambda k, v: False
         )
 
         result = runner.invoke(app, ["list"])
@@ -96,11 +100,13 @@ class TestStory1ZeroConfigList:
         """list output includes model size and task info."""
         registry = _make_registry()
         monkeypatch.setattr(
-            "openeye_ai.commands.models.load_registry", lambda: registry
+            "openeye_ai.commands.models_list.load_registry", lambda: registry
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda k: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.is_variant_downloaded", lambda k, v: False
+            "openeye_ai.commands.models_list.is_downloaded", lambda k: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_list.is_variant_downloaded", lambda k, v: False
         )
 
         result = runner.invoke(app, ["list"])
@@ -126,15 +132,17 @@ class TestStory2PullWithChecksum:
         """Successful pull verifies checksum and creates .pulled marker."""
         registry = _make_registry()
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_adapter",
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.get_adapter",
             lambda m, variant=None: StubAdapter(),
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+            "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
         )
         monkeypatch.setattr(
             "openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True
@@ -151,15 +159,17 @@ class TestStory2PullWithChecksum:
         """Pull exits with error when checksum verification fails."""
         registry = _make_registry()
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_adapter",
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.get_adapter",
             lambda m, variant=None: StubAdapter(),
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+            "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
         )
         monkeypatch.setattr(
             "openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: False
@@ -172,7 +182,7 @@ class TestStory2PullWithChecksum:
     def test_pull_unknown_model_errors(self, tmp_openeye_home, monkeypatch):
         """Pulling an unknown model name results in an error exit."""
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info",
+            "openeye_ai.commands.models_pull.get_model_info",
             lambda m: (_ for _ in ()).throw(KeyError(f"Unknown model '{m}'")),
         )
 
@@ -183,11 +193,13 @@ class TestStory2PullWithChecksum:
         """Pulling an already-downloaded model reports it and exits cleanly."""
         registry = _make_registry()
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: True)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: True
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
         )
 
         result = runner.invoke(app, ["pull", "yolov8"])
@@ -200,15 +212,17 @@ class TestStory2PullWithChecksum:
         """--force flag forces re-download even if already present."""
         registry = _make_registry()
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: True)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_adapter",
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: True
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.get_adapter",
             lambda m, variant=None: StubAdapter(),
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+            "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
         )
         monkeypatch.setattr(
             "openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True
@@ -226,11 +240,13 @@ class TestStory2PullWithChecksum:
         """Pull fails gracefully when disk space is insufficient."""
         registry = _make_registry()
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
         )
         # Report very little free space (1 MB)
         monkeypatch.setattr(
@@ -262,18 +278,20 @@ class TestStory3PullAll:
         pulled: list[str] = []
 
         monkeypatch.setattr(
-            "openeye_ai.commands.models.load_registry", lambda: registry
+            "openeye_ai.commands.models_pull.load_registry", lambda: registry
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_adapter",
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.get_adapter",
             lambda m, variant=None: StubAdapter(track_pulls=pulled),
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+            "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
         )
         monkeypatch.setattr(
             "openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True
@@ -292,18 +310,20 @@ class TestStory3PullAll:
         registry = _make_registry()
 
         monkeypatch.setattr(
-            "openeye_ai.commands.models.load_registry", lambda: registry
+            "openeye_ai.commands.models_pull.load_registry", lambda: registry
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_adapter",
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.get_adapter",
             lambda m, variant=None: StubAdapter(fail_on="depth"),
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+            "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
         )
         monkeypatch.setattr(
             "openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True
@@ -322,25 +342,27 @@ class TestStory3PullAll:
         pulled_models: list[str] = []
 
         monkeypatch.setattr(
-            "openeye_ai.commands.models.load_registry", lambda: registry
+            "openeye_ai.commands.models_pull.load_registry", lambda: registry
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_variant_info",
+            "openeye_ai.commands.models_pull.get_variant_info",
             lambda m, v: {**registry[m], "_variant": v},
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.is_variant_downloaded", lambda m, v: False
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_adapter",
+            "openeye_ai.commands.models_pull.is_variant_downloaded", lambda m, v: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.get_adapter",
             lambda m, variant=None: StubAdapter(track_pulls=pulled_models),
         )
         monkeypatch.setattr(
-            "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+            "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
         )
         monkeypatch.setattr(
             "openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True
@@ -364,14 +386,16 @@ class TestStory3PullAll:
         # Directory exists but no .pulled marker — partial download
 
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_adapter",
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
+        )
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.get_adapter",
             lambda m, variant=None: StubAdapter(),
         )
-        monkeypatch.setattr("openeye_ai.commands.models.MODELS_DIR", models_dir)
+        monkeypatch.setattr("openeye_ai.commands.models_pull.MODELS_DIR", models_dir)
         monkeypatch.setattr(
             "openeye_ai.utils.checksum.verify_checksum", lambda *a, **kw: True
         )
@@ -529,12 +553,14 @@ class TestStory5OptionalExtras:
             raise ImportError("No module named 'ultralytics'", name="ultralytics")
 
         monkeypatch.setattr(
-            "openeye_ai.commands.models.get_model_info", lambda m: registry[m]
+            "openeye_ai.commands.models_pull.get_model_info", lambda m: registry[m]
         )
-        monkeypatch.setattr("openeye_ai.commands.models.is_downloaded", lambda m: False)
-        monkeypatch.setattr("openeye_ai.commands.models.get_adapter", _fail_import)
         monkeypatch.setattr(
-            "openeye_ai.commands.models.MODELS_DIR", tmp_openeye_home / "models"
+            "openeye_ai.commands.models_pull.is_downloaded", lambda m: False
+        )
+        monkeypatch.setattr("openeye_ai.commands.models_pull.get_adapter", _fail_import)
+        monkeypatch.setattr(
+            "openeye_ai.commands.models_pull.MODELS_DIR", tmp_openeye_home / "models"
         )
 
         result = runner.invoke(app, ["pull", "yolov8"])
@@ -552,11 +578,11 @@ class TestStory5OptionalExtras:
 
     def test_dependency_error_helper_exits(self, tmp_openeye_home):
         """dependency_error() prints message and raises typer.Exit."""
-        from click.exceptions import Exit as ClickExit
         from openeye_ai._cli_helpers import dependency_error
+        from typer import Exit as TyperExit
 
         exc = ImportError("No module named 'ultralytics'", name="ultralytics")
-        with pytest.raises((SystemExit, ClickExit)):
+        with pytest.raises((SystemExit, TyperExit)):
             dependency_error("yolov8", exc)
 
     def test_run_with_missing_deps_shows_hint(
@@ -854,12 +880,6 @@ class TestStory8UpdateRegistry:
             "openeye_ai.utils.registry_update.update_registry_from_remote",
             lambda path: ["new-model-a", "new-model-b"],
         )
-        # Patch the import path used in the CLI command
-        monkeypatch.setattr(
-            "openeye_ai.commands.models.update_registry_from_remote",
-            lambda path: ["new-model-a", "new-model-b"],
-            raising=False,
-        )
 
         result = runner.invoke(app, ["update-registry"])
         assert result.exit_code == 0
@@ -870,11 +890,6 @@ class TestStory8UpdateRegistry:
         monkeypatch.setattr(
             "openeye_ai.utils.registry_update.update_registry_from_remote",
             lambda path: [],
-        )
-        monkeypatch.setattr(
-            "openeye_ai.commands.models.update_registry_from_remote",
-            lambda path: [],
-            raising=False,
         )
 
         result = runner.invoke(app, ["update-registry"])
@@ -890,11 +905,6 @@ class TestStory8UpdateRegistry:
         monkeypatch.setattr(
             "openeye_ai.utils.registry_update.update_registry_from_remote",
             _fail,
-        )
-        monkeypatch.setattr(
-            "openeye_ai.commands.models.update_registry_from_remote",
-            _fail,
-            raising=False,
         )
 
         result = runner.invoke(app, ["update-registry"])
