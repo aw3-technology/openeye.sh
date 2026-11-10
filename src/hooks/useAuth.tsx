@@ -80,6 +80,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const user = isDemo ? DEMO_USER : sessionData?.user ? toAppUser(sessionData.user) : null;
   const loading = isDemo ? false : isPending;
 
+  // Usage analytics (Viziera): tie page views and errors to the signed-in user.
+  // The shared demo account is left anonymous so its visitors aren't merged.
+  const sessionUser = isDemo ? null : sessionData?.user ?? null;
+  useEffect(() => {
+    if (isPending) return;
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const apply = () => {
+      const v = (window as unknown as { viziera?: { identify(id: string, t?: Record<string, unknown>): void; reset(): void } }).viziera;
+      if (!v) {
+        if (++tries < 20) timer = setTimeout(apply, 500);
+        return;
+      }
+      if (sessionUser) v.identify(sessionUser.id, { email: sessionUser.email, name: sessionUser.name || undefined, created_at: new Date(sessionUser.createdAt).toISOString() });
+      else v.reset();
+    };
+    apply();
+    return () => clearTimeout(timer);
+  }, [sessionUser?.id, isPending]);
+
   return (
     <AuthContext.Provider value={{ user, loading, isDemo, signOut, signInAsDemo }}>
       {children}
