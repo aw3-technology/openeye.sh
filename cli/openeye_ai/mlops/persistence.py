@@ -77,9 +77,9 @@ def atomic_save_yaml(path: Path, data: Any) -> None:
         suffix=".tmp",
     )
     try:
-        with os.fdopen(fd, "w") as f:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
-        # Atomic rename (POSIX guarantees atomicity on same filesystem)
+        # os.replace is atomic on the same filesystem (POSIX and Windows)
         os.replace(tmp_path, str(path))
     except Exception:
         # Clean up temp file on any failure

@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "typer[all]>=0.9",
+    "typer>=0.12",
     "rich>=13.0",
     "fastapi>=0.115.0",
     "python-multipart>=0.0.12",
@@ -42,7 +42,7 @@ grounding = ["transformers>=4.40", "torch>=2.0", "accelerate"]
 onnx = ["onnxruntime>=1.17"]
 onnx-gpu = ["onnxruntime-gpu>=1.17"]
 tensorrt = ["tensorrt>=10.0", "onnxruntime-gpu>=1.17"]
-sam = ["segment-anything-2>=0.1", "torch>=2.0"]
+sam = ["sam2>=1.0", "torch>=2.0"]
 rfdetr = ["rfdetr>=1.0"]
 smolvla = ["lerobot>=0.1", "torch>=2.0"]
 vlm = ["openai>=1.0"]

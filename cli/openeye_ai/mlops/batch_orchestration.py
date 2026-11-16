@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -73,9 +74,7 @@ def _list_gcs_images(input_path: str) -> list[str]:
 
 
 def _download_s3_image(uri: str):
-    """Download an S3 image to a temp file and return a PIL Image."""
-    import tempfile
-
+    """Download an S3 image and return a PIL Image."""
     import boto3
     from PIL import Image
 
@@ -83,16 +82,13 @@ def _download_s3_image(uri: str):
     bucket = parts[0]
     key = parts[1]
 
-    s3 = boto3.client("s3")
-    with tempfile.NamedTemporaryFile(suffix=Path(key).suffix) as tmp:
-        s3.download_file(bucket, key, tmp.name)
-        return Image.open(tmp.name).convert("RGB").copy()
+    # Read into memory: reopening a NamedTemporaryFile by name fails on Windows.
+    body = boto3.client("s3").get_object(Bucket=bucket, Key=key)["Body"].read()
+    return Image.open(io.BytesIO(body)).convert("RGB")
 
 
 def _download_gcs_image(uri: str):
-    """Download a GCS image to a temp file and return a PIL Image."""
-    import tempfile
-
+    """Download a GCS image and return a PIL Image."""
     from google.cloud import storage
     from PIL import Image
 
@@ -103,9 +99,7 @@ def _download_gcs_image(uri: str):
     client = storage.Client()
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(blob_name)
-    with tempfile.NamedTemporaryFile(suffix=Path(blob_name).suffix) as tmp:
-        blob.download_to_filename(tmp.name)
-        return Image.open(tmp.name).convert("RGB").copy()
+    return Image.open(io.BytesIO(blob.download_as_bytes())).convert("RGB")
 
 
 def run_batch_inference(

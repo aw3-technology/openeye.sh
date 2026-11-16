@@ -86,7 +86,7 @@ def _run_single(
     if output is not None:
         try:
             output.parent.mkdir(parents=True, exist_ok=True)
-            output.write_text(json_output)
+            output.write_text(json_output, encoding="utf-8")
         except OSError as e:
             rprint(f"[red]Failed to write output file: {e}[/red]", file=sys.stderr)
             raise typer.Exit(code=1)
@@ -261,9 +261,9 @@ def run(
             output.parent.mkdir(parents=True, exist_ok=True)
             if pretty:
                 parsed = json.loads(batch_output)
-                output.write_text(json.dumps(parsed, indent=2))
+                output.write_text(json.dumps(parsed, indent=2), encoding="utf-8")
             else:
-                output.write_text(batch_output)
+                output.write_text(batch_output, encoding="utf-8")
         except OSError as e:
             rprint(f"[red]Failed to write output file: {e}[/red]", file=sys.stderr)
             raise typer.Exit(code=1)

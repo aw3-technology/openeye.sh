@@ -37,7 +37,7 @@ class ObservationMemoryStore:
         if not self.path.exists():
             return []
         observations = []
-        for line in self.path.read_text().strip().splitlines():
+        for line in self.path.read_text(encoding="utf-8").strip().splitlines():
             if line:
                 observations.append(Observation.model_validate_json(line))
         return observations

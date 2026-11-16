@@ -74,7 +74,7 @@ openeye api usage --days 7
 - **Model management** — pull, list, and run vision models (YOLO, depth, grounding, SAM, RF-DETR)
 - **REST & WebSocket API** — FastAPI server with `/predict`, `/v1/*`, and streaming WebSocket endpoints; the [openeye.sh dashboard](https://openeye.sh/dashboard) can connect to it
 - **Hosted API client** — `openeye api` for `https://openeye.sh/v1`
-- **MCP server** — `openeye-mcp` (stdio) for MCP-capable agents
+- **MCP server** — `openeye-mcp` (stdio) for MCP-capable agents; run it without installing via `uvx --from "openeye-sh[mcp]" openeye-mcp`
 - **Live perception** — real-time camera inference with VLM reasoning
 - **Fleet management** — `openeye fleet` client and device agent for the self-hosted fleet control plane
 - **Agentic loop** — continuous perception + reasoning + planning pipeline

@@ -63,7 +63,8 @@ async def test_detect_posts_image_and_confidence(fake_http, image):
     call = fake_http.calls[0]
     assert call["method"] == "POST"
     assert call["url"] == "https://openeye.sh/v1/detect"
-    assert call["headers"] == {"Authorization": "Bearer oe_test"}
+    assert call["headers"]["Authorization"] == "Bearer oe_test"
+    assert call["headers"]["User-Agent"].startswith("openeye-mcp/")
     assert call["data"] == {"confidence": "0.4"}
     assert call["files"]["file"][0] == "photo.jpg"
     assert json.loads(out)["objects"][0]["label"] == "cup"

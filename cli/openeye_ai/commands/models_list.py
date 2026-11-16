@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+
+import typer
 from rich.table import Table
 
 from openeye_ai._cli_helpers import console
@@ -10,11 +13,34 @@ from openeye_ai.registry import (
 )
 
 
-def list_models() -> None:
+def list_models(
+    as_json: bool = typer.Option(
+        False, "--json", help="Print models as JSON (for scripts and agents)"
+    ),
+) -> None:
     """Show available and downloaded models."""
     from openeye_ai.utils.hardware import format_hardware_tags
 
     registry = load_registry()
+    if as_json:
+        models = [
+            {
+                "key": key,
+                "name": info.get("name", key),
+                "task": info.get("task"),
+                "description": info.get("description"),
+                "size_mb": info.get("size_mb"),
+                "hardware": info.get("hardware", {"cpu": True}),
+                "downloaded": is_downloaded(key),
+                "variants": {
+                    v: {"downloaded": is_variant_downloaded(key, v)}
+                    for v in info.get("variants") or {}
+                },
+            }
+            for key, info in registry.items()
+        ]
+        typer.echo(json.dumps(models, indent=2))
+        return
     table = Table(title="OpenEye Models")
     table.add_column("Model", style="cyan", no_wrap=True)
     table.add_column("Task", style="magenta")

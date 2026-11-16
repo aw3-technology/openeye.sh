@@ -27,14 +27,21 @@ def _ensure_key() -> str:
     if not _API_KEY:
         rprint(
             "[red]Error: OPENEYE_API_KEY is not set.[/red]\n"
-            "Set it with: [bold]export OPENEYE_API_KEY=oe_...[/bold]"
+            "Set it with: [bold]export OPENEYE_API_KEY=oe_...[/bold] "
+            '(PowerShell: [bold]$env:OPENEYE_API_KEY = "oe_..."[/bold])'
         )
         raise typer.Exit(code=1)
     return _API_KEY
 
 
-def _auth_headers() -> dict:
-    return {"Authorization": f"Bearer {_ensure_key()}"}
+def _auth_headers(required: bool = True) -> dict:
+    from openeye_ai import __version__
+
+    headers = {"User-Agent": f"openeye-cli/{__version__}"}
+    key = _ensure_key() if required else _API_KEY
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    return headers
 
 
 # ── api detect ────────────────────────────────────────────────────
@@ -176,7 +183,10 @@ def api_models(
 ) -> None:
     """List available hosted models and their credit costs."""
     url = _api_url(server)
-    r = http_request("GET", f"{url}/v1/models", headers=_auth_headers(), timeout=10)
+    # The hosted model list is public; a local server may still want the key.
+    r = http_request(
+        "GET", f"{url}/v1/models", headers=_auth_headers(required=False), timeout=10
+    )
     models = r.json()
 
     if as_json:

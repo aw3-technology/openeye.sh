@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "openeye": {
-      "command": "cli/.venv/bin/python",
-      "args": ["-m", "openeye_ai.mcp.server"]
+      "command": "uv",
+      "args": ["run", "--quiet", "--directory", "cli", "--extra", "mcp", "openeye-mcp"]
     }
   }
 }

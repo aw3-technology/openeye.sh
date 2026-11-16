@@ -222,6 +222,9 @@ def tmp_openeye_home(tmp_path, monkeypatch):
     monkeypatch.setattr("openeye_ai.config.OPENEYE_HOME", home)
     monkeypatch.setattr("openeye_ai.config.MODELS_DIR", models)
     monkeypatch.setattr("openeye_ai.config.CONFIG_PATH", home / "config.yaml")
+    monkeypatch.setattr(
+        "openeye_ai.registry.USER_REGISTRY_PATH", home / "custom_models.yaml"
+    )
     return home
 
 

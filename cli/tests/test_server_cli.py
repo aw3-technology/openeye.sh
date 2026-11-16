@@ -35,8 +35,8 @@ def test_health_success():
     mock_resp.status_code = 200
     mock_resp.json.return_value = {
         "model": "yolov8",
-        "loaded": True,
-        "uptime": "2h 15m",
+        "model_loaded": True,
+        "uptime_seconds": 8100.0,
     }
     mock_resp.raise_for_status = MagicMock()
 
@@ -70,8 +70,8 @@ def test_health_custom_server():
     mock_resp.status_code = 200
     mock_resp.json.return_value = {
         "model": "depth-anything",
-        "loaded": True,
-        "uptime": "1h",
+        "model_loaded": True,
+        "uptime_seconds": 3600.0,
     }
     mock_resp.raise_for_status = MagicMock()
 
@@ -93,7 +93,11 @@ def test_health_without_queue():
     """Health should succeed even if queue endpoint is unreachable."""
     mock_resp = MagicMock()
     mock_resp.status_code = 200
-    mock_resp.json.return_value = {"model": "yolov8", "loaded": False, "uptime": "5m"}
+    mock_resp.json.return_value = {
+        "model": "yolov8",
+        "model_loaded": False,
+        "uptime_seconds": 300.0,
+    }
     mock_resp.raise_for_status = MagicMock()
 
     with (

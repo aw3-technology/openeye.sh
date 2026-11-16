@@ -273,8 +273,8 @@ def test_health_success(tmp_openeye_home, monkeypatch):
     mock_response = MagicMock()
     mock_response.json.return_value = {
         "model": "yolov8",
-        "loaded": True,
-        "uptime": "1h",
+        "model_loaded": True,
+        "uptime_seconds": 3600.0,
     }
     mock_response.raise_for_status = MagicMock()
 

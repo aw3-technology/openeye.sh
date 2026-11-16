@@ -8,6 +8,7 @@ from typing import Any
 
 from fastapi import FastAPI
 
+from openeye_ai import __version__
 from openeye_ai.server.metrics import MODEL_INFO
 from openeye_ai.server.middleware import setup_middleware
 from openeye_ai.server.queue import InferenceQueue
@@ -27,7 +28,7 @@ def create_app(
     vlm_model: str | None = None,
     cortex_llm: str | None = None,
 ) -> FastAPI:
-    app = FastAPI(title=f"OpenEye — {model_info['name']}", version="0.1.0")
+    app = FastAPI(title=f"OpenEye — {model_info['name']}", version=__version__)
 
     # Build runtime config from CLI flags
     runtime_config: dict[str, Any] = {}

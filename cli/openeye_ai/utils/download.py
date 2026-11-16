@@ -12,9 +12,11 @@ def download_from_hf(
 ) -> Path:
     """Download a model from HuggingFace Hub to model_dir.
 
+    With ``filename``, downloads just that file; otherwise the whole repo
+    (transformers models need their config and tokenizer files).
     Returns the path to the downloaded directory.
     """
-    from huggingface_hub import snapshot_download
+    from huggingface_hub import hf_hub_download, snapshot_download
 
     model_dir.mkdir(parents=True, exist_ok=True)
 
@@ -24,12 +26,12 @@ def download_from_hf(
         transient=True,
     ) as progress:
         progress.add_task(f"Downloading {repo_id}...", total=None)
-        path = snapshot_download(
-            repo_id=repo_id,
-            local_dir=str(model_dir),
-            local_dir_use_symlinks=False,
-            resume_download=True,
-        )
+        if filename:
+            hf_hub_download(
+                repo_id=repo_id, filename=filename, local_dir=str(model_dir)
+            )
+            return model_dir
+        path = snapshot_download(repo_id=repo_id, local_dir=str(model_dir))
 
     return Path(path)
 

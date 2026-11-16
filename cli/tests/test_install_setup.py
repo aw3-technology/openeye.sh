@@ -964,3 +964,40 @@ class TestStory8UpdateRegistry:
         assert "sam2" in reloaded["models"]
         assert reloaded["models"]["yolov8"]["name"] == "YOLOv8"  # not overwritten
         assert reloaded["schema_version"] == 2
+
+
+class TestUserRegistry:
+    """Custom models live in ~/.openeye, not inside the installed package."""
+
+    def test_add_model_writes_user_registry_only(self, tmp_openeye_home):
+        from openeye_ai import registry
+
+        builtin_before = registry._REGISTRY_PATH.read_text(encoding="utf-8")
+        registry.add_model_to_registry(
+            "my-detector",
+            {
+                "name": "My Detector",
+                "task": "detection",
+                "description": "Test detector",
+                "adapter": "yolov8",
+            },
+        )
+
+        assert registry._REGISTRY_PATH.read_text(encoding="utf-8") == builtin_before
+        assert "my-detector" in registry.load_user_registry()["models"]
+        assert registry.get_model_info("my-detector")["name"] == "My Detector"
+        assert "yolov8" in registry.load_registry()
+
+    def test_add_model_rejects_builtin_key(self, tmp_openeye_home):
+        from openeye_ai import registry
+
+        with pytest.raises(ValueError, match="already exists"):
+            registry.add_model_to_registry(
+                "yolov8",
+                {
+                    "name": "Dup",
+                    "task": "detection",
+                    "description": "Duplicate key",
+                    "adapter": "yolov8",
+                },
+            )

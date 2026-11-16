@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
-import fcntl
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from openeye_ai.config import MODELS_DIR
+from openeye_ai.config import MODELS_DIR, OPENEYE_HOME
 
+# Built-in models ship read-only inside the package; models added with
+# add-model / register-adapter / update-registry go to the user registry,
+# which survives upgrades and works on read-only installs.
 _REGISTRY_PATH = Path(__file__).parent / "models.yaml"
+USER_REGISTRY_PATH = OPENEYE_HOME / "custom_models.yaml"
 _ADAPTER_MAP: dict[str, str] = {
     "yolov8": "openeye_ai.adapters.yolov8",
     "yolo26": "openeye_ai.adapters.yolo26",
@@ -26,17 +29,41 @@ _ADAPTER_MAP: dict[str, str] = {
 }
 
 
-def _load_raw() -> dict[str, Any]:
-    """Load the full YAML file."""
+def _read_yaml(path: Path) -> dict[str, Any]:
     try:
-        with open(_REGISTRY_PATH, encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
     except yaml.YAMLError as exc:
-        raise ValueError(f"Failed to parse {_REGISTRY_PATH}: {exc}") from exc
+        raise ValueError(f"Failed to parse {path}: {exc}") from exc
     if not isinstance(data, dict):
         raise ValueError(
-            f"Invalid registry file: expected YAML dict, got {type(data).__name__}"
+            f"Invalid registry file {path}: expected YAML dict, got {type(data).__name__}"
         )
+    return data
+
+
+def load_user_registry() -> dict[str, Any]:
+    """Load the user registry (empty if it doesn't exist yet)."""
+    if not USER_REGISTRY_PATH.exists():
+        return {"models": {}}
+    data = _read_yaml(USER_REGISTRY_PATH)
+    if not isinstance(data.get("models"), dict):
+        data["models"] = {}
+    return data
+
+
+def save_user_registry(data: dict[str, Any]) -> None:
+    from openeye_ai.mlops.persistence import atomic_save_yaml
+
+    atomic_save_yaml(USER_REGISTRY_PATH, data)
+
+
+def _load_raw() -> dict[str, Any]:
+    """Load the built-in registry with user-added models merged on top."""
+    data = _read_yaml(_REGISTRY_PATH)
+    models = dict(data.get("models") or {})
+    models.update(load_user_registry()["models"])
+    data["models"] = models
     return data
 
 
@@ -81,6 +108,9 @@ def get_variant_info(name: str, variant: str) -> dict[str, Any]:
     # Start with parent fields, overlay variant-specific fields
     merged = dict(info)
     merged.pop("variants", None)
+    # A variant with its own file must not inherit the parent file's checksum.
+    if "filename" in variants[variant] and "checksum" not in variants[variant]:
+        merged.pop("checksum", None)
     merged.update(variants[variant])
     merged["_variant"] = variant
     return merged
@@ -152,20 +182,9 @@ def add_model_to_registry(key: str, entry: dict[str, Any]) -> None:
     # hf_repo / filename / size_mb — those are only relevant for built-in entries.
     validate_model_entry(entry, allow_custom_adapter=True)
 
-    data = _load_raw()
-    models = data.get("models") or {}
-
-    if key in models:
+    if key in load_registry():
         raise ValueError(f"Model '{key}' already exists in registry")
 
-    models[key] = entry
-    data["models"] = models
-
-    with open(_REGISTRY_PATH, "r+", encoding="utf-8") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
-        try:
-            f.seek(0)
-            f.truncate()
-            yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
-        finally:
-            fcntl.flock(f, fcntl.LOCK_UN)
+    user = load_user_registry()
+    user["models"][key] = entry
+    save_user_registry(user)

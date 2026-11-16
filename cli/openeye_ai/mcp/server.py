@@ -13,10 +13,11 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-from openeye_ai.mcp.tools import OPENEYE, run_cli
+from openeye_ai.mcp.tools import openeye_binary, run_cli
 
 mcp = FastMCP(
     "openeye",
+    website_url="https://openeye.sh",
     instructions=(
         "Vision AI for agents. Local tools pull, run, serve and benchmark "
         "computer-vision models on this machine. Hosted tools (openeye_api_*) "
@@ -31,11 +32,10 @@ mcp = FastMCP(
 
 @mcp.tool()
 async def openeye_list() -> str:
-    """List available and downloaded vision AI models."""
-    result = await run_cli("list", timeout=30)
+    """List available and downloaded vision AI models as JSON."""
+    result = await run_cli("list", "--json", timeout=30)
     if result["returncode"] != 0:
         return f"Error: {result['stderr']}"
-    # list prints a Rich table to stderr; stdout may be empty
     return result["stdout"] or result["stderr"]
 
 
@@ -63,8 +63,8 @@ async def openeye_run(
     Args:
         model: Model key, e.g. 'yolov8'.
         image: Path to image file.
-        prompt: Optional text prompt (for open-vocab models like grounding_dino).
-        pretty: If true, return human-readable output instead of JSON.
+        prompt: Optional text prompt (for open-vocab models like grounding-dino).
+        pretty: If true, return a human-readable summary instead of JSON.
     """
     args = ["run", model, image]
     if prompt:
@@ -76,14 +76,10 @@ async def openeye_run(
     if result["returncode"] != 0:
         return f"Error: {result['stderr']}"
 
-    stdout = result["stdout"]
-    # Try to parse as JSON for validation
-    if not pretty:
-        try:
-            json.loads(stdout)
-        except (json.JSONDecodeError, ValueError):
-            pass  # Some output formats aren't pure JSON
-    return stdout
+    # `run --pretty` writes the summary to stderr and JSON to stdout.
+    if pretty:
+        return result["stderr"] or result["stdout"]
+    return result["stdout"]
 
 
 @mcp.tool()
@@ -103,7 +99,7 @@ async def openeye_serve(model: str, port: int = 8000) -> str:
     # this tool returns, so a chatty server would block on a full buffer.
     with open(log_path, "wb") as log:
         proc = await asyncio.create_subprocess_exec(
-            OPENEYE,
+            openeye_binary(),
             *args,
             stdin=asyncio.subprocess.DEVNULL,
             stdout=log,
@@ -188,9 +184,15 @@ async def openeye_remove(model: str) -> str:
 
 
 @mcp.tool()
-async def openeye_nebius_stats() -> str:
-    """Get Nebius VLM usage statistics from the running server."""
-    result = await run_cli("nebius-stats", timeout=15)
+async def openeye_nebius_stats(port: int = 8000) -> str:
+    """Get Nebius VLM usage statistics from the running server.
+
+    Args:
+        port: Port the server listens on (the one passed to openeye_serve).
+    """
+    result = await run_cli(
+        "nebius-stats", "--server", f"http://localhost:{port}", timeout=15
+    )
     if result["returncode"] != 0:
         return f"Error: {result['stderr']}"
     return result["stdout"] or result["stderr"]
@@ -211,12 +213,18 @@ async def _api_call(
     data: dict | None = None,
     params: dict | None = None,
     timeout: float = 60,
+    auth: bool = True,
 ) -> str:
     """Call the hosted API and return the JSON response (or an error) as text."""
     import httpx
 
+    from openeye_ai import __version__
+
     key = os.environ.get("OPENEYE_API_KEY", "")
-    if not key:
+    headers = {"User-Agent": f"openeye-mcp/{__version__}"}
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    elif auth:
         return (
             "Error: OPENEYE_API_KEY is not set. Create a key at "
             "https://openeye.sh/dashboard/settings/api-keys and add it to the "
@@ -235,7 +243,7 @@ async def _api_call(
             resp = await client.request(
                 method,
                 f"{_api_url()}{path}",
-                headers={"Authorization": f"Bearer {key}"},
+                headers=headers,
                 files=files,
                 data=data,
                 params=params,
@@ -286,7 +294,7 @@ async def openeye_api_describe(
 @mcp.tool()
 async def openeye_api_models() -> str:
     """List hosted API models, their credit cost and whether each is available."""
-    return await _api_call("GET", "/v1/models", timeout=15)
+    return await _api_call("GET", "/v1/models", timeout=15, auth=False)
 
 
 @mcp.tool()

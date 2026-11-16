@@ -26,7 +26,8 @@ def _ensure_token() -> None:
     if not _TOKEN:
         rprint(
             "[red]Error: OPENEYE_TOKEN environment variable is not set.[/red]\n"
-            "Set it with: [bold]export OPENEYE_TOKEN=<your-token>[/bold]"
+            "Set it with: [bold]export OPENEYE_TOKEN=<your-token>[/bold] "
+            '(PowerShell: [bold]$env:OPENEYE_TOKEN = "<your-token>"[/bold])'
         )
         raise typer.Exit(code=1)
 

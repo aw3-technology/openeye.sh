@@ -46,9 +46,13 @@ def health(
     table.add_row("Status", "[green]Healthy[/green]")
     table.add_row("Model", health_data.get("model", "—"))
     table.add_row(
-        "Loaded", "[green]Yes[/green]" if health_data.get("loaded") else "[red]No[/red]"
+        "Loaded",
+        "[green]Yes[/green]" if health_data.get("model_loaded") else "[red]No[/red]",
     )
-    table.add_row("Uptime", str(health_data.get("uptime", "—")))
+    uptime = health_data.get("uptime_seconds")
+    table.add_row(
+        "Uptime", f"{uptime:.0f}s" if isinstance(uptime, (int, float)) else "—"
+    )
 
     if queue_data:
         table.add_row("Queue active", str(queue_data.get("active", 0)))

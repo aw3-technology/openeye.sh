@@ -87,8 +87,9 @@ _OUTRO = r"""
 cat photo.jpg | openeye run yolov8 -
 # chain models
 openeye run yolov8 photo.jpg | openeye run depth-anything -
-# save annotated output
-openeye run yolov8 photo.jpg --output result.jpg
+# save JSON to a file / save an annotated image next to the input
+openeye run yolov8 photo.jpg --output result.json
+openeye run yolov8 photo.jpg --visualize
 ```
 
 ## MCP server (for AI tool integration)

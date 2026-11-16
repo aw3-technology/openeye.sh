@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from typing import Optional
 
 import typer
@@ -9,6 +10,15 @@ from rich import print as rprint
 
 from openeye_ai import __version__
 from openeye_ai.config import ensure_dirs
+
+# Redirected output (`openeye docs > ref.md`, JSON piped to another tool) uses
+# the locale encoding, which is cp1252 on Windows and can't encode "→" or "—".
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        if not _stream.isatty():
+            _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, OSError, ValueError):
+        pass  # replaced or closed stream (tests, embedding)
 
 app = typer.Typer(
     name="openeye",

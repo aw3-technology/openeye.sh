@@ -47,22 +47,32 @@ def merge_registries(
 
 
 def update_registry_from_remote(registry_path: Path) -> list[str]:
-    """Load local registry, fetch remote, merge, and write back.
+    """Fetch the remote registry and save models we don't have yet.
 
+    ``registry_path`` is the built-in models.yaml (read for ``registry_url``);
+    new models are written to the user registry, never into the package.
     Returns list of newly added model keys.
     """
-    with open(registry_path, encoding="utf-8") as f:
-        local = yaml.safe_load(f)
+    from openeye_ai.registry import (
+        load_registry,
+        load_user_registry,
+        save_user_registry,
+    )
 
-    url = local.get("registry_url")
+    with open(registry_path, encoding="utf-8") as f:
+        builtin = yaml.safe_load(f)
+
+    url = builtin.get("registry_url")
     if not url:
         raise ValueError("No registry_url configured in models.yaml")
 
     rprint(f"[dim]Fetching registry from {url}...[/dim]")
     remote = fetch_remote_registry(url)
-    merged, added = merge_registries(local, remote)
-
-    with open(registry_path, "w", encoding="utf-8") as f:
-        yaml.safe_dump(merged, f, default_flow_style=False, sort_keys=False)
+    _, added = merge_registries({"models": load_registry()}, remote)
+    if added:
+        user = load_user_registry()
+        for key in added:
+            user["models"][key] = remote["models"][key]
+        save_user_registry(user)
 
     return added

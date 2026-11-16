@@ -29,7 +29,7 @@ def _load_env() -> None:
             load_dotenv(env_file)
         except ImportError:
             # Manual fallback — parse KEY=VALUE lines
-            for line in env_file.read_text().splitlines():
+            for line in env_file.read_text(encoding="utf-8").splitlines():
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
                     k, _, v = line.partition("=")

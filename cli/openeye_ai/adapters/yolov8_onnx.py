@@ -103,10 +103,27 @@ class Adapter(ONNXAdapter):
         self._iou_threshold = 0.45
 
     def pull(self, model_dir: Path) -> None:
-        from openeye_ai.utils.download import download_from_hf
+        """Build yolov8n_int8.onnx locally: no prebuilt int8 export is published.
+
+        Exports yolov8n.pt to ONNX with ultralytics, then applies dynamic int8
+        quantization with ONNX Runtime. Needs the yolo and onnx extras.
+        """
+        import shutil
+        import tempfile
+
+        from onnxruntime.quantization import QuantType, quantize_dynamic
+        from ultralytics import YOLO
 
         model_dir.mkdir(parents=True, exist_ok=True)
-        download_from_hf("ultralytics/yolov8", model_dir, "yolov8n_int8.onnx")
+        with tempfile.TemporaryDirectory() as tmp:
+            weights = Path(tmp) / "yolov8n.pt"
+            shutil.copy2(Path(YOLO("yolov8n.pt").ckpt_path), weights)
+            fp32 = Path(YOLO(str(weights)).export(format="onnx", imgsz=640))
+            quantize_dynamic(
+                str(fp32),
+                str(model_dir / "yolov8n_int8.onnx"),
+                weight_type=QuantType.QUInt8,
+            )
 
     def preprocess(self, image: Image.Image):
         import numpy as np

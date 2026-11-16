@@ -13,8 +13,8 @@ COPY openeye_ai/ openeye_ai/
 
 RUN pip install --no-cache-dir ".[yolo]"
 
-# Pre-pull yolov8 model weights
-RUN python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')"
+# Pre-pull yolov8 model weights into /root/.openeye/models (copied below)
+RUN openeye pull yolov8
 
 # ---- Runtime ----
 FROM python:3.12-slim

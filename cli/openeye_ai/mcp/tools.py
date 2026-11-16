@@ -3,30 +3,28 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 import shutil
-import sys
-from pathlib import Path
+import sysconfig
 
 
-def _resolve_binary() -> str:
+@functools.cache
+def openeye_binary() -> str:
     """Find the ``openeye`` binary.
 
-    Checks the current venv first, then falls back to PATH lookup.
+    Checks this interpreter's scripts dir first (``bin/`` on POSIX,
+    ``Scripts\\`` on Windows), then PATH. Resolved on first use so the hosted
+    ``openeye_api_*`` tools work even when the CLI isn't installed.
     """
-    venv_bin = Path(sys.prefix) / "bin" / "openeye"
-    if venv_bin.exists():
-        return str(venv_bin)
-
-    found = shutil.which("openeye")
+    found = shutil.which("openeye", path=sysconfig.get_path("scripts"))
+    found = found or shutil.which("openeye")
     if found:
         return found
 
     raise FileNotFoundError(
-        "Could not find the 'openeye' binary. Install it with: pip install -e '.[all]'"
+        "Could not find the 'openeye' binary. Install it with: "
+        'pipx install "openeye-sh[mcp]"'
     )
-
-
-OPENEYE = _resolve_binary()
 
 
 async def run_cli(
@@ -38,8 +36,12 @@ async def run_cli(
 
     Returns a dict with keys ``returncode``, ``stdout``, ``stderr``.
     """
+    try:
+        binary = openeye_binary()
+    except FileNotFoundError as exc:
+        return {"returncode": -1, "stdout": "", "stderr": str(exc)}
     proc = await asyncio.create_subprocess_exec(
-        OPENEYE,
+        binary,
         *args,
         stdin=asyncio.subprocess.PIPE if stdin_data else asyncio.subprocess.DEVNULL,
         stdout=asyncio.subprocess.PIPE,

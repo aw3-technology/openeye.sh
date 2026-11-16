@@ -150,7 +150,7 @@ def load(
         client = GovernanceClient(server)
         path = Path(target)
         if path.is_file():
-            client.load_config_yaml(path.read_text())
+            client.load_config_yaml(path.read_text(encoding="utf-8"))
             rprint(f"[green]Loaded config from:[/green] {target}")
         else:
             client.load_preset(target)

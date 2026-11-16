@@ -22,12 +22,12 @@ def serve(
     vlm_model: str | None = typer.Option(
         None,
         "--vlm-model",
-        help="VLM model ID for perception (e.g. qwen/qwen3.5-9b, openrouter/healer-alpha)",
+        help="VLM model ID for perception (e.g. qwen/qwen3.5-9b, nvidia/nemotron-3.5-super-vl:free)",
     ),
     cortex_llm: str | None = typer.Option(
         None,
         "--cortex-llm",
-        help="Cortex LLM model ID for reasoning (e.g. z-ai/glm-5-turbo, openrouter/hunter-alpha)",
+        help="Cortex LLM model ID for reasoning (e.g. z-ai/glm-5-turbo, openai/gpt-5.4)",
     ),
 ) -> None:
     """Start a FastAPI server with REST API, WebSocket, and browser dashboard."""

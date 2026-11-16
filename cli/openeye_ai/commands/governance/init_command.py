@@ -118,7 +118,7 @@ def init(
     }
 
     path = Path(output)
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
     rprint(f"[green]Generated governance config:[/green] {path}")

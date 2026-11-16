@@ -31,7 +31,7 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def dashboard():
-    return _DASHBOARD_PATH.read_text()
+    return _DASHBOARD_PATH.read_text(encoding="utf-8")
 
 
 @router.get("/health")

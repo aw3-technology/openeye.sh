@@ -40,16 +40,16 @@ console = Console()
 # ---------------------------------------------------------------------------
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-DEFAULT_MODEL = "qwen/qwen3-vl-235b:free"
+DEFAULT_MODEL = "nvidia/nemotron-3.5-super-vl:free"
 DEFAULT_PROMPT = (
     "Describe what you see in this image in detail. "
     "Focus on objects, people, spatial layout, and any notable activities or hazards."
 )
 
 FREE_MODELS = [
-    ("qwen/qwen3-vl-235b:free", "Qwen3-VL 235B"),
-    ("qwen/qwen2.5-vl-72b-instruct:free", "Qwen2.5-VL 72B"),
-    ("google/gemma-3-27b-it:free", "Gemma 3 27B"),
+    ("nvidia/nemotron-3.5-super-vl:free", "Nemotron 3.5 Super VL"),
+    ("google/gemma-4-31b-it:free", "Gemma 4 31B"),
+    ("qwen/qwen3-vl-235b-a22b-instruct", "Qwen3-VL 235B (paid)"),
 ]
 
 DEFAULT_IMAGE = "src/assets/demo/scene-warehouse.jpg"
@@ -70,7 +70,7 @@ def run_demo(args: argparse.Namespace) -> None:
         console.print(
             "[red]OPENROUTER_API_KEY not set.[/red]\n"
             "[yellow]Add it to your .env file or export it:[/yellow]\n"
-            "  export OPENROUTER_API_KEY=sk-or-..."
+            '  export OPENROUTER_API_KEY=sk-or-...  (PowerShell: $env:OPENROUTER_API_KEY = "sk-or-...")'
         )
         sys.exit(1)
 
@@ -151,7 +151,7 @@ Examples:
 
   # Try a different model
   python -m openeye_ai.demos.vlm_openrouter_demo \\
-      --model google/gemma-3-27b-it:free
+      --model google/gemma-4-31b-it:free
 
   # Compare all free models
   python -m openeye_ai.demos.vlm_openrouter_demo --all-models

@@ -68,7 +68,7 @@ def vlm_demo(
         "src/assets/demo/scene-warehouse.jpg", "--image", help="Path to image file"
     ),
     model: str = typer.Option(
-        "qwen/qwen3-vl-235b:free", "--model", "-m", help="OpenRouter model ID"
+        "nvidia/nemotron-3.5-super-vl:free", "--model", "-m", help="OpenRouter model ID"
     ),
     prompt: str = typer.Option(
         "Describe what you see in this image in detail. "
