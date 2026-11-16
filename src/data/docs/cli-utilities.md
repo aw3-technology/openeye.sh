@@ -54,7 +54,7 @@ g1-demo options: --transport (webcam, usb, rtsp, sdk, auto; default webcam), --h
 openeye g1-demo --control-mode dry_run --demo
 ```
 
-vlm-demo options: --image (default src/assets/demo/scene-warehouse.jpg, relative to a repo checkout), --model, -m (default qwen/qwen3-vl-235b:free), --prompt, -p, --all-models (compare all free VLM models side by side).
+vlm-demo options: --image (default src/assets/demo/scene-warehouse.jpg, relative to a repo checkout), --model, -m (default nvidia/nemotron-3.5-super-vl:free; google/gemma-4-31b-it:free is also free, qwen/qwen3-vl-235b-a22b-instruct is paid), --prompt, -p, --all-models (run those three models side by side).
 
 ### openeye docs
 

@@ -8,7 +8,11 @@
 
 import { z } from "zod";
 
-// ── Hosted-API response schemas (mirrors backend/src/fleet/models/api_models.py) ──
+// ── Hosted-API response schemas ──
+// Mirror the hosted API (api/v1.ts at https://openeye.sh/v1). The self-hosted
+// `openeye serve` /v1 routes and the fleet control plane
+// (backend/src/fleet/models/api_models.py) return compatible shapes; fields
+// only one of them sends are optional.
 
 export const BBoxSchema = z.object({
   x: z.number(),
@@ -36,10 +40,14 @@ export const DetectResponseSchema = z.object({
   credits_used: z.number().int(),
 });
 
+/** Self-hosted only: the hosted POST /v1/depth returns 501. */
 export const DepthResponseSchema = z.object({
   model: z.string(),
   depth_map: z.string(),
   image: ImageInfoResponseSchema,
+  /** Top-level duplicates of image.width/height sent by `openeye serve`. */
+  width: z.number().int().optional(),
+  height: z.number().int().optional(),
   inference_ms: z.number(),
   credits_used: z.number().int(),
 });
@@ -58,21 +66,34 @@ export const ModelInfoSchema = z.object({
   task: z.string(),
   credits_per_call: z.number().int(),
   description: z.string().optional().default(""),
+  /** Hosted API only: whether the endpoint works right now. */
+  available: z.boolean().optional(),
 });
 
+/** GET /v1/models returns a bare array. */
+export const ModelListResponseSchema = z.array(ModelInfoSchema);
+
 export const UsageResponseSchema = z.object({
-  balance: z.number().int(),
+  /** null when the hosted API couldn't reach the credits service. */
+  balance: z.number().nullable(),
+  /** Alias of balance (hosted API and `openeye serve`). */
+  credits_remaining: z.number().nullable().optional(),
   total_requests: z.number().int().optional().default(0),
+  /** Alias of total_requests. */
+  total_calls: z.number().int().optional(),
   total_credits_used: z.number().int().optional().default(0),
+  /** Alias of total_credits_used. */
+  credits_used: z.number().int().optional(),
   by_endpoint: z.record(z.string(), z.number().int()).optional().default({}),
   daily_credits: z.record(z.string(), z.number().int()).optional().default({}),
   truncated: z.boolean().optional().default(false),
 });
 
+/** Hosted API errors are `{ "error": "<message>" }`; the fleet control plane adds message and status_code. */
 export const ErrorResponseSchema = z.object({
   error: z.string(),
-  message: z.string(),
-  status_code: z.number().int(),
+  message: z.string().optional(),
+  status_code: z.number().int().optional(),
 });
 
 // ── Fleet response schemas (mirrors src/types/fleet.ts) ──
@@ -265,6 +286,7 @@ export type DetectResponse = z.infer<typeof DetectResponseSchema>;
 export type DepthResponse = z.infer<typeof DepthResponseSchema>;
 export type DescribeResponse = z.infer<typeof DescribeResponseSchema>;
 export type ModelInfo = z.infer<typeof ModelInfoSchema>;
+export type ModelListResponse = z.infer<typeof ModelListResponseSchema>;
 export type UsageResponse = z.infer<typeof UsageResponseSchema>;
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 

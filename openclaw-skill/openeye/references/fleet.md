@@ -4,7 +4,7 @@
 
 ```bash
 # Register a new device
-openeye fleet register --name "warehouse-cam-01" --type camera
+openeye fleet register "warehouse-cam-01" --type camera
 
 # List devices
 openeye fleet ls                          # all devices

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePerceptionStream } from "@/hooks/usePerceptionStream";
 import { Camera } from "lucide-react";
+import { OPENEYE_VERSION } from "@/data/version";
 
 const stateConfig = {
   safe: {
@@ -200,7 +201,7 @@ export function DemoFeed() {
         {/* HUD overlay */}
         {isActive && (
           <div className="absolute top-3 left-3 font-mono text-[10px] text-terminal-green/70 space-y-0.5">
-            <div>OPENEYE GUARDIAN v0.1.0</div>
+            <div>OPENEYE GUARDIAN v{OPENEYE_VERSION}</div>
             <div className="tabular-nums">
               FPS: {metrics.fps} | LAT: {metrics.latency_ms.toFixed(0)}ms | OBJ: {latestFrame?.objects?.length ?? 0}
             </div>
@@ -251,7 +252,7 @@ export function DemoFeed() {
         {!isActive && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
             <div className="font-mono text-xs text-terminal-muted space-y-1 text-center">
-              <div>OPENEYE GUARDIAN v0.1.0</div>
+              <div>OPENEYE GUARDIAN v{OPENEYE_VERSION}</div>
               <div className="text-terminal-muted/50">Camera feed offline</div>
             </div>
             <button

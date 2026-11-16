@@ -44,7 +44,7 @@ openeye api describe scene.jpg --prompt "Is anyone standing near the robot arm?"
 | 400 | Missing `file`, prompt over 2,000 characters, or an image that can't be decoded |
 | 401 | Missing or invalid API key |
 | 402 | Not enough credits |
-| 413 | Image over 4 MB, or a PNG over 25 megapixels |
+| 413 | Image over 4 MB, or a PNG over 25 megapixels (a JPEG over 25 megapixels gets 400) |
 | 415 | Not JPEG or PNG, or the request is not multipart/form-data |
 | 429 | Rate limit exceeded |
 | 502 | The vision model request failed (credits are refunded) |

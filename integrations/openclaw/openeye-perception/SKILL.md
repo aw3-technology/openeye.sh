@@ -12,16 +12,16 @@ env:
   OPENEYE_FLEET_URL:
     required: false
     description: Self-hosted fleet control plane URL (default http://localhost:8001)
-  OPENEYE_FLEET_TOKEN:
+  OPENEYE_TOKEN:
     required: false
-    description: OpenEye (Better Auth) session token for the fleet control plane
+    description: OpenEye (Better Auth) session token for the fleet control plane (same variable as the openeye CLI; OPENEYE_FLEET_TOKEN is also accepted)
 bins:
   - python3
 ---
 
 # OpenEye Hosted Perception API
 
-Call OpenEye's hosted inference API at `https://openeye.sh/v1` — no local GPU, model downloads, or ML libraries. Needs an API key, credits, and `python3` with `requests`.
+Call OpenEye's hosted inference API at `https://openeye.sh/v1` — no local GPU, model downloads, or ML libraries. Needs an API key, credits, and Python 3 with `requests`. The examples use `python3`; on Windows run them with `python` (or `py`) instead. `scripts/usage.py models` works without a key.
 
 The user gets a key at https://openeye.sh/dashboard/settings/api-keys and buys credits at https://openeye.sh/dashboard/settings/credits.
 
@@ -74,7 +74,7 @@ python3 scripts/usage.py models                 # models, credit costs, availabi
 
 ### Query Fleet (self-hosted control plane)
 
-The fleet control plane is not hosted at openeye.sh. Use this only if the user runs one; set `OPENEYE_FLEET_URL` (default `http://localhost:8001`) and `OPENEYE_FLEET_TOKEN`.
+The fleet control plane is not hosted at openeye.sh. Use this only if the user runs one; set `OPENEYE_FLEET_URL` (default `http://localhost:8001`) and `OPENEYE_TOKEN` (the same variable `openeye fleet` uses; `OPENEYE_FLEET_TOKEN` also works).
 
 ```bash
 python3 scripts/fleet_query.py list [--status online] [--type camera]
@@ -112,7 +112,7 @@ Scripts print JSON to stdout on success and `{"error": "..."}` to stderr on fail
 
 - **Check credits first** — run `usage.py balance` before batch inference; warn if low.
 - **Handle 402/429** — tell the user and stop; for 402 point them to the credits page.
-- **Never log keys** — do not echo `OPENEYE_API_KEY` or `OPENEYE_FLEET_TOKEN`.
+- **Never log keys** — do not echo `OPENEYE_API_KEY` or `OPENEYE_TOKEN` / `OPENEYE_FLEET_TOKEN`.
 - **Prompt length** — max 2000 characters for describe prompts.
 
 ## References

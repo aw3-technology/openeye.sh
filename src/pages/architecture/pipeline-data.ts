@@ -14,7 +14,7 @@ export const pipelineLayers: PipelineLayer[] = [
     title: "Any camera. Any format.",
     description:
       "OpenEye ingests video from USB cameras, RTSP network streams, and video files. Hardware-agnostic input layer with automatic format detection and frame extraction.",
-    terminalCommand: "$ openeye watch --source rtsp://192.168.1.10:554/stream",
+    terminalCommand: "$ openeye watch --camera 0",
     details: [
       "USB webcams, industrial cameras, depth sensors",
       "RTSP, RTMP, HTTP-FLV network streams",
@@ -28,7 +28,7 @@ export const pipelineLayers: PipelineLayer[] = [
     title: "YOLO26 runs every frame.",
     description:
       "The fast detection layer processes every frame at 30fps using YOLO26. Model adapters let you swap to any supported detector without code changes. This is the safety-critical path — pure geometry, no LLM latency.",
-    terminalCommand: "$ openeye run yolo26 image.jpg --conf 0.4",
+    terminalCommand: "$ openeye run yolo26 image.jpg --confidence 0.4",
     details: [
       "YOLO26 and YOLOv8 as fast-layer detectors",
       "Model adapter pattern for hot-swapping",
@@ -42,7 +42,7 @@ export const pipelineLayers: PipelineLayer[] = [
     title: "Objects become a world model.",
     description:
       "Raw detections are composed into a structured scene graph with spatial relationships, hazard classifications, and environment context. This is the representation that downstream systems consume.",
-    terminalCommand: "$ openeye scene image.jpg --format json",
+    terminalCommand: "$ curl -F file=@image.jpg localhost:8000/perception",
     details: [
       "Scene graph with typed objects and positions",
       "Spatial relationships (on, near, inside, above)",
@@ -56,7 +56,7 @@ export const pipelineLayers: PipelineLayer[] = [
     title: "The smart layer thinks.",
     description:
       "Every 2-3 seconds, a VLM analyzes the scene for context-dependent risks that geometry alone can't catch. Powered by Qwen2.5-VL via Nebius Token Factory for fast, affordable inference.",
-    terminalCommand: "$ openeye watch --reason --vlm qwen2.5-vl",
+    terminalCommand: "$ openeye agent run --vlm",
     details: [
       "Qwen2.5-VL for multimodal scene reasoning",
       "Nebius Token Factory for hosted inference",
@@ -70,7 +70,7 @@ export const pipelineLayers: PipelineLayer[] = [
     title: "Goals become action plans.",
     description:
       "Given a natural language goal and the current scene graph, the planner generates structured multi-step action plans with safety constraints. Each step is grounded in what OpenEye actually sees.",
-    terminalCommand: '$ openeye plan "clear the workspace" --steps',
+    terminalCommand: '$ openeye agent run --goal "clear the workspace"',
     details: [
       "Natural language goal decomposition",
       "Plans grounded in real-time scene state",
@@ -84,7 +84,7 @@ export const pipelineLayers: PipelineLayer[] = [
     title: "Plans become robot actions.",
     description:
       "The adapter layer translates action plans into robot-specific commands. Unitree G1 connector with SDK, HTTP, and dry-run modes. Halt signals bypass the full pipeline for sub-100ms emergency stops.",
-    terminalCommand: "$ openeye g1-demo --source usb --dry-run",
+    terminalCommand: "$ openeye g1-demo --transport usb --control-mode dry_run",
     details: [
       "Unitree G1 connector (SDK / HTTP / dry-run)",
       "Auto-detect camera transport (USB, RTSP, SDK)",

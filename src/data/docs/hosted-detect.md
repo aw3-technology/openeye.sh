@@ -52,14 +52,14 @@ for obj in resp.json()["objects"]:
 
 | Status | Meaning |
 |--------|---------|
-| 400 | Missing `file`, bad `confidence`, or an image that can't be decoded |
+| 400 | Missing `file`, bad `confidence`, or an image that can't be decoded (including a JPEG over 25 megapixels) |
 | 401 | Missing or invalid API key |
 | 402 | Not enough credits |
-| 413 | Image over 4 MB, or a PNG over 25 megapixels |
+| 413 | Image over 4 MB, or a PNG over 25 megapixels (a JPEG over 25 megapixels gets 400) |
 | 415 | Not JPEG or PNG, or the request is not multipart/form-data |
 | 429 | Rate limit exceeded (see Rate Limits) |
 
-Error bodies are JSON with an `error` message, e.g. `{"error": "Image must be under 4 MB"}`. Credits are taken only after the image is decoded, and refunded if inference fails.
+Error bodies are JSON with an `error` message, e.g. `{"error": "Image must be under 4 MB"}`. Credits are taken only after the image is decoded, and refunded if inference fails. Failed calls are not charged and don't appear in /v1/usage totals, but they do count toward your per-key rate limit.
 
 ### From the CLI
 
@@ -71,4 +71,4 @@ openeye api detect photo.jpg --pretty   # full JSON response
 
 ### Self-hosted
 
-`openeye serve yolov8` serves the same route at `http://localhost:8000/v1/detect`, free. There `confidence` must be a query parameter (`/v1/detect?confidence=0.3`).
+`openeye serve yolov8` serves the same route at `http://localhost:8000/v1/detect`, free. It reads `confidence` the same way: from the form field first, then the query string.

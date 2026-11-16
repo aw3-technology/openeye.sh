@@ -14,6 +14,7 @@ import {
   DepthResponseSchema,
   DescribeResponseSchema,
   ModelInfoSchema,
+  ModelListResponseSchema,
   UsageResponseSchema,
   ErrorResponseSchema,
   DeviceResponseSchema,
@@ -44,16 +45,19 @@ const VALID_DETECT_RESPONSE = {
   credits_used: 1,
 };
 
+// Self-hosted `openeye serve depth-anything` (the hosted /v1/depth returns 501)
 const VALID_DEPTH_RESPONSE = {
-  model: "depth-anything-v2",
+  model: "depth-anything",
   depth_map: "iVBORw0KGgoAAAANSU...",
   image: VALID_IMAGE_INFO,
+  width: 1920,
+  height: 1080,
   inference_ms: 120.3,
   credits_used: 2,
 };
 
 const VALID_DESCRIBE_RESPONSE = {
-  model: "gpt-4o",
+  model: "qwen/qwen2.5-vl-72b-instruct",
   description: "A person walking through a park",
   image: VALID_IMAGE_INFO,
   inference_ms: 800.1,
@@ -194,6 +198,40 @@ describe("API model schemas", () => {
     }
   });
 
+  it("validates the hosted GET /v1/models array (api/v1.ts)", () => {
+    const hosted = [
+      { id: "yolov8", name: "YOLOv8 Nano", task: "detection", credits_per_call: 1,
+        description: "Real-time object detection with 80 COCO classes.", available: true },
+      { id: "qwen2.5-vl", name: "Qwen2.5-VL", task: "description", credits_per_call: 3,
+        description: "Scene description and visual Q&A.", available: false },
+      { id: "depth-anything-v2", name: "Depth Anything V2", task: "depth", credits_per_call: 2,
+        description: "Monocular depth estimation.", available: false },
+    ];
+    const result = ModelListResponseSchema.safeParse(hosted);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data[0].available).toBe(true);
+  });
+
+  it("validates the hosted GET /v1/usage response (api/v1.ts)", () => {
+    const hosted = {
+      balance: 847,
+      credits_remaining: 847,
+      total_requests: 153,
+      total_calls: 153,
+      total_credits_used: 180,
+      credits_used: 180,
+      by_endpoint: { "/v1/detect": 140, "/v1/describe": 13 },
+      daily_credits: { "2026-11-04": 22 },
+      truncated: false,
+    };
+    expect(UsageResponseSchema.safeParse(hosted).success).toBe(true);
+  });
+
+  it("accepts a null balance when the credits service is unreachable", () => {
+    const result = UsageResponseSchema.safeParse({ balance: null, credits_remaining: null });
+    expect(result.success).toBe(true);
+  });
+
   it("validates UsageResponse", () => {
     const valid = { balance: 500 };
     const result = UsageResponseSchema.safeParse(valid);
@@ -204,7 +242,11 @@ describe("API model schemas", () => {
     }
   });
 
-  it("validates ErrorResponse", () => {
+  it("validates the hosted ErrorResponse ({ error })", () => {
+    expect(ErrorResponseSchema.safeParse({ error: "No such endpoint: /v1/nope. See GET /v1" }).success).toBe(true);
+  });
+
+  it("validates the fleet ErrorResponse with message and status_code", () => {
     const valid = { error: "not_found", message: "Device not found", status_code: 404 };
     expect(ErrorResponseSchema.safeParse(valid).success).toBe(true);
   });
@@ -265,8 +307,8 @@ describe("Schema rejection of malformed data", () => {
     expect(DeploymentResponseSchema.safeParse(bad).success).toBe(false);
   });
 
-  it("rejects ErrorResponse with missing message", () => {
-    expect(ErrorResponseSchema.safeParse({ error: "oops", status_code: 500 }).success).toBe(false);
+  it("rejects ErrorResponse with missing error", () => {
+    expect(ErrorResponseSchema.safeParse({ message: "oops", status_code: 500 }).success).toBe(false);
   });
 
   it("rejects completely empty object for DeviceResponse", () => {

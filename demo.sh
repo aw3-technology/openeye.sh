@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────
 #  OpenEye CLI Demo — "Ollama for Vision AI"
-#  Run:  ./demo.sh
+#  Run:  ./demo.sh   (bash: macOS, Linux, WSL, or Git Bash on Windows)
+#
+#  Uses the first openeye it finds: on PATH (pipx install openeye-sh),
+#  then ./.venv, then cli/.venv (bin/ or Windows Scripts/).
+#  Needs the yolo extra: pipx install "openeye-sh[yolo]"
 # ──────────────────────────────────────────────────────────────
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV="$SCRIPT_DIR/.venv"
-OPENEYE="$VENV/bin/openeye"
+OPENEYE=""
 DEMO_IMAGES="$SCRIPT_DIR/src/assets/demo"
 OUTPUT_DIR="$SCRIPT_DIR/demo_output"
 
@@ -40,9 +43,24 @@ pause() {
 }
 
 # ── Preflight ───────────────────────────────────────────────
-if [[ ! -x "$OPENEYE" ]]; then
-    echo "Error: openeye not found at $OPENEYE"
-    echo "Run:  python3.12 -m venv .venv && .venv/bin/pip install -e './cli[yolo,camera]'"
+if command -v openeye >/dev/null 2>&1; then
+    OPENEYE="$(command -v openeye)"
+else
+    for candidate in \
+        "$SCRIPT_DIR/.venv/bin/openeye" \
+        "$SCRIPT_DIR/.venv/Scripts/openeye.exe" \
+        "$SCRIPT_DIR/cli/.venv/bin/openeye" \
+        "$SCRIPT_DIR/cli/.venv/Scripts/openeye.exe"; do
+        if [[ -x "$candidate" ]]; then
+            OPENEYE="$candidate"
+            break
+        fi
+    done
+fi
+if [[ -z "$OPENEYE" ]]; then
+    echo "Error: openeye not found on PATH, in ./.venv, or in cli/.venv"
+    echo "Install it with:  pipx install \"openeye-sh[yolo]\""
+    echo "or, from this repo:  cd cli && uv sync --extra yolo"
     exit 1
 fi
 
@@ -81,25 +99,25 @@ pause
 banner "Step 2: Pull a Model"
 step "Download YOLOv8 (6MB) — like 'ollama pull llama3'" "openeye pull yolov8"
 
-if "$OPENEYE" list 2>&1 | grep -q "yolov8.*download"; then
-    "$OPENEYE" pull yolov8 2>/dev/null || echo -e "${DIM}    (pull failed)${RESET}"
+# pull skips the download (and says so) when yolov8 is already there
+if "$OPENEYE" pull yolov8; then
+    echo ""
+    echo -e "${GREEN}    Model is in ~/.openeye/models/yolov8/${RESET}"
 else
-    echo -e "${DIM}    (yolov8 already downloaded, skipping pull)${RESET}"
+    echo -e "${YELLOW}    (pull failed — the next steps need yolov8)${RESET}"
 fi
-echo ""
-echo -e "${GREEN}    Model pulled to ~/.openeye/models/yolov8/${RESET}"
 pause
 
 # ── Step 3: Run Inference on an Image ───────────────────────
 banner "Step 3: Run Inference — Warehouse Scene"
 step "Detect objects in a warehouse photo" "openeye run yolov8 scene-warehouse.jpg --pretty"
-"$OPENEYE" run yolov8 "$DEMO_IMAGES/scene-warehouse.jpg" --pretty 2>/dev/null
+"$OPENEYE" run yolov8 "$DEMO_IMAGES/scene-warehouse.jpg" --pretty >/dev/null
 pause
 
 # ── Step 4: Run on Kitchen Scene ────────────────────────────
 banner "Step 4: Run Inference — Kitchen Scene"
 step "Detect objects in a kitchen photo" "openeye run yolov8 scene-kitchen.jpg --pretty"
-"$OPENEYE" run yolov8 "$DEMO_IMAGES/scene-kitchen.jpg" --pretty 2>/dev/null
+"$OPENEYE" run yolov8 "$DEMO_IMAGES/scene-kitchen.jpg" --pretty >/dev/null
 pause
 
 # ── Step 5: Visualize with Bounding Boxes ───────────────────
@@ -127,14 +145,14 @@ if command -v jq &>/dev/null; then
         | jq '.objects[] | {label, confidence}'
 else
     echo -e "${DIM}    (jq not installed — showing raw JSON instead)${RESET}"
-    "$OPENEYE" run yolov8 "$DEMO_IMAGES/scene-kitchen.jpg" --pretty 2>/dev/null
+    "$OPENEYE" run yolov8 "$DEMO_IMAGES/scene-kitchen.jpg" --pretty >/dev/null
 fi
 pause
 
 # ── Step 7: Benchmark ──────────────────────────────────────
 banner "Step 7: Benchmark Model Performance"
 step "Measure inference speed (5 runs)" "openeye bench yolov8 --warmup 2 --runs 5"
-"$OPENEYE" bench yolov8 --warmup 2 --runs 5 2>/dev/null
+"$OPENEYE" bench yolov8 --warmup 2 --runs 5
 pause
 
 # ── Step 8: Serve with REST API ────────────────────────────

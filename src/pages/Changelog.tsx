@@ -6,9 +6,13 @@ import { Footer } from "@/components/Footer";
 import { PageMeta } from "@/components/seo/PageMeta";
 import {
   changelog,
+  changelogLabel,
   formatChangelogDate,
   changeTypeColors,
 } from "@/data/changelog";
+
+const releases = changelog.filter((e) => !e.milestone);
+const firstMilestone = changelog.find((e) => e.milestone);
 
 /** Parses backtick-delimited segments into inline <code> elements. */
 function renderChangeText(text: string) {
@@ -81,15 +85,23 @@ export default function Changelog() {
               transition={{ duration: 0.3, delay: 0.05, ease: [0.2, 0.8, 0.2, 1] }}
               className="flex flex-wrap gap-2"
             >
-              {changelog.map((entry) => (
+              {releases.map((entry) => (
                 <a
                   key={entry.version}
                   href={`#v${entry.version}`}
                   className="font-mono text-xs px-2.5 py-1 border border-foreground/[0.08] rounded-inner text-muted-foreground hover:text-primary hover:border-primary/20 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
                 >
-                  v{entry.version}
+                  {changelogLabel(entry)}
                 </a>
               ))}
+              {firstMilestone && (
+                <a
+                  href={`#v${firstMilestone.version}`}
+                  className="font-mono text-xs px-2.5 py-1 border border-foreground/[0.08] rounded-inner text-muted-foreground hover:text-primary hover:border-primary/20 transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
+                >
+                  Earlier milestones
+                </a>
+              )}
             </motion.div>
           </div>
         </section>
@@ -124,8 +136,13 @@ export default function Changelog() {
                         href={`#v${entry.version}`}
                         className="font-mono text-sm font-medium text-foreground hover:text-primary transition-colors"
                       >
-                        v{entry.version}
+                        {changelogLabel(entry)}
                       </a>
+                      {entry.milestone && (
+                        <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 border rounded-inner text-muted-foreground border-foreground/[0.12]">
+                          Pre-release
+                        </span>
+                      )}
                       {entry.tag === "latest" && (
                         <span className="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 border rounded-inner text-primary border-primary/20">
                           Latest

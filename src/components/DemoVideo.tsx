@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import sceneWorkshop from "@/assets/demo/scene-workshop.jpg";
+import { OPENEYE_VERSION } from "@/data/version";
 
 const terminalLines = [
-  { text: "$ openeye watch --mode guardian --workspace table", delay: 0 },
+  { text: "$ openeye watch --models yolo26 --safety", delay: 0 },
   { text: "", delay: 400 },
   { text: "[INFO] Camera 0 connected — 1280x720 @ 30fps", delay: 800 },
   { text: "[INFO] Loading YOLO26-xl... done (1.2s)", delay: 1600 },
@@ -196,7 +197,7 @@ export function DemoVideo() {
 
                 {/* HUD */}
                 <div className="absolute top-3 left-3 font-mono text-[10px] text-terminal-green/50 space-y-0.5">
-                  <div>OPENEYE v0.1.0 — LIVE</div>
+                  <div>OPENEYE v{OPENEYE_VERSION} — LIVE</div>
                   <div className="tabular-nums">30 FPS | 1280x720 | YOLO26-xl</div>
                   <div
                     className={`transition-colors duration-300 ${

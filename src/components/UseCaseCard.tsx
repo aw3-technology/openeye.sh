@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { UseCase } from "@/data/useCasesData";
+import { OPENEYE_VERSION } from "@/data/version";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 
@@ -52,7 +53,7 @@ export function UseCaseSection({ uc, index }: UseCaseSectionProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
           <div className="absolute bottom-4 left-4 font-mono text-[10px] text-primary/70 space-y-0.5">
-            <div>OPENEYE v0.1.0 — {uc.overline.toUpperCase()}</div>
+            <div>OPENEYE v{OPENEYE_VERSION} — {uc.overline.toUpperCase()}</div>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               LIVE

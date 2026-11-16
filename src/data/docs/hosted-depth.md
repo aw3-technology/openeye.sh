@@ -23,6 +23,8 @@ Or with the CLI: `openeye api depth scene.jpg --server http://localhost:8000` (n
 
 ```json
 {
+  "model": "depth-anything",
+  "image": {"width": 1280, "height": 720},
   "width": 1280,
   "height": 720,
   "credits_used": 2,
@@ -31,4 +33,4 @@ Or with the CLI: `openeye api depth scene.jpg --server http://localhost:8000` (n
 }
 ```
 
-`depth_map` is a base64-encoded grayscale PNG where brighter pixels are closer to the camera. `credits_used` is only counted by the local server; nothing is charged.
+`depth_map` is a base64-encoded grayscale PNG where brighter pixels are closer to the camera. The top-level `width` and `height` duplicate `image` for older clients. `credits_used` is only counted by the local server; nothing is charged.

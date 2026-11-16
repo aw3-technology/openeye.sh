@@ -104,16 +104,16 @@ The server also mounts the hosted API's routes so `openeye api --server http://l
 
 | Method | Path | Notes |
 |--------|------|-------|
-| POST | /v1/detect | Runs the served model; `confidence` is a query parameter (default 0.25) |
+| POST | /v1/detect | Runs the served model; `confidence` from the multipart form field, else the query string (default 0.25) |
 | POST | /v1/depth | Runs the served model; use `openeye serve depth-anything` |
-| POST | /v1/describe | Uses the served model's prompt support; `prompt` is a query parameter |
+| POST | /v1/describe | Uses the served model's prompt support; `prompt` from the multipart form field, else the query string |
 | GET | /v1/models | Lists the one model being served |
 | GET | /v1/usage | Calls and credits counted for your key since the server started |
 
 Differences from the hosted API at https://openeye.sh/v1:
 
-- Auth is `Authorization: Bearer <key>` only (no X-API-Key). Any key starting with oe_ is accepted; set OPENEYE_SERVER_API_KEY to accept only that exact key.
-- Credits are counted in memory (detect 1, depth 2, describe 5, from a notional 1,000) and reset on restart. Nothing is charged.
+- Auth is `Authorization: Bearer <key>`, or `X-API-Key: <key>` when no Bearer token is sent (same as the hosted API). Any key starting with oe_ is accepted; set OPENEYE_SERVER_API_KEY to accept only that exact key.
+- Credits are counted in memory (detect 1, depth 2, describe 3, from a notional 1,000) and reset on restart. Nothing is charged.
 - Uploads up to 20 MB; errors use FastAPI's `{"detail": "..."}` body.
 
 ### Error Responses
@@ -121,7 +121,7 @@ Differences from the hosted API at https://openeye.sh/v1:
 | Status | Description |
 |--------|-------------|
 | 400 | Cannot decode image (on /v1 routes, also empty or oversized files) |
-| 401 | Missing or invalid Bearer key (/v1 routes) |
+| 401 | Missing or invalid API key (/v1 routes) |
 | 413 | File too large (over 20 MB) |
 | 429 | Rate limit exceeded (30 requests/minute on /predict) |
 | 500 | Inference failed |

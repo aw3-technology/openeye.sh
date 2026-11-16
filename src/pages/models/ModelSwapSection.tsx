@@ -33,7 +33,7 @@ export function ModelSwapSection() {
               $ openeye run depth-anything scene.jpg
             </div>
             <div className="font-mono text-sm bg-secondary text-oe-green px-4 py-2.5 rounded-inner border">
-              $ openeye run sam2 workspace.jpg --segment
+              $ openeye run sam2 workspace.jpg --visualize
             </div>
           </div>
         </motion.div>

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import sceneWorkshop from "@/assets/demo/scene-workshop.jpg";
+import { OPENEYE_VERSION } from "@/data/version";
 
 interface DetectedObject {
   name: string;
@@ -92,7 +93,7 @@ export function VisionFrame() {
         <div className="absolute top-3 left-3 font-mono text-[10px] text-primary/70 space-y-0.5">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rotate-45 bg-oe-blue" />
-            OPENEYE v0.1.0
+            OPENEYE v{OPENEYE_VERSION}
           </div>
           <div className="tabular-nums">FPS: 30 | RES: 1920×1080</div>
           <div className="tabular-nums">OBJECTS: {objects.length} | HAZARDS: {objects.filter(o => o.hazard).length}</div>

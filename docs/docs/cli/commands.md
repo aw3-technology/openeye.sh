@@ -169,7 +169,7 @@ openeye vlm-demo --image photo.jpg --prompt "What hazards do you see?"
 openeye vlm-demo --all-models
 ```
 
-**Options:** `--image` (default `src/assets/demo/scene-warehouse.jpg`, a path inside the repo), `--model, -m` (OpenRouter model ID, default `qwen/qwen3-vl-235b:free`), `--prompt, -p`, `--all-models` (compare all free VLM models side by side).
+**Options:** `--image` (default `src/assets/demo/scene-warehouse.jpg`, a path inside the repo), `--model, -m` (OpenRouter model ID, default `nvidia/nemotron-3.5-super-vl:free`; `google/gemma-4-31b-it:free` is also free, `qwen/qwen3-vl-235b-a22b-instruct` is paid), `--prompt, -p`, `--all-models` (run those three models side by side).
 
 ## Configuration
 
@@ -412,11 +412,11 @@ openeye api usage --days 7
 |------------|-------------|---------|
 | `detect <image>` | Object detection (YOLOv8, 1 credit) | `--confidence, -c` (default `0.25`), `--pretty, -p` (print the raw JSON) |
 | `describe <image>` | VLM scene description (3 credits) | `--prompt, -p` (default `Describe what you see in this image.`) |
-| `depth <image>` | Depth estimation | — |
-| `models` | List hosted models and credit costs | — |
+| `depth <image>` | Depth estimation (501 on the hosted API; works against `openeye serve depth-anything`) | `--output, -o <path>` (save the returned depth map PNG) |
+| `models` | List hosted models and credit costs (public, no key needed) | `--json` (print the raw JSON response) |
 | `usage` | Credit balance and usage | `--days, -d` (default `30`) |
 
-Every subcommand takes `--server, -s <url>` (default `$OPENEYE_API_URL`, or `https://openeye.sh`). The key is read from `OPENEYE_API_KEY` and sent as `Authorization: Bearer`.
+Every subcommand takes `--server, -s <url>` (default `$OPENEYE_API_URL`, or `https://openeye.sh`). The key is read from `OPENEYE_API_KEY` and sent as `Authorization: Bearer`; `models` works without one.
 
 !!! note "Hosted availability"
     `detect`, `models`, and `usage` are live. `describe` returns `503` until scene description is enabled on the hosted API, and `depth` returns `501` on the hosted API; point `--server` at a local `openeye serve depth-anything` to use it.

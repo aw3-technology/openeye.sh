@@ -2,11 +2,10 @@
 title: GET /v1/models
 ---
 
-Lists the hosted models, what each costs, and whether it's available right now. Free; needs an API key.
+Lists the hosted models, what each costs, and whether it's available right now. Free and public: no API key needed.
 
 ```bash
-curl https://openeye.sh/v1/models \
-  -H "Authorization: Bearer oe_your_key_here"
+curl https://openeye.sh/v1/models
 ```
 
 ```json
@@ -26,4 +25,4 @@ curl https://openeye.sh/v1/models \
 | qwen2.5-vl | POST /v1/describe | Becomes available when the VLM is enabled; returns 503 until then |
 | depth-anything-v2 | POST /v1/depth | Not hosted; returns 501 |
 
-From the CLI: `openeye api models`. For models on your own machine, run `openeye list`.
+From the CLI: `openeye api models` (`--json` for the raw response; works without OPENEYE_API_KEY). `GET https://openeye.sh/v1` is also public and returns a JSON index of every endpoint, its methods, and whether it needs a key. For models on your own machine, run `openeye list`.

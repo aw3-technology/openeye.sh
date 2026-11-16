@@ -122,19 +122,19 @@ The server also mounts the same routes as the hosted API at `https://openeye.sh/
 
 | Method | Endpoint | Notes |
 |--------|----------|-------|
-| POST | /v1/detect | multipart `file`; `confidence` query parameter (default `0.25`) |
+| POST | /v1/detect | multipart `file`; `confidence` form field, or query parameter as a fallback (default `0.25`) |
 | POST | /v1/depth | multipart `file`; use with `openeye serve depth-anything` |
-| POST | /v1/describe | multipart `file`; `prompt` query parameter |
+| POST | /v1/describe | multipart `file`; `prompt` form field, or query parameter as a fallback |
 | GET | /v1/models | Model list with credit costs |
 | GET | /v1/usage | Usage recorded by this server process |
 
-Auth is `Authorization: Bearer <key>`. Any key starting with `oe_` is accepted unless `OPENEYE_SERVER_API_KEY` is set, in which case only that exact key is. Credits are tallied in memory for the life of the process; nothing is charged. Max upload is 20 MB.
+Auth is `Authorization: Bearer <key>` (or `X-API-Key: <key>` when no Bearer token is sent). Any key starting with `oe_` is accepted unless `OPENEYE_SERVER_API_KEY` is set, in which case only that exact key is. Credits are tallied in memory for the life of the process (detect 1, depth 2, describe 3); nothing is charged. Max upload is 20 MB.
 
 ```bash
 openeye serve yolov8
-curl -X POST "http://localhost:8000/v1/detect?confidence=0.3" \
+curl -X POST http://localhost:8000/v1/detect \
   -H "Authorization: Bearer oe_local" \
-  -F "file=@photo.jpg"
+  -F "file=@photo.jpg" -F "confidence=0.3"
 ```
 
 ## WebSocket Endpoints

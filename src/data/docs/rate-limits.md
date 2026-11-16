@@ -14,7 +14,7 @@ Billed responses include:
 | X-RateLimit-Remaining | Requests left in the current window |
 | Retry-After | Sent with 429: seconds to wait (60) |
 
-When the limit is hit you get 429 with `{"error": "Rate limit exceeded (60 requests per minute)"}` and no credits are charged. Only successful calls count toward the window. Limits are per key, so separate keys for separate services keep one from starving another, but they share one credit balance.
+When the limit is hit you get 429 with `{"error": "Rate limit exceeded (60 requests per minute)"}` and no credits are charged. Every billed call that passes authentication counts toward the window, including ones that fail (bad image, 402, upstream error); failed calls are not charged and are left out of GET /v1/usage totals. Limits are per key, so separate keys for separate services keep one from starving another, but they share one credit balance.
 
 ```python
 import time, requests

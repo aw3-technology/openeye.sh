@@ -7,15 +7,16 @@ title: Error Codes
 The hosted API at https://openeye.sh/v1 returns errors as JSON with a single `error` message:
 
 ```json
-{"error": "Not enough credits. Buy more at https://openeye.sh/dashboard/settings/credits"}
+{"error": "Not enough credits (new accounts start with none). Buy credits at https://openeye.sh/dashboard/settings/credits"}
 ```
 
 | Status | When |
 |--------|------|
-| 400 | Missing `file`, `confidence` outside 0–1, prompt over 2,000 characters, malformed multipart body, or an image that can't be decoded |
+| 400 | Missing `file`, `confidence` outside 0–1, prompt over 2,000 characters, malformed multipart body, or an image that can't be decoded (including a JPEG over 25 megapixels) |
 | 401 | Missing API key, key not starting with oe_, or unknown/deleted key |
 | 402 | Not enough credits — including accounts that have never bought credits |
-| 404 | Unknown endpoint |
+| 404 | Unknown endpoint (no key needed to get this; GET /v1 lists the real ones) |
+| 405 | Wrong method for the endpoint; the `Allow` header lists the right one |
 | 413 | Image over 4 MB, or a PNG over 25 megapixels |
 | 415 | Not JPEG or PNG, or the request is not multipart/form-data |
 | 429 | Per-key rate limit exceeded (see Rate Limits) |
@@ -24,7 +25,7 @@ The hosted API at https://openeye.sh/v1 returns errors as JSON with a single `er
 | 502 | POST /v1/describe — the upstream vision model failed |
 | 503 | POST /v1/describe — scene description isn't enabled on the hosted API yet |
 
-Credits are only taken once a request passes validation and the rate limit, and they are refunded if inference fails, so 4xx responses and failed inferences cost nothing.
+Credits are only taken once a request passes validation and the rate limit, and they are refunded if inference fails, so 4xx responses and failed inferences cost nothing. Failed calls are still logged and count toward the per-key rate limit, but they are left out of the GET /v1/usage totals.
 
 ### Self-Hosted Server
 

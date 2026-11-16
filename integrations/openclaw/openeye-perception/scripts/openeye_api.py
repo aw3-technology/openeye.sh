@@ -10,7 +10,8 @@ API_KEY = os.environ.get("OPENEYE_API_KEY", "")
 API_URL = os.environ.get("OPENEYE_API_URL", "https://openeye.sh").rstrip("/")
 # The fleet control plane is self-hosted (backend/src/fleet, port 8001); it is not served at openeye.sh.
 FLEET_URL = os.environ.get("OPENEYE_FLEET_URL", "http://localhost:8001").rstrip("/")
-FLEET_TOKEN = os.environ.get("OPENEYE_FLEET_TOKEN", "")
+# OPENEYE_TOKEN is what the openeye CLI uses; OPENEYE_FLEET_TOKEN is still accepted.
+FLEET_TOKEN = os.environ.get("OPENEYE_TOKEN") or os.environ.get("OPENEYE_FLEET_TOKEN", "")
 
 # Exit codes
 EXIT_OK = 0
@@ -30,7 +31,7 @@ def require_api_key():
 
 def require_fleet_token():
     if not FLEET_TOKEN:
-        error("OPENEYE_FLEET_TOKEN environment variable is not set.", EXIT_CLIENT)
+        error("Set OPENEYE_TOKEN (or OPENEYE_FLEET_TOKEN) to your OpenEye session token.", EXIT_CLIENT)
 
 
 def error(message: str, code: int = EXIT_CLIENT):
@@ -51,22 +52,28 @@ def _handle_response(resp: requests.Response) -> dict:
     error(f"HTTP {resp.status_code}: {msg}", code)
 
 
+def _auth_headers() -> dict:
+    return {"Authorization": f"Bearer {API_KEY}"}
+
+
 def api_post_file(path: str, filepath: str, extra_fields: dict | None = None) -> dict:
-    """POST a file via multipart upload with X-API-Key auth."""
+    """POST a file via multipart upload with Bearer API-key auth."""
     require_api_key()
     url = f"{API_URL}{path}"
     with open(filepath, "rb") as f:
         files = {"file": (os.path.basename(filepath), f)}
         data = extra_fields or {}
-        resp = requests.post(url, files=files, data=data, headers={"X-API-Key": API_KEY}, timeout=120)
+        resp = requests.post(url, files=files, data=data, headers=_auth_headers(), timeout=120)
     return _handle_response(resp)
 
 
-def api_get(path: str, params: dict | None = None) -> dict:
-    """GET with X-API-Key auth."""
-    require_api_key()
+def api_get(path: str, params: dict | None = None, *, auth: bool = True) -> dict:
+    """GET with Bearer API-key auth (auth=False for public routes such as /v1/models)."""
+    if auth:
+        require_api_key()
     url = f"{API_URL}{path}"
-    resp = requests.get(url, params=params, headers={"X-API-Key": API_KEY}, timeout=30)
+    headers = _auth_headers() if API_KEY else {}
+    resp = requests.get(url, params=params, headers=headers, timeout=30)
     return _handle_response(resp)
 
 

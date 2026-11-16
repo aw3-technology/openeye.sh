@@ -96,7 +96,7 @@ export function ABTestingTab({ abTests }: ABTestingTabProps) {
             </Table>
           ) : (
             <p className="text-muted-foreground text-sm">
-              No A/B tests. Use <code>openeye mlops ab-test</code> to create one.
+              No A/B tests. Use <code>openeye mlops create-ab-test --champion VERSION --challenger VERSION</code> to create one.
             </p>
           )}
         </CardContent>

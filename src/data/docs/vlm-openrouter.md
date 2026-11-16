@@ -26,9 +26,11 @@ pipx install "openeye-sh[vlm]" --force
 
 | Model ID | Name | Parameters | Cost |
 |----------|------|------------|------|
-| `qwen/qwen3-vl-235b:free` | Qwen3-VL 235B | 235B | Free |
-| `qwen/qwen2.5-vl-72b-instruct:free` | Qwen2.5-VL 72B | 72B | Free |
-| `google/gemma-3-27b-it:free` | Gemma 3 27B | 27B | Free |
+| `nvidia/nemotron-3.5-super-vl:free` | Nemotron 3.5 Super VL (default) | — | Free |
+| `google/gemma-4-31b-it:free` | Gemma 4 31B | 31B | Free |
+| `qwen/qwen3-vl-235b-a22b-instruct` | Qwen3-VL 235B A22B | 235B (22B active) | Paid |
+
+Free OpenRouter models are rate limited and come and go; any other OpenRouter vision model ID also works with `--model`.
 
 ### CLI Usage
 
@@ -43,9 +45,9 @@ openeye vlm-demo --image photo.jpg
 openeye vlm-demo --prompt "List every safety hazard you see"
 
 # Pick a different model
-openeye vlm-demo --model google/gemma-3-27b-it:free
+openeye vlm-demo --model google/gemma-4-31b-it:free
 
-# Compare all free models side-by-side
+# Compare the three models above side-by-side
 openeye vlm-demo --all-models
 ```
 
@@ -54,9 +56,9 @@ openeye vlm-demo --all-models
 | Flag | Description |
 |------|-------------|
 | `--image` | Path to image file (default: `src/assets/demo/scene-warehouse.jpg`) |
-| `--model`, `-m` | OpenRouter model ID (default: `qwen/qwen3-vl-235b:free`) |
+| `--model`, `-m` | OpenRouter model ID (default: `nvidia/nemotron-3.5-super-vl:free`) |
 | `--prompt`, `-p` | Custom prompt to send with the image |
-| `--all-models` | Compare all free VLM models concurrently |
+| `--all-models` | Run the three models above concurrently |
 
 ### Standalone Usage
 

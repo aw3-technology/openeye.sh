@@ -55,7 +55,7 @@ backend/                      # Perception runtime + fleet control plane (Python
 
 integrations/openclaw/        # OpenClaw skill for the hosted API
 openclaw-skill/openeye/       # OpenClaw skill for the CLI
-.mcp.json                     # Project MCP config for Claude Code (runs cli/.venv python -m openeye_ai.mcp.server)
+.mcp.json                     # Project MCP config for Claude Code (uv run --directory cli --extra mcp openeye-mcp)
 ```
 
 ## Quick Command Reference
@@ -88,11 +88,12 @@ Model keys (`cli/openeye_ai/models.yaml`): `yolov8`, `depth-anything`, `groundin
 
 ## Hosted API in one screen
 
-Base `https://openeye.sh/v1`, `Authorization: Bearer oe_...` (or `X-API-Key`). Keys come from Dashboard → Settings → API Keys and are stored as SHA-256 hashes in `api_keys`.
+Base `https://openeye.sh/v1` (`/api/v1` is an alias), `Authorization: Bearer oe_...` (`X-API-Key` is accepted only when no `Authorization` header is sent). Keys come from Dashboard → Settings → API Keys and are stored as SHA-256 hashes in `api_keys`. `GET /v1` (endpoint index) and `GET /v1/models` are public; unknown paths return 404 and wrong methods 405 (with `Allow`) without a key.
 
 | Endpoint | Credits | Status |
 |---|---|---|
-| `GET /v1/models` | 0 | live, includes `available` flags |
+| `GET /v1` | 0 | live, public JSON index |
+| `GET /v1/models` | 0 | live, public, includes `available` flags |
 | `POST /v1/detect` (multipart `file`, `confidence`, default 0.25) | 1 | live, YOLOv8n COCO-80 on CPU |
 | `POST /v1/describe` (multipart `file`, `prompt`) | 3 | returns 503 until `OPENROUTER_API_KEY` is set |
 | `POST /v1/depth` | 2 | returns 501 on hosted; self-host with `openeye serve depth-anything` |
@@ -105,7 +106,7 @@ JPEG/PNG under 4 MB. Rate limit defaults to 60/min per key (`api_keys.rate_limit
 `openeye-mcp` (entry point `openeye_ai.mcp.server:main`, stdio transport; install the `mcp` extra) exposes:
 
 - Local tools (shell out to the `openeye` binary): `openeye_list`, `openeye_pull`, `openeye_run`, `openeye_serve`, `openeye_health`, `openeye_bench`, `openeye_remove`, `openeye_nebius_stats`
-- Hosted-API tools (need `OPENEYE_API_KEY` in the MCP server's environment): `openeye_api_detect(image_path, confidence)`, `openeye_api_describe(image_path, prompt)`, `openeye_api_models()`, `openeye_api_usage(days)`
+- Hosted-API tools: `openeye_api_detect(image_path, confidence)`, `openeye_api_describe(image_path, prompt)`, `openeye_api_usage(days)` (need `OPENEYE_API_KEY` in the MCP server's environment) and `openeye_api_models()` (public, no key)
 
 Client config (Claude Desktop, Cursor, or a user-level Claude Code config):
 
@@ -120,7 +121,9 @@ Client config (Claude Desktop, Cursor, or a user-level Claude Code config):
 }
 ```
 
-The repo's `.mcp.json` runs `cli/.venv/bin/python -m openeye_ai.mcp.server` from the repo root, so it needs a dev venv first: `python3.12 -m venv cli/.venv && cli/.venv/bin/pip install -e "cli/[all,mcp]"`. It sets no `env`, so the hosted-API tools only work if `OPENEYE_API_KEY` is exported in the shell that launched Claude Code.
+Installed users can skip the separate install and point the client at `uvx` instead: `"command": "uvx", "args": ["--from", "openeye-sh[mcp]", "openeye-mcp"]` (or `pipx install "openeye-sh[mcp]"`, then `"command": "openeye-mcp"`). A discovery manifest is published at `https://openeye.sh/.well-known/mcp.json` (`public/.well-known/mcp.json`).
+
+The repo's `.mcp.json` runs `uv run --quiet --directory cli --extra mcp openeye-mcp` from the repo root, so it only needs [uv](https://docs.astral.sh/uv/) on `PATH` (uv creates and syncs `cli/.venv` itself, on any OS). It sets no `env`, so the hosted-API tools only work if `OPENEYE_API_KEY` is exported in the shell that launched Claude Code.
 
 ## Environment Variables
 

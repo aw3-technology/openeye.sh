@@ -24,7 +24,7 @@ if not args.command:
 if args.command == "balance":
     result = api_get("/v1/usage", {"days": args.days})
 elif args.command == "models":
-    result = api_get("/v1/models")
+    result = api_get("/v1/models", auth=False)
 
 json.dump(result, sys.stdout, indent=2)
 print()

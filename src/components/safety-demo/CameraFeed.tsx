@@ -2,6 +2,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { SafetyState } from "./types";
 import { stateConfig, workspaceObjects, HAND_SIZE } from "./data";
 import safetyWorkspace from "@/assets/demo/safety-workspace.jpg";
+import { OPENEYE_VERSION } from "@/data/version";
 
 interface CameraFeedProps {
   currentState: SafetyState;
@@ -175,7 +176,7 @@ export function CameraFeed({
 
           {/* HUD overlay */}
           <div className="absolute top-3 left-3 font-mono text-[10px] text-terminal-green/70 space-y-0.5">
-            <div>OPENEYE GUARDIAN v0.1.0</div>
+            <div>OPENEYE GUARDIAN v{OPENEYE_VERSION}</div>
             <div className="tabular-nums">FPS: 30 | MODE: SAFETY MONITOR</div>
             <motion.div
               className="tabular-nums"

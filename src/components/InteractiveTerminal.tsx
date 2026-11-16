@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
+import { OPENEYE_VERSION } from "@/data/version";
 
 interface TerminalLine {
   text: string;
@@ -36,8 +37,8 @@ const commands: Command[] = [
       { text: "  yolov8            detection       downloaded  6.2MB", color: "green" },
       { text: "  yolo26            detection       downloaded  5.0MB", color: "green" },
       { text: "  rfdetr            detection       downloaded  120MB", color: "green" },
-      { text: "  grounding_dino    grounding       downloaded  341MB", color: "green" },
-      { text: "  depth_anything    depth           downloaded  98MB", color: "green" },
+      { text: "  grounding-dino    detection       downloaded  341MB", color: "green" },
+      { text: "  depth-anything    depth           downloaded  98MB", color: "green" },
       { text: "  sam2              segmentation    downloaded  150MB", color: "green" },
       { text: "  smolvla           vla             available   500MB", color: "amber" },
       { text: "", color: "default" },
@@ -69,7 +70,7 @@ const commands: Command[] = [
       { text: "[SERVER] Starting FastAPI server...", color: "muted" },
       { text: "", color: "default" },
       { text: "  ┌─────────────────────────────────────────────┐", color: "amber" },
-      { text: "  │  OpenEye Inference Server v0.1.0             │", color: "amber" },
+      { text: `  │  OpenEye Inference Server v${OPENEYE_VERSION}             │`, color: "amber" },
       { text: "  │                                               │", color: "amber" },
       { text: "  │  Dashboard:   http://localhost:8000/           │", color: "amber" },
       { text: "  │  REST API:    http://localhost:8000/predict    │", color: "amber" },

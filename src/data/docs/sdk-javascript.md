@@ -4,7 +4,7 @@ title: JavaScript / TypeScript
 
 ### Object Detection (hosted API, Node 18+)
 
-Keep the API key on a server; don't ship it to browsers.
+Keep the API key on a server; don't ship it to browsers. The hosted API sends no CORS headers, so the hosted examples below are for Node.js (18+) or another server-side runtime; browser pages can call a self-hosted `openeye serve` instead.
 
 ```typescript
 import { readFile } from "node:fs/promises";

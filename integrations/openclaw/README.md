@@ -15,7 +15,8 @@ export OPENEYE_API_KEY="oe_..."                 # from https://openeye.sh/dashbo
 export OPENEYE_API_URL="https://openeye.sh"     # optional; this is the default
 # export OPENEYE_API_URL="http://localhost:8000"  # or a local `openeye serve <model>`
 
-# 2. Run a script directly
+# 2. Run a script directly (on Windows use `python` instead of `python3`,
+#    and `$env:OPENEYE_API_KEY = "oe_..."` instead of export)
 python3 integrations/openclaw/openeye-perception/scripts/usage.py models
 python3 integrations/openclaw/openeye-perception/scripts/detect.py photo.jpg
 

@@ -13,7 +13,7 @@ Notation: `ARG` required, `ARG?` optional, `--opt=default`.
 
 | Command | Arguments / options | Purpose |
 |---|---|---|
-| `openeye list` | | Available and downloaded models |
+| `openeye list` | `--json` | Available and downloaded models |
 | `openeye pull` | `MODEL?` `--all` `--variant` `--quantized` `--force` | Download weights to `~/.openeye/models/` (interactive picker if no model) |
 | `openeye remove` | `MODEL` | Delete downloaded weights |
 | `openeye add-model` | `KEY` `--name` `--task` `--adapter` `--hf-repo` `--filename` `--size-mb` `--description` | Add a registry entry |
@@ -24,7 +24,7 @@ Notation: `ARG` required, `ARG?` optional, `--opt=default`.
 | `openeye serve` | `MODEL` `--host=0.0.0.0` `--port=8000` `--demo` `--vlm-model` `--cortex-llm` | Local FastAPI server (REST, `/v1`, WebSockets, browser dashboard at `/`) |
 | `openeye watch` | `-m/--models=yolov8` `-c/--camera=0` `-v/--video` `-s/--safety` `--danger-m=0.5` `--caution-m=1.5` `--demo` | Live camera/video feed in the terminal (needs `[camera]`) |
 | `openeye g1-demo` | `--transport=webcam` `--host=192.168.123.161` `-c/--camera=0` `--control-mode=dry_run` `-m/--model=yolov8` `--danger-m` `--caution-m` `--clear-duration=2.0` `--max-fps=15.0` `-v/--video` `--demo` | Unitree G1 safety guardian demo |
-| `openeye vlm-demo` | `--image` `-m/--model=qwen/qwen3-vl-235b:free` `-p/--prompt` `--all-models` | VLM demo via OpenRouter (`OPENROUTER_API_KEY`) |
+| `openeye vlm-demo` | `--image` `-m/--model=nvidia/nemotron-3.5-super-vl:free` (also free: `google/gemma-4-31b-it:free`; paid: `qwen/qwen3-vl-235b-a22b-instruct`) `-p/--prompt` `--all-models` | VLM demo via OpenRouter (`OPENROUTER_API_KEY`) |
 | `openeye health` | `-s/--server` | Health + queue status of a running server |
 | `openeye nebius-stats` | `-s/--server` | Nebius VLM usage from a running server |
 | `openeye server-config-get` | `-s/--server` | Runtime config of a running server |
@@ -43,9 +43,9 @@ Needs `OPENEYE_API_KEY=oe_...`. Base URL: `--server`, else `OPENEYE_API_URL`, el
 | Command | Arguments / options | Endpoint |
 |---|---|---|
 | `openeye api detect` | `IMAGE` `-c/--confidence=0.25` `-s/--server` `-p/--pretty` | `POST /v1/detect` (1 credit) |
-| `openeye api depth` | `IMAGE` `-s/--server` | `POST /v1/depth` (501 on hosted) |
+| `openeye api depth` | `IMAGE` `-o/--output` `-s/--server` | `POST /v1/depth` (501 on hosted) |
 | `openeye api describe` | `IMAGE` `-p/--prompt="Describe what you see in this image."` `-s/--server` | `POST /v1/describe` (3 credits; 503 on hosted until enabled) |
-| `openeye api models` | `-s/--server` | `GET /v1/models` |
+| `openeye api models` | `-s/--server` `--json` | `GET /v1/models` (public, no key needed) |
 | `openeye api usage` | `-d/--days=30` `-s/--server` | `GET /v1/usage` |
 
 ## `openeye config`
@@ -163,14 +163,16 @@ Stdio server in `cli/openeye_ai/mcp/server.py`. Local tools shell out to the `op
 | `openeye_nebius_stats()` | `openeye nebius-stats` |
 | `openeye_api_detect(image_path, confidence)` | hosted `POST /v1/detect` (needs `OPENEYE_API_KEY`) |
 | `openeye_api_describe(image_path, prompt)` | hosted `POST /v1/describe` (needs `OPENEYE_API_KEY`) |
-| `openeye_api_models()` | hosted `GET /v1/models` (needs `OPENEYE_API_KEY`) |
+| `openeye_api_models()` | hosted `GET /v1/models` (public, no key needed) |
 | `openeye_api_usage(days)` | hosted `GET /v1/usage` (needs `OPENEYE_API_KEY`) |
 
 ```json
 { "mcpServers": { "openeye": { "command": "openeye-mcp", "env": { "OPENEYE_API_KEY": "oe_..." } } } }
 ```
 
-In this repo, `.mcp.json` launches `cli/.venv/bin/python -m openeye_ai.mcp.server`; create that venv with `python3.12 -m venv cli/.venv && cli/.venv/bin/pip install -e "cli/[all,mcp]"`.
+Without a separate install: `{ "command": "uvx", "args": ["--from", "openeye-sh[mcp]", "openeye-mcp"] }`. Discovery manifest: `https://openeye.sh/.well-known/mcp.json`.
+
+In this repo, `.mcp.json` launches `uv run --quiet --directory cli --extra mcp openeye-mcp` (uv creates `cli/.venv` on first run; works on macOS, Linux and Windows).
 
 ## File Paths
 

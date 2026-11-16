@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import type { VLMScene } from "../vlm-data";
+import { OPENEYE_VERSION } from "@/data/version";
 
 interface SceneViewportProps {
   scene: VLMScene;
@@ -61,7 +62,7 @@ export function SceneViewport({ scene, selectedScene, stage, showDetections, onA
 
         {/* HUD overlay */}
         <div className="absolute top-3 left-3 font-mono text-[10px] text-terminal-green/70 space-y-0.5">
-          <div>OPENEYE DUAL-LAYER v0.1.0</div>
+          <div>OPENEYE DUAL-LAYER v{OPENEYE_VERSION}</div>
           <div className="tabular-nums">YOLO + VLM PIPELINE</div>
         </div>
 

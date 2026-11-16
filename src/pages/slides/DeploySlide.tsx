@@ -19,7 +19,7 @@ export function DeploySlide() {
     {
       label: "Fleet Management",
       desc: "Register edge devices, deploy models with canary/rolling/blue-green strategies, OTA updates, and a device agent.",
-      cmd: "openeye fleet deploy --strategy canary",
+      cmd: "openeye fleet deploy --model yolov8 --version 2.0 --strategy canary",
       icon: "📡",
     },
   ];

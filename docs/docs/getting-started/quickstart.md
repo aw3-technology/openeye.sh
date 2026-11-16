@@ -51,11 +51,12 @@ What's live on the hosted API:
 | Endpoint | Status | Credits |
 |----------|--------|---------|
 | `POST /v1/detect` | Live: YOLOv8 Nano (80 COCO classes), JPEG/PNG under 4 MB | 1 |
-| `GET /v1/models`, `GET /v1/usage` | Live | — |
+| `GET /v1`, `GET /v1/models` | Live, public (no key): endpoint index and model catalog | — |
+| `GET /v1/usage` | Live | — |
 | `POST /v1/describe` | Returns `503` until scene description is enabled | 3 |
-| `POST /v1/depth` | Returns `501`; run it self-hosted with `openeye serve depth-anything` | — |
+| `POST /v1/depth` | Returns `501`; run it self-hosted with `openeye serve depth-anything` | 2 (self-hosted tally) |
 
-Each key allows 60 requests per minute by default (`429` with `Retry-After` past that). The hosted API has no WebSocket streaming; for real-time streams, run `openeye serve`. Credits are refunded if inference fails. Full reference: [openeye.sh/docs](https://openeye.sh/docs).
+Each key allows 60 requests per minute by default (`429` with `Retry-After` past that). The hosted API has no WebSocket streaming; for real-time streams, run `openeye serve`. Credits are refunded if inference fails. The API sends no CORS headers, so call it from a server, script or the CLI rather than browser JavaScript. `https://openeye.sh/api/v1` is an alias of `/v1`. Full reference: [openeye.sh/docs](https://openeye.sh/docs).
 
 ## Self-Hosted Quickstart
 

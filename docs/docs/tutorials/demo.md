@@ -24,6 +24,17 @@ openeye pull yolov8
 ./demo.sh
 ```
 
+`demo.sh` is a bash script: run it on macOS, Linux, WSL, or Git Bash on Windows. It uses `openeye` from your `PATH` (pipx), falling back to `./.venv` or `cli/.venv`. In plain PowerShell or cmd, run the same steps yourself:
+
+```bash
+openeye list
+openeye pull yolov8
+openeye run yolov8 src/assets/demo/scene-warehouse.jpg --pretty
+openeye run yolov8 src/assets/demo/scene-warehouse.jpg --visualize
+openeye bench yolov8 --warmup 2 --runs 5
+openeye serve yolov8 --port 8111
+```
+
 The demo is interactive — press **Enter** to advance between steps. Each step shows the command being run and its live output.
 
 ## What the Demo Covers

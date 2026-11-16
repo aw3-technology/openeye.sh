@@ -16,8 +16,9 @@ The control plane is a FastAPI app in `backend/src/fleet/` that stores its data 
 # 1. Create the tables (from the repo root)
 psql "$DATABASE_URL" -f db/schema.sql     # or: npm run db:migrate
 
-# 2. Start it
-make install-backend
+# 2. Install and start it (same as `make install-backend` / `make dev-backend`;
+#    --group needs pip >= 25.1, or run `uv sync` in backend/ instead)
+pip install -e backend/ --group dev
 cd backend/src
 DATABASE_URL="postgresql://...?sslmode=require" \
   uvicorn fleet.app:create_fleet_app --factory --host 0.0.0.0 --port 8001

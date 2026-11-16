@@ -4,6 +4,7 @@ import { Play, Pause, RotateCcw } from "lucide-react";
 import { safetyScenario, SAFETY_CYCLE } from "./safety-demo-data";
 import { safetyColorClasses } from "./constants";
 import safetyWorkspaceImg from "@/assets/demo/safety-workspace.jpg";
+import { OPENEYE_VERSION } from "@/data/version";
 
 export function SafetyDemo() {
   const [stepIndex, setStepIndex] = useState(0);
@@ -160,7 +161,7 @@ export function SafetyDemo() {
 
             {/* HUD */}
             <div className="absolute top-3 left-3 font-mono text-[10px] text-terminal-green/70 space-y-0.5">
-              <div>OPENEYE GUARDIAN v0.1.0</div>
+              <div>OPENEYE GUARDIAN v{OPENEYE_VERSION}</div>
               <div className="tabular-nums">FPS: 30 | MODE: SAFETY MONITOR</div>
               <div className={stateColor}>STATUS: {stateLabel}</div>
             </div>

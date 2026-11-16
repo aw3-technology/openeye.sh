@@ -119,7 +119,7 @@ psql "$DATABASE_URL" -f db/schema.sql
 ### Run it
 
 ```bash
-make install-backend          # pip install -e backend/ --group dev
+pip install -e backend/ --group dev   # = make install-backend; needs pip >= 25.1 (or: cd backend && uv sync)
 export DATABASE_URL="postgresql://user:password@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require"
 cd backend/src
 uvicorn fleet.app:create_fleet_app --factory --host 0.0.0.0 --port 8001

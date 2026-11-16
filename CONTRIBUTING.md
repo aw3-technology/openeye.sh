@@ -47,7 +47,7 @@ See `.env.example` for every variable. Never point local development or tests at
 
 ```bash
 cd cli
-pip install -e ".[all]" --group dev
+pip install -e ".[all]" --group dev   # --group needs pip >= 25.1; or: uv sync --extra all
 ruff check           # Lint
 ruff format --check  # Format check
 pytest -v            # Run tests (excludes integration)
@@ -57,7 +57,7 @@ pytest -v            # Run tests (excludes integration)
 
 ```bash
 cd backend
-pip install -e . --group dev
+pip install -e . --group dev   # --group needs pip >= 25.1; or: uv sync
 ruff check
 ruff format --check
 pytest -v

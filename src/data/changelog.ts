@@ -10,6 +10,13 @@ export interface ChangelogEntry {
     text: string;
   }[];
   tag?: "latest" | "breaking";
+  /** Pre-release milestone whose version number was never published; `version` is just an anchor id. */
+  milestone?: boolean;
+}
+
+/** Short label for an entry: "v0.3.0", or "Milestone" for unpublished milestones. */
+export function changelogLabel(entry: ChangelogEntry): string {
+  return entry.milestone ? "Milestone" : `v${entry.version}`;
 }
 
 export const changelog: ChangelogEntry[] = entries as ChangelogEntry[];

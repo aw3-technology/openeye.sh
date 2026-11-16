@@ -84,7 +84,7 @@ export function ShadowTab({ shadowDeps }: ShadowTabProps) {
             </Table>
           ) : (
             <p className="text-muted-foreground text-sm">
-              No shadow deployments. Use <code>openeye mlops shadow</code> to create one.
+              No shadow deployments. Use <code>openeye mlops shadow-mode --champion VERSION --challenger VERSION</code> to create one.
             </p>
           )}
         </CardContent>

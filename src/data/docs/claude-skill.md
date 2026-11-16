@@ -29,7 +29,7 @@ cd openeye.sh
 claude
 ```
 
-Claude Code automatically discovers the `.claude/` directory in the project root, which contains the OpenEye skill files. No extra configuration needed.
+Claude Code automatically discovers the `.claude/` directory in the project root, which contains the OpenEye skill files. The repo's `.mcp.json` also registers the OpenEye MCP server, launched with `uv run --directory cli --extra mcp openeye-mcp`, so install [uv](https://docs.astral.sh/uv/) if you want Claude Code to call OpenEye tools directly (uv sets up the environment on first run; approve the server when Claude Code asks).
 
 ### Step 3: Verify it works
 
@@ -43,9 +43,25 @@ Claude will reference the skill files and give you accurate, project-specific an
 
 ## Setup — MCP Server (Claude Desktop and other MCP clients)
 
-The CLI ships an MCP server, openeye-mcp, that lets Claude call OpenEye directly: list, pull, and remove models, run inference on an image, start a server, check its health, benchmark, and read Nebius stats. It runs over stdio on your machine.
+The CLI ships an MCP server, openeye-mcp, that lets Claude call OpenEye directly. It runs over stdio on your machine and exposes two groups of tools:
+
+| Tools | What they do | Needs |
+|-------|--------------|-------|
+| `openeye_list`, `openeye_pull`, `openeye_remove`, `openeye_run`, `openeye_serve`, `openeye_health`, `openeye_bench`, `openeye_nebius_stats` | Run the local CLI: manage models, run inference, start a server, check its health, benchmark, read Nebius stats | The model extras you use (e.g. `[yolo]`) |
+| `openeye_api_detect`, `openeye_api_describe`, `openeye_api_usage` | Call the hosted API at `https://openeye.sh/v1` (detect and describe cost credits) | `OPENEYE_API_KEY` in the server's environment |
+| `openeye_api_models` | List hosted models and credit costs | Nothing (public) |
+
+A discovery manifest for MCP clients is published at `https://openeye.sh/.well-known/mcp.json`.
 
 ### Step 1: Install with the mcp extra
+
+Either run it on demand with [uv](https://docs.astral.sh/uv/) (nothing to install besides uv):
+
+```bash
+uvx --from "openeye-sh[mcp]" openeye-mcp
+```
+
+or install it once with pipx:
 
 ```bash
 pipx install "openeye-sh[mcp]"
@@ -53,28 +69,38 @@ pipx install "openeye-sh[mcp]"
 
 ### Step 2: Register the server
 
-Claude Code:
+Claude Code (outside this repo; inside it, `.mcp.json` already does this):
 
 ```bash
-claude mcp add openeye -- openeye-mcp
+claude mcp add openeye --env OPENEYE_API_KEY=oe_your_key_here -- uvx --from "openeye-sh[mcp]" openeye-mcp
 ```
+
+Leave out `--env ...` if you only want the local tools, and replace everything after `--` with `openeye-mcp` if you installed with pipx.
 
 Claude Desktop — add it to claude_desktop_config.json (Settings → Developer → Edit Config), then restart the app:
 
 ```json
 {
   "mcpServers": {
-    "openeye": { "command": "openeye-mcp" }
+    "openeye": {
+      "command": "uvx",
+      "args": ["--from", "openeye-sh[mcp]", "openeye-mcp"],
+      "env": { "OPENEYE_API_KEY": "oe_your_key_here" }
+    }
   }
 }
 ```
 
-If Claude Desktop can't find the command, use the full path from which openeye-mcp.
+With pipx, use `"command": "openeye-mcp"` and drop `args`. If Claude Desktop can't find the command, use its full path (`which uvx` / `which openeye-mcp` on macOS and Linux, `where.exe uvx` / `where.exe openeye-mcp` on Windows).
 
 ### Step 3: Ask for something
 
 ```text
 List the OpenEye models and run yolov8 on ~/Pictures/desk.jpg
+```
+
+```text
+Use the hosted OpenEye API to detect objects in desk.jpg, then show my remaining credits
 ```
 
 ## Example Prompts

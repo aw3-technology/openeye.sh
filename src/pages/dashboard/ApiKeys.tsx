@@ -111,8 +111,12 @@ for obj in detections:
               <TabsContent value="javascript">
                 <CodeBlock
                   lang="javascript"
-                  code={`const form = new FormData();
-form.append("file", imageBlob, "photo.jpg");
+                  code={`// Server-side only (Node 18+): the hosted API sends no CORS headers,
+// and the key must not reach the browser.
+import { readFile } from "node:fs/promises";
+
+const form = new FormData();
+form.append("file", new Blob([await readFile("photo.jpg")]), "photo.jpg");
 form.append("confidence", "0.3");
 
 const res = await fetch("https://openeye.sh/v1/detect", {
@@ -196,19 +200,6 @@ openeye api usage`}
           <div className="space-y-3 text-sm">
             <div className="flex items-start gap-3">
               <Badge variant="outline" className="shrink-0 mt-0.5 font-mono text-xs">
-                Header
-              </Badge>
-              <div>
-                <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                  X-API-Key: oe_your_key_here
-                </code>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Recommended for REST API requests.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Badge variant="outline" className="shrink-0 mt-0.5 font-mono text-xs">
                 Bearer
               </Badge>
               <div>
@@ -216,7 +207,20 @@ openeye api usage`}
                   Authorization: Bearer oe_your_key_here
                 </code>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Standard OAuth-style bearer token format.
+                  Recommended. Used by the openeye CLI, the MCP server and the examples above.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Badge variant="outline" className="shrink-0 mt-0.5 font-mono text-xs">
+                Header
+              </Badge>
+              <div>
+                <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                  X-API-Key: oe_your_key_here
+                </code>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Fallback, read only when no Authorization header is sent.
                 </p>
               </div>
             </div>
@@ -229,7 +233,8 @@ openeye api usage`}
                   {`{"api_key": "oe_your_key_here"}`}
                 </code>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Send as the first message after connecting.
+                  Self-hosted fleet control plane only (<code>/v1/stream</code>): send as the first message after
+                  connecting. The hosted API at openeye.sh has no WebSocket endpoint.
                 </p>
               </div>
             </div>

@@ -150,7 +150,7 @@ openeye api usage
 
 openeye api usage (or GET /v1/usage) shows your remaining balance and recent calls. The dashboard's Settings → Credits page shows the same balance.
 
-> [!info] What's live on the hosted API: POST /v1/detect, GET /v1/models, and GET /v1/usage. POST /v1/describe returns 503 until scene description is enabled; POST /v1/depth returns 501 (self-hosted only). There is no WebSocket streaming on the hosted API — use openeye serve for that.
+> [!info] What's live on the hosted API: POST /v1/detect, GET /v1/usage, and the public (no key) GET /v1 index and GET /v1/models. POST /v1/describe returns 503 until scene description is enabled; POST /v1/depth returns 501 (self-hosted only). There is no WebSocket streaming on the hosted API — use openeye serve for that.
 
 ### Interactive Demo
 
@@ -158,4 +158,15 @@ From a clone of the repository, run the included interactive demo script for a g
 
 ```bash
 ./demo.sh
+```
+
+`demo.sh` is a bash script: run it on macOS, Linux, WSL, or Git Bash on Windows. It uses `openeye` from your `PATH` (pipx), falling back to `./.venv` or `cli/.venv`. In plain PowerShell or cmd, run the same steps yourself:
+
+```bash
+openeye list
+openeye pull yolov8
+openeye run yolov8 src/assets/demo/scene-warehouse.jpg --pretty
+openeye run yolov8 src/assets/demo/scene-warehouse.jpg --visualize
+openeye bench yolov8 --warmup 2 --runs 5
+openeye serve yolov8 --port 8111
 ```

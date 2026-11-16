@@ -10,25 +10,28 @@ Five HTTP surfaces exist. Know which one you are talking to:
 | Fleet control plane (self-hosted) | `http://localhost:8001` | `backend/src/fleet/` | Better Auth session token, `oe_` key, or device key |
 | gRPC perception service | `localhost:50051` | `backend/src/perception_grpc/` | none |
 
-Routing for openeye.sh is in `vercel.json`: `/api/auth/*`, `/api/data/*`, `/api/cred/*` and `/v1/*` are rewritten to the functions (the sub-path is passed as `__path` and restored by `restoreRewrittenUrl`); everything else falls back to `index.html`.
+Routing for openeye.sh is in `vercel.json`: `/api/auth/*`, `/api/data/*`, `/api/cred/*`, `/v1/*` and `/api/v1/*` (an alias of `/v1/*`) are rewritten to the functions (the sub-path is passed as `__path` and restored by `restoreRewrittenUrl`); everything else falls back to `index.html`.
 
 ---
 
 ## Hosted Inference API — `https://openeye.sh/v1` (`api/v1.ts`)
 
-Auth: `Authorization: Bearer oe_...` or `X-API-Key: oe_...` (`api/_lib/api-key-auth.ts`). The key is SHA-256 hashed and looked up in `api_keys.key_hash`; `last_used_at` is updated. Keys are created in Dashboard → Settings → API Keys.
+Auth: `Authorization: Bearer oe_...` (preferred); `X-API-Key: oe_...` is accepted only when no `Authorization` header is sent (`api/_lib/api-key-auth.ts`). The key is SHA-256 hashed and looked up in `api_keys.key_hash`; `last_used_at` is updated. Keys are created in Dashboard → Settings → API Keys.
 
 | Method | Path | Credits | Behavior |
 |---|---|---|---|
-| `GET` | `/v1/models` | 0 | Array: `yolov8` (available), `qwen2.5-vl` (available iff `OPENROUTER_API_KEY`), `depth-anything-v2` (available: false) |
+| `GET` | `/v1` | 0 | Public (no key): JSON index of the endpoints below with `methods` and whether each needs `auth` |
+| `GET` | `/v1/models` | 0 | Public (no key). Array: `yolov8` (available), `qwen2.5-vl` (available iff `OPENROUTER_API_KEY`), `depth-anything-v2` (available: false) |
 | `POST` | `/v1/detect` | 1 | multipart `file`; `confidence` form field or query (0-1, default 0.25). YOLOv8n ONNX (COCO-80) on CPU via onnxruntime-web (`api/_lib/yolo.ts`) |
 | `POST` | `/v1/describe` | 3 | multipart `file` + `prompt` (default "Describe what you see in this image.", max 2000 chars). OpenRouter, model `OPENROUTER_VLM_MODEL` (default `qwen/qwen2.5-vl-72b-instruct`), max_tokens 512. 503 when `OPENROUTER_API_KEY` is unset (current production state) |
 | `POST` | `/v1/depth` | — | Always 501 on hosted ("Run it with `openeye serve depth-anything`") |
-| `GET` | `/v1/usage?days=30` | 0 | `days` clamped to 1-365 |
+| `GET` | `/v1/usage?days=30` | 0 | `days` clamped to 1-365. Totals count successful (200) calls only |
 
-Limits: multipart only (else 415); one file, < 4 MB (413, Vercel's body cap is 4.5 MB); JPEG or PNG only (415); max 25 megapixels (413). No WebSocket streaming on hosted.
+Routing runs before auth: an unknown path returns 404 and a wrong method returns 405 with an `Allow` header, neither needing a key. `/usage`, `/detect`, `/describe` and `/depth` need a key (401 without one).
 
-Metering (`metered()` in `api/v1.ts`): rate-limit check → Cred deduct (402 if refused, including users with no Cred account) → run → on failure refund via Cred `issue` → log to `api_usage_log`. Rate limit: `api_keys.rate_limit` (default 60) calls per 60 s, counted from `api_usage_log`; sets `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `Retry-After` on 429. Credit costs: `CREDIT_COSTS = { detect: 1, depth: 2, describe: 3 }` (`api/_lib/credits.ts`). If `CRED_API_KEY` is unset or `OPENEYE_CREDITS_DISABLED=true`, billing is off (balance reads 0, every call allowed).
+Limits: multipart only (else 415); one file, < 4 MB (413, Vercel's body cap is 4.5 MB); JPEG or PNG only (415); max 25 megapixels (413 for PNG; an oversized JPEG fails to decode and returns 400). No WebSocket streaming on hosted. No CORS headers are sent, so call `/v1` from a server, script or CLI, not from browser JavaScript.
+
+Metering (`metered()` in `api/v1.ts`): rate-limit check → Cred deduct (402 if refused; new accounts start with no credits) → run → on failure refund (`refund()` in `api/_lib/credits.ts`) → log to `api_usage_log`. Failed inference calls (4xx/5xx after auth) are logged with `credits_used = 0` and their status code: they count toward the rate limit but are not charged and are excluded from `/v1/usage` totals. Rate limit: `api_keys.rate_limit` (default 60) calls per 60 s, counted from `api_usage_log`; sets `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `Retry-After` on 429. Credit costs: `CREDIT_COSTS = { detect: 1, depth: 2, describe: 3 }` (`api/_lib/credits.ts`). If `CRED_API_KEY` is unset or `OPENEYE_CREDITS_DISABLED=true`, billing is off (balance reads 0, every call allowed).
 
 Responses:
 
@@ -44,7 +47,7 @@ Responses:
   "daily_credits": { "2026-11-04": 22 }, "truncated": false }
 ```
 
-`bbox` is normalized 0-1 (`x`,`y` top-left, `w`,`h` size). Errors are `{ "error": "<message>" }` with 400, 401, 402, 404, 413, 415, 429, 501, 502 (upstream VLM failed), 503.
+`bbox` is normalized 0-1 (`x`,`y` top-left, `w`,`h` size). Errors are `{ "error": "<message>" }` with 400, 401, 402, 404 (unknown path), 405 (wrong method, with `Allow`), 413, 415, 429, 501, 502 (upstream VLM failed), 503.
 
 ```bash
 curl -s https://openeye.sh/v1/detect -H "Authorization: Bearer $OPENEYE_API_KEY" -F file=@photo.jpg -F confidence=0.3
@@ -95,7 +98,7 @@ Browser client: `src/lib/api.ts` → `api.list/get/create/update/remove/removeWh
 
 ### `/api/cred/*` — Cred credits proxy (`api/cred.ts`)
 
-Requires a session. Forwards to `${CRED_API_BASE}/credits-api/<path>` (or `/hosted-checkout`, `/presale-checkout`) with the server's `CRED_API_KEY`, forcing `user_id`/`email` in JSON bodies to the session user and injecting identity into `GET balance`. Filters balances to `CRED_CREDIT_TYPE_ID`. Browser client: `src/lib/cred-api.ts` (`credApi.syncUser`, `getBalance`, `deduct`, `issue`, `createCheckout`, `getPricingTiers`, `getTransactions`); hooks in `src/hooks/useCredits.ts`.
+Requires a session. Forwards to `${CRED_API_BASE}/credits-api/<path>` (or `/hosted-checkout`, `/presale-checkout`) with the server's `CRED_API_KEY`, forcing `user_id`/`email` in JSON bodies to the session user and injecting identity into `GET balance`. Filters balances to `CRED_CREDIT_TYPE_ID`. Browser client: `src/lib/cred-api.ts` (`credApi.syncUser`, `getBalance`, `createCheckout`, `getPricingTiers`, `getTransactions`; deducting and refunding happen only server-side in `api/_lib/credits.ts`); hooks in `src/hooks/useCredits.ts`.
 
 ---
 
@@ -114,7 +117,7 @@ Factory `cli/openeye_ai/server/app.py`. CORS (`server/middleware.py`) allows `CO
 | `POST` | `/perception` | Full perception frame |
 | `POST` | `/vlm/analyze` | VLM analysis (OpenRouter or Nebius keys) |
 | `GET` | `/nebius/stats` | Nebius usage |
-| `POST` | `/v1/detect`, `/v1/depth`, `/v1/describe`; `GET` `/v1/models`, `/v1/usage` | Hosted-API-compatible routes; credits tracked in memory only |
+| `POST` | `/v1/detect`, `/v1/depth`, `/v1/describe`; `GET` `/v1/models`, `/v1/usage` | Hosted-API-compatible routes (key from `Authorization: Bearer` first, then `X-API-Key`; `confidence`/`prompt` from the form field first, then the query string); credits tracked in memory only |
 | — | `/agent/start|stop|status|stream|memory|recall|demo/stream` | Agent loop |
 | — | `/mlops/*`, `/governance/*` | MLOps and governance routers (governance mounted if importable) |
 | `WS` | `/ws`, `/ws/perception`, `/ws/agentic`, `/ws/vlm` | Streaming |

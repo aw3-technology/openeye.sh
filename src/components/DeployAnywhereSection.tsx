@@ -67,7 +67,7 @@ export function DeployAnywhereSection() {
               Register and monitor edge devices from the CLI. Canary deployments, rolling updates, and device configuration built in.
             </p>
             <div className="font-mono text-xs bg-secondary text-oe-green px-3 py-2 rounded-inner border mt-3 overflow-x-auto">
-              openeye fleet deploy --strategy canary
+              openeye fleet deploy --model yolov8 --version 2.0 --strategy canary
             </div>
           </motion.div>
         </div>

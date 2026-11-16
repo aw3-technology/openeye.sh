@@ -23,7 +23,7 @@ export function UseCasesSlide() {
       title: "See what your application sees.",
       desc: "Analyze screenshots and screen recordings to detect UI anomalies, verify layout correctness, and generate structured descriptions of what's on screen.",
       scenarios: ["Visual regression detection", "Layout validation", "VLM-powered UI analysis", "CI/CD integration"],
-      cmd: "openeye run screenshot.png --format json",
+      cmd: "openeye run yolov8 screenshot.png -o result.json",
       image: sceneKitchen,
     },
     {

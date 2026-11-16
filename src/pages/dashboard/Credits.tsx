@@ -77,9 +77,9 @@ export default function Credits() {
   const currentBalance = getTotalBalance(balance.data);
 
   const creditCosts = [
-    { endpoint: "POST /v1/detect", model: "YOLOv8", credits: 1, icon: Eye },
-    { endpoint: "POST /v1/depth", model: "Depth Anything V2", credits: 2, icon: Box },
-    { endpoint: "POST /v1/describe", model: "VLM (Qwen2.5-VL)", credits: 3, icon: ScanSearch },
+    { endpoint: "POST /v1/detect", model: "YOLOv8", credits: 1, icon: Eye, status: "Live" },
+    { endpoint: "POST /v1/depth", model: "Depth Anything V2", credits: 2, icon: Box, status: "Self-hosted only (501 on openeye.sh)" },
+    { endpoint: "POST /v1/describe", model: "VLM (Qwen2.5-VL)", credits: 3, icon: ScanSearch, status: "Coming soon (503 until enabled)" },
   ];
 
   return (
@@ -149,7 +149,10 @@ export default function Credits() {
               {creditCosts.map((cost) => (
                 <TableRow key={cost.endpoint}>
                   <TableCell className="text-xs font-mono">{cost.endpoint}</TableCell>
-                  <TableCell className="text-xs">{cost.model}</TableCell>
+                  <TableCell className="text-xs">
+                    {cost.model}
+                    <span className="block text-[11px] text-muted-foreground">{cost.status}</span>
+                  </TableCell>
                   <TableCell className="text-right">
                     <Badge variant="secondary" className="tabular-nums">
                       {cost.credits}
@@ -164,7 +167,7 @@ export default function Credits() {
             <p className="text-xs text-muted-foreground">
               Self-hosted inference via{" "}
               <code className="rounded bg-muted px-1 py-0.5 text-[11px]">openeye serve</code>{" "}
-              is always free and uses no credits.
+              is always free and uses no credits. Failed calls are refunded and never charged.
             </p>
           </div>
         </Card>

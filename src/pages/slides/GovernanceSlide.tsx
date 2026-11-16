@@ -51,7 +51,7 @@ export function GovernanceSlide() {
               ))}
             </div>
             <div className="mt-5 font-mono text-base bg-secondary/60 text-oe-green px-4 py-3 rounded-lg border border-border/40">
-              $ openeye govern --presets robotics
+              $ openeye govern load robotics
             </div>
           </motion.div>
 
@@ -79,7 +79,7 @@ export function GovernanceSlide() {
               ))}
             </div>
             <div className="mt-5 font-mono text-base bg-secondary/60 text-oe-green px-4 py-3 rounded-lg border border-border/40">
-              $ openeye mlops promote yolov8 --to production
+              $ openeye mlops promote --model yolov8 --version 2.0 --from staging --to production
             </div>
           </motion.div>
         </div>

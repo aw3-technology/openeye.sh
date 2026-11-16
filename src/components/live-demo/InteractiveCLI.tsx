@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { OPENEYE_VERSION } from "@/data/version";
 
 interface CLICommand {
   input: string;
@@ -15,21 +16,21 @@ const cliCommands: CLICommand[] = [
       "  Name              Task          Status      Size",
       "  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
       "  yolov8            detection     downloaded  6.2MB",
-      "  depth_anything    depth         downloaded  98MB",
-      "  grounding_dino    detection     available   340MB",
-      "  sam2              segmentation  available   2.4GB",
+      "  depth-anything    depth         downloaded  98MB",
+      "  grounding-dino    detection     available   340MB",
+      "  sam2              segmentation  available   150MB",
       "",
       "2 downloaded, 2 available. Use 'openeye pull <name>' to download.",
     ],
   },
   {
-    input: "openeye pull grounding_dino",
+    input: "openeye pull grounding-dino",
     output: [
-      "[REGISTRY] Resolving grounding_dino...",
+      "[REGISTRY] Resolving grounding-dino...",
       "[DOWNLOAD] Downloading IDEA-Research/grounding-dino-base...",
       "[DOWNLOAD] \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 340MB / 340MB (12.4 MB/s)",
       "[REGISTRY] Verifying checksum... \u2713",
-      "[REGISTRY] \u2713 grounding_dino ready at ~/.openeye/models/grounding_dino",
+      "[REGISTRY] \u2713 grounding-dino ready at ~/.openeye/models/grounding-dino",
     ],
   },
   {
@@ -78,7 +79,7 @@ const cliCommands: CLICommand[] = [
       "[SERVER] Starting FastAPI server...",
       "",
       "  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510",
-      "  \u2502  OpenEye Inference Server v0.1.0      \u2502",
+      `  \u2502  OpenEye Inference Server v${OPENEYE_VERSION}      \u2502`,
       "  \u2502                                        \u2502",
       "  \u2502  REST:  http://localhost:8000/predict   \u2502",
       "  \u2502  WS:    ws://localhost:8000/ws          \u2502",
