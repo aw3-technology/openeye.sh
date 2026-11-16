@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePredict, useSaveInference, useInferenceHistory } from "@/hooks/useOpenEyeQueries";
 import { useOpenEyeConnection } from "@/hooks/useOpenEyeConnection";
 import { toast } from "sonner";
+import { copyText } from "@/lib/clipboard";
 import type { PredictionResult } from "@/types/openeye";
 
 export function useInference() {
@@ -64,10 +65,10 @@ export function useInference() {
     if (lastFile) handleFile(lastFile);
   };
 
-  const handleCopyJson = () => {
+  const handleCopyJson = async () => {
     if (!result) return;
-    navigator.clipboard.writeText(JSON.stringify(result, null, 2));
-    toast.success("Copied result JSON to clipboard");
+    if (await copyText(JSON.stringify(result, null, 2))) toast.success("Copied result JSON to clipboard");
+    else toast.error("Couldn't copy to the clipboard");
   };
 
   const isLoading = predict.isPending;

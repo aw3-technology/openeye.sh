@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { copyText } from "@/lib/clipboard";
 
 export function CliCommandCard({
   icon,
@@ -11,9 +12,9 @@ export function CliCommandCard({
   command: string;
   description: string;
 }) {
-  const handleCopy = () => {
-    navigator.clipboard.writeText(command);
-    toast.success("Copied to clipboard");
+  const handleCopy = async () => {
+    if (await copyText(command)) toast.success("Copied to clipboard");
+    else toast.error("Couldn't copy. Select the command and copy it manually.");
   };
 
   return (

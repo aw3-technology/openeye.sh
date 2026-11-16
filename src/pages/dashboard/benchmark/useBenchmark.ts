@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
+import { copyText } from "@/lib/clipboard";
 import type { BenchmarkResult } from "./types";
 import { round2, stdDev } from "./types";
 
@@ -153,7 +154,7 @@ export function useBenchmark({ isConnected, client, model }: UseBenchmarkOptions
     toast.success("Results exported");
   };
 
-  const copyResults = () => {
+  const copyResults = async () => {
     const selected = results.find((r) => r.id === selectedResult) ?? results[0];
     if (!selected) return;
     const text = [
@@ -164,8 +165,8 @@ export function useBenchmark({ isConnected, client, model }: UseBenchmarkOptions
       `Min: ${selected.min_ms}ms | Max: ${selected.max_ms}ms`,
       `Std Dev: ${selected.std_ms}ms | FPS: ${selected.fps}`,
     ].join("\n");
-    navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard");
+    if (await copyText(text)) toast.success("Copied to clipboard");
+    else toast.error("Couldn't copy to the clipboard");
   };
 
   const active = results.find((r) => r.id === selectedResult) ?? results[0];
