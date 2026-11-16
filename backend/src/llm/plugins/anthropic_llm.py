@@ -19,9 +19,9 @@ R = T.TypeVar("R", bound=BaseModel)
 
 
 class AnthropicModel(str, Enum):
+    CLAUDE_SONNET_5_5 = "claude-sonnet-5-5"
+    CLAUDE_OPUS_5_5 = "claude-opus-5-5"
     CLAUDE_SONNET_4_6 = "claude-sonnet-4-6"
-    CLAUDE_SONNET_4_5 = "claude-sonnet-4-5-20251022"
-    CLAUDE_OPUS_4 = "claude-opus-4-0-20250514"
 
 
 class AnthropicConfig(LLMConfig):
@@ -30,7 +30,7 @@ class AnthropicConfig(LLMConfig):
         description="Base URL for the Anthropic API endpoint (optional)",
     )
     model: T.Optional[T.Union[AnthropicModel, str]] = Field(
-        default=AnthropicModel.CLAUDE_SONNET_4_6,
+        default=AnthropicModel.CLAUDE_SONNET_5_5,
         description="Anthropic model to use",
     )
     history_length: T.Optional[int] = Field(
@@ -50,7 +50,7 @@ class AnthropicLLM(LLM[R]):
         if not config.api_key:
             raise ValueError("config file missing api_key")
         if not config.model:
-            self._config.model = AnthropicModel.CLAUDE_SONNET_4_6
+            self._config.model = AnthropicModel.CLAUDE_SONNET_5_5
 
         self._anthropic_client = AsyncAnthropic(
             api_key=config.api_key,
@@ -99,7 +99,7 @@ class AnthropicLLM(LLM[R]):
             anthropic_messages.append({"role": "user", "content": prompt})
 
             kwargs: T.Dict[str, T.Any] = {
-                "model": self._config.model or AnthropicModel.CLAUDE_SONNET_4_6,
+                "model": self._config.model or AnthropicModel.CLAUDE_SONNET_5_5,
                 "max_tokens": 1024,
                 "messages": anthropic_messages,
             }

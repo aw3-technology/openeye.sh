@@ -16,7 +16,7 @@ class VLMOpenRouterProvider:
         self,
         base_url: str,
         api_key: str,
-        model: str = "qwen/qwen3-vl-235b:free",
+        model: str = "nvidia/nemotron-3.5-super-vl:free",
         fps: int = 10,
         camera_index: int = 0,
         site_url: str = "https://openeye.sh",

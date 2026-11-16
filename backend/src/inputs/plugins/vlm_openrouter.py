@@ -23,7 +23,7 @@ class VLMOpenRouterConfig(SensorConfig):
         description="OpenRouter Base URL",
     )
     model: str = Field(
-        default="qwen/qwen3-vl-235b:free",
+        default="nvidia/nemotron-3.5-super-vl:free",
         description="OpenRouter vision model to use",
     )
     camera_index: int = Field(default=0, description="Camera Index")

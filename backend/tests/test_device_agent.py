@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from pathlib import Path
+
 import pytest
 
 from fleet.agent.config import AgentConfig
@@ -21,8 +23,9 @@ class TestAgentConfig:
         assert cfg.api_key == ""
         assert cfg.server_url == "http://localhost:8001"
         assert cfg.heartbeat_interval == 15.0
-        assert cfg.model_cache_dir == "/tmp/openeye/models"
-        assert cfg.firmware_dir == "/tmp/openeye/firmware"
+        cache_root = Path.home() / ".openeye" / "fleet"
+        assert cfg.model_cache_dir == str(cache_root / "models")
+        assert cfg.firmware_dir == str(cache_root / "firmware")
         assert cfg.max_cache_versions == 2
         assert cfg.bandwidth_limit_mbps == 0
         assert cfg.log_level == "INFO"

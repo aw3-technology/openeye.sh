@@ -15,7 +15,7 @@ class VLMAnthropicProvider:
     def __init__(
         self,
         api_key: str,
-        model: str = "claude-sonnet-4-6",
+        model: str = "claude-sonnet-5-5",
         fps: int = 5,
         camera_index: int = 0,
     ):

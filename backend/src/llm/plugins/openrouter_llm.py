@@ -17,18 +17,15 @@ R = T.TypeVar("R")
 
 
 class OpenRouterModel(str, Enum):
-    QWEN3_VL_235B_FREE = "qwen/qwen3-vl-235b:free"
-    NEMOTRON_NANO_12B_VL_FREE = "nvidia/nemotron-nano-12b-vl:free"
-    GEMMA_3_27B_IT_FREE = "google/gemma-3-27b-it:free"
+    NEMOTRON_3_5_SUPER_VL_FREE = "nvidia/nemotron-3.5-super-vl:free"
+    GEMMA_4_31B_IT_FREE = "google/gemma-4-31b-it:free"
     # Vision/Multimodal
+    QWEN3_VL_235B = "qwen/qwen3-vl-235b-a22b-instruct"
     QWEN3_5_9B = "qwen/qwen3.5-9b"
-    HEALER_ALPHA = "openrouter/healer-alpha"
     SEED_2_LITE = "bytedance-seed/seed-2.0-lite"
     GPT_5_4 = "openai/gpt-5.4"
     # Agentic Reasoning
     GLM_5_TURBO = "z-ai/glm-5-turbo"
-    HUNTER_ALPHA = "openrouter/hunter-alpha"
-    NEMOTRON_3_SUPER_FREE = "nvidia/nemotron-3-super:free"
 
 
 class OpenRouterConfig(LLMConfig):
@@ -37,11 +34,11 @@ class OpenRouterConfig(LLMConfig):
         description="Base URL for the OpenRouter API endpoint",
     )
     model: T.Optional[T.Union[OpenRouterModel, str]] = Field(
-        default=OpenRouterModel.QWEN3_VL_235B_FREE,
+        default=OpenRouterModel.NEMOTRON_3_5_SUPER_VL_FREE,
         description="OpenRouter model to use",
     )
     fallback_model: T.Optional[str] = Field(
-        default=OpenRouterModel.GEMMA_3_27B_IT_FREE,
+        default=OpenRouterModel.GEMMA_4_31B_IT_FREE,
         description="Fallback model if the primary model fails",
     )
     site_url: str = Field(
@@ -65,7 +62,7 @@ class OpenRouterLLM(LLM[R]):
         if not config.api_key:
             raise ValueError("config file missing api_key for OpenRouter")
         if not config.model:
-            self._config.model = OpenRouterModel.QWEN3_VL_235B_FREE
+            self._config.model = OpenRouterModel.NEMOTRON_3_5_SUPER_VL_FREE
 
         self._client = openai.AsyncClient(
             base_url=config.base_url or "https://openrouter.ai/api/v1",
@@ -130,7 +127,9 @@ class OpenRouterLLM(LLM[R]):
             ]
             formatted_messages.append({"role": "user", "content": prompt})
 
-            primary_model = self._config.model or OpenRouterModel.QWEN3_VL_235B_FREE
+            primary_model = (
+                self._config.model or OpenRouterModel.NEMOTRON_3_5_SUPER_VL_FREE
+            )
             try:
                 return await self._call_model(primary_model, formatted_messages)
             except Exception as e:

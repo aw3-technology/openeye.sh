@@ -17,14 +17,14 @@ from providers.vlm_anthropic_provider import VLMAnthropicProvider
 
 
 class AnthropicVLMModel(str, Enum):
+    CLAUDE_SONNET_5_5 = "claude-sonnet-5-5"
     CLAUDE_SONNET_4_6 = "claude-sonnet-4-6"
-    CLAUDE_SONNET_4_5 = "claude-sonnet-4-5-20251022"
 
 
 class VLMAnthropicConfig(SensorConfig):
     api_key: Optional[str] = Field(default=None, description="Anthropic API Key")
     model: str = Field(
-        default=AnthropicVLMModel.CLAUDE_SONNET_4_6,
+        default=AnthropicVLMModel.CLAUDE_SONNET_5_5,
         description="Anthropic VLM model to use",
     )
     camera_index: int = Field(default=0, description="Camera Index")
