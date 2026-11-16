@@ -2,6 +2,8 @@
 
 **Ollama for vision AI models** — pull, run, and serve computer-vision models from your terminal.
 
+<!-- mcp-name: io.github.aw3-technology/openeye -->
+
 ## Install
 
 ```bash

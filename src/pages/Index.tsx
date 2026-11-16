@@ -35,7 +35,7 @@ export default function Index() {
             name: "OpenEye",
             url: "https://openeye.sh",
             logo: "https://openeye.sh/favicon.ico",
-            sameAs: ["https://github.com/aw3-technology/openeye.sh"],
+            sameAs: ["https://github.com/aw3-technology/openeye.sh", "https://pypi.org/project/openeye-sh/"],
           },
           {
             "@context": "https://schema.org",

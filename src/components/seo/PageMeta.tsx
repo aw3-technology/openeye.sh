@@ -24,7 +24,7 @@ export function absoluteUrl(pathOrUrl: string): string {
  */
 export function PageMeta({ title, description, path, type = "website", image, noindex = false }: PageMetaProps) {
   const url = `${SITE_URL}${path}`;
-  const imageUrl = absoluteUrl(image ?? "/og-image.webp");
+  const imageUrl = absoluteUrl(image ?? "/og-image.png");
   return (
     <Helmet>
       <title>{title}</title>
@@ -37,6 +37,9 @@ export function PageMeta({ title, description, path, type = "website", image, no
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
       <meta property="og:image" content={imageUrl} />
+      {!image && <meta property="og:image:width" content="1200" />}
+      {!image && <meta property="og:image:height" content="630" />}
+      <meta property="og:image:alt" content={title} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
