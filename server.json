@@ -1,0 +1,33 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.aw3-technology/openeye",
+  "title": "OpenEye",
+  "description": "Vision for agents: run YOLO, depth, segmentation and detection models locally or via hosted API.",
+  "websiteUrl": "https://openeye.sh",
+  "repository": {
+    "url": "https://github.com/aw3-technology/openeye.sh",
+    "source": "github",
+    "subfolder": "cli"
+  },
+  "version": "0.3.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "openeye-sh",
+      "version": "0.3.0",
+      "runtimeHint": "uvx",
+      "runtimeArguments": [
+        { "type": "named", "name": "--from", "value": "openeye-sh[mcp]==0.3.0" }
+      ],
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "OPENEYE_API_KEY",
+          "description": "Key from https://openeye.sh/dashboard/settings/api-keys; only needed for the hosted openeye_api_* tools.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,12 @@
 
 **Open-source eyes for the agent era.**
 
+[![PyPI](https://img.shields.io/pypi/v/openeye-sh)](https://pypi.org/project/openeye-sh/)
+[![Downloads](https://img.shields.io/pypi/dm/openeye-sh)](https://pypistats.org/packages/openeye-sh)
+[![Python](https://img.shields.io/pypi/pyversions/openeye-sh)](https://pypi.org/project/openeye-sh/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/aw3-technology/openeye.sh?style=social)](https://github.com/aw3-technology/openeye.sh/stargazers)
+
 [Website](https://openeye.sh) · [Docs](https://openeye.sh/docs) · [Models](https://openeye.sh/models) · [Blog](https://openeye.sh/blog) · [PyPI](https://pypi.org/project/openeye-sh/)
 
 OpenEye is a CLI-first perception engine that turns raw video into structured world models for robots and autonomous agents. Pull, run, and serve computer-vision models from your terminal — like Ollama, but for vision AI.
@@ -53,6 +59,17 @@ openeye watch --models yolov8
 # Live camera feed with safety monitoring
 openeye watch --models yolov8 --safety
 ```
+
+## Give Your AI Agent Eyes (MCP)
+
+OpenEye ships an MCP server, so Claude, Cursor, or any MCP client can pull models and run detection, depth, and segmentation on your machine:
+
+```bash
+pipx install "openeye-sh[mcp]"
+claude mcp add openeye -- openeye-mcp
+```
+
+Then ask: *"Run yolov8 on ~/Pictures/desk.jpg and tell me what's on my desk."* Setup for Claude Desktop and other clients: [docs/claude-skill](https://openeye.sh/docs/claude-skill).
 
 ## Hosted API Quick Start
 

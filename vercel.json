@@ -4,6 +4,19 @@
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "openeye-xi.vercel.app"
+        }
+      ],
+      "destination": "https://openeye.sh/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/auth/:path*",
