@@ -1,0 +1,21 @@
+{
+  "name": "openeye",
+  "title": "OpenEye",
+  "description": "Vision AI for agents: object detection, scene description, depth and segmentation, run locally or on the hosted API at https://openeye.sh/v1.",
+  "homepage": "https://openeye.sh",
+  "documentation": "https://openeye.sh/docs",
+  "repository": "https://github.com/aw3-technology/openeye.sh",
+  "servers": [
+    {
+      "transport": "stdio",
+      "package": { "registry": "pypi", "name": "openeye-sh", "extras": ["mcp"] },
+      "command": "uvx",
+      "args": ["--from", "openeye-sh[mcp]", "openeye-mcp"],
+      "env": {
+        "OPENEYE_API_KEY": { "required": false, "description": "Key from https://openeye.sh/dashboard/settings/api-keys; needed only for the hosted openeye_api_* tools." }
+      }
+    }
+  ],
+  "api": { "base_url": "https://openeye.sh/v1", "index": "https://openeye.sh/v1", "auth": "Authorization: Bearer oe_..." },
+  "llms_txt": "https://openeye.sh/llms.txt"
+}

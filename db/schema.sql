@@ -112,6 +112,7 @@ create table if not exists api_usage_log (
   status_code integer not null,
   created_at timestamptz not null default now()
 );
+alter table api_usage_log add column if not exists user_agent text;
 create index if not exists idx_api_usage_log_key_created on api_usage_log (api_key_id, created_at desc);
 create index if not exists idx_api_usage_log_user_created on api_usage_log (user_id, created_at desc);
 

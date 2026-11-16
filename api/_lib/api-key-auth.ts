@@ -9,6 +9,8 @@ export interface ApiKeyContext {
   email: string | null;
   rateLimit: number;
   scopes: string[];
+  /** Client User-Agent, recorded in api_usage_log to tell CLI / MCP / SDK traffic apart. */
+  userAgent: string | null;
 }
 
 /** Authenticates `Authorization: Bearer oe_...` against api_keys.key_hash (sha256). */
@@ -35,5 +37,6 @@ export async function requireApiKey(req: IncomingMessage): Promise<ApiKeyContext
     email: row.email,
     rateLimit: row.rate_limit ?? 60,
     scopes: row.scopes ?? ["inference"],
+    userAgent: req.headers["user-agent"]?.slice(0, 300) ?? null,
   };
 }
