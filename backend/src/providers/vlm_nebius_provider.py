@@ -16,7 +16,7 @@ class VLMNebiusProvider:
         self,
         base_url: str,
         api_key: str,
-        model: str = "Qwen/Qwen3-VL-72B",
+        model: str = "Qwen/Qwen2.5-VL-72B-Instruct",
         fps: int = 10,
         camera_index: int = 0,
     ):

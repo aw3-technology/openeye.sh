@@ -449,7 +449,7 @@ Get runtime configuration from a running server.
 Update a runtime config value on a running server.
 
 ```bash
-openeye server-config-set vlm_model "Qwen/Qwen3-VL-72B"
+openeye server-config-set vlm_model "Qwen/Qwen2.5-VL-72B-Instruct"
 ```
 
 ## Governance

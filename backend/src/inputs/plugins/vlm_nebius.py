@@ -23,7 +23,7 @@ class VLMNebiusConfig(SensorConfig):
         description="Nebius Token Factory Base URL",
     )
     model: str = Field(
-        default="Qwen/Qwen3-VL-72B",
+        default="Qwen/Qwen2.5-VL-72B-Instruct",
         description="Nebius vision model to use",
     )
     camera_index: int = Field(default=0, description="Camera Index")

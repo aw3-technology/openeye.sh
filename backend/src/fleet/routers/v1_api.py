@@ -123,6 +123,61 @@ async def _enforce_credits(
             )
 
 
+async def _metered(
+    db,
+    credits_svc: CreditsService,
+    ctx: ApiKeyContext,
+    *,
+    endpoint: str,
+    model: str,
+    cost: int,
+    file: UploadFile,
+    run,
+) -> JSONResponse:
+    """Rate limit, validate the image, charge, run, and log the call.
+
+    The image is decoded before charging so a bad upload costs nothing, and
+    failed calls are logged (uncharged) so they count toward the rate limit,
+    matching the hosted API in api/v1.ts.
+    """
+    rate_svc = RateLimitService(db)
+    try:
+        remaining, reset = await _enforce_rate_limit(rate_svc, ctx)
+        image = await _read_image(file)
+        await _enforce_credits(credits_svc, ctx.user_id, cost)
+        try:
+            result = await run(image)
+        except Exception:
+            await credits_svc.refund(ctx.user_id, cost)
+            raise
+    except Exception as exc:
+        status = exc.status_code if isinstance(exc, HTTPException) else 500
+        await rate_svc.log_usage(
+            api_key_id=ctx.api_key_id,
+            user_id=ctx.user_id,
+            endpoint=endpoint,
+            model=model,
+            credits_used=0,
+            inference_ms=None,
+            status_code=status,
+        )
+        raise
+
+    await rate_svc.log_usage(
+        api_key_id=ctx.api_key_id,
+        user_id=ctx.user_id,
+        endpoint=endpoint,
+        model=model,
+        credits_used=cost,
+        inference_ms=result["inference_ms"],
+        status_code=200,
+    )
+    return JSONResponse(
+        content={**result, "credits_used": cost},
+        headers=_rate_limit_headers(remaining - 1, ctx.rate_limit, reset),
+    )
+
+
 # ── Endpoints ─────────────────────────────────────────────────
 
 
@@ -144,31 +199,15 @@ async def detect(
     inference_svc: InferenceService = Depends(get_inference_service),
 ):
     """Run YOLOv8 object detection on an uploaded image."""
-    rate_svc = RateLimitService(db)
-    remaining, reset = await _enforce_rate_limit(rate_svc, ctx)
-    cost = CREDIT_COSTS["detect"]
-    await _enforce_credits(credits_svc, ctx.user_id, cost)
-
-    image = await _read_image(file)
-    try:
-        result = await inference_svc.detect(image, confidence=confidence)
-    except Exception:
-        await credits_svc.refund(ctx.user_id, cost)
-        raise
-
-    await rate_svc.log_usage(
-        api_key_id=ctx.api_key_id,
-        user_id=ctx.user_id,
+    return await _metered(
+        db,
+        credits_svc,
+        ctx,
         endpoint="/v1/detect",
         model="yolov8",
-        credits_used=cost,
-        inference_ms=result["inference_ms"],
-        status_code=200,
-    )
-
-    return JSONResponse(
-        content={**result, "credits_used": cost},
-        headers=_rate_limit_headers(remaining - 1, ctx.rate_limit, reset),
+        cost=CREDIT_COSTS["detect"],
+        file=file,
+        run=lambda image: inference_svc.detect(image, confidence=confidence),
     )
 
 
@@ -189,31 +228,15 @@ async def depth(
     inference_svc: InferenceService = Depends(get_inference_service),
 ):
     """Run depth estimation on an uploaded image."""
-    rate_svc = RateLimitService(db)
-    remaining, reset = await _enforce_rate_limit(rate_svc, ctx)
-    cost = CREDIT_COSTS["depth"]
-    await _enforce_credits(credits_svc, ctx.user_id, cost)
-
-    image = await _read_image(file)
-    try:
-        result = await inference_svc.depth(image)
-    except Exception:
-        await credits_svc.refund(ctx.user_id, cost)
-        raise
-
-    await rate_svc.log_usage(
-        api_key_id=ctx.api_key_id,
-        user_id=ctx.user_id,
+    return await _metered(
+        db,
+        credits_svc,
+        ctx,
         endpoint="/v1/depth",
         model="depth-anything-v2",
-        credits_used=cost,
-        inference_ms=result["inference_ms"],
-        status_code=200,
-    )
-
-    return JSONResponse(
-        content={**result, "credits_used": cost},
-        headers=_rate_limit_headers(remaining - 1, ctx.rate_limit, reset),
+        cost=CREDIT_COSTS["depth"],
+        file=file,
+        run=lambda image: inference_svc.depth(image),
     )
 
 
@@ -241,32 +264,15 @@ async def describe(
             detail=f"Prompt too long. Maximum length is {_MAX_PROMPT_LENGTH} characters.",
         )
 
-    rate_svc = RateLimitService(db)
-    remaining, reset = await _enforce_rate_limit(rate_svc, ctx)
-    cost = CREDIT_COSTS["describe"]
-    await _enforce_credits(credits_svc, ctx.user_id, cost)
-
-    image = await _read_image(file)
-    try:
-        result = await inference_svc.describe(image, prompt=prompt)
-    except Exception:
-        # Refund credits on inference failure
-        await credits_svc.refund(ctx.user_id, cost)
-        raise
-
-    await rate_svc.log_usage(
-        api_key_id=ctx.api_key_id,
-        user_id=ctx.user_id,
+    return await _metered(
+        db,
+        credits_svc,
+        ctx,
         endpoint="/v1/describe",
         model="gpt-4o",
-        credits_used=cost,
-        inference_ms=result["inference_ms"],
-        status_code=200,
-    )
-
-    return JSONResponse(
-        content={**result, "credits_used": cost},
-        headers=_rate_limit_headers(remaining - 1, ctx.rate_limit, reset),
+        cost=CREDIT_COSTS["describe"],
+        file=file,
+        run=lambda image: inference_svc.describe(image, prompt=prompt),
     )
 
 

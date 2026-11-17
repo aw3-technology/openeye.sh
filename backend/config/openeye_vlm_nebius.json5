@@ -14,14 +14,14 @@
     config: {
       agent_name: "OpenEye",
       history_length: 10,
-      model: "Qwen/Qwen3-VL-72B",
+      model: "Qwen/Qwen2.5-VL-72B-Instruct",
     },
   },
 
   modes: {
     perception: {
       display_name: "Nebius VLM Perception",
-      description: "Cloud VLM perception using Nebius Token Factory Qwen3-VL-72B",
+      description: "Cloud VLM perception using Nebius Token Factory Qwen2.5-VL-72B",
       system_prompt_base: "You are OpenEye, a perception engine. You receive visual observations from a camera processed by a vision language model. Describe what you see and identify interesting elements, people, objects, and activities. Be concise but informative.",
       hertz: 1,
 
@@ -30,7 +30,7 @@
           type: "VLMNebius",
           config: {
             base_url: "https://api.tokenfactory.nebius.com/v1/",
-            model: "Qwen/Qwen3-VL-72B",
+            model: "Qwen/Qwen2.5-VL-72B-Instruct",
             camera_index: 0,
           },
         },

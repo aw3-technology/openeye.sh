@@ -78,7 +78,7 @@ class RateLimitService:
             logger.error("Failed to log API usage: %s", exc)
 
     async def get_usage_stats(self, user_id: str, days: int = 30) -> dict:
-        """Get aggregated usage stats for a user."""
+        """Get aggregated usage stats for a user (successful calls only)."""
         since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
 
         # First get total count
@@ -87,6 +87,7 @@ class RateLimitService:
                 self.db.table("api_usage_log")
                 .select("id", count="exact")
                 .eq("user_id", user_id)
+                .eq("status_code", 200)
                 .gte("created_at", since)
                 .execute()
             )
@@ -98,6 +99,7 @@ class RateLimitService:
                 self.db.table("api_usage_log")
                 .select("endpoint, credits_used, created_at")
                 .eq("user_id", user_id)
+                .eq("status_code", 200)
                 .gte("created_at", since)
                 .order("created_at", desc=True)
                 .limit(1000)

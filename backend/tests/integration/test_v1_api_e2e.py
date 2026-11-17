@@ -353,6 +353,21 @@ class TestImageValidation:
         )
         assert resp.status_code == 400
 
+    def test_invalid_image_is_not_charged_but_is_logged(
+        self, v1_client: TestClient, mock_credits, fake_db: InMemoryDB
+    ):
+        resp = v1_client.post(
+            "/v1/detect",
+            files={"file": ("bad.txt", b"this is not an image", "image/jpeg")},
+        )
+        assert resp.status_code == 400
+        mock_credits.check_and_deduct.assert_not_called()
+        rows = [
+            r for r in fake_db.dump("api_usage_log") if r["endpoint"] == "/v1/detect"
+        ]
+        assert [(r["status_code"], r["credits_used"]) for r in rows] == [(400, 0)]
+        assert v1_client.get("/v1/usage").json()["total_requests"] == 0
+
 
 # ── Multi-step: Detect then check usage ──────────────────────────────
 

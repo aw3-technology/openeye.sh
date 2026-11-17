@@ -18,7 +18,7 @@ R = T.TypeVar("R")
 
 class NebiusModel(str, Enum):
     # Vision-Language Models
-    QWEN3_VL_72B = "Qwen/Qwen3-VL-72B"
+    QWEN3_VL_72B = "Qwen/Qwen2.5-VL-72B-Instruct"
     KIMI_K2_5 = "moonshot-ai/Kimi-K2.5"
     # LLM Reasoning
     LLAMA_3_3_70B = "meta-llama/Llama-3.3-70B-Instruct"
