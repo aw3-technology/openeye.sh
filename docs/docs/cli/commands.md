@@ -12,7 +12,7 @@ List all registered models and their download status.
 openeye list
 ```
 
-Output shows model name, task, size, hardware tags, and whether it's downloaded.
+Output shows model name, task, description, size, hardware tags, variants, and whether it's downloaded. Add `--json` to print the models as JSON (for scripts and agents).
 
 ### `openeye pull [model]`
 
@@ -74,16 +74,16 @@ openeye run yolov8 photo.jpg | openeye run depth-anything -
 openeye run depth-anything scene.png
 openeye run grounding-dino image.jpg --prompt "red cup"
 openeye run yolov8 photo.jpg --visualize
-openeye run yolov8 photo.jpg --backend onnx
+openeye run yolov8 photo.jpg --variant quantized
 ```
 
 **Options:**
 
 - `--prompt, -p <text>` — Text prompt for open-vocabulary models (e.g., grounding-dino)
 - `--output, -o <path>` — Write JSON results to a file instead of stdout
-- `--pretty` — Pretty-print JSON output
+- `--pretty` — Indent the JSON and print a human-readable, colored summary to stderr (JSON still goes to stdout)
 - `--visualize` — Save an annotated image with bounding boxes or depth map
-- `--backend, -b <onnx|tensorrt>` — Use a specific runtime backend
+- `--backend, -b <onnx|tensorrt>` — Use a specific runtime backend (selects the variant with that name; it must exist in the registry and be pulled)
 - `--variant <name>` — Use a specific model variant
 - `--confidence, -c <float>` — Minimum confidence threshold (0.0–1.0)
 
@@ -376,8 +376,8 @@ openeye agent recall "when did a person enter?"
 | Subcommand | Description |
 |------------|-------------|
 | `run` | Run the agentic perception loop locally on camera or video |
-| `start` | Start the agentic loop on a running server |
-| `stop` | Stop the agentic loop on a running server |
+| `start` | Set the goal and mark the agent as running on a running server (state only; the server does not tick a loop) |
+| `stop` | Mark the agent as stopped on a running server |
 | `status` | Show agentic loop status (running, tick count, plan, goal) |
 | `memory` | Show recent observations from the agent's memory |
 | `recall` | Query agent memory with a natural language search |
@@ -456,16 +456,16 @@ openeye server-config-set vlm_model "Qwen/Qwen2.5-VL-72B-Instruct"
 
 ### `openeye govern`
 
-Safety policy management, audit logs, and rule enforcement subcommands. `status`, `enable`, `disable`, `load`, `audit`, and `violations` take `--server, -s`; without it, `status`, `enable`, `disable`, and `load` act on the local engine.
+Safety policy management, audit logs, and rule enforcement subcommands. `status`, `enable`, `disable`, `load`, `audit`, and `violations` take `--server, -s` to act on a running `openeye serve`. Without it, `load` only validates the preset or file, and `enable`/`disable` act on a fresh in-process engine with no policies loaded, so use them with `--server`. The local commands (`ls`, `presets`, `validate`, and `status`/`load` without `--server`) import the governance engine from `backend/src`, so they only work from a source checkout of the repo, not from a PyPI install.
 
 ```bash
 openeye govern status
 openeye govern ls
-openeye govern enable pii-filter
-openeye govern disable pii-filter
 openeye govern presets
-openeye govern load safety-strict
-openeye govern load custom-policy.yaml
+openeye govern load robotics_safety --server http://localhost:8000
+openeye govern load custom-policy.yaml --server http://localhost:8000
+openeye govern enable action_safety --server http://localhost:8000
+openeye govern disable action_safety --server http://localhost:8000
 openeye govern validate governance.yaml
 openeye govern audit [--server <url>] [--limit 20]
 openeye govern violations [--server <url>] [--limit 20]

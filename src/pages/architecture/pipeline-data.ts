@@ -13,13 +13,13 @@ export const pipelineLayers: PipelineLayer[] = [
     overlineColor: "text-muted-foreground",
     title: "Any camera. Any format.",
     description:
-      "OpenEye ingests video from USB cameras, RTSP network streams, and video files. Hardware-agnostic input layer with automatic format detection and frame extraction.",
+      "OpenEye ingests video from USB cameras, RTSP network streams, and video files. Hardware-agnostic input layer with frame extraction handled by OpenCV.",
     terminalCommand: "$ openeye watch --camera 0",
     details: [
-      "USB webcams, industrial cameras, depth sensors",
-      "RTSP, RTMP, HTTP-FLV network streams",
-      "MP4, AVI, MKV video files",
-      "Multi-camera support with frame synchronization",
+      "USB webcams and built-in cameras (--camera)",
+      "RTSP and Unitree SDK camera transports (g1-demo)",
+      "MP4, AVI, MKV video files (--video)",
+      "Multi-model stacking on one feed (--models)",
     ],
   },
   {

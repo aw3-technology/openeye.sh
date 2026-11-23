@@ -4,7 +4,7 @@ title: Usage Tracking
 
 ### Hosted API
 
-Every successful billed call to https://openeye.sh/v1 is logged with its endpoint, model, credits, and inference time. See it three ways:
+Every billed call to https://openeye.sh/v1 is logged with its endpoint, model, credits, inference time, and status; usage totals count only the successful ones. See it three ways:
 
 - GET /v1/usage — balance, totals, per-endpoint counts, and credits per day (see GET /v1/usage)
 - openeye api usage --days 7 — the same from the CLI

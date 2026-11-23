@@ -36,7 +36,9 @@ The provider is picked from the model ID: a lowercase org (qwen/qwen3.5-9b) or a
 |----------|---------|---------|
 | DATABASE_URL | — (required) | Postgres connection string with db/schema.sql applied |
 | DATABASE_POOL_MAX | 10 | Max pool connections |
-| CORS_ORIGINS | http://localhost:5173,http://localhost:3000 | Allowed browser origins |
+| CORS_ORIGINS | http://localhost:5173, http://localhost:3000, http://localhost:8080, https://openeye.sh, https://www.openeye.sh | Comma-separated allowed browser origins; replaces the default list |
+| FLEET_RATE_LIMIT | 120 | Requests per client IP per 60 s window on fleet endpoints (/health and /v1 exempt) |
+| FLEET_OFFLINE_SWEEP_INTERVAL | 30 | Seconds between sweeps that mark silent devices offline; 0 or less disables it |
 | CRED_API_KEY | — | Enables Cred credit checks on the control plane's /v1 routes; unset disables credits |
 | CRED_API_BASE | Cred's hosted API | Cred API base URL |
 | CRED_CREDIT_TYPE_ID | — | Cred credit type to charge |
@@ -63,7 +65,7 @@ Only needed if you run the website and its api/ functions yourself (vercel dev).
 
 ### Runtime configs (backend)
 
-Backend runtime configs (backend/config/*.json5) can reference environment variables. ${ENV_VAR} and ${ENV_VAR:-default} are substituted at load time by runtime.env.load_env_vars(). The shipped configs use OPENAI_API_KEY, NEBIUS_API_KEY, and similar keys this way; backend/.env.example lists them.
+Backend runtime configs (backend/config/*.json5) can reference environment variables. ${ENV_VAR} and ${ENV_VAR:-default} are substituted at load time by runtime.env.EnvLoader.load_env_vars(). The shipped configs use OPENAI_API_KEY, NEBIUS_API_KEY, and similar keys this way; backend/.env.example lists them.
 
 ### Schema Validation
 

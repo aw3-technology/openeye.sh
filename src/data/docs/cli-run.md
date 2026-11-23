@@ -11,7 +11,7 @@ openeye run yolov8 photo.jpg --confidence 0.5
 openeye run depth-anything scene.png
 openeye run grounding-dino image.jpg --prompt "red cup"
 openeye run yolov8 photo.jpg --visualize
-openeye run yolov8 photo.jpg --backend onnx
+openeye run yolov8 photo.jpg --variant quantized
 openeye run yolov8 ./images/ -o results.json
 ```
 
@@ -31,7 +31,7 @@ openeye run yolov8 ./images/ -o results.json
 | --output, -o <path> | Write JSON results to a file (indented) |
 | --pretty | Print a human-readable, colored summary to stderr; JSON still goes to stdout |
 | --visualize | Save an annotated image with bounding boxes or depth map |
-| --backend, -b <name> | Runtime backend: onnx or tensorrt (selects that variant) |
+| --backend, -b <name> | Runtime backend: onnx or tensorrt (selects the variant with that name; it must exist in the registry and be pulled) |
 | --variant <name> | Use a specific model variant |
 
 A directory runs every image in it and prints a JSON array. Images that fail are skipped with a warning.

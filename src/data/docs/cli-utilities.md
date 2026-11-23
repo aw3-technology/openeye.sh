@@ -20,7 +20,7 @@ openeye server-config-set vlm_model qwen/qwen3.5-9b
 
 ### openeye govern
 
-Visual governance: policies, presets, and the audit trail. Without --server these work on the local governance engine; with --server they act on a running server's /governance API.
+Visual governance: policies, presets, and the audit trail. With --server they act on a running server's /governance API. Without --server they use the governance package from backend/src, which isn't in the PyPI wheel, so local mode only works from a repo checkout; there, load only validates a preset or file, and enable/disable have no loaded policies to act on, so use --server for those. Policy names are the instance names from the loaded config.
 
 | Command | Description |
 |---------|-------------|
@@ -58,7 +58,7 @@ vlm-demo options: --image (default src/assets/demo/scene-warehouse.jpg, relative
 
 ### openeye docs
 
-Prints the full CLI reference. Add --json, -j to get it wrapped in JSON ({"reference": "..."}) for AI agents.
+Prints the full CLI reference. Add --json, -j for AI agents: {"reference": "...", "commands": [...]}, where commands has one record per command (command, group, usage, help, arguments, options).
 
 ```bash
 openeye docs --json | jq -r .reference

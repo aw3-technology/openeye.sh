@@ -64,7 +64,7 @@ openeye register-adapter my-model ./my_adapter.py \
     --description "My custom detection model"
 ```
 
-This validates the adapter file (ensuring it exports an `Adapter` class that subclasses `ModelAdapter`) and adds it to the model registry.
+This validates the adapter file (ensuring it exports an `Adapter` class that subclasses `ModelAdapter`) and adds it, with the file's absolute path, to your user registry at `~/.openeye/custom_models.yaml`.
 
 Alternatively, use `add-model` for more control:
 
@@ -75,11 +75,11 @@ openeye add-model my-model \
     --description "My custom detection model"
 ```
 
-When `--name` is omitted it defaults to the registry key (`my-model` above).
+When `--name` is omitted it defaults to the registry key (`my-model` above). `add-model` stores the `--adapter` path as given, and relative paths are resolved against the current directory when the model is loaded, so prefer an absolute path.
 
 ### Manual registration (advanced)
 
-You can also add your model directly to `cli/openeye_ai/models.yaml`:
+You can also add your model directly to `~/.openeye/custom_models.yaml`, which is merged on top of the built-in registry (`cli/openeye_ai/models.yaml`):
 
 ```yaml
 models:
@@ -87,7 +87,7 @@ models:
     name: My Custom Model
     task: detection
     description: "My custom detection model"
-    adapter: ./my_adapter.py
+    adapter: /path/to/my_adapter.py
     size_mb: 50
     hardware:
       cpu: true
@@ -95,7 +95,7 @@ models:
       mps: false
 ```
 
-The `adapter` field points to your Python file. OpenEye will load it as a custom adapter.
+The `adapter` field points to your Python file (any value containing `/` or ending in `.py` is loaded as a custom adapter).
 
 ## Step 3: Use It
 

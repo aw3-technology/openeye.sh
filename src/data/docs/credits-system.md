@@ -16,8 +16,8 @@ Calls to the hosted API at https://openeye.sh/v1 are paid for with credits, hand
 
 ### How charging works
 
-- The request is authenticated and the image decoded first; bad requests cost nothing
-- The rate limit is checked, then the credits are deducted
+- The request is authenticated, rate limited, and the image decoded first; bad requests cost nothing
+- Then the credits are deducted
 - If inference fails afterwards, the credits are refunded
 - If Cred refuses the deduction (not enough credits, or you have never bought any) you get 402 and nothing runs
 

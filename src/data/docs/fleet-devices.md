@@ -55,4 +55,4 @@ openeye fleet batch restart --tag site=warehouse
 
 ### Device Status
 
-Devices report status via heartbeats (every 15 seconds by default). Possible statuses: `pending`, `online`, `offline`, `maintenance`, `error`, `decommissioned`. The control plane has offline detection for devices silent for more than 60 seconds (about 4 missed heartbeats), but nothing runs it on a schedule yet, so a device that stops reporting keeps its last status.
+Devices report status via heartbeats (every 15 seconds by default). Possible statuses: `pending`, `online`, `offline`, `maintenance`, `error`, `decommissioned`. The control plane runs a background sweep (every 30 seconds by default; set FLEET_OFFLINE_SWEEP_INTERVAL, 0 disables it) that marks devices offline after more than 60 seconds without a heartbeat (about 4 missed heartbeats).

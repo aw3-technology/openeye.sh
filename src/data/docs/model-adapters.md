@@ -39,7 +39,7 @@ class ModelAdapter(ABC):
 | Adapter | Module | Models |
 |---------|--------|--------|
 | yolov8 | openeye_ai.adapters.yolov8 | YOLOv8 (ultralytics) |
-| yolo26 | openeye_ai.adapters.yolo26 | YOLOv26 |
+| yolo26 | openeye_ai.adapters.yolo26 | YOLO26 (ships YOLO11 weights for now) |
 | depth_anything | openeye_ai.adapters.depth_anything | Depth Anything V2 |
 | grounding_dino | openeye_ai.adapters.grounding_dino | Grounding DINO |
 | rfdetr | openeye_ai.adapters.rfdetr | RF-DETR |

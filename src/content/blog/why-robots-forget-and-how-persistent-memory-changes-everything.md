@@ -53,16 +53,13 @@ The most powerful part of memory is pattern recognition. By observing many scene
 
 ## Recall in Action
 
-The memory system is accessed through the `recall` command:
+The memory system is searched with `openeye agent recall`, which queries the observations a running agent loop has stored:
 
 ```bash
-$ openeye recall kitchen
+$ openeye agent recall "coffee maker in the kitchen"
 
-[MEMORY] Environment: kitchen
-[MEMORY] Last observed: 2 minutes ago
-[MEMORY] Known objects: 14 tracked, 8 in typical positions
-[MEMORY] Anomalies: coffee_maker moved 40cm from usual position
-[MEMORY] Pattern: This configuration last seen 3 days ago (Tuesday morning)
+  tick 412 | coffee_maker moved about 40cm from its usual spot on the counter (kitchen, change)
+  tick 388 | kitchen counter clear except coffee_maker and fruit bowl (kitchen)
 ```
 
 The system doesn't just remember what's there — it remembers what's different, what's missing, and what the implications are.
@@ -88,11 +85,12 @@ A robot with memory that operates in the same environment for a month develops s
 This is the difference between a robot that works in an environment and a robot that understands an environment. The gap is memory, and it changes everything.
 
 ```bash
-# Build memory from a survey
-openeye watch --memorize --duration 60
+# Run the agent loop on a server; it stores observations as it goes
+openeye agent start --goal "survey the workspace"
 
-# Use memory in future perception
-openeye watch --reason --recall
+# Review and search what it remembers
+openeye agent memory --limit 20
+openeye agent recall "fire extinguisher"
 ```
 
 Robots shouldn't forget. Now they don't have to.

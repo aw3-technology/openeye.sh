@@ -62,22 +62,25 @@ export function AdapterSection() {
             <div className="w-2.5 h-2.5 rounded-full bg-foreground/10" />
             <div className="w-2.5 h-2.5 rounded-full bg-foreground/10" />
             <span className="font-mono text-[10px] text-muted-foreground ml-2">
-              adapters/yolo_adapter.py
+              my_yolo.py
             </span>
           </div>
           <pre className="px-6 py-5 font-mono text-sm text-oe-green overflow-x-auto leading-relaxed">
-            <code>{`class YOLOAdapter(ModelAdapter):
-    """Drop-in adapter for any YOLO model."""
+            <code>{`class Adapter(ModelAdapter):
+    """Drop-in adapter for your own YOLO weights."""
 
-    def load(self, weights: str = "yolo26n.pt"):
-        self.model = YOLO(weights)
+    def pull(self, model_dir: Path) -> None:
+        shutil.copy("my-yolo.pt", model_dir / "my-yolo.pt")
 
-    def predict(self, frame: np.ndarray) -> list[Detection]:
-        results = self.model(frame, conf=self.conf)
-        return self.postprocess(results)
+    def _do_load(self, model_dir: Path) -> None:
+        self.model = YOLO(str(model_dir / "my-yolo.pt"))
 
-# Register — one line, done.
-registry.register("yolo26", YOLOAdapter)`}</code>
+    def _do_predict(self, image: Image.Image) -> dict:
+        results = self.model(image, verbose=False)
+        return {"objects": to_objects(results), "inference_ms": elapsed_ms}
+
+# Register — one command, done.
+# openeye register-adapter my-yolo my_yolo.py --name "My YOLO" --task detection`}</code>
           </pre>
         </motion.div>
       </div>

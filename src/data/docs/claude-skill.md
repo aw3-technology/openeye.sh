@@ -29,7 +29,7 @@ cd openeye.sh
 claude
 ```
 
-Claude Code automatically discovers the `.claude/` directory in the project root, which contains the OpenEye skill files. The repo's `.mcp.json` also registers the OpenEye MCP server, launched with `uv run --directory cli --extra mcp openeye-mcp`, so install [uv](https://docs.astral.sh/uv/) if you want Claude Code to call OpenEye tools directly (uv sets up the environment on first run; approve the server when Claude Code asks).
+Claude Code automatically discovers the `.claude/` directory in the project root, which contains the OpenEye skill files. The repo's `.mcp.json` also registers the OpenEye MCP server, launched with `uv run --quiet --directory cli --extra mcp openeye-mcp`, so install [uv](https://docs.astral.sh/uv/) if you want Claude Code to call OpenEye tools directly (uv sets up the environment on first run; approve the server when Claude Code asks).
 
 ### Step 3: Verify it works
 
@@ -102,6 +102,33 @@ List the OpenEye models and run yolov8 on ~/Pictures/desk.jpg
 ```text
 Use the hosted OpenEye API to detect objects in desk.jpg, then show my remaining credits
 ```
+
+## Setup — Remote MCP Server (no install)
+
+If you only need the hosted tools, connect to `https://openeye.sh/mcp` instead of installing anything. It speaks Streamable HTTP and exposes `openeye_api_detect`, `openeye_api_describe`, `openeye_api_models` and `openeye_api_usage`, the same tools and billing as the hosted API. Because it can't read files on your machine, the image tools take `image_url` (a public http(s) URL) or `image_base64` (JPEG or PNG under 4 MB) instead of a path.
+
+Send your API key as a header. `openeye_api_models` works without one.
+
+Claude Code:
+
+```bash
+claude mcp add --transport http openeye https://openeye.sh/mcp --header "Authorization: Bearer oe_your_key_here"
+```
+
+Other clients (Cursor, VS Code, Windsurf and others that support remote servers):
+
+```json
+{
+  "mcpServers": {
+    "openeye": {
+      "url": "https://openeye.sh/mcp",
+      "headers": { "Authorization": "Bearer oe_your_key_here" }
+    }
+  }
+}
+```
+
+Calls through the remote server are rate limited and charged like `/v1` calls (detection is 1 credit) and appear in `/v1/usage` under `/mcp/detect` and `/mcp/describe`. The server doesn't support OAuth sign-in, so clients that only connect through OAuth (such as claude.ai custom connectors) can't use the keyed tools yet; use the local server for those.
 
 ## Example Prompts
 

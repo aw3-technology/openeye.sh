@@ -75,8 +75,9 @@ Bounding boxes are normalized (0–1), so the agent can reason about position ("
 | `openeye_health` | Check a running server |
 | `openeye_bench` | Benchmark a model's latency on your hardware |
 | `openeye_remove` | Delete a downloaded model |
+| `openeye_nebius_stats` | Show VLM usage stats from a running server |
 
-With an `OPENEYE_API_KEY` set, the agent also gets hosted tools (`openeye_api_detect`, `openeye_api_models`, `openeye_api_usage`). These run detection on the hosted API at `https://openeye.sh/v1`, so nothing has to be installed on the machine running the agent.
+The server also has hosted tools (`openeye_api_detect`, `openeye_api_describe`, `openeye_api_models`, `openeye_api_usage`). Set `OPENEYE_API_KEY` and they call the hosted API at `https://openeye.sh/v1`, so detection works without any model installed on the machine running the agent. (Scene description isn't enabled on the hosted API yet.)
 
 ## Beyond detection
 
@@ -87,7 +88,7 @@ The same server works for every model in the [registry](/models):
 - **Segmentation:** "Segment the person in portrait.jpg with sam2."
 - **Benchmarking:** "Benchmark yolov8 and rfdetr on this machine and tell me which one to use for a 30 fps camera."
 
-Each model needs its extra (`depth`, `grounding`, `sam`, `rfdetr`). Install them all with `pipx install "openeye-sh[all,mcp]"`.
+Each model needs its extra (`depth`, `grounding`, `sam`, `rfdetr`). Install them all with `pipx install "openeye-sh[mcp,yolo,depth,grounding,sam,rfdetr]"`.
 
 ## Why run vision locally?
 

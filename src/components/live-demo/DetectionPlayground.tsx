@@ -222,7 +222,7 @@ export function DetectionPlayground() {
                   );
                 })}
                 <div className="pt-3 border-t border-border mt-3 text-muted-foreground">
-                  <div>Model: yolov8-xl</div>
+                  <div>Model: yolov8</div>
                   <div>Resolution: 1280x720</div>
                   <div>Backend: CUDA (simulated)</div>
                 </div>

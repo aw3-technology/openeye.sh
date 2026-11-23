@@ -15,7 +15,7 @@ export interface ValueProp {
 }
 
 export const planTerminalLines: TerminalLine[] = [
-  { text: "$ openeye watch --safety", color: "green" },
+  { text: '$ openeye agent run --vlm --goal "keep the workspace safe"', color: "green" },
   { text: "", color: "default" },
   { text: "[TICK 1] Perceiving...", color: "muted" },
   { text: "[DETECT] 3 objects: cup_01, book_01, knife_01", color: "green" },
@@ -38,14 +38,14 @@ export const commands: Command[] = [
   { label: "Fleet", command: "openeye fleet ls --type robot", description: "Register, monitor, and deploy to edge devices. Supports canary rollouts, OTA updates, and real-time alerts." },
   { label: "MLOps", command: "openeye mlops pipelines", description: "Manage model lifecycle with A/B testing, shadow deployments, feedback loops, and automated retraining pipelines." },
   { label: "Govern", command: "openeye govern audit", description: "Enforce safety policies, review audit trails, and monitor policy violations across your perception fleet." },
-  { label: "API", command: "openeye api detect photo.jpg", description: "Client for the hosted inference API. Detect objects, estimate depth, or describe scenes with VLM — all from the CLI." },
-  { label: "Bench", command: "openeye bench yolov8 --runs 20", description: "Benchmark any model's inference speed. Reports mean, median, and p95 latency with FPS across hardware targets." },
-  { label: "Pull", command: "openeye pull grounding-dino", description: "Download and configure any vision model from the registry. Handles weights, dependencies, and runtime setup automatically." },
+  { label: "API", command: "openeye api detect photo.jpg", description: "Client for the hosted inference API at openeye.sh/v1. Detect objects, check credit usage, and list hosted models from the CLI." },
+  { label: "Bench", command: "openeye bench yolov8 --runs 20", description: "Benchmark any model's inference speed. Reports mean, median, and p95 latency with FPS on your hardware." },
+  { label: "Pull", command: "openeye pull grounding-dino", description: "Download any vision model from the registry. Weights land in ~/.openeye/models; missing runtime packages get a one-line install hint." },
 ];
 
 export const valueProps: ValueProp[] = [
   { label: "Safety-first", description: "Real-time human detection and robot halt" },
-  { label: "Model-agnostic", description: "8 models: YOLO, YOLO26, RF-DETR, DINO, SAM 2, Depth Anything, SmolVLA, Qwen2.5-VL" },
-  { label: "Self-hosted", description: "All inference runs locally — your data never leaves your network" },
+  { label: "Model-agnostic", description: "7 registry models (YOLOv8, YOLO26, RF-DETR, DINO, SAM 2, Depth Anything, SmolVLA) plus Qwen2.5-VL reasoning" },
+  { label: "Self-hosted", description: "Registry models run locally — frames leave your network only if you turn on a cloud VLM" },
   { label: "Open source", description: "MIT — inspect, modify, deploy freely" },
 ];

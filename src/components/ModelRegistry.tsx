@@ -8,11 +8,11 @@ interface Model {
 }
 
 const models: Model[] = [
-  { name: "yolov8", task: "object-detection", size: "6.2 MB", status: "running" },
+  { name: "yolov8", task: "object-detection", size: "6 MB", status: "running" },
   { name: "depth-anything", task: "depth-estimation", size: "98 MB", status: "running" },
-  { name: "groundingdino", task: "open-vocab-detection", size: "662 MB", status: "ready" },
-  { name: "sam2", task: "segmentation", size: "358 MB", status: "available" },
-  { name: "smolvla", task: "vision-language-action", size: "450 MB", status: "available" },
+  { name: "grounding-dino", task: "open-vocab-detection", size: "341 MB", status: "ready" },
+  { name: "sam2", task: "segmentation", size: "150 MB", status: "available" },
+  { name: "smolvla", task: "vision-language-action", size: "500 MB", status: "available" },
 ];
 
 const statusStyles = {

@@ -14,7 +14,7 @@ interface Command {
 
 const commands: Command[] = [
   {
-    input: "openeye run yolov8 photo.jpg --pretty",
+    input: "openeye run yolov8 photo.jpg --pretty -o output.json",
     output: [
       { text: "[OPENEYE] Loading model: yolov8...", color: "muted" },
       { text: "[VISION] Detected 5 objects in 23ms", color: "green" },
@@ -24,7 +24,7 @@ const commands: Command[] = [
       { text: '  ├─ book     (88.1%)  bbox: [60, 300, 180, 420]', color: "green" },
       { text: '  └─ phone    (85.6%)  bbox: [420, 150, 470, 210]', color: "green" },
       { text: "", color: "default" },
-      { text: "[DONE] Results saved to output.json", color: "muted" },
+      { text: "[DONE] Results written to output.json", color: "muted" },
     ],
   },
   {

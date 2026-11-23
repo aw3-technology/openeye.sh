@@ -43,13 +43,13 @@ Changing the detection model in an OpenEye deployment is a configuration change,
 
 ```bash
 # Current deployment
-openeye watch --model yolo26 --reason
+openeye watch --models yolo26 --safety
 
-# Upgrade to new model
-openeye watch --model grounding-dino-1.5 --reason
+# Upgrade to a different detector
+openeye watch --models rfdetr --safety
 
-# Try a custom model
-openeye watch --model custom/my-fine-tuned-detector --reason
+# Try a custom model (registered with `openeye register-adapter`)
+openeye watch --models my-fine-tuned-detector --safety
 ```
 
 Because the adapter normalizes the output, everything downstream — the scene graph, the safety system, the planning layer, the WebSocket stream — works identically regardless of which model is running.
@@ -59,14 +59,14 @@ Because the adapter normalizes the output, everything downstream — the scene g
 The Vision Language Model space is evolving even faster than object detection. New models with better reasoning, faster inference, and specialized capabilities launch monthly. OpenEye supports swapping VLMs with the same ease:
 
 ```bash
-# Use Qwen2.5-VL through OpenRouter
-openeye watch --reason --vlm openrouter/qwen2.5-vl
+# Use Qwen2.5-VL through Nebius Token Factory (the default)
+openeye serve yolov8 --vlm-model Qwen/Qwen2.5-VL-72B-Instruct
 
-# Use a local model through Ollama
-openeye watch --reason --vlm ollama/llava
+# Use a vision model through OpenRouter (needs OPENROUTER_API_KEY)
+openeye serve yolov8 --vlm-model qwen/qwen3-vl-235b-a22b-instruct
 
-# Use a custom fine-tuned model
-openeye watch --reason --vlm custom/safety-specialist-v3
+# Point the VLM client at your own endpoint serving a fine-tuned model
+NEBIUS_BASE_URL=https://vlm.internal/v1 openeye serve yolov8 --vlm-model safety-specialist-v3
 ```
 
 This is especially powerful for the safety layer. You can fine-tune a VLM specifically for your deployment's hazard types — industrial machinery, medical equipment, food handling — and drop it into the pipeline without changing anything else.
@@ -76,11 +76,15 @@ This is especially powerful for the safety layer. You can fine-tune a VLM specif
 Model-agnostic design enables something that locked-in pipelines can't do: A/B testing perception models in production.
 
 ```bash
-# Run two models simultaneously, compare outputs
-openeye benchmark --model-a yolo26 --model-b grounding-dino-1.5 --source camera://0
+# Shadow a challenger version on live traffic, then compare
+openeye mlops shadow-mode --champion yolov8-v2 --challenger yolov8-v3
+openeye mlops shadow-status yolov8
+
+# Or split traffic between them
+openeye mlops create-ab-test --champion yolov8-v2 --challenger yolov8-v3 --traffic 80/20
 ```
 
-The benchmark mode runs both models on the same frames and compares their detections — accuracy, latency, consistency, and safety-relevant metrics (missed hazards, false alarms). You can evaluate a new model against your current one using your actual production data, in your actual environment.
+Shadow mode runs the challenger on the same frames as the production model without affecting its output, and reports comparison metrics. You can evaluate a new model against your current one using your actual production data, in your actual environment.
 
 This is the responsible way to upgrade perception models. Don't trust benchmarks on academic datasets — test on your data, in your environment, with your safety requirements.
 

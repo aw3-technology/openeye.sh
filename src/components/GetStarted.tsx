@@ -5,13 +5,13 @@ const steps = [
     step: "1",
     title: "Install OpenEye",
     command: "pipx install openeye-sh",
-    description: "Works with Python 3.10+. Installs the CLI, model adapters, and server.",
+    description: "Works with Python 3.12+. Installs the CLI, model adapters, and server.",
   },
   {
     step: "2",
     title: "Pull a model",
     command: "openeye pull yolov8",
-    description: "Download model weights from the registry. Handles dependencies and runtime setup automatically.",
+    description: "Download model weights from the registry to ~/.openeye/models. If a model needs extra packages, OpenEye prints the pipx extra to install.",
   },
   {
     step: "3",
@@ -23,7 +23,7 @@ const steps = [
     step: "4",
     title: "Start real-time monitoring",
     command: "openeye watch --models yolov8 --safety",
-    description: "Connect a USB camera or RTSP stream. Live terminal HUD with detections, safety zones, and hazard alerts.",
+    description: "Use a USB camera or a video file. Live terminal HUD with detections, safety zones, and hazard alerts.",
   },
 ];
 

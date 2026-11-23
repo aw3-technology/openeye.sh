@@ -83,24 +83,24 @@ This means:
 
 ## Running the Two Brains
 
-In OpenEye, the two-brain architecture activates whenever you use the `--reason` flag:
+In OpenEye, the two-brain architecture activates when you turn on VLM reasoning in the agent loop with `--vlm`:
 
 ```
-openeye watch --reason
+openeye agent run --vlm
 ```
 
-Without `--reason`, you get the fast brain only — pure detection at maximum framerate. With `--reason`, both brains engage, and you get detection plus contextual intelligence.
+Without `--vlm`, you get the fast brain only — detection with simple fallback reasoning. With `--vlm`, both brains engage, and you get detection plus contextual intelligence.
 
-For production deployments where the VLM runs on cloud infrastructure:
-
-```
-openeye watch --reason --vlm openrouter/qwen2.5-vl
-```
-
-For fully local deployments:
+For production deployments where the VLM runs on cloud infrastructure (Nebius Token Factory by default, or OpenRouter):
 
 ```
-openeye watch --reason --vlm local/qwen2.5-vl
+openeye serve yolov8 --vlm-model qwen/qwen3-vl-235b-a22b-instruct
+```
+
+For fully local deployments, point the VLM client at an OpenAI-compatible server you run yourself:
+
+```
+NEBIUS_BASE_URL=http://localhost:8080/v1 openeye serve yolov8 --vlm-model Qwen/Qwen2.5-VL-7B-Instruct
 ```
 
 The two-brain architecture isn't a compromise between speed and intelligence. It's the realization that you need both — running in parallel, communicating through a shared world model, each doing what it does best.

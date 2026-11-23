@@ -99,7 +99,7 @@ export const registryModels: RegistryModel[] = [
     name: "SmolVLA",
     task: "vla",
     summary: "Vision-language-action model for robotic control.",
-    hfRepo: "HuggingFaceTB/SmolVLA-base",
+    hfRepo: "lerobot/smolvla_base",
     sizeMb: 500,
     hardware: { cpu: true, cuda: true, mps: false },
     extra: "smolvla",

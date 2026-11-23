@@ -4,9 +4,10 @@ import { InstallButton } from "@/components/InstallButton";
 import { DetectionField } from "@/components/DetectionField";
 import { VisionFrame } from "@/components/VisionFrame";
 import { SceneGraph } from "@/components/SceneGraph";
+import { OPENEYE_VERSION } from "@/data/version";
 
 const highlights = [
-  "8 open models",
+  "7 open models",
   "Runs on your hardware",
   "REST + WebSocket",
   "MCP server built in",
@@ -22,11 +23,11 @@ export function HeroSection() {
 
       <div className="relative mx-auto max-w-3xl text-center">
         <a
-          href="#perception-loop"
+          href="/changelog"
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-foreground/[0.03] py-1 pl-1 pr-3 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
         >
-          <span className="rounded-full bg-primary px-2 py-0.5 font-medium text-primary-foreground">v0.2</span>
-          Agent loop with observation memory
+          <span className="rounded-full bg-primary px-2 py-0.5 font-medium text-primary-foreground">v{OPENEYE_VERSION}</span>
+          Hosted API at openeye.sh/v1
         </a>
 
         <h1 className="font-display text-5xl font-light leading-[1.04] tracking-[-0.015em] md:text-7xl">

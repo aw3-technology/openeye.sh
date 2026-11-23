@@ -37,7 +37,7 @@ curl "https://openeye.sh/v1/usage?days=7" \
 | daily_credits | Credits spent per day (YYYY-MM-DD, database time zone) |
 | truncated | Always false today |
 
-Usage covers every API key on your account. Only successful calls are logged, so rejected requests (401, 402, 429, ...) don't appear.
+Usage covers every API key on your account. Only successful calls are counted, so rejected or failed requests (402, 429, bad images, ...) don't appear.
 
 ### From the CLI
 
@@ -45,4 +45,4 @@ Usage covers every API key on your account. Only successful calls are logged, so
 openeye api usage --days 7
 ```
 
-The CLI prints credits remaining, credits used, and total calls for the window. The dashboard's Settings → Credits page shows the same balance and lets you buy more.
+The CLI prints credits remaining, credits used, total calls, and calls per endpoint for the window. The dashboard's Settings → Credits page shows the same balance and lets you buy more.

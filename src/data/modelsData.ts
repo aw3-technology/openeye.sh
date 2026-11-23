@@ -292,7 +292,7 @@ export const adapterSteps: AdapterStep[] = [
     step: "01",
     title: "Register",
     description:
-      "Every model implements a common Adapter interface — load, predict, and postprocess. Adding a new model means writing one file.",
+      "Every model implements a common ModelAdapter interface — pull, load, and predict. Adding a new model means writing one file.",
   },
   {
     step: "02",
@@ -310,7 +310,7 @@ export const adapterSteps: AdapterStep[] = [
     step: "04",
     title: "Swap",
     description:
-      "Switch models with a CLI flag or API parameter. No code changes, no redeployment, no downtime. Hot-swap in production.",
+      "Switch models by changing the model name you pass to openeye run, serve, or watch. Every adapter returns the same JSON, so no application code changes.",
   },
 ];
 
@@ -323,12 +323,12 @@ export const modelFaqs: ModelFaq[] = [
   {
     question: "How do I add a custom model?",
     answer:
-      "Write a Python class that implements the ModelAdapter interface (load, predict, postprocess methods) and register it with the adapter registry. See the docs for a step-by-step guide.",
+      "Write a Python file with an Adapter class that implements the ModelAdapter interface (pull, load, and predict) and register it with openeye register-adapter <key> <file.py> --name ... --task .... See the docs for a step-by-step guide.",
   },
   {
     question: "Can I use my own fine-tuned YOLO weights?",
     answer:
-      "Yes. Point the --weights flag at your .pt or .onnx file. The YOLO adapter auto-detects the format and loads the correct backend.",
+      "Yes. Write a small custom adapter that loads your .pt or .onnx file and register it with openeye register-adapter. It then works with openeye run, serve, and watch like any built-in model.",
   },
   {
     question: "Which models run on CPU vs GPU?",

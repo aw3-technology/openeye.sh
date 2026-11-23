@@ -136,7 +136,7 @@ export default function Community() {
                 <div className="space-y-2">
                   <div className="font-mono text-xs text-primary">Model Adapters</div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Add a new detection or segmentation model. Implement detect() and load(), register it — done. YOLO, DETR, SAM, or your own custom model.
+                    Add a new detection or segmentation model. Implement pull(), load() and predict(), register it — done. YOLO, DETR, SAM, or your own custom model.
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -148,26 +148,27 @@ export default function Community() {
                 <div className="space-y-2">
                   <div className="font-mono text-xs text-muted-foreground">Output Adapters</div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Stream perception data as JSON, protobuf, ROS messages, or your custom format. The output layer is pluggable too.
+                    Every adapter returns the same unified JSON, served over REST and WebSocket. Build any consumer on top of it.
                   </p>
                 </div>
               </div>
 
               <div className="bg-card rounded-inner border p-4 font-mono text-[13px] text-foreground overflow-x-auto">
                 <div className="text-terminal-muted"># Example: Add a new model adapter</div>
-                <div className="text-terminal-amber">from openeye.adapters import ModelAdapter</div>
+                <div className="text-terminal-amber">from openeye_ai.adapters.base import ModelAdapter</div>
                 <div className="h-3" />
-                <div className="text-primary">class MyCustomModel(ModelAdapter):</div>
-                <div className="text-terminal-fg pl-4">name = "my-model-v1"</div>
+                <div className="text-primary">class Adapter(ModelAdapter):</div>
+                <div className="text-primary pl-4">def pull(self, model_dir):</div>
+                <div className="text-terminal-fg pl-8">download_weights(model_dir / "my-model.pt")</div>
                 <div className="h-3" />
-                <div className="text-primary pl-4">def load(self):</div>
-                <div className="text-terminal-fg pl-8">self.model = load_weights("my-model.pt")</div>
+                <div className="text-primary pl-4">def _do_load(self, model_dir):</div>
+                <div className="text-terminal-fg pl-8">self.model = load_weights(model_dir / "my-model.pt")</div>
                 <div className="h-3" />
-                <div className="text-primary pl-4">def detect(self, frame):</div>
-                <div className="text-terminal-fg pl-8">return self.model.predict(frame)</div>
+                <div className="text-primary pl-4">def _do_predict(self, image):</div>
+                <div className="text-terminal-fg pl-8">return {"{"}&quot;objects&quot;: self.model(image), &quot;inference_ms&quot;: ms{"}"}</div>
                 <div className="h-3" />
                 <div className="text-terminal-muted"># Register it — now available via CLI and API</div>
-                <div className="text-terminal-fg">openeye.register_adapter(MyCustomModel)</div>
+                <div className="text-terminal-fg">openeye register-adapter my-model my_model.py --name &quot;My Model&quot; --task detection</div>
               </div>
             </div>
           </motion.div>

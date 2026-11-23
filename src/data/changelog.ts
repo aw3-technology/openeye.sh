@@ -12,10 +12,13 @@ export interface ChangelogEntry {
   tag?: "latest" | "breaking";
   /** Pre-release milestone whose version number was never published; `version` is just an anchor id. */
   milestone?: boolean;
+  /** Changes on main and openeye.sh that are not in a published openeye-sh release yet; `version` is just an anchor id. */
+  unreleased?: boolean;
 }
 
-/** Short label for an entry: "v0.3.0", or "Milestone" for unpublished milestones. */
+/** Short label for an entry: "v0.3.0", "Unreleased", or "Milestone" for unpublished milestones. */
 export function changelogLabel(entry: ChangelogEntry): string {
+  if (entry.unreleased) return "Unreleased";
   return entry.milestone ? "Milestone" : `v${entry.version}`;
 }
 

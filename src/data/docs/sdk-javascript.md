@@ -42,11 +42,14 @@ data.objects.forEach((obj) => {
 });
 ```
 
-### Node.js (form-data)
+### Node.js (form-data + node-fetch)
+
+The `form-data` package works with `node-fetch`, not with Node's built-in `fetch` (use the built-in `FormData` with that, as in the hosted example above).
 
 ```typescript
 import fs from "fs";
 import FormData from "form-data";
+import fetch from "node-fetch";
 
 const form = new FormData();
 form.append("file", fs.createReadStream("photo.jpg"));

@@ -53,8 +53,8 @@ The self-hosted control plane's streaming endpoint uses API key authentication a
 - 1. Connect to `ws://<your-control-plane>/v1/stream`
 - 2. Send auth: `{"api_key": "oe_xxx"}`
 - 3. Server responds: `{"status": "authenticated"}`
-- 4. Optionally send config: `{"model": "yolov8", "confidence": 0.3}`
+- 4. Optionally send config: `{"model": "yolov8", "confidence": 0.3}` (server replies `{"status": "configured", "model": ...}`)
 - 5. Send base64-encoded image frames as text messages
-- 6. Receive detection JSON for each frame
+- 6. Receive detection JSON for each frame, with `credits_used`
 
-Cost: 1 credit per frame. Rate limits apply per API key.
+Cost: 1 credit per frame (every frame runs detection, whatever model you configure). Rate limits apply per API key. A missing or invalid key closes the socket with code 4001; per-frame problems (bad image, rate limit, insufficient credits, inference failure) come back as `{"error": "..."}` and the connection stays open.

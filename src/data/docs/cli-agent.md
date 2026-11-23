@@ -9,8 +9,8 @@ Agentic perception loop — continuously perceive, reason, and act. The agent ma
 | Command | Description |
 |---------|-------------|
 | agent run | Run the agentic loop locally on camera or video |
-| agent start | Start the agentic loop on a running server |
-| agent stop | Stop the agentic loop on a running server |
+| agent start | Mark the agent running with a goal on a running server |
+| agent stop | Mark the agent stopped on a running server |
 | agent status | Show agent status (running, tick count, plan, goal) |
 | agent memory | Show recent observations from memory |
 | agent recall QUERY | Query memory with natural language |
@@ -34,7 +34,7 @@ openeye agent run --vlm
 
 ### Server Agent Control
 
-These talk to a running openeye serve at OPENEYE_SERVER_URL (default http://localhost:8000) unless you pass --server, -s <url>.
+These talk to a running openeye serve at OPENEYE_SERVER_URL (default http://localhost:8000) unless you pass --server, -s <url>. The server only records the goal and running state; it doesn't run the perception loop itself (use agent run for that), so status shows 0 ticks and memory stays empty.
 
 ```bash
 openeye agent start --goal "detect hazards"

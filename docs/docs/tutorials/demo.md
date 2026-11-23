@@ -4,7 +4,7 @@ An interactive walkthrough that runs real OpenEye commands against sample images
 
 ## Prerequisites
 
-- **Python 3.12** (torch requires <=3.12)
+- **Python 3.12+**
 - **jq** (optional, for JSON pipeline steps — `brew install jq`)
 - **curl** (for the API server step)
 

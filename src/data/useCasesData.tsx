@@ -117,7 +117,7 @@ export const useCases: UseCase[] = [
       },
     ],
     terminalCommand:
-      "$ openeye run yolov8 screenshot.png --pretty",
+      '$ openeye run grounding-dino screenshot.png --prompt "button . text field"',
     stats: [
       { value: "JSON", label: "Structured output" },
       { value: "CI/CD", label: "Pipeline-ready" },
@@ -140,7 +140,7 @@ export const useCases: UseCase[] = [
         icon: <MousePointer className="w-4 h-4" />,
         label: "UI element detection",
         detail:
-          "Detect buttons, inputs, menus, and other interactive elements with bounding boxes. Agents know exactly where to click.",
+          "Prompt Grounding DINO for buttons, inputs, and menus and get bounding boxes back. Agents know exactly where to click.",
       },
       {
         icon: <Brain className="w-4 h-4" />,

@@ -96,11 +96,14 @@ The fundamental challenge with interventionist safety is trust. Teams need to tr
 4. **Open source**: If you don't trust the logic, read it. Modify it. Test it. You're never relying on a black box.
 
 ```bash
-# Start in advisory mode
-openeye watch --reason --safety advisory
+# Start in advisory mode: show safety zones and alerts, don't touch the robot
+openeye watch --safety --danger-m 0.5 --caution-m 1.5
 
-# When ready, enable intervention
-openeye watch --reason --safety interventionist --halt-on hazard
+# Rehearse the halt logic without sending commands
+openeye g1-demo --control-mode dry_run
+
+# When ready, let OpenEye halt the robot
+openeye g1-demo --control-mode sdk
 ```
 
 Safety systems that can't stop the robot aren't safety systems — they're dashboards with concerning data. OpenEye builds the kind that actually keeps people safe.

@@ -165,7 +165,7 @@ VLM (Vision Language Model) reasoning on camera frames. Sends frames to a config
 
 **Receive:** JSON with VLM description, latency, and token usage.
 
-Requires `NEBIUS_API_KEY` or `OPENROUTER_API_KEY` environment variable, or a `--vlm-model` flag with an `openrouter/` prefix.
+Requires `NEBIUS_API_KEY`, or `OPENROUTER_API_KEY` together with an OpenRouter-style model ID (lowercase provider, e.g. `--vlm-model qwen/qwen3.5-9b`). Without `--vlm-model`, the model is `$NEBIUS_MODEL` (default `Qwen/Qwen2.5-VL-72B-Instruct`, served through Nebius).
 
 ### `ws://host:port/ws/agentic`
 
@@ -183,7 +183,7 @@ REST endpoints for controlling the agentic perception loop, prefixed with `/agen
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | /agent/start | Start the agentic loop (body: `{"goal": "..."}`) |
+| POST | /agent/start | Record the goal and mark the agent running (body: `{"goal": "..."}`; no loop is started server-side, so status/memory stay empty; use `openeye agent run` or `/ws/agentic` for a live loop) |
 | POST | /agent/stop | Stop the agentic loop |
 | GET | /agent/status | Get agent status (running, tick count, plan, goal) |
 | GET | /agent/stream | SSE stream of AgentTickEvent objects |

@@ -1,5 +1,24 @@
 [
   {
+    "version": "unreleased",
+    "unreleased": true,
+    "date": "2026-11-23",
+    "title": "Remote MCP server, MCP registry listing, Windows support and hosted API fixes",
+    "description": "Shipped on openeye.sh and on main since 0.3.0. The CLI and MCP changes below are not on PyPI yet; they ship in the next openeye-sh release.",
+    "changes": [
+      { "type": "added", "text": "`openeye-mcp` is published to the official MCP registry as `io.github.aw3-technology/openeye`, and openeye.sh serves a `/.well-known/mcp.json` manifest" },
+      { "type": "added", "text": "Remote MCP server at `https://openeye.sh/mcp` (Streamable HTTP) with the hosted tools `openeye_api_detect`, `openeye_api_describe`, `openeye_api_models` and `openeye_api_usage`; nothing to install, authenticate with your `oe_` key" },
+      { "type": "added", "text": "Contact page at openeye.sh/contact" },
+      { "type": "added", "text": "Codex project config (`.codex/config.toml`) registers the OpenEye MCP server, alongside `.mcp.json` for Claude Code" },
+      { "type": "added", "text": "`openeye list --json` for scripts and agents" },
+      { "type": "changed", "text": "The CLI and MCP server run on Windows; CI tests the CLI on Ubuntu, macOS and Windows" },
+      { "type": "changed", "text": "Hosted API: `GET /v1` and `GET /v1/models` are public, and failed inference calls are logged and count toward the per-key rate limit (rate-limited 429 responses don't)" },
+      { "type": "fixed", "text": "Self-hosted `/v1` no longer charges credits for uploads that fail to decode" },
+      { "type": "fixed", "text": "Replaced retired OpenRouter and Nebius VLM model IDs; the Nebius default is `Qwen/Qwen2.5-VL-72B-Instruct`" },
+      { "type": "fixed", "text": "The hosted API no longer crashes when Neon drops an idle database connection" }
+    ]
+  },
+  {
     "version": "0.3.0",
     "date": "2026-11-05",
     "title": "Hosted API at openeye.sh/v1",

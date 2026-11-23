@@ -71,6 +71,12 @@ claude mcp add openeye -- openeye-mcp
 
 Then ask: *"Run yolov8 on ~/Pictures/desk.jpg and tell me what's on my desk."* Setup for Claude Desktop and other clients: [docs/claude-skill](https://openeye.sh/docs/claude-skill).
 
+No install needed for the hosted tools: connect any remote-capable MCP client to `https://openeye.sh/mcp` with your API key.
+
+```bash
+claude mcp add --transport http openeye https://openeye.sh/mcp --header "Authorization: Bearer oe_your_key_here"
+```
+
 ## Hosted API Quick Start
 
 No GPU or local install needed for detection:

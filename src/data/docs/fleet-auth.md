@@ -23,7 +23,7 @@ psql "$DATABASE_URL" -f db/schema.sql
 Then start the app factory from backend/src:
 
 ```bash
-pip install -e backend/ --group dev
+pip install -e backend/ --group backend/pyproject.toml:dev   # --group needs pip >= 25.1
 export DATABASE_URL="postgresql://user:password@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require"
 cd backend/src
 uvicorn fleet.app:create_fleet_app --factory --host 0.0.0.0 --port 8001
@@ -34,7 +34,9 @@ curl http://localhost:8001/health
 |----------|----------|---------|---------|
 | DATABASE_URL | Yes | — | Postgres connection string (pooled endpoint recommended) |
 | DATABASE_POOL_MAX | No | 10 | Max pool connections |
-| CORS_ORIGINS | No | http://localhost:5173,http://localhost:3000 | Browser origins allowed; add http://localhost:8080 for the local dashboard |
+| CORS_ORIGINS | No | http://localhost:5173, http://localhost:3000, http://localhost:8080, https://openeye.sh, https://www.openeye.sh | Comma-separated browser origins allowed; setting it replaces the defaults |
+| FLEET_RATE_LIMIT | No | 120 | Requests per 60 s per client IP on fleet routes (/health and /v1 are exempt) |
+| FLEET_OFFLINE_SWEEP_INTERVAL | No | 30 | Seconds between sweeps that mark devices offline after 60 s without a heartbeat; 0 disables |
 | CRED_API_KEY | No | — | Enables credit checks on the control plane's /v1 routes; unset means credits are disabled |
 | CRED_API_BASE, CRED_CREDIT_TYPE_ID, CRED_APP_ORIGIN | No | Cred defaults | Cred settings |
 

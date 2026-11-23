@@ -52,10 +52,10 @@ See Model Adapters for how to write one.
 
 ### openeye update-registry
 
-Fetch the latest registry from the OpenEye repository (cli/openeye_ai/models.yaml on main) and merge in models you don't have yet.
+Fetch the latest registry from the OpenEye repository (cli/openeye_ai/models.yaml on main) and save models you don't have yet.
 
 ```bash
 openeye update-registry
 ```
 
-add-model, register-adapter, and update-registry all edit the models.yaml installed with the CLI, so reinstalling or upgrading the package resets them.
+add-model, register-adapter, and update-registry write to ~/.openeye/custom_models.yaml, never to the models.yaml inside the package, so the models you add survive upgrades and reinstalls. A key that's already in the registry can't be added again.

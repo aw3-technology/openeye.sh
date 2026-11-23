@@ -35,18 +35,19 @@ OpenEye's FastAPI server exposes four WebSocket endpoints, each delivering a dif
 
 **`/ws/agentic`** — Agentic loop stream. The full perception-reasoning-planning cycle. Delivers continuous action plans alongside perception data for autonomous operation.
 
-Each endpoint delivers structured JSON messages:
+Each endpoint delivers structured JSON messages. A `/ws/perception` frame looks like this (abbreviated):
 
 ```json
 {
-  "timestamp_ms": 1710523847000,
-  "frame_number": 1042,
-  "detections": [
-    {"bbox": [0.34, 0.28, 0.12, 0.15], "class": "cup", "confidence": 0.94}
+  "frame_id": 1042,
+  "timestamp": 1710523847.0,
+  "inference_ms": 18.4,
+  "objects": [
+    {"track_id": "cup_01", "label": "cup", "confidence": 0.94, "bbox": {"x": 0.34, "y": 0.28, "w": 0.12, "h": 0.15}}
   ],
-  "scene_graph": {"objects": [...], "relationships": [...]},
-  "hazards": [],
-  "analysis": "Coffee cup stable on desk surface. No immediate risks detected."
+  "scene_graph": {"nodes": [...], "relationships": [...]},
+  "scene_description": "Coffee cup stable on desk surface. No immediate risks detected.",
+  "safety_alerts": []
 }
 ```
 
@@ -59,7 +60,7 @@ Each frame includes everything a downstream system might need:
 The server starts with a single command:
 
 ```bash
-openeye serve --port 8000
+openeye serve yolov8 --port 8000
 ```
 
 Any WebSocket client can connect to the appropriate endpoint and start receiving perception frames immediately.
@@ -81,23 +82,13 @@ For safety-critical paths, we optimize further. The hazard detection runs on a f
 
 The biggest challenge in perception streaming isn't speed — it's handling consumers that can't keep up. If a downstream system processes frames slower than they arrive, you need a strategy.
 
-OpenEye implements three backpressure modes:
+OpenEye bounds the work instead of letting it pile up. Every request goes through an inference queue that runs one inference at a time and holds at most 16 waiting frames. When the queue is full, the server answers that frame with a "Server busy" error right away rather than queueing it, so a client that falls behind gets fresh results once it catches up instead of a growing backlog of stale ones — stale data is worse than no data.
 
-**Drop oldest**: When the consumer falls behind, drop older frames and send the latest. This is the default for most real-time applications — stale data is worse than no data.
-
-**Buffer**: Maintain a configurable buffer of frames. Useful for consumers that process in bursts (batch planners, logging systems).
-
-**Block**: Slow down the entire pipeline to match the slowest consumer. Used when every frame matters (forensic recording, compliance logging).
+You can watch the queue from the CLI or over HTTP:
 
 ```bash
-# Default: drop oldest frames when consumer is slow
-openeye serve --backpressure drop
-
-# Buffer up to 100 frames
-openeye serve --backpressure buffer --buffer-size 100
-
-# Block if consumer can't keep up
-openeye serve --backpressure block
+openeye health --server http://localhost:8000
+curl http://localhost:8000/queue/status
 ```
 
 ## Multi-Consumer Architecture

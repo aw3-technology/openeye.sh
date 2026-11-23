@@ -51,7 +51,7 @@ curl -X POST http://localhost:8000/predict \\
 #   "model": "yolov8",
 #   "objects": [
 #     { "label": "cup", "confidence": 0.94,
-#       "bbox": { "x1": 0.46, "y1": 0.52, "x2": 0.50, "y2": 0.63 } }
+#       "bbox": { "x": 0.46, "y": 0.52, "w": 0.04, "h": 0.11 } }
 #   ],
 #   "inference_ms": 14.2
 # }

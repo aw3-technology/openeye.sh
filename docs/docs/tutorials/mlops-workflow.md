@@ -6,9 +6,9 @@ End-to-end guide for managing the model lifecycle with `openeye mlops` — from 
 
 - OpenEye CLI installed (`pipx install openeye-sh`; add the `cloud` extra for S3/GCS batch jobs)
 - A trained model file (ONNX, TorchScript, SafeTensors, or PyTorch format)
+- A test image or dataset for validation
 
 All `openeye mlops` state (registry, promotions, tests, runs) is stored locally in YAML files under `~/.openeye/`.
-- A test image or dataset for validation
 
 ## 1. Upload a Custom Model
 
@@ -41,21 +41,21 @@ openeye mlops registry
 
 ## 2. Version Tracking
 
-Each upload creates a new version. List all versions of a model:
+`upload` registers a new model key at version `1.0.0` (uploading to a key that already exists fails). Add later versions with `POST /mlops/models/{key}/versions` on a running `openeye serve`; there is no CLI command for it. List all versions of a model:
 
 ```bash
 openeye mlops versions warehouse-detector
 ```
 
-Output shows version IDs, creation timestamps, current stage, and metadata. Use the version ID in promotion, export, and testing commands.
+Output shows version IDs, creation timestamps, current stage, and metadata. Use the version string (for example `1.0.0`) in promotion, export, and testing commands.
 
 View the full provenance chain for any version:
 
 ```bash
-openeye mlops lineage warehouse-detector v1
+openeye mlops lineage warehouse-detector 1.0.0
 ```
 
-This displays the dataset, git commit, framework, and hyperparameters used to produce the version.
+This displays the dataset, code commit, and hyperparameters recorded for the version, if lineage was recorded for it.
 
 ## 3. Stage Promotion
 
@@ -64,23 +64,23 @@ Models progress through stages: **dev** &rarr; **staging** &rarr; **production**
 Promote a version to staging:
 
 ```bash
-openeye mlops promote --model warehouse-detector --version v1 \
+openeye mlops promote --model warehouse-detector --version 1.0.0 \
   --from dev --to staging \
   --requester "ml-team" \
   --reason "Passed offline eval with 96% mAP"
 ```
 
-The default gates: dev → staging auto-approves when `accuracy > 0.90`; staging → production needs an approver. Request the production promotion, then a reviewer approves or rejects it:
+The default gates: dev → staging auto-approves when the version's recorded `accuracy > 0.90` (a freshly uploaded version has no metrics, so its request stays pending until approved); staging → production needs an approver. Request the production promotion, then a reviewer approves or rejects it:
 
 ```bash
-openeye mlops promote --model warehouse-detector --version v1 \
+openeye mlops promote --model warehouse-detector --version 1.0.0 \
   --from staging --to production --requester "ml-team"
 
 # Reviewer approves
-openeye mlops approve-promotion --model warehouse-detector --version v1 --approver "lead-eng"
+openeye mlops approve-promotion --model warehouse-detector --version 1.0.0 --approver "lead-eng"
 
 # Or rejects with reason
-openeye mlops reject-promotion --model warehouse-detector --version v1 \
+openeye mlops reject-promotion --model warehouse-detector --version 1.0.0 \
   --approver "lead-eng" \
   --reason "Latency regression on Jetson"
 ```
@@ -90,7 +90,7 @@ openeye mlops reject-promotion --model warehouse-detector --version v1 \
 Convert a model version to an optimized edge format:
 
 ```bash
-openeye mlops export warehouse-detector --version v1 --format tensorrt \
+openeye mlops export warehouse-detector --version 1.0.0 --format tensorrt \
   --output ./deploy/warehouse-detector.trt
 ```
 
@@ -111,7 +111,7 @@ No extra flags are needed; the `model_key` from the registry is passed automatic
 
 ```bash
 # Works even when the stored file is .safetensors
-openeye mlops export warehouse-detector --version v1 --format onnx
+openeye mlops export warehouse-detector --version 1.0.0 --format onnx
 ```
 
 ### Quantization
@@ -119,7 +119,7 @@ openeye mlops export warehouse-detector --version v1 --format onnx
 The `--quantize` flag applies dynamic INT8 quantization (ONNX format only). This typically reduces model size by ~4x with minimal accuracy impact for detection workloads.
 
 ```bash
-openeye mlops export warehouse-detector --version v1 --format onnx --quantize
+openeye mlops export warehouse-detector --version 1.0.0 --format onnx --quantize
 ```
 
 The quantized file is saved alongside the original with an `_int8` suffix.
@@ -135,7 +135,7 @@ openeye mlops exports --model warehouse-detector
 Process a directory of images (or a cloud bucket) in bulk:
 
 ```bash
-openeye mlops batch-create --model warehouse-detector --version v1 \
+openeye mlops batch-create --model warehouse-detector --version 1.0.0 \
   --input ./test-images/ --output ./results/ \
   --batch-size 32 \
   --workers 4 \
@@ -158,12 +158,12 @@ Input can be a local directory, `s3://`, or `gs://` path; results can also be wr
 
 ```bash
 # Read from S3, write results to S3
-openeye mlops batch-create --model warehouse-detector --version v1 \
+openeye mlops batch-create --model warehouse-detector --version 1.0.0 \
   --input s3://my-bucket/images/ --output s3://my-bucket/results/ \
   --workers 8 --format jsonl
 
 # Read from GCS, write results locally
-openeye mlops batch-create --model warehouse-detector --version v1 \
+openeye mlops batch-create --model warehouse-detector --version 1.0.0 \
   --input gs://my-bucket/frames/ --output ./local-results/ \
   --format csv
 ```
@@ -198,7 +198,7 @@ openeye mlops create-ab-test \
   --max-samples 5000
 ```
 
-This sends 30% of requests to `v2` (challenger) and 70% to `v1` (champion). The test stops after 5,000 samples. Without `--model`, the model key is derived from the champion string (`yolov8-v2` → `yolov8`).
+This records a test that splits traffic 70% to `v1` (champion) and 30% to `v2` (challenger) and stops after 5,000 samples. `openeye serve` doesn't route requests through A/B tests on its own: your serving code picks a version with `route_request()` and records outcomes with `record_result()` from `openeye_ai.mlops.ab_testing`. Without `--model`, the model key is derived from the champion string (`yolov8-v2` → `yolov8`).
 
 Check results, then graduate the winner:
 
@@ -209,7 +209,7 @@ openeye mlops complete-ab-test <test-id>
 
 ## 7. Shadow Mode
 
-Run a new model version alongside production without affecting users. The shadow model receives the same inputs and its predictions are logged for comparison, but only the production model's output is served:
+Run a new model version alongside production without affecting users. The shadow model receives the same inputs and its predictions are logged for comparison, but only the production model's output is served. As with A/B tests, the CLI records the deployment; your serving code feeds it by calling `run_shadow_inference()` from `openeye_ai.mlops.shadow_mode`:
 
 ```bash
 openeye mlops shadow-mode \
@@ -241,7 +241,7 @@ When the model makes mistakes, annotate them to build a correction dataset.
 ### Submit an Annotation
 
 ```bash
-openeye mlops annotate warehouse-detector v1 ./misdetected.jpg \
+openeye mlops annotate warehouse-detector 1.0.0 ./misdetected.jpg \
   --label forklift \
   --type misclassification \
   --predicted pallet \
@@ -263,7 +263,7 @@ To record whether a single prediction was right, use `feedback`:
 
 ```bash
 openeye mlops feedback --prediction-id img-0042 --correct false --label forklift \
-  --model warehouse-detector --version v1
+  --model warehouse-detector --version 1.0.0
 ```
 
 ### Browse Annotations
@@ -297,9 +297,11 @@ openeye mlops pipeline-create \
   --schedule "0 2 * * *"
 ```
 
-The `--schedule` flag accepts a cron expression (this example runs at 2 AM daily).
+The `--schedule` flag stores a cron expression on the pipeline (here, 2 AM daily). OpenEye doesn't run a scheduler, so call `openeye mlops retrain` from cron or CI to act on it.
 
 ### Trigger a Retraining Run
+
+`retrain` runs the pipeline's training script synchronously and prints the run's final status:
 
 ```bash
 openeye mlops retrain warehouse-nightly --by "ci-bot"

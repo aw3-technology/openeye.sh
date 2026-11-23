@@ -17,7 +17,7 @@ export function DeployAnywhereSection() {
             Your cameras. Your hardware. Your data.
           </h2>
           <p className="text-muted-foreground mb-12 max-w-2xl">
-            All inference runs locally. Camera feeds never leave your network — deploy on laptops, edge devices, or on-prem servers.
+            Registry models run locally. Camera feeds stay on your network — deploy on laptops, edge devices, or on-prem servers.
           </p>
         </motion.div>
 
@@ -32,7 +32,7 @@ export function DeployAnywhereSection() {
             <div className="font-mono text-xs uppercase tracking-widest text-terminal-green mb-3">Self-Hosted</div>
             <h3 className="font-display text-base font-light mb-2">Full data sovereignty</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              All inference runs locally. No data leaves your premises — run in air-gapped environments or on-device at the edge.
+              Detection, depth and segmentation run on your machine with no cloud calls — run in air-gapped environments or on-device at the edge.
             </p>
             <div className="font-mono text-xs bg-secondary text-oe-green px-3 py-2 rounded-inner border mt-3 overflow-x-auto">
               openeye serve yolov8 --port 8000

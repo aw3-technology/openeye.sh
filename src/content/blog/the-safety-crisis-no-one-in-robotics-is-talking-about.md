@@ -65,9 +65,9 @@ We'd rather the industry get ahead of that moment than react to it.
 The simplest way to add perception-based safety to any robot is a single command:
 
 ```
-openeye watch --reason --halt-on hazard
+openeye watch --safety
 ```
 
-This runs continuous perception with the two-layer safety system, and can output halt signals to your robot's motion controller. It works with any USB camera. No proprietary hardware required.
+This runs continuous perception with the Safety Guardian's danger and caution zones. To send halt signals to a robot's motion controller, `openeye g1-demo` drives a Unitree G1 (start with `--control-mode dry_run`). It works with any USB camera. No proprietary hardware required.
 
 The safety crisis in robotics is real. But it's also solvable — with open-source tools that any team can deploy, inspect, and improve.

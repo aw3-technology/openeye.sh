@@ -50,7 +50,7 @@ cd cli
 pip install -e ".[all]" --group dev   # --group needs pip >= 25.1; or: uv sync --extra all
 ruff check           # Lint
 ruff format --check  # Format check
-pytest -v            # Run tests (excludes integration)
+pytest -v -m "not integration"   # Run tests without real model downloads (as CI does)
 ```
 
 ### Backend
@@ -223,7 +223,7 @@ openeye register-adapter my-detector ./my_adapter.py \
   --description "Custom object detector"
 ```
 
-Both commands add an entry to `models.yaml`. The adapter file must define a class named `Adapter` that subclasses `ModelAdapter`. The registry resolves custom adapters by detecting a `/` or `.py` suffix in the adapter path, then dynamically imports the module.
+Both commands add an entry to your user registry, `~/.openeye/custom_models.yaml` (the built-in `models.yaml` is not modified). The adapter file must define a class named `Adapter` that subclasses `ModelAdapter`. The registry resolves custom adapters by detecting a `/` or `.py` suffix in the adapter path, then dynamically imports the module.
 
 ### Testing with `FakeAdapter`
 

@@ -118,7 +118,7 @@ The server starts at `http://localhost:8000` with:
 - `GET /` — Browser dashboard
 - `WebSocket /ws` — Real-time inference
 - `WebSocket /ws/perception` — Full perception pipeline with scene graph
-- `WebSocket /ws/vlm` — VLM reasoning (requires `--vlm-model` or `NEBIUS_API_KEY`)
+- `WebSocket /ws/vlm` — VLM reasoning (requires `NEBIUS_API_KEY`, or `OPENROUTER_API_KEY` with an OpenRouter `--vlm-model`)
 - `WebSocket /ws/agentic` — Continuous agentic loop
 - `GET /metrics` — Prometheus metrics
 - `GET /nebius/stats` — VLM usage statistics

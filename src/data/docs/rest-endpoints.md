@@ -30,7 +30,7 @@ Health check endpoint.
 
 ### POST /predict
 
-Run inference on an uploaded image. Request: multipart form with a `file` field (max 20 MB). Rate limited to 30 requests per minute per client IP.
+Run inference on an uploaded image. Request: multipart form with a `file` field (max 20 MB). Errors return `{"error": "..."}`. Rate limited to 30 requests per minute per client IP.
 
 | Parameter | In | Default | Description |
 |-----------|----|---------|-------------|
@@ -81,7 +81,7 @@ Inference queue status. The queue runs one inference at a time and holds up to 1
 
 ### GET /nebius/stats
 
-Nebius Token Factory VLM usage statistics (also `openeye nebius-stats`).
+Nebius Token Factory VLM usage statistics (also `openeye nebius-stats`). `estimated_cost_usd` is a rough estimate at about $0.20 per 1K tokens.
 
 ```json
 {
@@ -94,7 +94,8 @@ Nebius Token Factory VLM usage statistics (also `openeye nebius-stats`).
   "model": "Qwen/Qwen2.5-VL-72B-Instruct",
   "provider": "Nebius Token Factory",
   "configured": true,
-  "uptime_seconds": 3600.0
+  "uptime_seconds": 3600.0,
+  "estimated_cost_usd": 1.68
 }
 ```
 
@@ -114,7 +115,7 @@ Differences from the hosted API at https://openeye.sh/v1:
 
 - Auth is `Authorization: Bearer <key>`, or `X-API-Key: <key>` when no Bearer token is sent (same as the hosted API). Any key starting with oe_ is accepted; set OPENEYE_SERVER_API_KEY to accept only that exact key.
 - Credits are counted in memory (detect 1, depth 2, describe 3, from a notional 1,000) and reset on restart. Nothing is charged.
-- Uploads up to 20 MB; errors use FastAPI's `{"detail": "..."}` body.
+- Uploads up to 20 MB (larger or empty files get 400). Auth and validation errors use FastAPI's `{"detail": "..."}` body; queue-full (503) and inference failures (500) use `{"error": "..."}`.
 
 ### Error Responses
 
@@ -125,4 +126,4 @@ Differences from the hosted API at https://openeye.sh/v1:
 | 413 | File too large (over 20 MB) |
 | 429 | Rate limit exceeded (30 requests/minute on /predict) |
 | 500 | Inference failed |
-| 503 | Server busy (queue full), or VLM / perception pipeline not configured |
+| 503 | Server busy (queue full; /predict adds Retry-After: 5), or VLM / perception pipeline not configured |

@@ -9,7 +9,7 @@ readTime: "7 min read"
 
 OpenEye started at the Nebius.Build Hackathon in San Francisco. The original idea was modest: build a CLI tool that makes it easy to run computer vision models the way Ollama makes it easy to run language models. Pull a model, run it on an image, get structured output. Nothing revolutionary — just a quality-of-life improvement for robotics engineers who were tired of writing boilerplate model-loading code.
 
-The hackathon prototype was 400 lines of Python. You could run `openeye detect image.jpg` and get JSON with bounding boxes. That was it. It worked, it was fast, and a few people said "oh, that's handy."
+The hackathon prototype was 400 lines of Python. You could run `openeye run yolov8 image.jpg` and get JSON with bounding boxes. That was it. It worked, it was fast, and a few people said "oh, that's handy."
 
 Then we started talking to robotics teams.
 

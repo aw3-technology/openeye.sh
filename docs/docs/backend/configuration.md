@@ -14,15 +14,16 @@ Configuration files live in `backend/config/` and are JSON5 format (supports com
 {
   "version": "1.0.1",
   "name": "my_agent",
+  "api_key": "${OPENAI_API_KEY}",
   "system_prompt_base": "You are a helpful robot assistant.",
   "system_governance": "Be safe and helpful.",
   "system_prompt_examples": "",
   "hertz": 1.0,
   "agent_inputs": [
-    {"type": "vlm_openai", "config": {"model": "gpt-4o"}}
+    {"type": "VLMOpenAI", "config": {}}
   ],
   "cortex_llm": {
-    "type": "openai", "config": {"model": "gpt-4o"}
+    "type": "OpenAILLM", "config": {"model": "gpt-4o"}
   },
   "agent_actions": [],
   "simulators": [],
@@ -35,9 +36,10 @@ Configuration files live in `backend/config/` and are JSON5 format (supports com
 ```json5
 {
   "version": "1.0.1",
-  "name": "multi_mode_agent",
   "default_mode": "idle",
+  "api_key": "${OPENAI_API_KEY}",
   "system_governance": "Be safe.",
+  "cortex_llm": {"type": "OpenAILLM", "config": {"model": "gpt-4o-mini"}},
   "modes": {
     "idle": {
       "display_name": "Idle",
@@ -45,7 +47,7 @@ Configuration files live in `backend/config/` and are JSON5 format (supports com
       "system_prompt_base": "You are idle.",
       "hertz": 0.5,
       "agent_inputs": [],
-      "cortex_llm": {"type": "openai", "config": {}}
+      "agent_actions": []
     },
     "active": {
       "display_name": "Active",
@@ -53,7 +55,7 @@ Configuration files live in `backend/config/` and are JSON5 format (supports com
       "system_prompt_base": "You are active.",
       "hertz": 2.0,
       "agent_inputs": [],
-      "cortex_llm": {"type": "openai", "config": {}}
+      "agent_actions": []
     }
   },
   "transition_rules": [
@@ -61,7 +63,8 @@ Configuration files live in `backend/config/` and are JSON5 format (supports com
       "from_mode": "idle",
       "to_mode": "active",
       "transition_type": "input_triggered",
-      "trigger_keywords": ["hello", "start"]
+      "trigger_keywords": ["hello", "start"],
+      "priority": 1
     }
   ]
 }
@@ -98,7 +101,9 @@ Set these in the environment of the control plane process (see `backend/.env.exa
 |----------|----------|---------|-------------|
 | `DATABASE_URL` | Yes | — | Postgres connection string. For Neon, prefer the pooled endpoint, with `?sslmode=require`. |
 | `DATABASE_POOL_MAX` | No | `10` | Max connections in the pool |
-| `CORS_ORIGINS` | No | `http://localhost:5173,http://localhost:3000` | Comma-separated browser origins allowed to call the API |
+| `CORS_ORIGINS` | No | `http://localhost:5173,http://localhost:3000,http://localhost:8080,https://openeye.sh,https://www.openeye.sh` | Comma-separated browser origins allowed to call the API (setting it replaces the defaults) |
+| `FLEET_RATE_LIMIT` | No | `120` | Requests per 60 s per client IP on fleet routes |
+| `FLEET_OFFLINE_SWEEP_INTERVAL` | No | `30` | Seconds between background sweeps that mark devices offline after 60 s without a heartbeat; `0` disables |
 | `CRED_API_KEY` | No | — | Cred credits API key for the control plane's `/v1` routes. Unset means credits are **disabled**: every call is allowed and nothing is charged. |
 | `CRED_API_BASE` | No | Cred's API | Cred API base URL |
 | `CRED_CREDIT_TYPE_ID` | No | — | Cred credit type to charge |
@@ -119,7 +124,7 @@ psql "$DATABASE_URL" -f db/schema.sql
 ### Run it
 
 ```bash
-pip install -e backend/ --group dev   # = make install-backend; needs pip >= 25.1 (or: cd backend && uv sync)
+pip install -e backend/ --group backend/pyproject.toml:dev   # needs pip >= 25.1 (or: cd backend && uv sync)
 export DATABASE_URL="postgresql://user:password@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require"
 cd backend/src
 uvicorn fleet.app:create_fleet_app --factory --host 0.0.0.0 --port 8001
@@ -137,8 +142,8 @@ uvicorn fleet.app:create_fleet_app --factory --host 0.0.0.0 --port 8001
 
 Sessions and API keys are looked up in the control plane's own database, so users must exist there. The simplest way is to run the website against the same `DATABASE_URL` (`vercel dev` locally, or your own deployment) and sign up there. A session token is the value of the Better Auth session cookie; both the raw token and the signed cookie value are accepted. Keys are stored as SHA-256 hashes.
 
-Fleet endpoints are rate limited in memory per client IP (configured for 120 requests per minute); `/health` and `/v1` are exempt.
+Fleet endpoints are rate limited in memory per client IP (120 requests per minute by default, `FLEET_RATE_LIMIT`); `/health` and `/v1` are exempt.
 
 ## Environment Variables
 
-Use `${ENV_VAR}` syntax in config values — they are resolved at load time via `runtime.env.load_env_vars()`.
+Use `${ENV_VAR}` syntax in config values — they are resolved at load time via `runtime.env.EnvLoader.load_env_vars()`.

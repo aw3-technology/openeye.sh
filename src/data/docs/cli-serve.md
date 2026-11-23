@@ -46,7 +46,7 @@ VLM features need OPENROUTER_API_KEY or NEBIUS_API_KEY in the environment.
 | GET, PUT /config | Runtime config |
 | GET /nebius/stats | Nebius VLM usage |
 
-See REST Endpoints and WebSocket for details. The /governance routes are mounted only when the governance engine can be imported.
+See REST Endpoints and WebSocket for details. The /governance routes are mounted only when the governance engine can be imported (backend/src, so from a repo checkout, not a PyPI install).
 
 ### Use it from the openeye.sh dashboard
 
@@ -56,7 +56,7 @@ To change the allowed origins, set CORS_ORIGINS to a comma-separated list; it re
 
 ### Securing the /v1 routes
 
-By default the /v1 routes accept any Bearer key starting with oe_. Set OPENEYE_SERVER_API_KEY to require one exact key:
+By default the /v1 routes accept any key starting with oe_, sent as Authorization: Bearer (or X-API-Key when there's no Authorization header). Set OPENEYE_SERVER_API_KEY to require one exact key:
 
 ```bash
 OPENEYE_SERVER_API_KEY=oe_my_secret openeye serve yolov8

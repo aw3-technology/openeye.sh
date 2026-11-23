@@ -37,7 +37,7 @@ export const pricingTiers: PricingPlanTier[] = [
     badge: "Available Now",
     features: [
       { text: "Full CLI toolchain (run, serve, watch, bench)", included: true },
-      { text: "8 model adapters (YOLO, RF-DETR, DINO, SAM 2, Depth, SmolVLA, Qwen2.5-VL)", included: true },
+      { text: "7 registry models (YOLO, RF-DETR, DINO, SAM 2, Depth, SmolVLA) + Qwen2.5-VL reasoning", included: true },
       { text: "Dual-layer perception (YOLO + VLM reasoning)", included: true },
       { text: "REST & WebSocket API server", included: true },
       { text: "Real-time dashboard with 19+ pages", included: true },
@@ -236,14 +236,14 @@ export const pricingFaq: FaqItem[] = [
       "Yes. The CLI, all model adapters, the dashboard, MLOps pipeline, fleet management, and the local API server are open source under the MIT license. You can self-host everything on your own hardware at no cost.",
   },
   {
-    question: "When will the hosted Cloud tier be available?",
+    question: "Is the hosted Cloud tier available?",
     answer:
-      "The hosted API is currently in development. Join the waitlist to be notified when it launches. In the meantime, you can self-host OpenEye with full functionality.",
+      "Yes. The hosted API at https://openeye.sh/v1 serves YOLOv8 object detection today at 1 credit per call. Create an API key in the dashboard, buy credits, and send images to POST /v1/detect. Scene description and depth are not enabled on the hosted API yet; self-host OpenEye for those.",
   },
   {
     question: "What models are supported?",
     answer:
-      "OpenEye ships with 8 integrated model adapters: YOLOv8, YOLO26, RF-DETR, Grounding DINO, Depth Anything V2, SAM 2, SmolVLA, and Qwen2.5-VL (via Nebius Token Factory). ONNX and TensorRT runtimes are also included. You can add custom models through the adapter system.",
+      "The registry has 7 models you can pull: YOLOv8, YOLO26, RF-DETR, Grounding DINO, Depth Anything V2, SAM 2, and SmolVLA. VLM reasoning uses Qwen2.5-VL via Nebius Token Factory or OpenRouter. ONNX and TensorRT runtimes are available as install extras. You can add custom models through the adapter system.",
   },
   {
     question: "Do you offer GPU support for self-hosted deployments?",

@@ -90,14 +90,18 @@ export const milestones: Milestone[] = [
   },
   {
     date: "Mar 2026",
-    event: "8 model adapters integrated — YOLO, RF-DETR, DINO, SAM 2, Depth, SmolVLA, Qwen2.5-VL",
+    event: "7 registry models integrated — YOLO, RF-DETR, DINO, SAM 2, Depth, SmolVLA — plus Qwen2.5-VL reasoning",
   },
   {
     date: "Mar 2026",
     event: "Fleet control plane, MLOps pipeline, and governance framework shipped",
   },
   {
+    date: "Nov 2026",
+    event: "openeye-sh 0.3.0: hosted inference API at openeye.sh/v1 and MCP tools that call it",
+  },
+  {
     date: "Next",
-    event: "ROS 2 adapter, persistent scene memory, multi-camera fusion",
+    event: "ROS 2 adapter, multi-camera fusion",
   },
 ];

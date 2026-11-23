@@ -16,9 +16,9 @@ The control plane is a FastAPI app in `backend/src/fleet/` that stores its data 
 # 1. Create the tables (from the repo root)
 psql "$DATABASE_URL" -f db/schema.sql     # or: npm run db:migrate
 
-# 2. Install and start it (same as `make install-backend` / `make dev-backend`;
-#    --group needs pip >= 25.1, or run `uv sync` in backend/ instead)
-pip install -e backend/ --group dev
+# 2. Install and start it (--group needs pip >= 25.1, or run `uv sync` in
+#    backend/ instead)
+pip install -e backend/ --group backend/pyproject.toml:dev
 cd backend/src
 DATABASE_URL="postgresql://...?sslmode=require" \
   uvicorn fleet.app:create_fleet_app --factory --host 0.0.0.0 --port 8001
@@ -130,7 +130,7 @@ openeye fleet group-scaling <group-id> --enabled --min 2 --max 10 --target-cpu 7
 
 ### Canary Deployment
 
-Deploy to a small percentage first, then gradually roll out:
+A deployment needs target devices, so pass `--group`. Every strategy rolls out through the same staged plan (by default canary 10%, then 50%, then 100%); `--strategy` is recorded on the deployment but doesn't change the rollout:
 
 ```bash
 openeye fleet deploy \
@@ -142,9 +142,9 @@ openeye fleet deploy \
 
 When `--name` is omitted, it auto-generates as `<model>-<version>`.
 
-### Rolling Deployment
+### Named Deployment
 
-Update devices one-by-one across the group:
+Give the deployment a name and a different strategy label:
 
 ```bash
 openeye fleet deploy \
@@ -163,6 +163,8 @@ openeye fleet deployments --status in_progress
 ```
 
 ### Advance or Pause
+
+Each `advance` queues `deploy_model` commands for the next stage's share of devices; the control plane refuses to advance before the current stage's minimum wait (300 s for canary, 600 s for the 50% stage) has passed.
 
 ```bash
 openeye fleet advance <deployment-id>

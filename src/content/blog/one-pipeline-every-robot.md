@@ -52,19 +52,20 @@ With OpenEye, you run one perception pipeline with three adapters. The safety sy
 
 ```bash
 # Same perception, different robots
-openeye watch --reason --adapter unitree-g1   # Unitree quadruped
-openeye watch --reason --adapter ros2        # ROS2 arm
-openeye watch --reason --adapter ws://drone:8000/ws  # Custom drone
+openeye g1-demo --control-mode sdk     # Unitree G1, built-in connector
+openeye serve yolov8 --port 8000       # anything else: consume ws://<host>:8000/ws/perception
 ```
+
+(A ROS 2 adapter is on the roadmap.)
 
 ## Model Agnostic Too
 
 Hardware-agnosticism extends to the ML models themselves. OpenEye's vision layer is designed to work with any detection model that produces structured output:
 
-- **YOLO variants**: YOLOv8, YOLO-NAS, YOLO26 — swap with a flag
+- **YOLO variants**: YOLOv8, YOLO26 — swap by model name
 - **Grounding DINO**: For open-vocabulary detection
 - **SAM variants**: For segmentation tasks
-- **Custom models**: Any ONNX or TorchScript model with the right output format
+- **Custom models**: Any model you wrap in an adapter and register with `openeye register-adapter`
 
 And for the reasoning layer:
 - **Cloud VLMs**: GPT-4o, Claude, Qwen2.5-VL via API
@@ -73,12 +74,12 @@ And for the reasoning layer:
 
 ```bash
 # Swap the detection model
-openeye detect --model yolo26 image.jpg
-openeye detect --model grounding-dino image.jpg
+openeye run yolo26 image.jpg
+openeye run grounding-dino image.jpg --prompt "forklift"
 
 # Swap the reasoning model
-openeye watch --reason --vlm qwen2.5-vl
-openeye watch --reason --vlm local/custom-safety-model
+openeye serve yolov8 --vlm-model Qwen/Qwen2.5-VL-72B-Instruct
+openeye serve yolov8 --vlm-model qwen/qwen3-vl-235b-a22b-instruct
 ```
 
 ## Build Once, Deploy Everywhere
