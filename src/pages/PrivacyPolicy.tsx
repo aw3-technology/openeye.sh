@@ -14,7 +14,7 @@ export default function PrivacyPolicy() {
       <Navbar />
       <main>
         <PageHero size="sm" eyebrow="Legal" title="Privacy Policy">
-          <span className="text-sm">Last updated: March 15, 2026</span>
+          <span className="text-sm">Last updated: November 22, 2026</span>
         </PageHero>
         <div className="container max-w-3xl mx-auto px-4 pt-12 pb-20">
 
@@ -58,6 +58,7 @@ export default function PrivacyPolicy() {
                 <li>Create and manage your account</li>
                 <li>Respond to your inquiries and provide customer support</li>
                 <li>Send administrative communications (service updates, security alerts)</li>
+                <li>Send the AW3 Technology newsletter and product updates to your email address, as described in our <a href="/terms" className="text-primary hover:underline">Terms of Service</a>; you can unsubscribe at any time via the link in any email or at <a href="mailto:contact@aw3.tech" className="text-primary hover:underline">contact@aw3.tech</a></li>
                 <li>Monitor and analyze usage trends to improve user experience</li>
                 <li>Detect, prevent, and address technical issues and security threats</li>
                 <li>Comply with legal obligations</li>
