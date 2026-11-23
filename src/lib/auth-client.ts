@@ -21,7 +21,7 @@ export interface SessionInfo {
   expiresAt: Date | string;
 }
 
-type Result<T = unknown> = Promise<{ data: T | null; error: { message?: string } | null }>;
+type Result<T = unknown> = Promise<{ data: T | null; error: { message?: string; code?: string } | null }>;
 
 /**
  * Typed facade over the methods the app uses. Better Auth's inferred client

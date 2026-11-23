@@ -5,6 +5,7 @@ import { authClient } from "@/lib/auth-client";
 import { PageMeta } from "@/components/seo/PageMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { isCloudDeployment } from "@/lib/deployment-env";
+import { emailAuthErrorMessage, oauthErrorMessage } from "@/lib/auth-errors";
 import { PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,14 +21,16 @@ type Connection = "google" | "azure" | "apple" | "github";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const [error, setError] = useState<string | null>(() =>
+    oauthErrorMessage(new URLSearchParams(location.search).get("error")),
+  );
   const [success, setSuccess] = useState<string | null>(null);
   const [mode, setMode] = useState<AuthMode>("sign_in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { signInAsDemo } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const isCloud = isCloudDeployment();
 
   const handleDemoLogin = () => {
@@ -59,7 +62,7 @@ export default function LoginPage() {
         ? await authClient.signUp.email({ email, password, name: email.split("@")[0] })
         : await authClient.signIn.email({ email, password });
     if (error) {
-      setError(error.message || "Sign-in failed");
+      setError(emailAuthErrorMessage(error, isCloud));
     } else {
       const from = (location.state as { from?: string })?.from || "/dashboard";
       navigate(from, { replace: true });

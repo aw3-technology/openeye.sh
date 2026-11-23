@@ -79,6 +79,15 @@
       ]
     },
     {
+      "source": "/.well-known/traffic-advice",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/trafficadvice+json"
+        }
+      ]
+    },
+    {
       "source": "/docs/(.*)\\.md",
       "headers": [
         {
