@@ -44,6 +44,10 @@
       "destination": "/api/v1?__path=:path*"
     },
     {
+      "source": "/mcp",
+      "destination": "/api/mcp"
+    },
+    {
       "source": "/dashboard",
       "destination": "/app.html"
     },
@@ -54,6 +58,11 @@
   ],
   "functions": {
     "api/v1.ts": {
+      "memory": 2048,
+      "maxDuration": 60,
+      "includeFiles": "{models/yolov8n.onnx,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs}"
+    },
+    "api/mcp.ts": {
       "memory": 2048,
       "maxDuration": 60,
       "includeFiles": "{models/yolov8n.onnx,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm,node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs}"

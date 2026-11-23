@@ -52,6 +52,7 @@ const pages = [
   { path: "/changelog", priority: "0.6", changefreq: "weekly" },
   { path: "/community", priority: "0.6", changefreq: "monthly" },
   { path: "/demo", priority: "0.6", changefreq: "monthly" },
+  { path: "/contact", priority: "0.5", changefreq: "yearly" },
   ...docEntries.map((d) => ({ path: `/docs/${d.id}`, priority: "0.7", changefreq: "monthly" })),
   ...registryModels.map((m) => ({ path: `/models/${m.slug}`, priority: "0.7", changefreq: "monthly" })),
   ...blogPosts.map((p) => ({ path: `/blog/${p.slug}`, priority: "0.6", changefreq: "yearly", lastmod: p.date })),
@@ -125,7 +126,8 @@ const llms = `# OpenEye
 OpenEye runs vision models (YOLO, RF-DETR, Grounding DINO, Depth Anything V2, SAM 2, SmolVLA) locally on CPU, NVIDIA CUDA, or Apple Silicon. \`openeye pull <model>\` downloads weights, \`openeye run <model> <image>\` prints JSON, and \`openeye serve <model>\` exposes REST and WebSocket APIs. Source at https://github.com/aw3-technology/openeye.sh. Full docs as one file: ${SITE}/llms-full.txt
 
 - Hosted API: \`https://openeye.sh/v1\` with \`Authorization: Bearer oe_...\` (keys at ${SITE}/dashboard/settings/api-keys). \`GET /v1\` (endpoint index) and \`GET /v1/models\` are public; \`POST /v1/detect\` (YOLOv8, 1 credit, multipart field \`file\`) and \`GET /v1/usage\` need a key; \`/v1/describe\` returns 503 while its model shows \`available: false\` in \`/v1/models\`; depth and streaming are self-hosted only. No CORS: call it from a server, CLI or agent, not a browser. CLI: \`openeye api detect <image>\` with \`OPENEYE_API_KEY\`.
-- MCP server: \`openeye-mcp\` (run \`uvx --from "openeye-sh[mcp]" openeye-mcp\`, or \`pipx install "openeye-sh[mcp]"\`; manifest at ${SITE}/.well-known/mcp.json) exposes local tools (openeye_list, openeye_pull, openeye_run, openeye_serve, openeye_health, openeye_bench, openeye_remove, openeye_nebius_stats) and hosted tools (openeye_api_detect, openeye_api_describe, openeye_api_models, openeye_api_usage; need \`OPENEYE_API_KEY\`).
+- Remote MCP server: \`https://openeye.sh/mcp\` (Streamable HTTP, header \`Authorization: Bearer oe_...\`) with the hosted tools openeye_api_detect, openeye_api_describe, openeye_api_models (no key needed) and openeye_api_usage; images go in as \`image_url\` or \`image_base64\`. Claude Code: \`claude mcp add --transport http openeye https://openeye.sh/mcp --header "Authorization: Bearer oe_..."\`.
+- Local MCP server: \`openeye-mcp\` (run \`uvx --from "openeye-sh[mcp]" openeye-mcp\`, or \`pipx install "openeye-sh[mcp]"\`; manifest at ${SITE}/.well-known/mcp.json) exposes local tools (openeye_list, openeye_pull, openeye_run, openeye_serve, openeye_health, openeye_bench, openeye_remove, openeye_nebius_stats) and hosted tools (openeye_api_detect, openeye_api_describe, openeye_api_models, openeye_api_usage; need \`OPENEYE_API_KEY\`).
 - Dashboard: ${SITE}/dashboard for API keys, credits, inference history, fleet management and observation memory; connect it to a local \`openeye serve\` at http://localhost:8000 for live inference.
 
 ${groups

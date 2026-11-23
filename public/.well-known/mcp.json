@@ -8,14 +8,47 @@
   "servers": [
     {
       "transport": "stdio",
-      "package": { "registry": "pypi", "name": "openeye-sh", "extras": ["mcp"] },
+      "package": {
+        "registry": "pypi",
+        "name": "openeye-sh",
+        "extras": [
+          "mcp"
+        ]
+      },
       "command": "uvx",
-      "args": ["--from", "openeye-sh[mcp]", "openeye-mcp"],
+      "args": [
+        "--from",
+        "openeye-sh[mcp]",
+        "openeye-mcp"
+      ],
       "env": {
-        "OPENEYE_API_KEY": { "required": false, "description": "Key from https://openeye.sh/dashboard/settings/api-keys; needed only for the hosted openeye_api_* tools." }
+        "OPENEYE_API_KEY": {
+          "required": false,
+          "description": "Key from https://openeye.sh/dashboard/settings/api-keys; needed only for the hosted openeye_api_* tools."
+        }
+      }
+    },
+    {
+      "transport": "streamable-http",
+      "url": "https://openeye.sh/mcp",
+      "tools": [
+        "openeye_api_detect",
+        "openeye_api_describe",
+        "openeye_api_models",
+        "openeye_api_usage"
+      ],
+      "headers": {
+        "Authorization": {
+          "required": false,
+          "description": "Bearer oe_... from https://openeye.sh/dashboard/settings/api-keys; needed for every tool except openeye_api_models."
+        }
       }
     }
   ],
-  "api": { "base_url": "https://openeye.sh/v1", "index": "https://openeye.sh/v1", "auth": "Authorization: Bearer oe_..." },
+  "api": {
+    "base_url": "https://openeye.sh/v1",
+    "index": "https://openeye.sh/v1",
+    "auth": "Authorization: Bearer oe_..."
+  },
   "llms_txt": "https://openeye.sh/llms.txt"
 }

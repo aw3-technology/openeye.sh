@@ -17,13 +17,33 @@
       "version": "0.3.0",
       "runtimeHint": "uvx",
       "runtimeArguments": [
-        { "type": "named", "name": "--from", "value": "openeye-sh[mcp]==0.3.0" }
+        {
+          "type": "named",
+          "name": "--from",
+          "value": "openeye-sh[mcp]==0.3.0"
+        }
       ],
-      "transport": { "type": "stdio" },
+      "transport": {
+        "type": "stdio"
+      },
       "environmentVariables": [
         {
           "name": "OPENEYE_API_KEY",
           "description": "Key from https://openeye.sh/dashboard/settings/api-keys; only needed for the hosted openeye_api_* tools.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://openeye.sh/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer oe_... from https://openeye.sh/dashboard/settings/api-keys; needed for every tool except openeye_api_models.",
           "isRequired": false,
           "isSecret": true
         }

@@ -19,6 +19,7 @@ type CompanyLink = InternalLink | ExternalLink;
 
 const companyLinks: CompanyLink[] = [
   { label: "About", to: "/about" },
+  { label: "Contact", to: "/contact" },
   { label: "GitHub", href: "https://github.com/aw3-technology/openeye.sh" },
 ];
 

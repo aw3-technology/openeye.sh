@@ -28,6 +28,7 @@ import Architecture from "./pages/Architecture.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import TermsOfService from "./pages/TermsOfService.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import Contact from "./pages/Contact.tsx";
 import Overview from "./pages/dashboard/Overview.tsx";
 import Inference from "./pages/dashboard/Inference.tsx";
 import LiveStream from "./pages/dashboard/LiveStream.tsx";
@@ -92,6 +93,7 @@ export const AppRoutes = () => (
         <Route path="/hackathon" element={<HackathonDemo />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/contact" element={<Contact />} />
 
         <Route
           path="/dashboard"

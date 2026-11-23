@@ -5,6 +5,28 @@ import { pool } from "./db.js";
 
 const ONEPROFILE_ISSUER =
   process.env.ONEPROFILE_ISSUER || "https://lluoavnspwejosiuqymg.supabase.co/functions/v1/oauth";
+const ONEPROFILE_DISCOVERY_URL = `${ONEPROFILE_ISSUER}/.well-known/openid-configuration`;
+
+// Better Auth fetches the discovery document once while it initializes and, if
+// that fails, skips the provider until the next 1Profile sign-in retries it. On
+// Vercel the first outbound fetch of a fresh instance often fails within ~10 ms
+// ("TypeError: fetch failed") and the next one works, so warm the connection
+// first, with one retry, and log the underlying cause if both attempts fail.
+async function warmOneProfileDiscovery() {
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await fetch(ONEPROFILE_DISCOVERY_URL, { signal: AbortSignal.timeout(3_000) });
+      await res.arrayBuffer();
+      if (!res.ok) console.warn(`[auth] 1Profile discovery returned HTTP ${res.status}`);
+      return;
+    } catch (err) {
+      if (attempt === 2) {
+        console.warn(`[auth] 1Profile discovery failed twice: ${err}; cause: ${(err as { cause?: unknown }).cause}`);
+      }
+    }
+  }
+}
+await warmOneProfileDiscovery();
 
 const vercelHost =
   process.env.VERCEL_ENV === "production"
@@ -59,7 +81,7 @@ export const auth = betterAuth({
       config: [
         {
           providerId: "1profile",
-          discoveryUrl: `${ONEPROFILE_ISSUER}/.well-known/openid-configuration`,
+          discoveryUrl: ONEPROFILE_DISCOVERY_URL,
           clientId: process.env.ONEPROFILE_CLIENT_ID ?? "client_5239446173344611bdddf84a23d4cf2b",
           tokenEndpointAuth: { method: "none" },
           pkce: true,
