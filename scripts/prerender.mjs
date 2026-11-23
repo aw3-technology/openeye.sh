@@ -9,6 +9,7 @@
 //   dist/app.html             unrendered SPA shell for /dashboard (noindex)
 //   dist/sitemap.xml, dist/llms.txt, dist/llms-full.txt
 //   dist/docs/<slug>.md       raw markdown for each docs page
+//   dist/.well-known/mcp/server.json, dist/SKILL.md   agent discovery copies
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -109,6 +110,11 @@ for (const d of docEntries) {
   docMarkdown.set(d.id, md);
   write(`docs/${d.id}.md`, md);
 }
+
+// Agent discovery: MCP directories probe /.well-known/mcp/server.json and
+// /SKILL.md daily. Serve the registry manifest and the agent skill as-is.
+write(".well-known/mcp/server.json", fs.readFileSync(path.join(root, "server.json")));
+write("SKILL.md", fs.readFileSync(path.join(root, "openclaw-skill", "openeye", "SKILL.md")));
 
 // llms.txt — https://llmstxt.org
 const groups = [...new Set(docEntries.map((d) => d.group))];

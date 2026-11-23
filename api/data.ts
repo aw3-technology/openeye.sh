@@ -22,10 +22,10 @@ import {
   pathSegments,
   readJson,
   readRawBody,
-  requireUser,
   restoreRewrittenUrl,
   sendJson,
 } from "./_lib/http.js";
+import { requireUser } from "./_lib/session.js";
 
 // Return numeric columns as numbers, matching what PostgREST returned.
 pg.types.setTypeParser(pg.types.builtins.NUMERIC, (v) => (v === null ? null : parseFloat(v)));

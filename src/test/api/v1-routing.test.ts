@@ -1,7 +1,8 @@
 /**
  * api/v1.ts must route before it authenticates (agents discover the API by
  * fetching /v1 without a key), and log failed inference calls so they count
- * toward the key's rate limit.
+ * toward the key's rate limit. It must not load Better Auth either: its init
+ * fires a 1Profile discovery fetch and schema check on every cold start.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Readable } from "node:stream";
@@ -10,7 +11,9 @@ const query = vi.fn(async (_sql: string, _params?: unknown[]): Promise<{ rows: R
   rows: [{ n: 0 }],
 }));
 vi.mock("../../../api/_lib/db.js", () => ({ pool: { query } }));
-vi.mock("../../../api/_lib/auth.js", () => ({ auth: {} }));
+vi.mock("../../../api/_lib/auth.js", () => {
+  throw new Error("api/v1.ts must not import Better Auth");
+});
 vi.mock("../../../api/_lib/yolo.js", () => ({ decodeImage: vi.fn(), detect: vi.fn() }));
 
 const { default: handler } = await import("../../../api/v1.ts");

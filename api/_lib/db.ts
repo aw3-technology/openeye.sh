@@ -3,7 +3,10 @@ import { attachDatabasePool } from "@vercel/functions";
 
 /** Shared Neon connection pool (pooled DATABASE_URL). */
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  // Neon's URL says sslmode=require, which pg 8 already treats as verify-full
+  // but warns about on every cold start. Name verify-full so the behavior is
+  // explicit and survives pg 9's switch to libpq semantics.
+  connectionString: process.env.DATABASE_URL?.replace(/\bsslmode=(prefer|require|verify-ca)\b/, "sslmode=verify-full"),
   max: 5,
   // Neon's pooler drops connections that sit idle; let the pool retire them
   // first so a warm instance rarely holds a dead one.

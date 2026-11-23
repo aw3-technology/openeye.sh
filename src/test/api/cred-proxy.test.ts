@@ -6,11 +6,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Readable } from "node:stream";
 
-vi.mock("../../../api/_lib/http.js", async () => {
-  const actual = await vi.importActual<typeof import("../../../api/_lib/http.js")>("../../../api/_lib/http.js");
-  return { ...actual, requireUser: vi.fn(async () => ({ id: "user-1", email: "me@example.com", name: "Me" })) };
-});
-vi.mock("../../../api/_lib/auth.js", () => ({ auth: {} }));
+vi.mock("../../../api/_lib/session.js", () => ({
+  requireUser: vi.fn(async () => ({ id: "user-1", email: "me@example.com", name: "Me" })),
+}));
 
 const { default: handler } = await import("../../../api/cred.ts");
 

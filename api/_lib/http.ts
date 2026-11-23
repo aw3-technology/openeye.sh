@@ -1,6 +1,4 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "./auth.js";
 
 export class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -34,13 +32,6 @@ export async function readJson<T = Record<string, unknown>>(req: IncomingMessage
   } catch {
     throw new HttpError(400, "Invalid JSON body");
   }
-}
-
-/** Returns the signed-in user, or throws 401. */
-export async function requireUser(req: IncomingMessage) {
-  const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
-  if (!session) throw new HttpError(401, "Not authenticated");
-  return session.user;
 }
 
 /**

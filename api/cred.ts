@@ -7,7 +7,8 @@
  * the browser — otherwise anyone could `issue` themselves credits.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { handleError, pathSegments, readRawBody, requireUser, restoreRewrittenUrl, sendJson } from "./_lib/http.js";
+import { handleError, pathSegments, readRawBody, restoreRewrittenUrl, sendJson } from "./_lib/http.js";
+import { requireUser } from "./_lib/session.js";
 
 const CRED_API_BASE = process.env.CRED_API_BASE || "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
 
