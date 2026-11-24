@@ -93,6 +93,47 @@ Claude Desktop — add it to claude_desktop_config.json (Settings → Developer 
 
 With pipx, use `"command": "openeye-mcp"` and drop `args`. If Claude Desktop can't find the command, use its full path (`which uvx` / `which openeye-mcp` on macOS and Linux, `where.exe uvx` / `where.exe openeye-mcp` on Windows).
 
+Other MCP clients use the same stdio server. The snippets below assume the pipx install from Step 1, so the command is `openeye-mcp`; if you used uvx instead, set `"command": "uvx"` and `"args": ["--from", "openeye-sh[mcp]", "openeye-mcp"]`. Add `OPENEYE_API_KEY` to the `env` object only if you want the hosted `openeye_api_*` tools. Restart the editor after changing the file.
+
+Cursor — `.cursor/mcp.json` in your project (or the global equivalent):
+
+```json
+{
+  "mcpServers": {
+    "openeye": {
+      "command": "openeye-mcp"
+    }
+  }
+}
+```
+
+Windsurf — `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "openeye": {
+      "command": "openeye-mcp"
+    }
+  }
+}
+```
+
+VS Code — `.vscode/mcp.json` in your project (or a user-level MCP config):
+
+```json
+{
+  "servers": {
+    "openeye": {
+      "type": "stdio",
+      "command": "openeye-mcp"
+    }
+  }
+}
+```
+
+If the editor can't find `openeye-mcp`, use its full path (`which openeye-mcp` on macOS and Linux, `where.exe openeye-mcp` on Windows).
+
 ### Step 3: Ask for something
 
 ```text
