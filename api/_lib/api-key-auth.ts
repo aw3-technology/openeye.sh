@@ -4,7 +4,8 @@ import { pool } from "./db.js";
 import { HttpError } from "./http.js";
 
 export interface ApiKeyContext {
-  apiKeyId: string;
+  /** null for a 1Profile AW3 token on /mcp (api/_lib/oneprofile.ts), which has no key. */
+  apiKeyId: string | null;
   userId: string;
   email: string | null;
   rateLimit: number;

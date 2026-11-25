@@ -113,6 +113,8 @@ create table if not exists api_usage_log (
   created_at timestamptz not null default now()
 );
 alter table api_usage_log add column if not exists user_agent text;
+-- Calls made with a 1Profile AW3 access token on /mcp (api/_lib/oneprofile.ts) have no key.
+alter table api_usage_log alter column api_key_id drop not null;
 create index if not exists idx_api_usage_log_key_created on api_usage_log (api_key_id, created_at desc);
 create index if not exists idx_api_usage_log_user_created on api_usage_log (user_id, created_at desc);
 

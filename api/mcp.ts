@@ -9,12 +9,16 @@
  * tools/list and openeye_api_models need no key; the other tools need
  * `Authorization: Bearer oe_...` and are rate limited, charged and logged
  * exactly like /v1 (api/_lib/inference.ts), with endpoint /mcp/<tool>.
+ *
+ * A 1Profile AW3 access token (ZeusMCP; api/_lib/oneprofile.ts) works in place
+ * of a key and acts as the OpenEye user it belongs to; an invalid one is a 401.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { isIP } from "node:net";
 import { requireApiKey, type ApiKeyContext } from "./_lib/api-key-auth.js";
 import { enforceRateLimit, logUsage, models, runDescribe, runDetect, usage, VLM_MODEL } from "./_lib/inference.js";
 import { HttpError, readRawBody, sendJson } from "./_lib/http.js";
+import { isOneProfileToken, oneProfileContext } from "./_lib/oneprofile.js";
 
 const SERVER_INFO = { name: "openeye", title: "OpenEye", version: "0.3.0", websiteUrl: "https://openeye.sh" };
 // Newest first; we answer with the client's version when we support it.
@@ -140,12 +144,18 @@ async function loadImage(args: ToolArgs): Promise<Buffer> {
   return bytes;
 }
 
-async function callTool(req: IncomingMessage, name: string, args: ToolArgs) {
+/** The bearer value of `Authorization`, if any. */
+function bearerToken(req: IncomingMessage) {
+  const [scheme, token] = (req.headers.authorization ?? "").split(" ");
+  return scheme?.toLowerCase() === "bearer" ? token?.trim() || null : null;
+}
+
+async function callTool(req: IncomingMessage, name: string, args: ToolArgs, auth: ApiKeyContext | null) {
   if (name === "openeye_api_models") return models();
   const metered = name === "openeye_api_detect" ? "yolov8" : name === "openeye_api_describe" ? VLM_MODEL : null;
   if (!metered && name !== "openeye_api_usage") throw new RpcError(-32602, `Unknown tool: ${name}`);
 
-  const ctx: ApiKeyContext = await requireApiKey(req);
+  const ctx: ApiKeyContext = auth ?? (await requireApiKey(req));
   if (name === "openeye_api_usage") return usage(ctx, Number(args.days));
 
   const endpoint = name === "openeye_api_detect" ? "/mcp/detect" : "/mcp/describe";
@@ -163,7 +173,7 @@ async function callTool(req: IncomingMessage, name: string, args: ToolArgs) {
   }
 }
 
-async function dispatch(req: IncomingMessage, msg: JsonRpcMessage): Promise<unknown> {
+async function dispatch(req: IncomingMessage, msg: JsonRpcMessage, auth: ApiKeyContext | null): Promise<unknown> {
   const params = msg.params ?? {};
   switch (msg.method) {
     case "initialize": {
@@ -183,7 +193,7 @@ async function dispatch(req: IncomingMessage, msg: JsonRpcMessage): Promise<unkn
       const name = typeof params.name === "string" ? params.name : "";
       const args = (params.arguments ?? {}) as ToolArgs;
       try {
-        const result = await callTool(req, name, args);
+        const result = await callTool(req, name, args, auth);
         const structured = Array.isArray(result) ? { models: result } : (result as Record<string, unknown>);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }], structuredContent: structured };
       } catch (err) {
@@ -203,13 +213,13 @@ async function dispatch(req: IncomingMessage, msg: JsonRpcMessage): Promise<unkn
 }
 
 /** Returns the response for a request, or null for a notification or a client response. */
-async function handleMessage(req: IncomingMessage, msg: JsonRpcMessage) {
+async function handleMessage(req: IncomingMessage, msg: JsonRpcMessage, auth: ApiKeyContext | null) {
   if (!msg || typeof msg !== "object" || msg.jsonrpc !== "2.0") {
     return { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid JSON-RPC message" } };
   }
   if (msg.method === undefined || msg.id === undefined) return null;
   try {
-    return { jsonrpc: "2.0", id: msg.id, result: await dispatch(req, msg) };
+    return { jsonrpc: "2.0", id: msg.id, result: await dispatch(req, msg, auth) };
   } catch (err) {
     const code = err instanceof RpcError ? err.code : -32603;
     if (!(err instanceof RpcError)) console.error("[api/mcp]", err);
@@ -224,6 +234,20 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       error: "This MCP server speaks Streamable HTTP: POST JSON-RPC messages to https://openeye.sh/mcp. It has no SSE stream.",
     });
   }
+  // A 1Profile token is checked up front: a bad one is refused at the HTTP level
+  // (RFC 6750), not reported as a tool error like a bad API key.
+  let auth: ApiKeyContext | null = null;
+  const bearer = bearerToken(req);
+  if (bearer && isOneProfileToken(bearer)) {
+    try {
+      auth = await oneProfileContext(req, bearer);
+    } catch (err) {
+      console.warn("[api/mcp] 1Profile token rejected:", err instanceof Error ? err.message : err);
+      res.setHeader("WWW-Authenticate", 'Bearer error="invalid_token", error_description="Invalid 1Profile access token"');
+      return sendJson(res, 401, { error: "Invalid 1Profile access token" });
+    }
+  }
+
   let body: unknown;
   try {
     body = JSON.parse((await readRawBody(req, MAX_BODY_BYTES)).toString("utf8"));
@@ -234,7 +258,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   const batch = Array.isArray(body);
   const messages = (batch ? body : [body]) as JsonRpcMessage[];
-  const replies = (await Promise.all(messages.map((m) => handleMessage(req, m)))).filter((r) => r !== null);
+  const replies = (await Promise.all(messages.map((m) => handleMessage(req, m, auth)))).filter((r) => r !== null);
   if (replies.length === 0) {
     res.statusCode = 202;
     return res.end();

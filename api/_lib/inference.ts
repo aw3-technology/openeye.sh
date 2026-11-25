@@ -45,13 +45,22 @@ export function models() {
   ];
 }
 
-/** Counts this key's calls in the last minute; throws 429 when over its limit. Sets X-RateLimit-* on `res` when given. */
+/**
+ * Counts this key's calls in the last minute (or, without a key, the user's
+ * keyless calls); throws 429 when over its limit. Sets X-RateLimit-* on `res` when given.
+ */
 export async function enforceRateLimit(ctx: ApiKeyContext, res?: ServerResponse) {
-  const { rows } = await pool.query(
-    `select count(*)::int as n from api_usage_log
-      where api_key_id = $1 and created_at > now() - make_interval(secs => $2)`,
-    [ctx.apiKeyId, RATE_WINDOW_SECONDS],
-  );
+  const { rows } = ctx.apiKeyId
+    ? await pool.query(
+        `select count(*)::int as n from api_usage_log
+          where api_key_id = $1 and created_at > now() - make_interval(secs => $2)`,
+        [ctx.apiKeyId, RATE_WINDOW_SECONDS],
+      )
+    : await pool.query(
+        `select count(*)::int as n from api_usage_log
+          where user_id = $1 and api_key_id is null and created_at > now() - make_interval(secs => $2)`,
+        [ctx.userId, RATE_WINDOW_SECONDS],
+      );
   const used = rows[0].n as number;
   const remaining = Math.max(0, ctx.rateLimit - used - 1);
   res?.setHeader("X-RateLimit-Limit", String(ctx.rateLimit));
