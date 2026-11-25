@@ -239,7 +239,7 @@ openeye.sh/
 
 **Auth**: Better Auth — email/password and "Continue with 1Profile"; Google/Apple sign-in when their OAuth credentials are configured
 
-**Credits**: [Cred](https://cred.diy), proxied through `/api/cred`
+**Credits**: [Cred](https://cred.diy), proxied through `/api/cred`. With `AW3_CRED_*` set, calls OpenEye's own credits can't cover are paid in Electrum, the credit shared across AW3 apps (`api/_lib/aw3-credit.ts`), and new purchases buy Electrum
 
 **AI/ML**: Ultralytics (YOLO), Transformers, ONNX Runtime, TensorRT, LangChain
 

@@ -1,9 +1,10 @@
+// @vitest-environment node
 /**
  * api/cred.ts must only expose read/purchase routes and always use the
  * session's identity — never let the browser issue credits or read someone
  * else's balance.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Readable } from "node:stream";
 
 vi.mock("../../../api/_lib/session.js", () => ({
@@ -11,6 +12,7 @@ vi.mock("../../../api/_lib/session.js", () => ({
 }));
 
 const { default: handler } = await import("../../../api/cred.ts");
+const { requireUser } = await import("../../../api/_lib/session.js");
 
 function call(method: string, url: string, body?: unknown) {
   const req = Readable.from(body ? [Buffer.from(JSON.stringify(body))] : []) as unknown as import("node:http").IncomingMessage;
@@ -77,5 +79,42 @@ describe("cred proxy", () => {
     expect(body.external_id).toBe("user-1");
     expect(body.user_id).toBe("user-1");
     expect(body.email).toBe("me@example.com");
+  });
+
+  describe("with Electrum (AW3 Credit) on and a verified email", () => {
+    beforeEach(() => {
+      process.env.AW3_CRED_API_KEY = "hub-key";
+      process.env.AW3_CRED_CREDIT_TYPE_ID = "ct-aw3";
+      process.env.AW3_CRED_PRICING_TIER_ID = "tier-aw3";
+      vi.mocked(requireUser).mockResolvedValue({ id: "user-1", email: "Me@Example.com", name: "Me", emailVerified: true } as never);
+    });
+    afterEach(() => {
+      delete process.env.AW3_CRED_API_KEY;
+      delete process.env.AW3_CRED_CREDIT_TYPE_ID;
+      delete process.env.AW3_CRED_PRICING_TIER_ID;
+      vi.mocked(requireUser).mockResolvedValue({ id: "user-1", email: "me@example.com", name: "Me" } as never);
+    });
+
+    it("checks out the Electrum tier on the hub, whatever tier the browser sent", async () => {
+      await call("POST", "/api/cred/checkout", { success_url: "https://openeye.sh/x", cancel_url: "https://openeye.sh/y" });
+      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(url).toMatch(/\/hosted-checkout$/);
+      expect((init.headers as Record<string, string>)["x-api-key"]).toBe("hub-key");
+      const body = JSON.parse(String(init.body));
+      expect(body.pricing_tier_id).toBe("tier-aw3");
+      expect(body.user_id).toBe("me@example.com");
+    });
+
+    it("keeps a legacy tier's checkout on OpenEye's own project", async () => {
+      await call("POST", "/api/cred/checkout", { pricing_tier_id: "legacy-tier" });
+      const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect((init.headers as Record<string, string>)["x-api-key"]).toBe("server-key");
+    });
+
+    it("grants the welcome credits on user sync", async () => {
+      await call("POST", "/api/cred/users", {});
+      const hubCall = fetchMock.mock.calls.find(([, i]) => (i?.headers as Record<string, string>)["x-api-key"] === "hub-key");
+      expect((hubCall?.[1]?.headers as Record<string, string>)["Idempotency-Key"]).toBe("aw3-welcome:me@example.com");
+    });
   });
 });

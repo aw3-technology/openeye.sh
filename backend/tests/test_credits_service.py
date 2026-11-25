@@ -43,6 +43,9 @@ def _clean_env(monkeypatch):
         "CRED_API_BASE",
         "CRED_CREDIT_TYPE_ID",
         "CRED_APP_ORIGIN",
+        "AW3_CRED_API_KEY",
+        "AW3_CRED_CREDIT_TYPE_ID",
+        "AW3_CRED_PRICING_TIER_ID",
     ):
         monkeypatch.delenv(var, raising=False)
 
@@ -172,3 +175,114 @@ class TestDisabled:
     def test_default_base_is_cred_service(self, monkeypatch):
         svc = CreditsService(api_key="k")
         assert svc._url("deduct") == f"{cs.DEFAULT_CRED_API_BASE}/credits-api/deduct"
+
+
+# ── Shared AW3 Credit (legacy first, never split) ──
+
+HUB_KEY = "hub-key"
+
+
+def _aw3_on(monkeypatch):
+    monkeypatch.setenv("AW3_CRED_API_KEY", HUB_KEY)
+    monkeypatch.setenv("AW3_CRED_CREDIT_TYPE_ID", "ct-aw3")
+    monkeypatch.setenv("AW3_CRED_PRICING_TIER_ID", "tier-aw3")
+
+
+def _aw3_service(
+    legacy_status: int, hub_status: int = 200, verified=" Ada@Example.com "
+):
+    """Legacy calls answer legacy_status, hub calls hub_status (told apart by key)."""
+    seen: list[httpx.Request] = []
+
+    def handler(r: httpx.Request) -> httpx.Response:
+        seen.append(r)
+        if r.headers["x-api-key"] == HUB_KEY:
+            if r.url.path.endswith("/balance"):
+                return httpx.Response(
+                    200, json={"balances": [{"credit_type_id": "ct-aw3", "balance": 7}]}
+                )
+            return httpx.Response(hub_status, json={"success": hub_status == 200})
+        if r.url.path.endswith("/balance"):
+            return httpx.Response(
+                200, json={"balances": [{"credit_type_id": "x", "balance": 2}]}
+            )
+        return httpx.Response(legacy_status, json={"success": legacy_status == 200})
+
+    svc = CreditsService(
+        email_lookup=lambda uid: "ada@example.com",
+        aw3_email_lookup=lambda uid: verified,
+        api_key="cred-key",
+        api_base=BASE,
+        client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
+    )
+    return svc, seen
+
+
+def _hub(seen):
+    return [r for r in seen if r.headers["x-api-key"] == HUB_KEY]
+
+
+class TestAw3Chooser:
+    def test_legacy_enough_charges_legacy_only(self, monkeypatch):
+        _aw3_on(monkeypatch)
+        svc, seen = _aw3_service(200)
+        assert _run(svc.charge("u", 3)) == "app"
+        assert _hub(seen) == []
+
+    def test_legacy_short_charges_all_to_aw3(self, monkeypatch):
+        _aw3_on(monkeypatch)
+        svc, seen = _aw3_service(402)
+        assert _run(svc.charge("u", 3, "OpenEye API /v1/detect")) == "aw3"
+        req = _hub(seen)[0]
+        assert str(req.url) == f"{BASE}/credits-api/deduct"
+        assert req.headers["Idempotency-Key"].startswith("openeye:deduct:")
+        assert req.headers["x-app-origin"] == "https://openeye.sh"
+        body = json.loads(req.content)
+        assert body == {
+            "user_id": "ada@example.com",
+            "user_email": "ada@example.com",
+            "credit_type_id": "ct-aw3",
+            "amount": 3,
+            "reason": "OpenEye: API /v1/detect",
+        }
+
+    def test_both_short_is_refused(self, monkeypatch):
+        _aw3_on(monkeypatch)
+        svc, seen = _aw3_service(402, hub_status=402)
+        assert _run(svc.charge("u", 3)) is None
+        assert _run(svc.check_and_deduct("u", 3)) is False
+
+    def test_hub_down_falls_back_to_legacy_refusal(self, monkeypatch):
+        _aw3_on(monkeypatch)
+        svc, _ = _aw3_service(402, hub_status=503)
+        assert _run(svc.charge("u", 3)) is None
+
+    def test_aw3_off_is_todays_behaviour(self, monkeypatch):
+        monkeypatch.setenv("AW3_CRED_API_KEY", HUB_KEY)  # partial config = off
+        svc, seen = _aw3_service(402)
+        assert _run(svc.charge("u", 3)) is None
+        assert _run(svc.get_balance("u")) == 2
+        assert _hub(seen) == []
+
+    def test_unverified_email_is_legacy_only(self, monkeypatch):
+        _aw3_on(monkeypatch)
+        svc, seen = _aw3_service(402, verified=None)
+        assert _run(svc.charge("u", 3)) is None
+        assert _hub(seen) == []
+
+    def test_refund_goes_to_recorded_source(self, monkeypatch):
+        _aw3_on(monkeypatch)
+        svc, seen = _aw3_service(200)
+        assert _run(svc.refund("u", 3, source="aw3")) is True
+        hub = _hub(seen)
+        assert len(hub) == 1 and str(hub[0].url) == f"{BASE}/credits-api/issue"
+        assert hub[0].headers["Idempotency-Key"].startswith("openeye:refund:")
+        seen.clear()
+        assert _run(svc.refund("u", 3)) is True
+        assert _hub(seen) == [] and seen[0].url.path.endswith("/issue")
+
+    def test_balance_is_legacy_plus_aw3(self, monkeypatch):
+        _aw3_on(monkeypatch)
+        svc, seen = _aw3_service(200)
+        assert _run(svc.get_balance("u")) == 9
+        assert _hub(seen)[0].url.params["email"] == "ada@example.com"

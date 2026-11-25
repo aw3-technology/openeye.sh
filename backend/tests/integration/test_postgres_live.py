@@ -64,7 +64,7 @@ def live():
     app = create_fleet_app()
     app.dependency_overrides[get_db] = lambda: db
     credits = MagicMock()
-    credits.check_and_deduct = AsyncMock(return_value=True)
+    credits.charge = AsyncMock(return_value="app")
     credits.refund = AsyncMock(return_value=True)
     credits.get_balance = AsyncMock(return_value=42)
     inference = MagicMock()

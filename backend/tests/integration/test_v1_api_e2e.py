@@ -79,7 +79,7 @@ def _make_describe_result(width: int = 64, height: int = 64) -> dict:
 def _mock_credits_service(balance: int = 500, deduct_ok: bool = True) -> MagicMock:
     """Create a mock CreditsService with configurable behavior."""
     svc = MagicMock(spec=CreditsService)
-    svc.check_and_deduct = AsyncMock(return_value=deduct_ok)
+    svc.charge = AsyncMock(return_value="app" if deduct_ok else None)
     svc.get_balance = AsyncMock(return_value=balance)
     svc.refund = AsyncMock(return_value=True)
     svc.close = AsyncMock()
@@ -361,7 +361,7 @@ class TestImageValidation:
             files={"file": ("bad.txt", b"this is not an image", "image/jpeg")},
         )
         assert resp.status_code == 400
-        mock_credits.check_and_deduct.assert_not_called()
+        mock_credits.charge.assert_not_called()
         rows = [
             r for r in fake_db.dump("api_usage_log") if r["endpoint"] == "/v1/detect"
         ]

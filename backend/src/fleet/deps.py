@@ -11,7 +11,11 @@ from fastapi import Depends, Header, HTTPException, status
 from fastapi.requests import HTTPConnection
 
 from .db import Database, get_database
-from .services.credits_service import CreditsService, db_email_lookup
+from .services.credits_service import (
+    CreditsService,
+    db_email_lookup,
+    db_verified_email_lookup,
+)
 from .services.inference_service import InferenceService
 
 logger = logging.getLogger(__name__)
@@ -224,13 +228,20 @@ def get_credits_service(request: HTTPConnection) -> CreditsService:
         return svc
     global _fallback_credits
     if _fallback_credits is None:
-        _fallback_credits = CreditsService(email_lookup=_user_email)
+        _fallback_credits = CreditsService(
+            email_lookup=_user_email, aw3_email_lookup=_user_verified_email
+        )
     return _fallback_credits
 
 
 def _user_email(user_id: str) -> Optional[str]:
     """Look up a Better Auth user's email (Cred identifies users by email)."""
     return db_email_lookup(get_database())(user_id)
+
+
+def _user_verified_email(user_id: str) -> Optional[str]:
+    """The user's verified email, which keys the shared AW3 Credit wallet."""
+    return db_verified_email_lookup(get_database())(user_id)
 
 
 def get_inference_service(request: HTTPConnection) -> InferenceService:

@@ -99,8 +99,9 @@ async function metered<T extends { inference_ms: number }>(
   cost: number,
   run: () => Promise<T>,
 ) {
-  const user = { id: ctx.userId, email: ctx.email };
-  if (!(await deduct(user, cost, `OpenEye API ${endpoint}`))) {
+  const user = { id: ctx.userId, email: ctx.email, emailVerified: ctx.emailVerified };
+  const source = await deduct(user, cost, `OpenEye API ${endpoint}`);
+  if (!source) {
     throw new HttpError(
       402,
       "Not enough credits (new accounts start with none). Buy credits at https://openeye.sh/dashboard/settings/credits",
@@ -110,7 +111,7 @@ async function metered<T extends { inference_ms: number }>(
   try {
     result = await run();
   } catch (err) {
-    await refund(user, cost, `Refund: ${endpoint} failed`);
+    await refund(user, cost, `Refund: ${endpoint} failed`, source);
     throw err;
   }
   await logUsage(ctx, endpoint, model, cost, result.inference_ms, 200);
@@ -196,7 +197,7 @@ export async function usage(ctx: ApiKeyContext, requestedDays: number) {
       [ctx.userId, days],
     ),
   ]);
-  const balance = await getBalance({ id: ctx.userId, email: ctx.email }).catch(() => null);
+  const balance = await getBalance({ id: ctx.userId, email: ctx.email, emailVerified: ctx.emailVerified }).catch(() => null);
   return {
     balance,
     credits_remaining: balance,

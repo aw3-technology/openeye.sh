@@ -110,17 +110,17 @@ async def _enforce_rate_limit(
     return remaining, reset
 
 
-async def _enforce_credits(
-    credits_svc: CreditsService, user_id: str, cost: int
-) -> None:
-    """Check and deduct credits, raise 402 if insufficient."""
-    if cost > 0:
-        ok = await credits_svc.check_and_deduct(user_id, cost)
-        if not ok:
-            raise HTTPException(
-                status_code=402,
-                detail=f"Insufficient credits. This request costs {cost} credit(s).",
-            )
+async def _enforce_credits(credits_svc: CreditsService, user_id: str, cost: int) -> str:
+    """Charge credits, raise 402 if insufficient. Returns the source that paid."""
+    if cost <= 0:
+        return "app"
+    source = await credits_svc.charge(user_id, cost)
+    if source is None:
+        raise HTTPException(
+            status_code=402,
+            detail=f"Insufficient credits. This request costs {cost} credit(s).",
+        )
+    return source
 
 
 async def _metered(
@@ -144,11 +144,11 @@ async def _metered(
     try:
         remaining, reset = await _enforce_rate_limit(rate_svc, ctx)
         image = await _read_image(file)
-        await _enforce_credits(credits_svc, ctx.user_id, cost)
+        source = await _enforce_credits(credits_svc, ctx.user_id, cost)
         try:
             result = await run(image)
         except Exception:
-            await credits_svc.refund(ctx.user_id, cost)
+            await credits_svc.refund(ctx.user_id, cost, source=source)
             raise
     except Exception as exc:
         status = exc.status_code if isinstance(exc, HTTPException) else 500

@@ -8,6 +8,8 @@ export interface ApiKeyContext {
   apiKeyId: string | null;
   userId: string;
   email: string | null;
+  /** The email is verified (Better Auth / 1Profile), so it may key the shared AW3 wallet. */
+  emailVerified: boolean;
   rateLimit: number;
   scopes: string[];
   /** Client User-Agent, recorded in api_usage_log to tell CLI / MCP / SDK traffic apart. */
@@ -27,7 +29,7 @@ export async function requireApiKey(req: IncomingMessage): Promise<ApiKeyContext
     `update api_keys k set last_used_at = now()
        from "user" u
       where k.key_hash = $1 and u.id = k.user_id
-      returning k.id, k.user_id, k.rate_limit, k.scopes, u.email`,
+      returning k.id, k.user_id, k.rate_limit, k.scopes, u.email, u."emailVerified"`,
     [hash],
   );
   const row = rows[0];
@@ -36,6 +38,7 @@ export async function requireApiKey(req: IncomingMessage): Promise<ApiKeyContext
     apiKeyId: row.id,
     userId: row.user_id,
     email: row.email,
+    emailVerified: row.emailVerified === true,
     rateLimit: row.rate_limit ?? 60,
     scopes: row.scopes ?? ["inference"],
     userAgent: req.headers["user-agent"]?.slice(0, 300) ?? null,

@@ -108,6 +108,7 @@ Set these in the environment of the control plane process (see `backend/.env.exa
 | `CRED_API_BASE` | No | Cred's API | Cred API base URL |
 | `CRED_CREDIT_TYPE_ID` | No | — | Cred credit type to charge |
 | `CRED_APP_ORIGIN` | No | `https://openeye.sh` | Origin sent to Cred |
+| `AW3_CRED_API_KEY`, `AW3_CRED_CREDIT_TYPE_ID`, `AW3_CRED_PRICING_TIER_ID` | No | — | Electrum, the shared AW3 Credit. All three set: a charge OpenEye's own credits can't cover is paid in full in Electrum (verified emails only) and refunds go back to whichever paid. Any unset: off. |
 
 ### Apply the schema
 

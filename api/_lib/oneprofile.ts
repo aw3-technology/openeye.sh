@@ -143,6 +143,8 @@ export async function oneProfileContext(req: IncomingMessage, token: string): Pr
     apiKeyId: null,
     userId: user.id,
     email: user.email,
+    // 1Profile verified this email for this user (email_verified).
+    emailVerified: identity.emailVerified && user.email?.trim().toLowerCase() === identity.email?.trim().toLowerCase(),
     rateLimit: 60,
     scopes: ["inference"],
     userAgent: req.headers["user-agent"]?.slice(0, 300) ?? null,

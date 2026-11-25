@@ -5,10 +5,16 @@
  * Only read and purchase routes are exposed. Credits are deducted and
  * refunded server-side by the hosted API (api/_lib/credits.ts), never from
  * the browser — otherwise anyone could `issue` themselves credits.
+ *
+ * With the shared AW3 Credit on (api/_lib/aw3-credit.ts) and a verified email:
+ * the balance adds the AW3 Credit, the credit pack on sale is the hub's AW3
+ * tier and its checkout runs on the hub, and syncing the user grants the AW3
+ * welcome credits once.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { handleError, pathSegments, readRawBody, restoreRewrittenUrl, sendJson } from "./_lib/http.js";
 import { requireUser } from "./_lib/session.js";
+import { aw3BalanceEntry, aw3Config, aw3Welcome, hub, trustedEmail } from "./_lib/aw3-credit.js";
 
 const CRED_API_BASE = process.env.CRED_API_BASE || "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
 
@@ -63,6 +69,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       else search.set("user_id", user.id);
     }
 
+    // The shared AW3 wallet, for a verified email only (else OpenEye's own credits alone).
+    const aw3 = aw3Config();
+    const hubEmail = aw3 ? trustedEmail(user.email, user.emailVerified) : null;
+
+    if (path === "pricing-tiers" && aw3 && hubEmail) {
+      // New purchases buy AW3 Credit. A hub hiccup falls back to OpenEye's own packs.
+      const tiers = await hub<{ pricing_tiers?: { id: string }[] }>("credits-api/pricing-tiers");
+      const mine = tiers.ok ? (tiers.data.pricing_tiers ?? []).filter((t) => t.id === aw3.pricingTierId) : [];
+      if (mine.length) return sendJson(res, 200, { pricing_tiers: mine });
+    }
+
+    const upstreamUrl = targetUrl(path, search);
+    let upstreamKey = apiKey;
     let body: string | undefined;
     if (method === "POST") {
       const rawBody = (await readRawBody(req, 100_000)).toString("utf8");
@@ -79,17 +98,22 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         if (!parsed.name) parsed.name = user.name || userEmail?.split("@")[0];
         // Cred first-touch attribution (recorded once, never overwritten)
         if (!parsed.signup_url) parsed.signup_url = signupUrl;
+        if (path === "checkout" && aw3 && hubEmail && (!parsed.pricing_tier_id || parsed.pricing_tier_id === aw3.pricingTierId)) {
+          // The AW3 pack: checkout on the hub, for the hub wallet keyed by email.
+          Object.assign(parsed, { user_id: hubEmail, user_email: hubEmail, email: hubEmail, pricing_tier_id: aw3.pricingTierId });
+          upstreamKey = aw3.apiKey;
+        }
         body = JSON.stringify(parsed);
       } catch {
         return sendJson(res, 400, { error: "Invalid JSON body" });
       }
     }
 
-    const upstream = await fetch(targetUrl(path, search), {
+    const upstream = await fetch(upstreamUrl, {
       method,
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey,
+        "x-api-key": upstreamKey,
         "x-app-origin": APP_ORIGIN,
       },
       body,
@@ -117,6 +141,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         responseData = JSON.stringify(parsed);
       }
     }
+
+    // Balance shown = OpenEye's own + the AW3 Credit (as its own entry).
+    if (path === "balance" && upstream.status === 200 && hubEmail) {
+      const shared = await aw3BalanceEntry(hubEmail);
+      const parsed = JSON.parse(responseData);
+      if (shared && Array.isArray(parsed.balances)) {
+        parsed.balances.push(shared);
+        responseData = JSON.stringify(parsed);
+      }
+    }
+
+    // The welcome grant rides on the dashboard's user sync (once per person, every AW3 app).
+    if (path === "users" && hubEmail) await aw3Welcome(hubEmail);
 
     res.statusCode = upstream.status;
     res.setHeader("Content-Type", "application/json");

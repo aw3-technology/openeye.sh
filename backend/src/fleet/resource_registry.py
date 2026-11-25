@@ -88,7 +88,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan: create shared services, tear them down on exit."""
     from .db import close_database
     from .deps import get_db
-    from .services.credits_service import CreditsService, db_email_lookup
+    from .services.credits_service import (
+        CreditsService,
+        db_email_lookup,
+        db_verified_email_lookup,
+    )
     from .services.inference_service import InferenceService
 
     registry = ResourceRegistry()
@@ -98,7 +102,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     registry.register("db", db)
 
     # Long-lived HTTP-backed services
-    credits_svc = CreditsService(email_lookup=db_email_lookup(db))
+    credits_svc = CreditsService(
+        email_lookup=db_email_lookup(db),
+        aw3_email_lookup=db_verified_email_lookup(db),
+    )
     registry.register("credits_service", credits_svc)
 
     inference_svc = InferenceService()
