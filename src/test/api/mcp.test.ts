@@ -21,6 +21,7 @@ vi.mock("../../../api/_lib/credits.js", () => ({
   deduct,
   refund: vi.fn(),
   getBalance: vi.fn(async () => 10),
+  getBalances: vi.fn(async () => ({ app: 10, electrum: null })),
 }));
 
 const { default: handler } = await import("../../../api/mcp.ts");

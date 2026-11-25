@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { Coins, AlertCircle } from "lucide-react";
 import { useCreditBalance } from "@/hooks/useCredits";
-import { getTotalBalance } from "@/types/credits";
+import { getElectrumBalance, getTotalBalance } from "@/types/credits";
 
 export function CreditBalanceBadge() {
   const { data, isLoading, isError } = useCreditBalance();
   const balance = getTotalBalance(data);
+  const electrum = getElectrumBalance(data);
 
   return (
     <Link
@@ -19,6 +20,7 @@ export function CreditBalanceBadge() {
       )}
       <span className="tabular-nums">
         {isLoading ? "—" : isError ? "!" : balance}
+        {!isLoading && !isError && electrum !== null && ` · ${electrum.toFixed(2)} Electrum`}
       </span>
     </Link>
   );

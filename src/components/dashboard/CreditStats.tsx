@@ -2,6 +2,7 @@ import { Coins, TrendingDown, TrendingUp } from "lucide-react";
 import type { useCreditBalance } from "@/hooks/useCredits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { getElectrumBalance } from "@/types/credits";
 
 interface CreditStatsProps {
   balance: ReturnType<typeof useCreditBalance>;
@@ -32,6 +33,11 @@ export function CreditStats({
                   ? "Error"
                   : currentBalance.toLocaleString()}
             </p>
+            {!balance.isLoading && !balance.isError && getElectrumBalance(balance.data) !== null && (
+              <p className="text-xs text-muted-foreground">
+                + {getElectrumBalance(balance.data)!.toFixed(2)} Electrum, spendable in every AW3 app
+              </p>
+            )}
             {balance.isError && (
               <p className="text-xs text-destructive" role="alert">
                 Could not load balance.

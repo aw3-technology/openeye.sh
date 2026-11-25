@@ -6,7 +6,7 @@
 import type { ServerResponse } from "node:http";
 import { pool } from "./db.js";
 import type { ApiKeyContext } from "./api-key-auth.js";
-import { CREDIT_COSTS, deduct, getBalance, refund } from "./credits.js";
+import { CREDIT_COSTS, deduct, getBalances, refund } from "./credits.js";
 import { decodeImage, detect } from "./yolo.js";
 import { HttpError } from "./http.js";
 
@@ -100,8 +100,8 @@ async function metered<T extends { inference_ms: number }>(
   run: () => Promise<T>,
 ) {
   const user = { id: ctx.userId, email: ctx.email, emailVerified: ctx.emailVerified };
-  const source = await deduct(user, cost, `OpenEye API ${endpoint}`);
-  if (!source) {
+  const charge = await deduct(user, cost, `OpenEye API ${endpoint}`);
+  if (!charge) {
     throw new HttpError(
       402,
       "Not enough credits (new accounts start with none). Buy credits at https://openeye.sh/dashboard/settings/credits",
@@ -111,7 +111,7 @@ async function metered<T extends { inference_ms: number }>(
   try {
     result = await run();
   } catch (err) {
-    await refund(user, cost, `Refund: ${endpoint} failed`, source);
+    await refund(user, cost, `Refund: ${endpoint} failed`, charge);
     throw err;
   }
   await logUsage(ctx, endpoint, model, cost, result.inference_ms, 200);
@@ -197,10 +197,13 @@ export async function usage(ctx: ApiKeyContext, requestedDays: number) {
       [ctx.userId, days],
     ),
   ]);
-  const balance = await getBalance({ id: ctx.userId, email: ctx.email, emailVerified: ctx.emailVerified }).catch(() => null);
+  const balances = await getBalances({ id: ctx.userId, email: ctx.email, emailVerified: ctx.emailVerified }).catch(() => null);
+  const balance = balances?.app ?? null;
   return {
     balance,
     credits_remaining: balance,
+    // Electrum (the credit shared by AW3 apps), shown apart from OpenEye credits; null when off.
+    electrum_balance: balances?.electrum ?? null,
     total_requests: totals[0].requests,
     total_calls: totals[0].requests,
     total_credits_used: totals[0].credits,

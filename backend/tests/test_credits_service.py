@@ -10,7 +10,7 @@ import httpx
 import pytest
 
 from fleet.services import credits_service as cs
-from fleet.services.credits_service import CreditsService
+from fleet.services.credits_service import Charge, CreditsService
 
 BASE = "https://cred.example/functions/v1"
 
@@ -43,9 +43,7 @@ def _clean_env(monkeypatch):
         "CRED_API_BASE",
         "CRED_CREDIT_TYPE_ID",
         "CRED_APP_ORIGIN",
-        "AW3_CRED_API_KEY",
-        "AW3_CRED_CREDIT_TYPE_ID",
-        "AW3_CRED_PRICING_TIER_ID",
+        "ELECTRUM_ENABLED",
     ):
         monkeypatch.delenv(var, raising=False)
 
@@ -177,36 +175,31 @@ class TestDisabled:
         assert svc._url("deduct") == f"{cs.DEFAULT_CRED_API_BASE}/credits-api/deduct"
 
 
-# ── Shared AW3 Credit (legacy first, never split) ──
-
-HUB_KEY = "hub-key"
+# ── Electrum v2 (cred.diy shared_fallback; mirrors src/test/api/electrum.test.ts) ──
 
 
-def _aw3_on(monkeypatch):
-    monkeypatch.setenv("AW3_CRED_API_KEY", HUB_KEY)
-    monkeypatch.setenv("AW3_CRED_CREDIT_TYPE_ID", "ct-aw3")
-    monkeypatch.setenv("AW3_CRED_PRICING_TIER_ID", "tier-aw3")
-
-
-def _aw3_service(
-    legacy_status: int, hub_status: int = 200, verified=" Ada@Example.com "
-):
-    """Legacy calls answer legacy_status, hub calls hub_status (told apart by key)."""
+def _electrum_service(deduct_replies=None, verified=" Ada@Example.com "):
+    """A fake Cred: /deduct answers the queued replies in turn (the last repeats)."""
     seen: list[httpx.Request] = []
+    replies = list(
+        deduct_replies
+        or [(200, {"success": True, "paid_from": "app", "transaction_id": "tx-app"})]
+    )
 
     def handler(r: httpx.Request) -> httpx.Response:
         seen.append(r)
-        if r.headers["x-api-key"] == HUB_KEY:
-            if r.url.path.endswith("/balance"):
-                return httpx.Response(
-                    200, json={"balances": [{"credit_type_id": "ct-aw3", "balance": 7}]}
-                )
-            return httpx.Response(hub_status, json={"success": hub_status == 200})
+        if r.url.path.endswith("/deduct"):
+            status, body = replies.pop(0) if len(replies) > 1 else replies[0]
+            return httpx.Response(status, json=body)
         if r.url.path.endswith("/balance"):
             return httpx.Response(
-                200, json={"balances": [{"credit_type_id": "x", "balance": 2}]}
+                200,
+                json={
+                    "balances": [{"credit_type_id": "x", "balance": 2}],
+                    "shared_balance": {"balance": 3.4},
+                },
             )
-        return httpx.Response(legacy_status, json={"success": legacy_status == 200})
+        return httpx.Response(200, json={"success": True})
 
     svc = CreditsService(
         email_lookup=lambda uid: "ada@example.com",
@@ -218,71 +211,77 @@ def _aw3_service(
     return svc, seen
 
 
-def _hub(seen):
-    return [r for r in seen if r.headers["x-api-key"] == HUB_KEY]
+def _deducts(seen):
+    return [r for r in seen if r.url.path.endswith("/deduct")]
 
 
-class TestAw3Chooser:
-    def test_legacy_enough_charges_legacy_only(self, monkeypatch):
-        _aw3_on(monkeypatch)
-        svc, seen = _aw3_service(200)
-        assert _run(svc.charge("u", 3)) == "app"
-        assert _hub(seen) == []
+class TestElectrum:
+    def test_one_deduct_with_shared_fallback(self, monkeypatch):
+        monkeypatch.setenv("ELECTRUM_ENABLED", "true")
+        svc, seen = _electrum_service()
+        assert _run(svc.charge("u", 3)) == Charge("app", "tx-app")
+        reqs = _deducts(seen)
+        assert len(reqs) == 1 and reqs[0].headers["x-api-key"] == "cred-key"
+        body = json.loads(reqs[0].content)
+        assert body["shared_fallback"] is True
+        assert body["user_email"] == "ada@example.com"
+        assert body["amount"] == 3
 
-    def test_legacy_short_charges_all_to_aw3(self, monkeypatch):
-        _aw3_on(monkeypatch)
-        svc, seen = _aw3_service(402)
-        assert _run(svc.charge("u", 3, "OpenEye API /v1/detect")) == "aw3"
-        req = _hub(seen)[0]
-        assert str(req.url) == f"{BASE}/credits-api/deduct"
-        assert req.headers["Idempotency-Key"].startswith("openeye:deduct:")
-        assert req.headers["x-app-origin"] == "https://openeye.sh"
-        body = json.loads(req.content)
-        assert body == {
-            "user_id": "ada@example.com",
-            "user_email": "ada@example.com",
-            "credit_type_id": "ct-aw3",
-            "amount": 3,
-            "reason": "OpenEye: API /v1/detect",
-        }
+    def test_shared_paid_is_recorded_and_refunded_with_shared(self, monkeypatch):
+        monkeypatch.setenv("ELECTRUM_ENABLED", "true")
+        svc, seen = _electrum_service(
+            [(200, {"success": True, "paid_from": "shared", "transaction_id": "tx-e"})]
+        )
+        charge = _run(svc.charge("u", 3))
+        assert charge == Charge("shared", "tx-e")
+        seen.clear()
+        assert _run(svc.refund("u", 3, charge=charge)) is True
+        assert len(seen) == 1 and seen[0].url.path.endswith("/refund")
+        body = json.loads(seen[0].content)
+        assert body["transaction_id"] == "tx-e" and body["shared"] is True
+        assert "amount" not in body
+
+    def test_app_paid_refund_is_todays_issue(self, monkeypatch):
+        monkeypatch.setenv("ELECTRUM_ENABLED", "true")
+        svc, seen = _electrum_service()
+        assert _run(svc.refund("u", 3, charge=Charge("app", "tx-app"))) is True
+        assert seen[0].url.path.endswith("/issue")
 
     def test_both_short_is_refused(self, monkeypatch):
-        _aw3_on(monkeypatch)
-        svc, seen = _aw3_service(402, hub_status=402)
+        monkeypatch.setenv("ELECTRUM_ENABLED", "true")
+        svc, seen = _electrum_service([(400, {"code": "INSUFFICIENT_CREDITS"})])
         assert _run(svc.charge("u", 3)) is None
-        assert _run(svc.check_and_deduct("u", 3)) is False
+        assert len(_deducts(seen)) == 1
 
-    def test_hub_down_falls_back_to_legacy_refusal(self, monkeypatch):
-        _aw3_on(monkeypatch)
-        svc, _ = _aw3_service(402, hub_status=503)
-        assert _run(svc.charge("u", 3)) is None
+    def test_hub_not_linked_retries_once_without_fallback(self, monkeypatch):
+        monkeypatch.setenv("ELECTRUM_ENABLED", "true")
+        svc, seen = _electrum_service(
+            [
+                (400, {"code": "SHARED_RATE_MISSING"}),
+                (200, {"success": True, "transaction_id": "tx-app"}),
+            ]
+        )
+        assert _run(svc.charge("u", 3)) == Charge("app", "tx-app")
+        first, second = (json.loads(r.content) for r in _deducts(seen))
+        assert first["shared_fallback"] is True and "shared_fallback" not in second
 
-    def test_aw3_off_is_todays_behaviour(self, monkeypatch):
-        monkeypatch.setenv("AW3_CRED_API_KEY", HUB_KEY)  # partial config = off
-        svc, seen = _aw3_service(402)
-        assert _run(svc.charge("u", 3)) is None
+    def test_off_sends_no_shared_fields(self):
+        svc, seen = _electrum_service()
+        assert _run(svc.charge("u", 3)) == Charge("app", "tx-app")
+        assert "shared_fallback" not in json.loads(_deducts(seen)[0].content)
+        assert _run(svc.get_balances("u")) == (2, None)
+        assert all("include_shared" not in str(r.url) for r in seen)
+
+    def test_unverified_email_sends_no_fallback(self, monkeypatch):
+        monkeypatch.setenv("ELECTRUM_ENABLED", "true")
+        svc, seen = _electrum_service(verified=None)
+        _run(svc.charge("u", 3))
+        assert "shared_fallback" not in json.loads(_deducts(seen)[0].content)
+
+    def test_balance_keeps_electrum_apart(self, monkeypatch):
+        monkeypatch.setenv("ELECTRUM_ENABLED", "true")
+        svc, seen = _electrum_service()
+        assert _run(svc.get_balances("u")) == (2, 3.4)
         assert _run(svc.get_balance("u")) == 2
-        assert _hub(seen) == []
-
-    def test_unverified_email_is_legacy_only(self, monkeypatch):
-        _aw3_on(monkeypatch)
-        svc, seen = _aw3_service(402, verified=None)
-        assert _run(svc.charge("u", 3)) is None
-        assert _hub(seen) == []
-
-    def test_refund_goes_to_recorded_source(self, monkeypatch):
-        _aw3_on(monkeypatch)
-        svc, seen = _aw3_service(200)
-        assert _run(svc.refund("u", 3, source="aw3")) is True
-        hub = _hub(seen)
-        assert len(hub) == 1 and str(hub[0].url) == f"{BASE}/credits-api/issue"
-        assert hub[0].headers["Idempotency-Key"].startswith("openeye:refund:")
-        seen.clear()
-        assert _run(svc.refund("u", 3)) is True
-        assert _hub(seen) == [] and seen[0].url.path.endswith("/issue")
-
-    def test_balance_is_legacy_plus_aw3(self, monkeypatch):
-        _aw3_on(monkeypatch)
-        svc, seen = _aw3_service(200)
-        assert _run(svc.get_balance("u")) == 9
-        assert _hub(seen)[0].url.params["email"] == "ada@example.com"
+        assert seen[0].url.params["include_shared"] == "true"
+        assert seen[0].url.params["email"] == "ada@example.com"

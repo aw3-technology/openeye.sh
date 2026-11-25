@@ -19,7 +19,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 from fleet.deps import get_credits_service, get_inference_service
-from fleet.services.credits_service import CreditsService
+from fleet.services.credits_service import Charge, CreditsService
 from fleet.services.inference_service import InferenceService
 
 from .conftest import TEST_USER_ID, InMemoryDB
@@ -79,8 +79,9 @@ def _make_describe_result(width: int = 64, height: int = 64) -> dict:
 def _mock_credits_service(balance: int = 500, deduct_ok: bool = True) -> MagicMock:
     """Create a mock CreditsService with configurable behavior."""
     svc = MagicMock(spec=CreditsService)
-    svc.charge = AsyncMock(return_value="app" if deduct_ok else None)
+    svc.charge = AsyncMock(return_value=Charge() if deduct_ok else None)
     svc.get_balance = AsyncMock(return_value=balance)
+    svc.get_balances = AsyncMock(return_value=(balance, None))
     svc.refund = AsyncMock(return_value=True)
     svc.close = AsyncMock()
     return svc
@@ -336,6 +337,7 @@ class TestUsageEndpoint:
         self, v1_client: TestClient, mock_credits, fake_db: InMemoryDB
     ):
         mock_credits.get_balance = AsyncMock(return_value=200)
+        mock_credits.get_balances = AsyncMock(return_value=(200, None))
         resp = v1_client.get("/v1/usage?days=7")
         assert resp.status_code == 200
         body = resp.json()

@@ -9,6 +9,8 @@ export interface CreditBalance {
   user_id: string;
   email?: string;
   balances: CreditBalanceEntry[];
+  /** Electrum, the credit shared by every AW3 app ($1 each); absent while it's off. */
+  shared_balance?: { balance: number } | null;
 }
 
 export interface CreditTransaction {
@@ -44,6 +46,12 @@ export interface CheckoutSession {
 export function getTotalBalance(bal: CreditBalance | undefined | null): number {
   if (!bal?.balances) return 0;
   return bal.balances.reduce((sum, b) => sum + b.balance, 0);
+}
+
+/** The person's Electrum, or null when it doesn't apply. Shown apart from OpenEye credits. */
+export function getElectrumBalance(bal: CreditBalance | undefined | null): number | null {
+  const v = bal?.shared_balance?.balance;
+  return typeof v === "number" ? v : null;
 }
 
 export const INFERENCE_CREDIT_COST = 1;

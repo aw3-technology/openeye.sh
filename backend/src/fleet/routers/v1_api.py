@@ -2,6 +2,7 @@
 
 import logging
 from io import BytesIO
+from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import JSONResponse
@@ -22,7 +23,7 @@ from ..models import (
     ModelInfo,
     UsageResponse,
 )
-from ..services.credits_service import CREDIT_COSTS, CreditsService
+from ..services.credits_service import CREDIT_COSTS, Charge, CreditsService
 from ..services.inference_service import InferenceService
 from ..services.rate_limit_service import RateLimitService
 from .v1_stream import stream_router
@@ -110,17 +111,19 @@ async def _enforce_rate_limit(
     return remaining, reset
 
 
-async def _enforce_credits(credits_svc: CreditsService, user_id: str, cost: int) -> str:
-    """Charge credits, raise 402 if insufficient. Returns the source that paid."""
+async def _enforce_credits(
+    credits_svc: CreditsService, user_id: str, cost: int
+) -> Optional[Charge]:
+    """Charge credits, raise 402 if insufficient. Returns the charge (who paid)."""
     if cost <= 0:
-        return "app"
-    source = await credits_svc.charge(user_id, cost)
-    if source is None:
+        return None
+    charge = await credits_svc.charge(user_id, cost)
+    if charge is None:
         raise HTTPException(
             status_code=402,
             detail=f"Insufficient credits. This request costs {cost} credit(s).",
         )
-    return source
+    return charge
 
 
 async def _metered(
@@ -144,11 +147,11 @@ async def _metered(
     try:
         remaining, reset = await _enforce_rate_limit(rate_svc, ctx)
         image = await _read_image(file)
-        source = await _enforce_credits(credits_svc, ctx.user_id, cost)
+        charge = await _enforce_credits(credits_svc, ctx.user_id, cost)
         try:
             result = await run(image)
         except Exception:
-            await credits_svc.refund(ctx.user_id, cost, source=source)
+            await credits_svc.refund(ctx.user_id, cost, charge=charge)
             raise
     except Exception as exc:
         status = exc.status_code if isinstance(exc, HTTPException) else 500
@@ -290,11 +293,12 @@ async def get_usage(
     credits_svc: CreditsService = Depends(get_credits_service),
 ):
     """Get credit balance and usage statistics."""
-    balance = await credits_svc.get_balance(ctx.user_id)
+    balance, electrum = await credits_svc.get_balances(ctx.user_id)
     rate_svc = RateLimitService(db)
     stats = await rate_svc.get_usage_stats(ctx.user_id, days=days)
 
     return {
         "balance": balance,
+        "electrum_balance": electrum,
         **stats,
     }

@@ -24,6 +24,7 @@ from PIL import Image
 from fleet.app import create_fleet_app
 from fleet.db import Database
 from fleet.deps import get_credits_service, get_db, get_inference_service
+from fleet.services.credits_service import Charge
 
 DSN = os.environ.get("FLEET_TEST_DATABASE_URL")
 
@@ -64,9 +65,10 @@ def live():
     app = create_fleet_app()
     app.dependency_overrides[get_db] = lambda: db
     credits = MagicMock()
-    credits.charge = AsyncMock(return_value="app")
+    credits.charge = AsyncMock(return_value=Charge())
     credits.refund = AsyncMock(return_value=True)
     credits.get_balance = AsyncMock(return_value=42)
+    credits.get_balances = AsyncMock(return_value=(42, None))
     inference = MagicMock()
     inference.detect = AsyncMock(
         return_value={

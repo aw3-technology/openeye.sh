@@ -6,15 +6,24 @@
  * refunded server-side by the hosted API (api/_lib/credits.ts), never from
  * the browser — otherwise anyone could `issue` themselves credits.
  *
- * With the shared AW3 Credit on (api/_lib/aw3-credit.ts) and a verified email:
- * the balance adds the AW3 Credit, the credit pack on sale is the hub's AW3
- * tier and its checkout runs on the hub, and syncing the user grants the AW3
- * welcome credits once.
+ * With Electrum on (ELECTRUM_ENABLED=true, api/_lib/electrum.ts) and a verified
+ * email, all on OpenEye's own key: the balance carries `shared_balance` (Electrum,
+ * shown apart from OpenEye credits), the packs on sale are the Electrum packs and
+ * their checkout is `shared: true`, and syncing the user grants the 1 Electrum
+ * welcome once per person.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { handleError, pathSegments, readRawBody, restoreRewrittenUrl, sendJson } from "./_lib/http.js";
 import { requireUser } from "./_lib/session.js";
-import { aw3BalanceEntry, aw3Config, aw3Welcome, hub, trustedEmail } from "./_lib/aw3-credit.js";
+import { cred, electrumEmail, electrumWelcome } from "./_lib/electrum.js";
+
+type Tier = { id: string };
+
+/** The Electrum packs ($5 / $10 / $25), or null when cred.diy can't list them. */
+async function electrumTiers(): Promise<Tier[] | null> {
+  const res = await cred<{ pricing_tiers?: Tier[] }>("credits-api/pricing-tiers?shared=true");
+  return res.ok ? (res.data.pricing_tiers ?? []) : null;
+}
 
 const CRED_API_BASE = process.env.CRED_API_BASE || "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
 
@@ -69,19 +78,20 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       else search.set("user_id", user.id);
     }
 
-    // The shared AW3 wallet, for a verified email only (else OpenEye's own credits alone).
-    const aw3 = aw3Config();
-    const hubEmail = aw3 ? trustedEmail(user.email, user.emailVerified) : null;
+    // Electrum, for a verified email only (else OpenEye's own credits alone).
+    const sharedEmail = electrumEmail(user.email, user.emailVerified);
+    if (path === "balance" && sharedEmail) {
+      search.set("email", sharedEmail);
+      search.set("include_shared", "true");
+    }
 
-    if (path === "pricing-tiers" && aw3 && hubEmail) {
-      // New purchases buy AW3 Credit. A hub hiccup falls back to OpenEye's own packs.
-      const tiers = await hub<{ pricing_tiers?: { id: string }[] }>("credits-api/pricing-tiers");
-      const mine = tiers.ok ? (tiers.data.pricing_tiers ?? []).filter((t) => t.id === aw3.pricingTierId) : [];
-      if (mine.length) return sendJson(res, 200, { pricing_tiers: mine });
+    if (path === "pricing-tiers" && sharedEmail) {
+      // New purchases buy Electrum. If cred.diy can't list them, OpenEye's own packs show.
+      const tiers = await electrumTiers();
+      if (tiers?.length) return sendJson(res, 200, { pricing_tiers: tiers });
     }
 
     const upstreamUrl = targetUrl(path, search);
-    let upstreamKey = apiKey;
     let body: string | undefined;
     if (method === "POST") {
       const rawBody = (await readRawBody(req, 100_000)).toString("utf8");
@@ -98,10 +108,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         if (!parsed.name) parsed.name = user.name || userEmail?.split("@")[0];
         // Cred first-touch attribution (recorded once, never overwritten)
         if (!parsed.signup_url) parsed.signup_url = signupUrl;
-        if (path === "checkout" && aw3 && hubEmail && (!parsed.pricing_tier_id || parsed.pricing_tier_id === aw3.pricingTierId)) {
-          // The AW3 pack: checkout on the hub, for the hub wallet keyed by email.
-          Object.assign(parsed, { user_id: hubEmail, user_email: hubEmail, email: hubEmail, pricing_tier_id: aw3.pricingTierId });
-          upstreamKey = aw3.apiKey;
+        if (path === "checkout" && sharedEmail && (await electrumTiers())?.some((t) => t.id === parsed.pricing_tier_id)) {
+          // An Electrum pack: bought into the person's Electrum wallet, keyed by email.
+          Object.assign(parsed, { shared: true, user_id: sharedEmail, user_email: sharedEmail, email: sharedEmail });
         }
         body = JSON.stringify(parsed);
       } catch {
@@ -113,7 +122,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       method,
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": upstreamKey,
+        "x-api-key": apiKey,
         "x-app-origin": APP_ORIGIN,
       },
       body,
@@ -142,18 +151,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       }
     }
 
-    // Balance shown = OpenEye's own + the AW3 Credit (as its own entry).
-    if (path === "balance" && upstream.status === 200 && hubEmail) {
-      const shared = await aw3BalanceEntry(hubEmail);
-      const parsed = JSON.parse(responseData);
-      if (shared && Array.isArray(parsed.balances)) {
-        parsed.balances.push(shared);
-        responseData = JSON.stringify(parsed);
-      }
-    }
-
     // The welcome grant rides on the dashboard's user sync (once per person, every AW3 app).
-    if (path === "users" && hubEmail) await aw3Welcome(hubEmail);
+    if (path === "users" && sharedEmail) await electrumWelcome(sharedEmail);
 
     res.statusCode = upstream.status;
     res.setHeader("Content-Type", "application/json");

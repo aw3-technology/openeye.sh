@@ -1,6 +1,6 @@
 """Hosted API Pydantic models (detection, depth, description, etc.)."""
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -57,6 +57,10 @@ class ModelInfo(BaseModel):
 
 class UsageResponse(BaseModel):
     balance: int = Field(description="Current credit balance")
+    electrum_balance: Optional[float] = Field(
+        default=None,
+        description="Electrum, the credit shared by AW3 apps, shown apart from OpenEye credits (null when off)",
+    )
     total_requests: int = Field(default=0, description="Total API requests in period")
     total_credits_used: int = Field(
         default=0, description="Total credits used in period"

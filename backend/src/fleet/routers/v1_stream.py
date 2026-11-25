@@ -113,8 +113,8 @@ async def stream(
                 continue
 
             # Credit check
-            source = await credits_svc.charge(ctx.user_id, cost)
-            if source is None:
+            charge = await credits_svc.charge(ctx.user_id, cost)
+            if charge is None:
                 await websocket.send_json({"error": "Insufficient credits"})
                 continue
 
@@ -122,7 +122,7 @@ async def stream(
             try:
                 result = await inference_svc.detect(image, confidence=confidence)
             except Exception:
-                await credits_svc.refund(ctx.user_id, cost, source=source)
+                await credits_svc.refund(ctx.user_id, cost, charge=charge)
                 await websocket.send_json({"error": "Inference failed"})
                 continue
 
