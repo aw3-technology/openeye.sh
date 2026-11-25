@@ -48,6 +48,10 @@
       "destination": "/api/mcp"
     },
     {
+      "source": "/.well-known/mcp",
+      "destination": "/.well-known/mcp.json"
+    },
+    {
       "source": "/dashboard",
       "destination": "/app.html"
     },

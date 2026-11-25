@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "../_lib/auth.js";
+import { getAuth } from "../_lib/auth.js";
 
 // 1Profile brokers these sign-in methods; ?connection= on its authorize URL skips its picker.
 const CONNECTIONS = new Set(["google", "azure", "apple", "github"]);
@@ -17,6 +17,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const next = url.searchParams.get("callbackURL");
   const callbackURL = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 
+  const auth = await getAuth();
   const response = await auth.api.signInSocial({
     body: { provider: "1profile", callbackURL, errorCallbackURL: "/login" },
     headers: fromNodeHeaders(req.headers),

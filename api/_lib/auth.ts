@@ -26,8 +26,6 @@ async function warmOneProfileDiscovery() {
     }
   }
 }
-await warmOneProfileDiscovery();
-
 const vercelHost =
   process.env.VERCEL_ENV === "production"
     ? process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -51,55 +49,88 @@ if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET) {
   };
 }
 
-export const auth = betterAuth({
-  database: pool,
-  baseURL,
-  basePath: "/api/auth",
-  secret: process.env.BETTER_AUTH_SECRET,
-  trustedOrigins: [
-    "https://openeye.sh",
-    "https://www.openeye.sh",
-    "https://appleid.apple.com",
-    "https://1profile.com",
-    "http://localhost:3000",
-    "http://localhost:8080",
-    // Production alias and preview deployments of the openeye project
-    "https://openeye-*-aw3technologys-projects.vercel.app",
-    ...[process.env.VERCEL_PROJECT_PRODUCTION_URL, process.env.VERCEL_BRANCH_URL, process.env.VERCEL_URL]
-      .filter(Boolean)
-      .map((host) => `https://${host}`),
-  ],
-  emailAndPassword: {
-    enabled: true,
-    minPasswordLength: 6,
-  },
-  socialProviders,
-  plugins: [
-    // Sign in with 1Profile (OIDC). OpenEye is a public client (PKCE, no secret), registered
-    // with redirect URIs <origin>/api/auth/callback/1profile for openeye.sh and localhost:8080.
-    genericOAuth({
-      config: [
-        {
-          providerId: "1profile",
-          discoveryUrl: ONEPROFILE_DISCOVERY_URL,
-          clientId: process.env.ONEPROFILE_CLIENT_ID ?? "client_5239446173344611bdddf84a23d4cf2b",
-          tokenEndpointAuth: { method: "none" },
-          pkce: true,
-          scopes: ["openid", "email", "profile"],
-        },
-      ],
-    }),
-  ],
-  account: {
-    // Users imported from Lovable Cloud have no password; let them sign in
-    // with 1Profile/Google/Apple on the same email and get linked to their account.
-    // 1Profile verifies emails, so linking on it is safe.
-    accountLinking: { enabled: true, trustedProviders: ["1profile", "google", "apple"] },
-  },
-  advanced: {
-    // Keep UUID ids so imported Supabase user ids stay valid.
-    database: { generateId: () => crypto.randomUUID() },
-  },
-});
+function createAuth() {
+  return betterAuth({
+    database: pool,
+    baseURL,
+    basePath: "/api/auth",
+    secret: process.env.BETTER_AUTH_SECRET,
+    trustedOrigins: [
+      "https://openeye.sh",
+      "https://www.openeye.sh",
+      "https://appleid.apple.com",
+      "https://1profile.com",
+      "http://localhost:3000",
+      "http://localhost:8080",
+      // Production alias and preview deployments of the openeye project
+      "https://openeye-*-aw3technologys-projects.vercel.app",
+      ...[process.env.VERCEL_PROJECT_PRODUCTION_URL, process.env.VERCEL_BRANCH_URL, process.env.VERCEL_URL]
+        .filter(Boolean)
+        .map((host) => `https://${host}`),
+    ],
+    emailAndPassword: {
+      enabled: true,
+      minPasswordLength: 6,
+    },
+    socialProviders,
+    plugins: [
+      // Sign in with 1Profile (OIDC). OpenEye is a public client (PKCE, no secret), registered
+      // with redirect URIs <origin>/api/auth/callback/1profile for openeye.sh and localhost:8080.
+      genericOAuth({
+        config: [
+          {
+            providerId: "1profile",
+            discoveryUrl: ONEPROFILE_DISCOVERY_URL,
+            clientId: process.env.ONEPROFILE_CLIENT_ID ?? "client_5239446173344611bdddf84a23d4cf2b",
+            tokenEndpointAuth: { method: "none" },
+            pkce: true,
+            scopes: ["openid", "email", "profile"],
+          },
+        ],
+      }),
+    ],
+    account: {
+      // Users imported from Lovable Cloud have no password; let them sign in
+      // with 1Profile/Google/Apple on the same email and get linked to their account.
+      // 1Profile verifies emails, so linking on it is safe.
+      accountLinking: { enabled: true, trustedProviders: ["1profile", "google", "apple"] },
+    },
+    advanced: {
+      database: {
+        // Keep UUID ids so imported Supabase user ids stay valid.
+        generateId: () => crypto.randomUUID(),
+        // db/schema.sql (npm run db:migrate) owns the schema. Better Auth's runtime
+        // check introspects it on every cold start (~1.7 s) without the request
+        // awaiting it, so a suspended instance cut it off and logged "Could not
+        // validate the database schema" 5x on 2026-11-24..25 with a healthy schema.
+        // Keep it where it is cheap and useful: local dev and tests.
+        validateSchema: process.env.VERCEL_ENV !== "production",
+      },
+    },
+  });
+}
 
-export type Session = typeof auth.$Infer.Session;
+export type Auth = ReturnType<typeof createAuth>;
+export type Session = Auth["$Infer"]["Session"];
+
+let ready: Promise<Auth> | undefined;
+
+/**
+ * Better Auth, initialized inside the calling request. Building it at module
+ * load let Vercel suspend a pre-warmed instance mid-init: on 2026-11-25 one
+ * 1Profile discovery fetch started 13:39, failed after the instance thawed and
+ * left 1Profile sign-in disabled until a retry. Awaiting $context here (which
+ * includes discovery) keeps that work within a live request.
+ */
+export function getAuth(): Promise<Auth> {
+  ready ??= (async () => {
+    await warmOneProfileDiscovery();
+    const auth = createAuth();
+    await auth.$context;
+    return auth;
+  })().catch((err) => {
+    ready = undefined;
+    throw err;
+  });
+  return ready;
+}

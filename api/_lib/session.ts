@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "node:http";
 import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "./auth.js";
+import { getAuth } from "./auth.js";
 import { HttpError } from "./http.js";
 
 // Kept out of http.ts so routes that never read a session (api/v1.ts) don't
@@ -10,6 +10,7 @@ import { HttpError } from "./http.js";
 
 /** Returns the signed-in user, or throws 401. */
 export async function requireUser(req: IncomingMessage) {
+  const auth = await getAuth();
   const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
   if (!session) throw new HttpError(401, "Not authenticated");
   return session.user;

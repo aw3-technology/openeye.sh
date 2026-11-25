@@ -9,7 +9,7 @@
 //   dist/app.html             unrendered SPA shell for /dashboard (noindex)
 //   dist/sitemap.xml, dist/llms.txt, dist/llms-full.txt
 //   dist/docs/<slug>.md       raw markdown for each docs page
-//   dist/.well-known/mcp/server.json, dist/SKILL.md   agent discovery copies
+//   dist/.well-known/mcp/server.json, server-card.json, dist/SKILL.md   agent discovery
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -115,6 +115,32 @@ for (const d of docEntries) {
 // Agent discovery: MCP directories probe /.well-known/mcp/server.json and
 // /SKILL.md daily. Serve the registry manifest and the agent skill as-is.
 write(".well-known/mcp/server.json", fs.readFileSync(path.join(root, "server.json")));
+// Server card (MCP SEP-1649 draft), probed by agent directories (AgentTrustBot,
+// 2026-11-24) before they connect. Tools are listed live by tools/list.
+const registry = JSON.parse(fs.readFileSync(path.join(root, "server.json"), "utf8"));
+write(
+  ".well-known/mcp/server-card.json",
+  JSON.stringify(
+    {
+      serverInfo: { name: "openeye", title: "OpenEye", version: registry.version },
+      description: "Hosted OpenEye vision tools: object detection and scene description for an image URL or base64 image.",
+      websiteUrl: SITE,
+      documentationUrl: `${SITE}/docs`,
+      transport: { type: "streamable-http", url: `${SITE}/mcp` },
+      // Same list as PROTOCOL_VERSIONS in api/mcp.ts.
+      protocolVersions: ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"],
+      capabilities: { tools: {} },
+      authentication: {
+        required: false,
+        schemes: ["bearer"],
+        description: `openeye_api_models needs no key; other tools take Authorization: Bearer oe_... from ${SITE}/dashboard/settings/api-keys.`,
+      },
+      tools: "dynamic",
+    },
+    null,
+    2,
+  ) + "\n",
+);
 write("SKILL.md", fs.readFileSync(path.join(root, "openclaw-skill", "openeye", "SKILL.md")));
 
 // llms.txt — https://llmstxt.org
