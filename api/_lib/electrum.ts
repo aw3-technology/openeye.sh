@@ -2,12 +2,13 @@
  * Electrum, the credit shared by every AW3 app (1 Electrum = $1). cred.diy
  * supports it natively, so OpenEye uses its OWN cred key for everything:
  * `shared_fallback` on /deduct, `include_shared` on /balance, `shared: true` on
- * /issue, /refund, /pricing-tiers and hosted-checkout (contract: ZeusMCP
+ * /refund (contract: ZeusMCP
  * obsidian/backend/aw3-credit.md). Mirrored in
  * backend/src/fleet/services/credits_service.py.
  *
- * Off unless ELECTRUM_ENABLED=true (server-only); then OpenEye bills exactly as
- * before. Only a verified email names the person's Electrum wallet.
+ * Off unless ELECTRUM_ENABLED=true (server-only); unset, OpenEye bills exactly as
+ * before. On, Electrum is only the spending fallback: it is sold on ZeusMCP, never
+ * here, and OpenEye grants none. Only a verified email names the person's Electrum wallet.
  */
 
 const CRED_API_BASE = process.env.CRED_API_BASE || "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
@@ -58,17 +59,6 @@ export async function cred<T>(
     console.error(`[electrum] ${method} ${path.split("?")[0]} unreachable`, err);
     return { ok: false, status: 0 };
   }
-}
-
-/** 1 Electrum once per person across every AW3 app; 200 or a key replay both mean "granted". */
-export async function electrumWelcome(email: string) {
-  const res = await cred("credits-api/issue", {
-    method: "POST",
-    idempotencyKey: `aw3-welcome:${email}`,
-    body: { shared: true, user_email: email, amount: 1, reason: "Electrum welcome credit" },
-  });
-  if (res.ok) return true;
-  return "code" in res && res.code === "IDEMPOTENCY_KEY_REUSED";
 }
 
 /**

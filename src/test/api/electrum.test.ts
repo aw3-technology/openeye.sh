@@ -2,12 +2,11 @@
 /**
  * Electrum v2 (cred.diy shared_fallback): one /deduct call on OpenEye's own key,
  * `paid_from` recorded, Electrum-paid refunds by transaction id with
- * `shared: true`, the welcome's key and body exact. (OpenEye has no
+ * `shared: true`. (OpenEye has no
  * "can afford?" gate or escrow holds, so no shared_rate conversion.) Mirrors backend/tests/test_credits_service.py::TestElectrum.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { deduct, getBalances, refund } from "../../../api/_lib/credits.ts";
-import { electrumWelcome } from "../../../api/_lib/electrum.ts";
 
 const user = { id: "user-1", email: " Ada@Example.com ", emailVerified: true };
 
@@ -113,12 +112,4 @@ describe("Electrum v2", () => {
     expect(cred.calls[0].url).toContain("email=ada%40example.com");
   });
 
-  it("welcome: exact key and body on OpenEye's own key", async () => {
-    const cred = fakeCred();
-    expect(await electrumWelcome("ada@example.com")).toBe(true);
-    const w = cred.calls.find((c) => c.url.includes("/issue"))!;
-    expect(w.headers["Idempotency-Key"]).toBe("aw3-welcome:ada@example.com");
-    expect(w.headers["x-api-key"]).toBe("app-key");
-    expect(w.body).toEqual({ shared: true, user_email: "ada@example.com", amount: 1, reason: "Electrum welcome credit" });
-  });
 });

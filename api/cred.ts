@@ -7,24 +7,15 @@
  * the browser — otherwise anyone could `issue` themselves credits.
  *
  * With Electrum on (ELECTRUM_ENABLED=true, api/_lib/electrum.ts) and a verified
- * email, all on OpenEye's own key: the balance carries `shared_balance` (Electrum,
- * shown apart from OpenEye credits); OpenEye's own packs stay on sale exactly as
- * before, with the Electrum packs listed beside them as `electrum_tiers` (only
- * their checkout is `shared: true`); and syncing the user grants the 1 Electrum
- * welcome once per person, on top of whatever OpenEye grants a new account.
+ * email, the balance carries `shared_balance` (Electrum, read-only, shown apart
+ * from OpenEye credits as the spending fallback). Nothing else changes: only
+ * OpenEye's own packs are sold here (Electrum is bought on ZeusMCP), checkout and
+ * user sync are exactly as before Electrum, and no Electrum is granted here.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { handleError, pathSegments, readRawBody, restoreRewrittenUrl, sendJson } from "./_lib/http.js";
 import { requireUser } from "./_lib/session.js";
-import { cred, electrumEmail, electrumWelcome } from "./_lib/electrum.js";
-
-type Tier = { id: string };
-
-/** The Electrum packs ($5 / $10 / $25), or null when cred.diy can't list them. */
-async function electrumTiers(): Promise<Tier[] | null> {
-  const res = await cred<{ pricing_tiers?: Tier[] }>("credits-api/pricing-tiers?shared=true");
-  return res.ok ? (res.data.pricing_tiers ?? []) : null;
-}
+import { electrumEmail } from "./_lib/electrum.js";
 
 const CRED_API_BASE = process.env.CRED_API_BASE || "https://eutdgemlrpvnxfkkpvlu.supabase.co/functions/v1";
 
@@ -79,7 +70,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       else search.set("user_id", user.id);
     }
 
-    // Electrum, for a verified email only (else OpenEye's own credits alone).
+    // Electrum balance (read-only), for a verified email only.
     const sharedEmail = electrumEmail(user.email, user.emailVerified);
     if (path === "balance" && sharedEmail) {
       search.set("email", sharedEmail);
@@ -103,10 +94,6 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         if (!parsed.name) parsed.name = user.name || userEmail?.split("@")[0];
         // Cred first-touch attribution (recorded once, never overwritten)
         if (!parsed.signup_url) parsed.signup_url = signupUrl;
-        if (path === "checkout" && sharedEmail && (await electrumTiers())?.some((t) => t.id === parsed.pricing_tier_id)) {
-          // An Electrum pack: bought into the person's Electrum wallet, keyed by email.
-          Object.assign(parsed, { shared: true, user_id: sharedEmail, user_email: sharedEmail, email: sharedEmail });
-        }
         body = JSON.stringify(parsed);
       } catch {
         return sendJson(res, 400, { error: "Invalid JSON body" });
@@ -145,19 +132,6 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         responseData = JSON.stringify(parsed);
       }
     }
-
-    // OpenEye's own packs as before, plus the Electrum packs listed apart (never as OpenEye credits).
-    if (path === "pricing-tiers" && upstream.status === 200 && sharedEmail) {
-      const electrum = await electrumTiers();
-      if (electrum?.length) {
-        const parsed = JSON.parse(responseData);
-        parsed.electrum_tiers = electrum;
-        responseData = JSON.stringify(parsed);
-      }
-    }
-
-    // The welcome grant rides on the dashboard's user sync (once per person, every AW3 app).
-    if (path === "users" && sharedEmail) await electrumWelcome(sharedEmail);
 
     res.statusCode = upstream.status;
     res.setHeader("Content-Type", "application/json");

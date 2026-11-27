@@ -133,28 +133,6 @@ export default function Credits() {
         </div>
       </div>
 
-      {/* Electrum packs: the AW3-wide credit, sold apart from OpenEye credits */}
-      {!!tiers.data?.electrum_tiers?.length && (
-        <div>
-          <h2 className="mb-1 text-lg font-medium">Electrum — works in every AW3 app</h2>
-          <p className="mb-3 text-sm text-muted-foreground">
-            1 Electrum = $1, spendable in OpenEye and every other AW3 app. A call is paid from your OpenEye
-            credits when they cover it, otherwise from Electrum.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {tiers.data.electrum_tiers.map((tier) => (
-              <PricingTierCard
-                key={tier.id}
-                tier={tier}
-                unit="Electrum"
-                onBuy={() => handleBuy(tier)}
-                loading={checkout.isPending}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Credit costs reference */}
       <div>
         <h2 className="mb-3 text-lg font-medium">Credit Costs per API Call</h2>

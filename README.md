@@ -239,7 +239,7 @@ openeye.sh/
 
 **Auth**: Better Auth — email/password and "Continue with 1Profile"; Google/Apple sign-in when their OAuth credentials are configured
 
-**Credits**: [Cred](https://cred.diy), proxied through `/api/cred`. With `ELECTRUM_ENABLED=true`, cred.diy pays calls OpenEye's own credits can't cover in Electrum, the credit shared across AW3 apps (`shared_fallback`, `api/_lib/electrum.ts`), OpenEye's own credit packs stay on sale with the Electrum packs listed beside them, and new users get 1 Electrum on top of any OpenEye signup grant
+**Credits**: [Cred](https://cred.diy), proxied through `/api/cred`. With `ELECTRUM_ENABLED=true`, cred.diy pays calls OpenEye's own credits can't cover in Electrum, the credit shared across AW3 apps (`shared_fallback`, `api/_lib/electrum.ts`) as a fallback only (Electrum is sold on ZeusMCP; OpenEye sells only its own packs and grants no Electrum)
 
 **AI/ML**: Ultralytics (YOLO), Transformers, ONNX Runtime, TensorRT, LangChain
 

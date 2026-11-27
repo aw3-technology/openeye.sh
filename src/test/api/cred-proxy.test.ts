@@ -82,13 +82,10 @@ describe("cred proxy", () => {
   });
 
   describe("with Electrum on (ELECTRUM_ENABLED) and a verified email", () => {
-    const tiersReply = () => new Response(JSON.stringify({ pricing_tiers: [{ id: "tier-elec-5" }] }), { status: 200 });
     beforeEach(() => {
       process.env.ELECTRUM_ENABLED = "true";
       vi.mocked(requireUser).mockResolvedValue({ id: "user-1", email: "Me@Example.com", name: "Me", emailVerified: true } as never);
-      fetchMock.mockImplementation(async (url: string) =>
-        String(url).includes("pricing-tiers?shared=true") ? tiersReply() : new Response(JSON.stringify({ ok: true }), { status: 200 }),
-      );
+      fetchMock.mockImplementation(async () => new Response(JSON.stringify({ ok: true }), { status: 200 }));
     });
     afterEach(() => {
       delete process.env.ELECTRUM_ENABLED;
@@ -96,30 +93,15 @@ describe("cred proxy", () => {
       vi.mocked(requireUser).mockResolvedValue({ id: "user-1", email: "me@example.com", name: "Me" } as never);
     });
 
-    it("keeps OpenEye's own packs and lists the Electrum packs apart, on OpenEye's own key", async () => {
-      fetchMock.mockImplementation(async (url: string) =>
-        String(url).includes("pricing-tiers?shared=true")
-          ? tiersReply()
-          : new Response(JSON.stringify({ pricing_tiers: [{ id: "legacy-tier" }] }), { status: 200 }),
-      );
+    it("sells only OpenEye's own packs (no Electrum packs listed or fetched)", async () => {
+      fetchMock.mockImplementation(async () => new Response(JSON.stringify({ pricing_tiers: [{ id: "legacy-tier" }] }), { status: 200 }));
       const res = await call("GET", "/api/cred/pricing-tiers");
-      expect(JSON.parse(res.body)).toEqual({ pricing_tiers: [{ id: "legacy-tier" }], electrum_tiers: [{ id: "tier-elec-5" }] });
-      for (const [, init] of fetchMock.mock.calls as [string, RequestInit][]) {
-        expect((init.headers as Record<string, string>)["x-api-key"]).toBe("server-key");
-      }
+      expect(JSON.parse(res.body)).toEqual({ pricing_tiers: [{ id: "legacy-tier" }] });
+      expect(fetchMock.mock.calls.some(([u]) => String(u).includes("shared=true"))).toBe(false);
     });
 
-    it("checks out an Electrum pack with shared: true and the trusted email", async () => {
+    it("checks out exactly as before (never shared: true)", async () => {
       await call("POST", "/api/cred/checkout", { pricing_tier_id: "tier-elec-5" });
-      const [url, init] = fetchMock.mock.calls.find(([u]) => String(u).includes("hosted-checkout")) as [string, RequestInit];
-      expect(url).toMatch(/\/hosted-checkout$/);
-      expect((init.headers as Record<string, string>)["x-api-key"]).toBe("server-key");
-      const body = JSON.parse(String(init.body));
-      expect(body).toMatchObject({ shared: true, pricing_tier_id: "tier-elec-5", user_email: "me@example.com" });
-    });
-
-    it("keeps an OpenEye pack's checkout as it was", async () => {
-      await call("POST", "/api/cred/checkout", { pricing_tier_id: "legacy-tier" });
       const [, init] = fetchMock.mock.calls.find(([u]) => String(u).includes("hosted-checkout")) as [string, RequestInit];
       expect(JSON.parse(String(init.body)).shared).toBeUndefined();
     });
@@ -130,11 +112,9 @@ describe("cred proxy", () => {
       expect(url).toContain("include_shared=true");
     });
 
-    it("grants the 1 Electrum welcome on user sync", async () => {
+    it("grants no Electrum on user sync", async () => {
       await call("POST", "/api/cred/users", {});
-      const w = fetchMock.mock.calls.find(([u]) => String(u).includes("/issue"))!;
-      expect((w[1]?.headers as Record<string, string>)["Idempotency-Key"]).toBe("aw3-welcome:me@example.com");
-      expect(JSON.parse(String(w[1]?.body))).toEqual({ shared: true, user_email: "me@example.com", amount: 1, reason: "Electrum welcome credit" });
+      expect(fetchMock.mock.calls.some(([u]) => String(u).includes("/issue"))).toBe(false);
     });
   });
 });

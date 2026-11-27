@@ -35,8 +35,18 @@ export function CreditStats({
             </p>
             {!balance.isLoading && !balance.isError && getElectrumBalance(balance.data) !== null && (
               <p className="text-xs text-muted-foreground">
-                + {getElectrumBalance(balance.data)!.toFixed(2)} Electrum, spendable in every AW3 app
+                + {getElectrumBalance(balance.data)!.toFixed(2)} Electrum (fallback when OpenEye credits run out)
               </p>
+            )}
+            {!balance.isLoading && !balance.isError && getElectrumBalance(balance.data) !== null && (
+              <a
+                href="https://zeusmcp.one/dashboard"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary underline-offset-2 hover:underline"
+              >
+                Have Electrum? Get it on ZeusMCP
+              </a>
             )}
             {balance.isError && (
               <p className="text-xs text-destructive" role="alert">
