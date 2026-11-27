@@ -96,11 +96,17 @@ describe("cred proxy", () => {
       vi.mocked(requireUser).mockResolvedValue({ id: "user-1", email: "me@example.com", name: "Me" } as never);
     });
 
-    it("lists the Electrum packs on OpenEye's own key", async () => {
+    it("keeps OpenEye's own packs and lists the Electrum packs apart, on OpenEye's own key", async () => {
+      fetchMock.mockImplementation(async (url: string) =>
+        String(url).includes("pricing-tiers?shared=true")
+          ? tiersReply()
+          : new Response(JSON.stringify({ pricing_tiers: [{ id: "legacy-tier" }] }), { status: 200 }),
+      );
       const res = await call("GET", "/api/cred/pricing-tiers");
-      expect(JSON.parse(res.body)).toEqual({ pricing_tiers: [{ id: "tier-elec-5" }] });
-      const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-      expect((init.headers as Record<string, string>)["x-api-key"]).toBe("server-key");
+      expect(JSON.parse(res.body)).toEqual({ pricing_tiers: [{ id: "legacy-tier" }], electrum_tiers: [{ id: "tier-elec-5" }] });
+      for (const [, init] of fetchMock.mock.calls as [string, RequestInit][]) {
+        expect((init.headers as Record<string, string>)["x-api-key"]).toBe("server-key");
+      }
     });
 
     it("checks out an Electrum pack with shared: true and the trusted email", async () => {

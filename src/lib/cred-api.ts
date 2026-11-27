@@ -83,9 +83,9 @@ export const credApi = {
     });
   },
 
-  /** GET /pricing-tiers */
+  /** GET /pricing-tiers: OpenEye's own packs, plus the Electrum packs apart when Electrum is on. */
   getPricingTiers() {
-    return request<{ pricing_tiers: PricingTier[] }>("pricing-tiers");
+    return request<{ pricing_tiers: PricingTier[]; electrum_tiers?: PricingTier[] }>("pricing-tiers");
   },
 
   /** GET /transactions */

@@ -8,9 +8,10 @@
  *
  * With Electrum on (ELECTRUM_ENABLED=true, api/_lib/electrum.ts) and a verified
  * email, all on OpenEye's own key: the balance carries `shared_balance` (Electrum,
- * shown apart from OpenEye credits), the packs on sale are the Electrum packs and
- * their checkout is `shared: true`, and syncing the user grants the 1 Electrum
- * welcome once per person.
+ * shown apart from OpenEye credits); OpenEye's own packs stay on sale exactly as
+ * before, with the Electrum packs listed beside them as `electrum_tiers` (only
+ * their checkout is `shared: true`); and syncing the user grants the 1 Electrum
+ * welcome once per person, on top of whatever OpenEye grants a new account.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { handleError, pathSegments, readRawBody, restoreRewrittenUrl, sendJson } from "./_lib/http.js";
@@ -85,12 +86,6 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       search.set("include_shared", "true");
     }
 
-    if (path === "pricing-tiers" && sharedEmail) {
-      // New purchases buy Electrum. If cred.diy can't list them, OpenEye's own packs show.
-      const tiers = await electrumTiers();
-      if (tiers?.length) return sendJson(res, 200, { pricing_tiers: tiers });
-    }
-
     const upstreamUrl = targetUrl(path, search);
     let body: string | undefined;
     if (method === "POST") {
@@ -147,6 +142,16 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         parsed.balances = parsed.balances.filter(
           (b: { credit_type_id?: string }) => b.credit_type_id === creditTypeId,
         );
+        responseData = JSON.stringify(parsed);
+      }
+    }
+
+    // OpenEye's own packs as before, plus the Electrum packs listed apart (never as OpenEye credits).
+    if (path === "pricing-tiers" && upstream.status === 200 && sharedEmail) {
+      const electrum = await electrumTiers();
+      if (electrum?.length) {
+        const parsed = JSON.parse(responseData);
+        parsed.electrum_tiers = electrum;
         responseData = JSON.stringify(parsed);
       }
     }

@@ -6,10 +6,13 @@ export function PricingTierCard({
   tier,
   onBuy,
   loading,
+  unit = "credits",
 }: {
   tier: PricingTier;
   onBuy: () => void;
   loading: boolean;
+  /** What the pack buys: OpenEye "credits", or "Electrum" (the AW3-wide credit). */
+  unit?: "credits" | "Electrum";
 }) {
   return (
     <Card className={tier.is_popular ? "border-primary" : ""}>
@@ -28,7 +31,7 @@ export function PricingTierCard({
           <span className="text-2xl font-bold">${parseFloat(tier.price).toFixed(2)}</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          {tier.credits.toLocaleString()} credits
+          {tier.credits.toLocaleString()} {unit}
         </p>
         <Button className="w-full" onClick={onBuy} disabled={loading}>
           {loading ? "Redirecting..." : "Buy"}
